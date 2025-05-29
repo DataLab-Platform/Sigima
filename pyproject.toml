@@ -1,0 +1,119 @@
+# sigima setup configuration file
+
+[project]
+name = "sigima"
+authors = [{ name = "Pierre Raybaut", email = "p.raybaut@codra.fr" }]
+maintainers = [
+    { name = "DataLab Platform Developers", email = "p.raybaut@codra.fr" },
+]
+description = "Scientific computing engine for 1D signals and 2D images, part of the DataLab open-source platform."
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows :: Windows 7",
+    "Operating System :: Microsoft :: Windows :: Windows 8",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Image Processing",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.9, <4"
+dependencies = [
+    "guidata >= 3.9",
+    "SciPy >= 1.5, < 1.15.0",
+    "scikit-image >= 0.18",
+    "pandas >= 1.2",
+    "PyWavelets >= 1.1",
+]
+dynamic = ["version"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+Homepage = "https://datalab-platform.com/"
+Documentation = "https://datalab-platform.com/"
+
+[project.optional-dependencies]
+opencv = ["opencv-python-headless >= 4.5"]
+dev = ["ruff", "pylint", "Coverage"]
+doc = [
+    "sphinx",
+    "sphinx_intl",
+    "sphinx-sitemap",
+    "myst_parser",
+    "sphinx_design",
+    "sphinx-copybutton",
+    "pydata-sphinx-theme",
+]
+test = ["pytest", "pytest-xvfb"]
+
+[tool.setuptools.packages.find]
+include = ["sigima*"]
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.pdf",
+    "*.png",
+    "*.svg",
+    "*.mo",
+    "*.txt",
+    "*.json",
+    "*_test.h5",
+    "*.npy",
+    "*.dcm",
+    "*.scor-data",
+    "*.tiff",
+    "*.jpg",
+    "*.sif",
+    "*.csv",
+    "*.mat",
+    "*.js",
+    "*.css",
+    "*.html",
+    "*.buildinfo",
+    "*.inv",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "sigima.__version__" }
+
+[tool.pytest.ini_options]
+addopts = "sigima"
+
+[tool.ruff]
+exclude = [".git", ".vscode", "build", "dist", "*.ipynb"]
+line-length = 88                               # Same as Black.
+indent-width = 4                               # Same as Black.
+target-version = "py39"                        # Assume Python 3.9.
+
+[tool.ruff.lint]
+# all rules can be found here: https://beta.ruff.rs/docs/rules/
+select = ["E", "F", "W", "I", "NPY201"]
+ignore = [
+    "E203", # space before : (needed for how black formats slicing)
+]
+
+[tool.ruff.format]
+quote-style = "double"            # Like Black, use double quotes for strings.
+indent-style = "space"            # Like Black, indent with spaces, rather than tabs.
+skip-magic-trailing-comma = false # Like Black, respect magic trailing commas.
+line-ending = "auto"              # Like Black, automatically detect the appropriate line ending.
+
+[tool.ruff.lint.per-file-ignores]
+"doc/*" = ["E402"]
