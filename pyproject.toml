@@ -33,11 +33,13 @@ classifiers = [
 ]
 requires-python = ">=3.9, <4"
 dependencies = [
-    "guidata >= 3.9",
-    "SciPy >= 1.5, < 1.15.0",
+    "guidata >= 3.10",
+    "SciPy >= 1.5",
     "scikit-image >= 0.18",
     "pandas >= 1.2",
     "PyWavelets >= 1.1",
+    "packaging >= 20.0",
+    "typing-extensions >= 3.10",
 ]
 dynamic = ["version"]
 
@@ -51,7 +53,7 @@ Documentation = "https://datalab-platform.com/"
 
 [project.optional-dependencies]
 opencv = ["opencv-python-headless >= 4.5"]
-dev = ["ruff", "pylint", "Coverage"]
+dev = ["babel","ruff", "pylint", "Coverage", "toml-to-requirements"]
 doc = [
     "sphinx",
     "sphinx_intl",

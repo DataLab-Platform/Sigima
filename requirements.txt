@@ -1,9 +1,13 @@
+PyQt5
 guidata
+plotpy
+PythonQwt
 scikit-image
 opencv-python-headless
 pandas
 PyWavelets
 psutil
+typing-extensions>=4.0
 pylint
 ruff
 coverage
