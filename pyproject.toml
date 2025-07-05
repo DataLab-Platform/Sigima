@@ -64,6 +64,7 @@ doc = [
     "pydata-sphinx-theme",
 ]
 test = ["pytest", "pytest-xvfb"]
+qt = ["qtpy", "PyQt5", "plotpy"]
 
 [tool.setuptools.packages.find]
 include = ["sigima*"]
@@ -96,7 +97,7 @@ include = ["sigima*"]
 version = { attr = "sigima.__version__" }
 
 [tool.pytest.ini_options]
-addopts = "sigima"
+addopts = "sigima --import-mode=importlib"
 
 [tool.ruff]
 exclude = [".git", ".vscode", "build", "dist", "*.ipynb"]
