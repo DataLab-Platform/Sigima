@@ -11,25 +11,28 @@ The `sigima` package requires the following Python modules:
       - >=3.9, <4
       - Python programming language
     * - guidata
-      -  >= 3.10
+      -  >= 3.11
       - Automatic GUI generation for easy dataset editing and display
+    * - NumPy
+      -  >= 1.22
+      - Fundamental package for array computing in Python
     * - SciPy
-      -  >= 1.5
+      -  >= 1.7.3
       - Fundamental algorithms for scientific computing in Python
     * - scikit-image
-      -  >= 0.18
+      -  >= 0.19
       - Image processing in Python
     * - pandas
-      -  >= 1.2
+      -  >= 1.4
       - Powerful data structures for data analysis, time series, and statistics
     * - PyWavelets
-      -  >= 1.1
+      -  >= 1.2
       - PyWavelets, wavelet transform module
     * - packaging
-      -  >= 20.0
+      -  >= 21.3
       - Core utilities for Python packages
     * - typing-extensions
-      -  >= 3.10
+      -  >= 4.0
       - Backported and Experimental Type Hints for Python 3.9+
 
 Optional modules for GUI support (Qt):
