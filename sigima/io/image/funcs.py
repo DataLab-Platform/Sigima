@@ -370,15 +370,15 @@ def imread_dicom(filename: str) -> np.ndarray:
     # **********************************************************************
     # The following is necessary until pydicom numpy support is improved:
     # (after that, a simple: 'arr = dcm.PixelArray' will work the same)
-    format_str = "%sint%s" % (("u", "")[dcm.PixelRepresentation], dcm.BitsAllocated)
+    format_str = f"{'u' if dcm.PixelRepresentation == 0 else ''}int{dcm.BitsAllocated}"
     try:
         dtype = np.dtype(format_str)
-    except TypeError:
+    except TypeError as exc:
         raise TypeError(
-            "Data type not understood by NumPy: "
-            "PixelRepresentation=%d, BitsAllocated=%d"
-            % (dcm.PixelRepresentation, dcm.BitsAllocated)
-        )
+            f"Data type not understood by NumPy: "
+            f"PixelRepresentation={dcm.PixelRepresentation}, "
+            f"BitsAllocated={dcm.BitsAllocated}"
+        ) from exc
     arr = np.frombuffer(dcm.PixelData, dtype)
     try:
         # pydicom 0.9.3:
