@@ -53,7 +53,7 @@ Documentation = "https://datalab-platform.com/"
 
 [project.optional-dependencies]
 opencv = ["opencv-python-headless >= 4.5"]
-dev = ["babel","ruff", "pylint", "Coverage", "toml-to-requirements"]
+dev = ["babel","ruff", "pylint", "Coverage", "pre-commit"]
 doc = [
     "sphinx",
     "sphinx_intl",
