@@ -35,7 +35,7 @@ requires-python = ">=3.9, <4"
 dependencies = [
     "guidata >= 3.11",
     "NumPy >= 1.22",
-    "SciPy >= 1.7.3",
+    "SciPy >= 1.10.1",
     "scikit-image >= 0.19.2",
     "pandas >= 1.4",
     "PyWavelets >= 1.2",
