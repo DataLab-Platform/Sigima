@@ -99,7 +99,7 @@ from sigima.obj import (
     create_signal_roi,
 )
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __docurl__ = __homeurl__ = "https://datalab-platform.com/"
 __supporturl__ = "https://github.com/DataLab-Platform/sigima/issues/new/choose"
 
