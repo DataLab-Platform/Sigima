@@ -47,7 +47,6 @@ Signal model
 .. autofunction:: sigima.obj.create_signal_roi
 .. autofunction:: sigima.obj.create_signal
 .. autofunction:: sigima.obj.create_signal_from_param
-.. autofunction:: sigima.obj.new_signal_param
 .. autoclass:: sigima.obj.SignalTypes
 .. autodataset:: sigima.obj.NewSignalParam
 .. autodataset:: sigima.obj.GaussLorentzVoigtParam
@@ -65,7 +64,6 @@ Image model
 .. autofunction:: sigima.obj.create_image_roi
 .. autofunction:: sigima.obj.create_image
 .. autofunction:: sigima.obj.create_image_from_param
-.. autofunction:: sigima.obj.new_image_param
 .. autoclass:: sigima.obj.ImageTypes
 .. autodataset:: sigima.obj.NewImageParam
 .. autodataset:: sigima.obj.Gauss2DParam
