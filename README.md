@@ -1,14 +1,14 @@
-![DataLab](https://raw.githubusercontent.com/DataLab-Platform/DataLab/main/doc/images/DataLab-banner.png)
+![Sigima](https://raw.githubusercontent.com/DataLab-Platform/DataLab/main/doc/images/DataLab-banner.png)
 
 [![license](https://img.shields.io/pypi/l/sigima.svg)](./LICENSE)
 [![pypi version](https://img.shields.io/pypi/v/sigima.svg)](https://pypi.org/project/sigima/)
-[![PyPI status](https://img.shields.io/pypi/status/sigima.svg)](https://github.com/DataLab-Platform/SigIma)
+[![PyPI status](https://img.shields.io/pypi/status/sigima.svg)](https://github.com/DataLab-Platform/Sigima)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/sigima.svg)](https://pypi.org/project/sigima/)
 
-**SigIma** is an **open-source Python library for scientific image and signal processing**,
+**Sigima** is an **open-source Python library for scientific image and signal processing**,
 designed as a modular and testable foundation for building advanced analysis pipelines.
 
-🔬 Developed by [Codra](https://codra.net/) and the [DataLab Platform Developers](https://github.com/DataLab-Platform), SigIma powers the computation backend of [DataLab](https://datalab-platform.com/).
+🔬 Developed by [Codra](https://codra.net/) and the [DataLab Platform Developers](https://github.com/DataLab-Platform), Sigima powers the computation backend of [DataLab](https://datalab-platform.com/).
 
 ---
 
@@ -24,7 +24,7 @@ designed as a modular and testable foundation for building advanced analysis pip
 
 ## 💡 Use cases
 
-SigIma is meant to be:
+Sigima is meant to be:
 
 - A **processing backend** for scientific/industrial tools
 - A library to **build reproducible analysis pipelines**
@@ -42,8 +42,8 @@ pip install sigima
 Or in a development environment:
 
 ```bash
-git clone https://github.com/DataLab-Platform/SigIma.git
-cd SigIma
+git clone https://github.com/DataLab-Platform/Sigima.git
+cd Sigima
 pip install -e .
 ```
 
@@ -54,14 +54,14 @@ pip install -e .
 📖 Full documentation (in progress) is available at:
 👉 <https://datalab-platform.com/en/api/>
 
-> Want to use SigIma inside DataLab with GUI tools?
+> Want to use Sigima inside DataLab with GUI tools?
 > Check out the full platform: [DataLab](https://datalab-platform.com/)
 
 ---
 
 ## ⚙️ Architecture
 
-SigIma is organized by data type:
+Sigima is organized by data type:
 
 ```
 sigima/
@@ -81,7 +81,7 @@ Each domain provides:
 
 ## 🧪 Testing
 
-SigIma comes with unit tests based on `pytest`.
+Sigima comes with unit tests based on `pytest`.
 
 To run all tests:
 
@@ -99,7 +99,7 @@ pytest --gui
 
 ## 🧠 License
 
-SigIma is distributed under the terms of the BSD 3-Clause license.
+Sigima is distributed under the terms of the BSD 3-Clause license.
 See [LICENSE](./LICENSE) for details.
 
 ---

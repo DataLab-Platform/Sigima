@@ -1,10 +1,10 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-SigIma
+Sigima
 ======
 
-SigIma is a scientific computing engine for 1D signals and 2D images.
+Sigima is a scientific computing engine for 1D signals and 2D images.
 
 It provides a set of tools for image and signal processing, including
 denoising, segmentation, and restoration. It is designed to be used in
