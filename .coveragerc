@@ -13,6 +13,7 @@ omit =
     */guidata/*
 
     #--- Workaround for certain builds of python-opencv package:
+    ./config-3.9.py
     ./config-3.py
     ./config.py
     #---
