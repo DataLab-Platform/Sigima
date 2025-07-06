@@ -1,4 +1,4 @@
-The `sigima` package requires the following Python modules:
+The `SigIma` package requires the following Python modules:
 
 .. list-table::
     :header-rows: 1
@@ -63,6 +63,9 @@ Optional modules for development:
     * - Name
       - Version
       - Summary
+    * - build
+      - 
+      - A simple, correct Python build frontend
     * - babel
       - 
       - Internationalization utilities
