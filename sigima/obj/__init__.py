@@ -44,8 +44,6 @@ Signal model
 .. autodataset:: sigima.obj.SignalObj
     :members:
     :inherited-members:
-.. autofunction:: sigima.obj.read_signal
-.. autofunction:: sigima.obj.read_signals
 .. autofunction:: sigima.obj.create_signal_roi
 .. autofunction:: sigima.obj.create_signal
 .. autofunction:: sigima.obj.create_signal_from_param
@@ -64,8 +62,6 @@ Image model
 .. autodataset:: sigima.obj.ImageObj
     :members:
     :inherited-members:
-.. autofunction:: sigima.obj.read_image
-.. autofunction:: sigima.obj.read_images
 .. autofunction:: sigima.obj.create_image_roi
 .. autofunction:: sigima.obj.create_image
 .. autofunction:: sigima.obj.create_image_from_param
