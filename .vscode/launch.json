@@ -1,0 +1,110 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run DataLab",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cdl/app.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": false,
+            "args": [
+                // "--reset"
+                // "--h5browser",
+                // "${workspaceFolder}/cdl/data/tests/empty.h5"
+                // "${workspaceFolder}/cdl/data/tests/reordering_test.h5",
+                // "${workspaceFolder}/cdl/data/tests/reordering_test.h5,/DataLab_Sig/g001: /s003: wiener(s002)/xydata",
+            ],
+            "env": {
+                // "DEBUG": "1",
+                // "LANG": "en",
+                // "QT_COLOR_MODE": "light",
+            }
+        },
+        {
+            "name": "Run current file",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": false,
+            "args": [
+                // "--h5browser",
+                // "${workspaceFolder}/cdl/data/tests/format_v1.7.h5",
+                // "${workspaceFolder}/cdl/data/tests/format_v1.7.h5,/DataLab_Ima/i002: i002+i004",
+                // "--unattended",
+                // "--screenshot",
+                // "--verbose",
+                // "quiet",
+                // "--delay",
+                // "1000"
+            ],
+            "env": {
+                // "DEBUG": "1",  // ☣️ Debug mode will reset .ini settings
+                // "TEST_SEGFAULT_ERROR": "1",
+                "LANG": "en",
+                "QT_COLOR_MODE": "light",
+            }
+        },
+        {
+            "name": "Run current file (unattended)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "pythonArgs": [
+                "-W error::DeprecationWarning",
+                "-W error::RuntimeWarning",
+            ],
+            "justMyCode": false,
+            "args": [
+                "--unattended",
+            ],
+            "env": {
+                // "DEBUG": "1",  // ☣️ Debug mode will reset .ini settings
+                // "QT_QPA_PLATFORM": "offscreen",
+                // The `CDL_DATA` environment variable is set here just for checking
+                // that the data path is not added twice to the test data path list:
+                "CDL_DATA": "${workspaceFolder}/cdl/data/tests",
+                "LANG": "en",
+                "QT_COLOR_MODE": "light",
+            }
+        },
+        {
+            "name": "Profile current file",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "cProfile",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "args": [
+                "-o",
+                "${file}.prof",
+                "${file}"
+            ],
+        },
+        {
+            "name": "Run H5browser",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/cdl/tests/features/hdf5/h5browser1_unit.py",
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env",
+            "justMyCode": true,
+            "env": {
+                "DEBUG": "1",
+                // "QT_COLOR_MODE": "light",
+            },
+            "args": [
+                // "--unattended",
+                // "--screenshot",
+            ],
+        },
+    ]
+}
