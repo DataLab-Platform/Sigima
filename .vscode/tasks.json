@@ -95,14 +95,14 @@
                 "-m",
                 "sphinx",
                 "build",
-                ".",
-                "../build/gettext",
+                "doc",
+                "build/gettext",
                 "-b",
                 "gettext",
                 "-W"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/doc",
+                "cwd": "${workspaceFolder}",
                 "statusbar": {
                     "hide": true
                 }
@@ -129,7 +129,7 @@
                 "sphinx_intl",
                 "update",
                 "-p",
-                "../build/gettext",
+                "build/gettext",
                 "-l",
                 "fr",
                 "--no-obsolete",
@@ -137,7 +137,7 @@
                 "0",
             ],
             "options": {
-                "cwd": "${workspaceFolder}/doc",
+                "cwd": "${workspaceFolder}",
                 "statusbar": {
                     "hide": true
                 }
