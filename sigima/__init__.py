@@ -1,11 +1,18 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-sigima
+SigIma
 ======
 
-Scientific computing engine for 1D signals and 2D images,
-part of the DataLab open-source platform.
+SigIma is a scientific computing engine for 1D signals and 2D images.
+
+It provides a set of tools for image and signal processing, including
+denoising, segmentation, and restoration. It is designed to be used in
+scientific and research applications.
+
+It is a part of the DataLab Platform, which aims at providing a
+comprehensive set of tools for data analysis and visualization, around
+the DataLab application.
 """
 
 # TODO: Use `numpy.typing.NDArray` for more precise type annotations once NumPy >= 1.21

@@ -1,7 +1,7 @@
-# sigima setup configuration file
+# SigIma setup configuration file
 
 [project]
-name = "sigima"
+name = "SigIma"
 authors = [{ name = "Pierre Raybaut", email = "p.raybaut@codra.fr" }]
 maintainers = [
     { name = "DataLab Platform Developers", email = "p.raybaut@codra.fr" },
