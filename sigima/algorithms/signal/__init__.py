@@ -7,13 +7,13 @@ This package contains signal processing algorithms.
 Algorithms are organized into subpackages according to their purpose:
 
 - :mod:`sigima.algorithms.signal.dynamic`: Dynamic parameter extraction
+- :mod:`sigima.algorithms.signal.features`: Feature extraction algorithms
 - :mod:`sigima.algorithms.signal.fitmodels`: Curve fitting models
 - :mod:`sigima.algorithms.signal.fourier`: Fourier analysis algorithms
 - :mod:`sigima.algorithms.signal.interpolation`: Interpolation algorithms
-- :mod:`sigima.algorithms.signal.level`: Level adjustment algorithms
-- :mod:`sigima.algorithms.signal.misc`: Miscellaneous tools
 - :mod:`sigima.algorithms.signal.peakdetection`: Peak detection algorithms
 - :mod:`sigima.algorithms.signal.pulse`: Pulse analysis algorithms
+- :mod:`sigima.algorithms.signal.scaling`: Scaling algorithms
 - :mod:`sigima.algorithms.signal.stability`: Stability analysis algorithms
 - :mod:`sigima.algorithms.signal.windowing`: Windowing algorithms
 
@@ -22,6 +22,12 @@ Dynamic Parameter Extraction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: sigima.algorithms.signal.dynamic
+   :members:
+
+Feature Extraction Algorithms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: sigima.algorithms.signal.features
    :members:
 
 Curve Fitting Models
@@ -42,18 +48,6 @@ Interpolation Algorithms
 .. automodule:: sigima.algorithms.signal.interpolation
    :members:
 
-Scaling Algorithms
-^^^^^^^^^^^^^^^^^^
-
-.. automodule:: sigima.algorithms.signal.scaling
-   :members:
-
-Features
-^^^^^^^^
-
-.. automodule:: sigima.algorithms.signal.features
-   :members:
-
 Peak Detection Algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -64,6 +58,12 @@ Pulse Analysis Algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: sigima.algorithms.signal.pulse
+   :members:
+
+Scaling Algorithms
+^^^^^^^^^^^^^^^^^^
+
+.. automodule:: sigima.algorithms.signal.scaling
    :members:
 
 Stability Analysis Algorithms
