@@ -239,7 +239,8 @@ def read_csv(
                     else:
                         break
             # Remove the last line if it contains the column names:
-            if header and df.columns[0] in header.splitlines()[-1]:
+            last_line = header.splitlines()[-1] if header.splitlines() else ""
+            if str(df.columns[0]) in last_line:
                 header = "\n".join(header.splitlines()[:-1])
 
     # Now we read the whole file with the correct options
