@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "🧽 Run Ruff Formatter",
+            "label": "🧽 Ruff Formatter",
             "command": "${command:python.interpreterPath}",
             "args": [
                 "-m",
@@ -29,7 +29,7 @@
             "type": "shell"
         },
         {
-            "label": "🔦 Run Ruff Linter",
+            "label": "🔦 Ruff Linter",
             "command": "${command:python.interpreterPath}",
             "args": [
                 "-m",
@@ -55,7 +55,7 @@
             "type": "shell"
         },
         {
-            "label": "🔦 Run Pylint",
+            "label": "🔦 Pylint",
             "command": "${command:python.interpreterPath}",
             "args": [
                 "-m",
@@ -258,7 +258,7 @@
             ]
         },
         {
-            "label": "🚀 Run pytest",
+            "label": "🚀 Pytest",
             "command": "${command:python.interpreterPath}",
             "args": [
                 "-m",
@@ -315,7 +315,7 @@
             "type": "shell"
         },
         {
-            "label": "🧪 Run coverage tests",
+            "label": "🧪 Coverage tests",
             "type": "shell",
             "command": "${command:python.interpreterPath}",
             "args": [
@@ -368,7 +368,7 @@
             "problemMatcher": [],
             "dependsOrder": "sequence",
             "dependsOn": [
-                "🧪 Run coverage tests",
+                "🧪 Coverage tests",
             ],
         },
         {
@@ -407,7 +407,7 @@
             ]
         },
         {
-            "label": "📦 Upgrade PlotPyStack",
+            "label": "Upgrade PlotPyStack",
             "command": "${command:python.interpreterPath}",
             "args": [
                 "-m",
@@ -421,6 +421,9 @@
             ],
             "options": {
                 "cwd": "${workspaceFolder}",
+                "statusbar": {
+                    "hide": true
+                }
             },
             "group": {
                 "kind": "build",
@@ -485,7 +488,7 @@
             }
         },
         {
-            "label": "📚 Build documentation",
+            "label": "📚 Build doc",
             "command": "${command:python.interpreterPath}",
             "args": [
                 "-m",
@@ -561,7 +564,7 @@
             ]
         },
         {
-            "label": "❔ List untracked files",
+            "label": "❔ Untracked files",
             "type": "shell",
             "command": "git ls-files --others | Where-Object { $_ -notmatch '^\\.' -and $_ -notmatch '^(build|dist|releases)/' -and $_ -notmatch '.(pyc|mo)$'}",
             "options": {
