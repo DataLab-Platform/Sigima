@@ -1,4 +1,4 @@
-![Sigima](https://raw.githubusercontent.com/DataLab-Platform/DataLab/main/doc/images/DataLab-banner.png)
+![Sigima](https://raw.githubusercontent.com/DataLab-Platform/Sigima/main/doc/images/Sigima-Banner.svg)
 
 [![license](https://img.shields.io/pypi/l/sigima.svg)](./LICENSE)
 [![pypi version](https://img.shields.io/pypi/v/sigima.svg)](https://pypi.org/project/sigima/)
