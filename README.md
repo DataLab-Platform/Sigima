@@ -107,7 +107,7 @@ See [LICENSE](./LICENSE) for details.
 ## 🤝 Contributing
 
 Bug reports, feature requests and pull requests are welcome!
-See the [CONTRIBUTING](./doc/CONTRIBUTING.md) guide to get started.
+See the [CONTRIBUTING](https://datalab-platform.com/en/contributing) guide to get started.
 
 ---
 
