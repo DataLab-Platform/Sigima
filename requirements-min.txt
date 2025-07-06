@@ -2,7 +2,7 @@ Coverage
 NumPy==1.22
 PyQt5
 PyWavelets==1.2
-SciPy==1.7.3
+SciPy==1.10.1
 babel
 build
 guidata==3.11
@@ -18,7 +18,7 @@ pytest
 pytest-xvfb
 qtpy
 ruff
-scikit-image==0.19
+scikit-image==0.19.2
 sphinx
 sphinx-copybutton
 sphinx-sitemap
