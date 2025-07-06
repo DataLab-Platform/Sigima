@@ -53,7 +53,7 @@ class DenoiseTVParam(gds.DataSet):
             "(E_(n-1) - E_n) < eps * E_0"
         ),
     )
-    n_iter_max = gds.IntItem(
+    max_num_iter = gds.IntItem(
         _("Max. iterations"),
         default=200,
         min=0,
@@ -78,7 +78,7 @@ def denoise_tv(src: ImageObj, p: DenoiseTVParam) -> ImageObj:
         restoration.denoise_tv_chambolle,
         weight=p.weight,
         eps=p.eps,
-        n_iter_max=p.n_iter_max,
+        max_num_iter=p.max_num_iter,
     )(src)
 
 

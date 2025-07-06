@@ -332,11 +332,11 @@ def test_denoise_tv() -> None:
     src = get_test_image("flower.npy")
     src.data = src.data[::8, ::8]
     for weight, eps, mni in ((0.1, 0.0002, 200), (0.5, 0.0001, 100)):
-        p = sigima.param.DenoiseTVParam.create(weight=weight, eps=eps, n_iter_max=mni)
+        p = sigima.param.DenoiseTVParam.create(weight=weight, eps=eps, max_num_iter=mni)
         dst = sigima_image.denoise_tv(src, p)
         exp = restoration.denoise_tv_chambolle(src.data, weight, eps, mni)
         check_array_result(
-            f"DenoiseTV[weight={weight},eps={eps},n_iter_max={mni}]",
+            f"DenoiseTV[weight={weight},eps={eps},max_num_iter={mni}]",
             dst.data,
             exp,
         )
