@@ -50,10 +50,3 @@ if exist htmlcov ( rmdir /s /q htmlcov )
 del /s /q .coverage.* 1>nul 2>&1
 if exist sitecustomize.py ( del /q sitecustomize.py )
 if exist .pytest_cache ( rmdir /s /q .pytest_cache )
-
-@REM Removing files/directories related to WiX installer
-if exist wix\bin ( rmdir /s /q wix\bin )
-if exist wix\obj ( rmdir /s /q wix\obj )
-if exist wix\*.bmp ( del /q wix\*.bmp )
-if exist wix\*.wixpdb ( del /q wix\*.wixpdb )
-del /q wix\%LIBNAME%*.wxs 1>nul 2>&1
