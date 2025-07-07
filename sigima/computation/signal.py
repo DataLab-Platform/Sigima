@@ -9,7 +9,7 @@
 # MARK: Important note
 # --------------------
 # All `guidata.dataset.DataSet` classes must also be imported
-# in the `sigima.param` module.
+# in the `sigima.params` module.
 
 from __future__ import annotations
 

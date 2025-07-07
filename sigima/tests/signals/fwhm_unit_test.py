@@ -13,7 +13,7 @@ import pytest
 
 import sigima.computation.signal as sigima_signal
 import sigima.obj
-import sigima.param
+import sigima.params
 import sigima.tests.data as cdltd
 import sigima.tests.helpers
 from sigima.tests.env import execenv
@@ -26,7 +26,7 @@ def __test_fwhm_interactive(obj: sigima.obj.SignalObj, method: str) -> None:
 
     from sigima.tests.vistools import view_curve_items
 
-    param = sigima.param.FWHMParam.create(method=method)
+    param = sigima.params.FWHMParam.create(method=method)
     df = sigima_signal.fwhm(obj, param).to_dataframe()
     x, y = obj.xydata
     view_curve_items(
@@ -48,7 +48,7 @@ def test_signal_fwhm_interactive() -> None:
         execenv.print("Computing FWHM of a multi-peak signal:")
         obj1 = cdltd.create_paracetamol_signal()
         obj2 = cdltd.create_noisy_signal(cdltd.GaussianNoiseParam.create(sigma=0.05))
-        for method, _mname in sigima.param.FWHMParam.methods:
+        for method, _mname in sigima.params.FWHMParam.methods:
             execenv.print(f"  Method: {method}")
             for obj in (obj1, obj2):
                 if method == "zero-crossing":
@@ -70,14 +70,14 @@ def test_signal_fwhm() -> None:
         ("voigt", 2.56591),
         ("zero-crossing", real_fwhm),
     ):
-        param = sigima.param.FWHMParam.create(method=method)
+        param = sigima.params.FWHMParam.create(method=method)
         df = sigima_signal.fwhm(obj, param).to_dataframe()
         sigima.tests.helpers.check_scalar_result(
             f"FWHM[{method}]", df.L[0], exp, rtol=0.05
         )
     obj = cdltd.create_paracetamol_signal()
     with pytest.warns(UserWarning):
-        sigima_signal.fwhm(obj, sigima.param.FWHMParam.create(method="zero-crossing"))
+        sigima_signal.fwhm(obj, sigima.params.FWHMParam.create(method="zero-crossing"))
 
 
 @pytest.mark.validation
@@ -94,7 +94,7 @@ def test_signal_full_width_at_y() -> None:
     """Validation test for the full width at y computation."""
     obj = cdltd.get_test_signal("fwhm.txt")
     real_fwhm = 2.675  # Manual validation
-    param = sigima.param.OrdinateParam.create(y=0.5)
+    param = sigima.params.OrdinateParam.create(y=0.5)
     df = sigima_signal.full_width_at_y(obj, param).to_dataframe()
     sigima.tests.helpers.check_scalar_result("∆X", df.L[0], real_fwhm, rtol=0.05)
 

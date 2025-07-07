@@ -18,7 +18,7 @@ import pytest
 
 import sigima.computation.signal as sigima_signal
 import sigima.obj
-import sigima.param
+import sigima.params
 from sigima.tests.data import get_test_signal
 from sigima.tests.helpers import check_scalar_result
 
@@ -37,7 +37,7 @@ def test_signal_bandwidth_3db() -> None:
 def test_dynamic_parameters() -> None:
     """Validation test for dynamic parameters computation."""
     obj = get_test_signal("dynamic_parameters.txt")
-    param = sigima.param.DynamicParam.create(full_scale=1.0)
+    param = sigima.params.DynamicParam.create(full_scale=1.0)
     res = sigima_signal.dynamic_parameters(obj, param)
     assert res is not None, "Dynamic parameters computation failed"
     df = res.to_dataframe()

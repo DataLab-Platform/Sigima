@@ -1,10 +1,10 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Parameters (:mod:`sigima.param`)
+Parameters (:mod:`sigima.params`)
 ---------------------------------
 
-The :mod:`sigima.param` module aims at providing all the dataset parameters that are
+The :mod:`sigima.params` module aims at providing all the dataset parameters that are
 used by the :mod:`sigima.computation` and DataLab's processors.
 
 Those datasets are defined in other modules:
@@ -13,7 +13,7 @@ Those datasets are defined in other modules:
     - :mod:`sigima.computation.image`
     - :mod:`sigima.computation.signal`
 
-The :mod:`sigima.param` module is thus a convenient way to import all the sets of
+The :mod:`sigima.params` module is thus a convenient way to import all the sets of
 parameters at once.
 
 As a matter of fact, the following import statement is equivalent to the previous one:
@@ -26,7 +26,7 @@ As a matter of fact, the following import statement is equivalent to the previou
     from sigima.computation.image.exposure import EqualizeHistParam
 
     # Equivalent import statement
-    from sigima.param import MovingAverageParam, PolynomialFitParam, EqualizeHistParam
+    from sigima.params import MovingAverageParam, PolynomialFitParam, EqualizeHistParam
 
 Introduction to `DataSet` parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -38,78 +38,78 @@ Each dataset is a subclass of :py:class:`guidata.dataset.datatypes.DataSet` and 
 needs to be instantiated before being used.
 
 Here is a complete example of how to instantiate a dataset and access its parameters
-with the :py:class:`sigima.param.BinningParam` dataset:
+with the :py:class:`sigima.params.BinningParam` dataset:
 
-    .. autodataset:: sigima.param.BinningParam
+    .. autodataset:: sigima.params.BinningParam
         :no-index:
         :shownote:
 
 Common parameters
 ^^^^^^^^^^^^^^^^^
 
-.. autodataset:: sigima.param.ArithmeticParam
+.. autodataset:: sigima.params.ArithmeticParam
     :no-index:
-.. autodataset:: sigima.param.ClipParam
+.. autodataset:: sigima.params.ClipParam
     :no-index:
-.. autodataset:: sigima.param.ConstantParam
+.. autodataset:: sigima.params.ConstantParam
     :no-index:
-.. autodataset:: sigima.param.FFTParam
+.. autodataset:: sigima.params.FFTParam
     :no-index:
-.. autodataset:: sigima.param.GaussianParam
+.. autodataset:: sigima.params.GaussianParam
     :no-index:
-.. autodataset:: sigima.param.HistogramParam
+.. autodataset:: sigima.params.HistogramParam
     :no-index:
-.. autodataset:: sigima.param.MovingAverageParam
+.. autodataset:: sigima.params.MovingAverageParam
     :no-index:
-.. autodataset:: sigima.param.MovingMedianParam
+.. autodataset:: sigima.params.MovingMedianParam
     :no-index:
-.. autodataset:: sigima.param.NormalizeParam
+.. autodataset:: sigima.params.NormalizeParam
     :no-index:
-.. autodataset:: sigima.param.SpectrumParam
+.. autodataset:: sigima.params.SpectrumParam
     :no-index:
 
 Signal parameters
 ^^^^^^^^^^^^^^^^^
 
-.. autodataset:: sigima.param.AllanVarianceParam
+.. autodataset:: sigima.params.AllanVarianceParam
     :no-index:
-.. autodataset:: sigima.param.AngleUnitParam
+.. autodataset:: sigima.params.AngleUnitParam
     :no-index:
-.. autodataset:: sigima.param.BandPassFilterParam
+.. autodataset:: sigima.params.BandPassFilterParam
     :no-index:
-.. autodataset:: sigima.param.BandStopFilterParam
+.. autodataset:: sigima.params.BandStopFilterParam
     :no-index:
-.. autodataset:: sigima.param.DataTypeSParam
+.. autodataset:: sigima.params.DataTypeSParam
     :no-index:
-.. autodataset:: sigima.param.DetrendingParam
+.. autodataset:: sigima.params.DetrendingParam
     :no-index:
-.. autodataset:: sigima.param.DynamicParam
+.. autodataset:: sigima.params.DynamicParam
     :no-index:
-.. autodataset:: sigima.param.AbscissaParam
+.. autodataset:: sigima.params.AbscissaParam
     :no-index:
-.. autodataset:: sigima.param.OrdinateParam
+.. autodataset:: sigima.params.OrdinateParam
     :no-index:
-.. autodataset:: sigima.param.FWHMParam
+.. autodataset:: sigima.params.FWHMParam
     :no-index:
-.. autodataset:: sigima.param.HighPassFilterParam
+.. autodataset:: sigima.params.HighPassFilterParam
     :no-index:
-.. autodataset:: sigima.param.InterpolationParam
+.. autodataset:: sigima.params.InterpolationParam
     :no-index:
-.. autodataset:: sigima.param.LowPassFilterParam
+.. autodataset:: sigima.params.LowPassFilterParam
     :no-index:
-.. autodataset:: sigima.param.PeakDetectionParam
+.. autodataset:: sigima.params.PeakDetectionParam
     :no-index:
-.. autodataset:: sigima.param.PolynomialFitParam
+.. autodataset:: sigima.params.PolynomialFitParam
     :no-index:
-.. autodataset:: sigima.param.PowerParam
+.. autodataset:: sigima.params.PowerParam
     :no-index:
-.. autodataset:: sigima.param.ResamplingParam
+.. autodataset:: sigima.params.ResamplingParam
     :no-index:
-.. autodataset:: sigima.param.WindowingParam
+.. autodataset:: sigima.params.WindowingParam
     :no-index:
-.. autodataset:: sigima.param.XYCalibrateParam
+.. autodataset:: sigima.params.XYCalibrateParam
     :no-index:
-.. autodataset:: sigima.param.ZeroPadding1DParam
+.. autodataset:: sigima.params.ZeroPadding1DParam
     :no-index:
 
 Image parameters
@@ -118,95 +118,95 @@ Image parameters
 Base image parameters
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.AverageProfileParam
+.. autodataset:: sigima.params.AverageProfileParam
     :no-index:
-.. autodataset:: sigima.param.BinningParam
+.. autodataset:: sigima.params.BinningParam
     :no-index:
-.. autodataset:: sigima.param.ButterworthParam
+.. autodataset:: sigima.params.ButterworthParam
     :no-index:
-.. autodataset:: sigima.param.DataTypeIParam
+.. autodataset:: sigima.params.DataTypeIParam
     :no-index:
-.. autodataset:: sigima.param.FlatFieldParam
+.. autodataset:: sigima.params.FlatFieldParam
     :no-index:
-.. autodataset:: sigima.param.GridParam
+.. autodataset:: sigima.params.GridParam
     :no-index:
-.. autodataset:: sigima.param.HoughCircleParam
+.. autodataset:: sigima.params.HoughCircleParam
     :no-index:
-.. autodataset:: sigima.param.LineProfileParam
+.. autodataset:: sigima.params.LineProfileParam
     :no-index:
-.. autodataset:: sigima.param.LogP1Param
+.. autodataset:: sigima.params.LogP1Param
     :no-index:
-.. autodataset:: sigima.param.RadialProfileParam
+.. autodataset:: sigima.params.RadialProfileParam
     :no-index:
-.. autodataset:: sigima.param.ResizeParam
+.. autodataset:: sigima.params.ResizeParam
     :no-index:
-.. autodataset:: sigima.param.RotateParam
+.. autodataset:: sigima.params.RotateParam
     :no-index:
-.. autodataset:: sigima.param.SegmentProfileParam
+.. autodataset:: sigima.params.SegmentProfileParam
     :no-index:
-.. autodataset:: sigima.param.ZCalibrateParam
+.. autodataset:: sigima.params.ZCalibrateParam
     :no-index:
-.. autodataset:: sigima.param.ZeroPadding2DParam
+.. autodataset:: sigima.params.ZeroPadding2DParam
     :no-index:
 
 Detection parameters
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.BlobDOGParam
+.. autodataset:: sigima.params.BlobDOGParam
     :no-index:
-.. autodataset:: sigima.param.BlobDOHParam
+.. autodataset:: sigima.params.BlobDOHParam
     :no-index:
-.. autodataset:: sigima.param.BlobLOGParam
+.. autodataset:: sigima.params.BlobLOGParam
     :no-index:
-.. autodataset:: sigima.param.BlobOpenCVParam
+.. autodataset:: sigima.params.BlobOpenCVParam
     :no-index:
-.. autodataset:: sigima.param.ContourShapeParam
+.. autodataset:: sigima.params.ContourShapeParam
     :no-index:
-.. autodataset:: sigima.param.Peak2DDetectionParam
+.. autodataset:: sigima.params.Peak2DDetectionParam
     :no-index:
 
 Edge detection parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.CannyParam
+.. autodataset:: sigima.params.CannyParam
     :no-index:
 
 Exposure correction parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.AdjustGammaParam
+.. autodataset:: sigima.params.AdjustGammaParam
     :no-index:
-.. autodataset:: sigima.param.AdjustLogParam
+.. autodataset:: sigima.params.AdjustLogParam
     :no-index:
-.. autodataset:: sigima.param.AdjustSigmoidParam
+.. autodataset:: sigima.params.AdjustSigmoidParam
     :no-index:
-.. autodataset:: sigima.param.EqualizeAdaptHistParam
+.. autodataset:: sigima.params.EqualizeAdaptHistParam
     :no-index:
-.. autodataset:: sigima.param.EqualizeHistParam
+.. autodataset:: sigima.params.EqualizeHistParam
     :no-index:
-.. autodataset:: sigima.param.RescaleIntensityParam
+.. autodataset:: sigima.params.RescaleIntensityParam
     :no-index:
 
 Morphological parameters
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.MorphologyParam
+.. autodataset:: sigima.params.MorphologyParam
     :no-index:
 
 Restoration parameters
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.DenoiseBilateralParam
+.. autodataset:: sigima.params.DenoiseBilateralParam
     :no-index:
-.. autodataset:: sigima.param.DenoiseTVParam
+.. autodataset:: sigima.params.DenoiseTVParam
     :no-index:
-.. autodataset:: sigima.param.DenoiseWaveletParam
+.. autodataset:: sigima.params.DenoiseWaveletParam
     :no-index:
 
 Threshold parameters
 ~~~~~~~~~~~~~~~~~~~~
 
-.. autodataset:: sigima.param.ThresholdParam
+.. autodataset:: sigima.params.ThresholdParam
     :no-index:
 """
 

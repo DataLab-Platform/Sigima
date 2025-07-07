@@ -14,7 +14,7 @@ import pytest
 
 import sigima.computation.signal as sigima_signal
 import sigima.obj
-import sigima.param
+import sigima.params
 from sigima.tests.helpers import check_array_result
 
 
@@ -60,7 +60,7 @@ def test_signal_allan_variance():
     sig1 = sigima.obj.create_signal("White Noise Test", time_white, values_white)
 
     # Define Allan variance parameters
-    param = sigima.param.AllanVarianceParam()
+    param = sigima.params.AllanVarianceParam()
     param.max_tau = max(tau_values)
 
     # Compute Allan variance using the high-level function
@@ -94,7 +94,7 @@ def test_signal_allan_deviation():
     sig1 = sigima.obj.create_signal("White Noise Test", time_white, values_white)
 
     # Define Allan variance parameters
-    param = sigima.param.AllanVarianceParam()
+    param = sigima.params.AllanVarianceParam()
     param.max_tau = max(tau_values)
 
     # Compute Allan deviation using the high-level function

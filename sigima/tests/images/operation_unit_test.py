@@ -22,7 +22,7 @@ import scipy.ndimage as spi
 
 import sigima.computation.image as sigima_image
 import sigima.obj
-import sigima.param
+import sigima.params
 from sigima.tests import guiutils
 from sigima.tests.data import create_noisygauss_image
 from sigima.tests.env import execenv
@@ -177,13 +177,13 @@ def test_image_division(request: pytest.FixtureRequest = None) -> None:
         check_array_result("Image division", ima3.data, exp)
 
 
-def __constparam(value: float) -> sigima.param.ConstantParam:
+def __constparam(value: float) -> sigima.params.ConstantParam:
     """Create a constant parameter."""
-    return sigima.param.ConstantParam.create(value=value)
+    return sigima.params.ConstantParam.create(value=value)
 
 
 def __iterate_image_with_constant() -> Generator[
-    tuple[sigima.obj.ImageObj, sigima.param.ConstantParam], None, None
+    tuple[sigima.obj.ImageObj, sigima.params.ConstantParam], None, None
 ]:
     """Iterate over all possible image and constant couples for testing."""
     size = 128
@@ -252,7 +252,7 @@ def test_image_arithmetic() -> None:
     # pylint: disable=too-many-nested-blocks
     for ima1, ima2 in __iterate_image_couples():
         dtype1 = ima1.data.dtype
-        p = sigima.param.ArithmeticParam.create()
+        p = sigima.params.ArithmeticParam.create()
         for o in p.operators:
             p.operator = o
             for a in (0.0, 1.0, 2.0):
@@ -349,7 +349,7 @@ def test_image_astype() -> None:
             if info_exp.min < info_ima1.min or info_exp.max > info_ima1.max:
                 continue
             exp = np.clip(ima1.data, info_exp.min, info_exp.max).astype(dtype_exp)
-            p = sigima.param.DataTypeIParam.create(dtype_str=dtype_str)
+            p = sigima.params.DataTypeIParam.create(dtype_str=dtype_str)
             ima2 = sigima_image.astype(ima1, p)
             check_array_result(
                 f"Image astype({dtype1_str}->{dtype_str})", ima2.data, exp
@@ -387,7 +387,7 @@ def test_image_logp1() -> None:
     with np.errstate(over="ignore"):
         for ima1 in __iterate_images():
             execenv.print(f"  log1p({ima1.data.dtype}): ", end="")
-            p = sigima.param.LogP1Param.create(n=2)
+            p = sigima.params.LogP1Param.create(n=2)
             exp = np.log10(ima1.data + p.n)
             ima2 = sigima_image.logp1(ima1, p)
             check_array_result("Image log1p", ima2.data, exp)
@@ -451,7 +451,7 @@ def test_image_rotate() -> None:
         for angle in (30, 45, 60, 120):
             execenv.print(f"  rotate{angle}({ima1.data.dtype}): ", end="")
             ima2 = sigima_image.rotate(
-                ima1, sigima.param.RotateParam.create(angle=angle)
+                ima1, sigima.params.RotateParam.create(angle=angle)
             )
             exp = spi.rotate(ima1.data, angle, reshape=False)
             check_array_result(f"Image rotate{angle}", ima2.data, exp)

@@ -15,7 +15,7 @@ import scipy.signal as sps
 
 import sigima.computation.signal as sigima_signal
 import sigima.obj
-import sigima.param
+import sigima.params
 import sigima.tests.data as ctd
 from sigima.algorithms.signal import fourier
 from sigima.tests import guiutils
@@ -31,7 +31,7 @@ def test_signal_zero_padding() -> None:
     )
 
     # Validate zero padding with custom length
-    param = sigima.param.ZeroPadding1DParam.create(n=250)
+    param = sigima.params.ZeroPadding1DParam.create(n=250)
     assert param.strategy == "custom", (
         f"Wrong default strategy: {param.strategy} (expected 'custom')"
     )
@@ -59,7 +59,7 @@ def test_signal_zero_padding() -> None:
         ("double", 1000),
         ("triple", 2000),
     ):
-        param = sigima.param.ZeroPadding1DParam.create(strategy=strategy)
+        param = sigima.params.ZeroPadding1DParam.create(strategy=strategy)
         param.update_from_obj(s1)
         assert param.n == expected_length, (
             f"Wrong length for '{param.strategy}' strategy: {param.n}"
@@ -208,7 +208,7 @@ def test_signal_psd() -> None:
     s1 = ctd.create_periodic_signal(
         sigima.obj.SignalTypes.COSINUS, freq=freq, size=size
     )
-    param = sigima.param.SpectrumParam()
+    param = sigima.params.SpectrumParam()
     for log_scale in (False, True):
         param.log = log_scale
         psd = sigima_signal.psd(s1, param)

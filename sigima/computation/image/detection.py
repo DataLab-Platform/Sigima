@@ -19,7 +19,7 @@ enabling automated extraction of regions or features of interest.
 
 # Note:
 # ----
-# All dataset classes must also be imported in the sigima.param module.
+# All dataset classes must also be imported in the sigima.params module.
 
 from __future__ import annotations
 

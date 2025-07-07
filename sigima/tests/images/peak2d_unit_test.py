@@ -16,7 +16,7 @@ import pytest
 
 import sigima.computation.image as sigima_image
 import sigima.obj
-import sigima.param
+import sigima.params
 from sigima.algorithms.image import get_2d_peaks_coords
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
@@ -79,7 +79,7 @@ def test_image_peak_detection():
     data, coords_expected = get_peak2d_data(seed=1, multi=False)
     for create_rois in (True, False):
         obj = sigima.obj.create_image("peak2d_unit_test", data=data)
-        param = sigima.param.Peak2DDetectionParam.create(create_rois=create_rois)
+        param = sigima.params.Peak2DDetectionParam.create(create_rois=create_rois)
         result = sigima_image.peak_detection(obj, param)
         df = result.to_dataframe()
         coords = df.to_numpy(int)

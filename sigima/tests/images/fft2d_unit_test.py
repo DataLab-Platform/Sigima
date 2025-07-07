@@ -13,7 +13,7 @@ import pytest
 import sigima.algorithms.image as alg
 import sigima.computation.image as sigima_image
 import sigima.obj
-import sigima.param
+import sigima.params
 import sigima.tests.data as ctd
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result, check_scalar_result
@@ -54,7 +54,7 @@ def test_image_zero_padding() -> None:
     """2D FFT zero padding validation test."""
     ima1 = ctd.create_checkerboard()
     rows, cols = 2, 2
-    param = sigima.param.ZeroPadding2DParam.create(rows=rows, cols=cols)
+    param = sigima.params.ZeroPadding2DParam.create(rows=rows, cols=cols)
     assert param.strategy == "custom", (
         f"Wrong default strategy: {param.strategy} (expected 'custom')"
     )
@@ -105,7 +105,7 @@ def test_image_zero_padding() -> None:
         ("next_pow2", (56, 212)),
         ("multiple_of_64", (56, 20)),
     ):
-        param = sigima.param.ZeroPadding2DParam.create(strategy=strategy)
+        param = sigima.params.ZeroPadding2DParam.create(strategy=strategy)
         param.update_from_obj(ima4)
         assert param.rows == exp_rows, (
             f"Wrong row number for '{param.strategy}' strategy: {param.rows}"

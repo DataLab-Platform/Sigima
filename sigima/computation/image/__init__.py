@@ -9,7 +9,7 @@
 # MARK: Important notes
 # ---------------------
 # - All `guidata.dataset.DataSet` classes must also be imported
-#   in the `sigima.param` module.
+#   in the `sigima.params` module.
 # - All functions decorated by `computation_function` defined in the other modules
 #   of this package must be imported right here.
 

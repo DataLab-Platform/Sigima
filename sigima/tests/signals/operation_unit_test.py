@@ -20,7 +20,7 @@ import pytest
 
 import sigima.computation.signal as sigima_signal
 import sigima.obj
-import sigima.param as sigima_param
+import sigima.params as sigima_param
 import sigima.tests.data as ctd
 from sigima.tests.helpers import check_array_result
 

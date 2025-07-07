@@ -11,7 +11,7 @@ Restoration computation module
 # Note:
 # ----
 # - All `guidata.dataset.DataSet` parameter classes must also be imported
-#   in the `sigima.param` module.
+#   in the `sigima.params` module.
 # - All functions decorated by `computation_function` must be imported in the upper
 #   level `sigima.computation.image` module.
 

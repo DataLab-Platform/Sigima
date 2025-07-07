@@ -14,7 +14,7 @@ import pytest
 
 import sigima.computation.image as sigima_image
 import sigima.obj
-import sigima.param
+import sigima.params
 from sigima.tests.data import create_noisygauss_image
 
 
@@ -45,7 +45,7 @@ def test_image_offset_correction_interactive() -> None:
             ix0, iy0, ix1, iy1 = i1.physical_to_indices(shape.get_rect())
             param.x0, param.y0, param.dx, param.dy = ix0, iy0, ix1 - ix0, iy1 - iy0
             i2 = sigima_image.offset_correction(i1, param)
-            i3 = sigima_image.clip(i2, sigima.param.ClipParam.create(lower=0))
+            i3 = sigima_image.clip(i2, sigima.params.ClipParam.create(lower=0))
             vistools.view_images_side_by_side(
                 [i1, i3],
                 titles=["Original image", "Corrected image"],

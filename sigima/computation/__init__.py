@@ -18,7 +18,7 @@ Each computation module defines a set of computation objects, that is, functions
 that implement processing features and classes that implement the corresponding
 parameters (in the form of :py:class:`guidata.dataset.datatypes.Dataset` subclasses).
 The computation functions takes a DataLab object (e.g. :class:`sigima.obj.SignalObj`)
-and a parameter object (e.g. :py:class:`sigima.param.MovingAverageParam`) as input
+and a parameter object (e.g. :py:class:`sigima.params.MovingAverageParam`) as input
 and return a DataLab object as output (the result of the computation). The parameter
 object is used to configure the computation function (e.g. the size of the moving
 average window).
