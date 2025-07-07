@@ -50,6 +50,8 @@ the DataLab application.
 # ** Task 3. Documentation and Training Materials **
 # TODO: Add documentation. Step 1: initiate `sigima` package documentation
 # TODO: Add documentation. Step 2: migrate parts of `cdl` package documentation
+#
+# TODO: Migrate `cdlclient` features to a subpackage of `sigima` (e.g., `sigima.client`)
 # --------------------------------------------------------------------------------------
 
 # pylint:disable=unused-import
