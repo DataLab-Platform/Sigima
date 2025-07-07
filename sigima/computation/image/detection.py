@@ -26,7 +26,7 @@ from __future__ import annotations
 import guidata.dataset as gds
 import numpy as np
 
-import sigima.algorithms.image as alg
+import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.image.base import calc_resultshape
 from sigima.config import _
@@ -70,7 +70,7 @@ class Peak2DDetectionParam(GenericDetectionParam):
 @computation_function()
 def peak_detection(obj: ImageObj, p: Peak2DDetectionParam) -> ResultShape | None:
     """Compute 2D peak detection
-    with :py:func:`sigima.algorithms.image.get_2d_peaks_coords`
+    with :py:func:`sigima.tools.image.get_2d_peaks_coords`
 
     Args:
         obj: input image
@@ -123,7 +123,7 @@ class ContourShapeParam(GenericDetectionParam):
 @computation_function()
 def contour_shape(image: ImageObj, p: ContourShapeParam) -> ResultShape | None:
     """Compute contour shape fit
-    with :py:func:`sigima.algorithms.image.get_contour_shapes`"""
+    with :py:func:`sigima.tools.image.get_contour_shapes`"""
     return calc_resultshape(
         "contour", p.shape, image, alg.get_contour_shapes, p.shape, p.threshold
     )
@@ -186,7 +186,7 @@ class BlobDOGParam(BaseBlobParam):
 @computation_function()
 def blob_dog(image: ImageObj, p: BlobDOGParam) -> ResultShape | None:
     """Compute blobs using Difference of Gaussian method
-    with :py:func:`sigima.algorithms.image.find_blobs_dog`
+    with :py:func:`sigima.tools.image.find_blobs_dog`
 
     Args:
         imageOutput: input image
@@ -225,7 +225,7 @@ class BlobDOHParam(BaseBlobParam):
 @computation_function()
 def blob_doh(image: ImageObj, p: BlobDOHParam) -> ResultShape | None:
     """Compute blobs using Determinant of Hessian method
-    with :py:func:`sigima.algorithms.image.find_blobs_doh`
+    with :py:func:`sigima.tools.image.find_blobs_doh`
 
     Args:
         imageOutput: input image
@@ -260,7 +260,7 @@ class BlobLOGParam(BlobDOHParam):
 @computation_function()
 def blob_log(image: ImageObj, p: BlobLOGParam) -> ResultShape | None:
     """Compute blobs using Laplacian of Gaussian method
-    with :py:func:`sigima.algorithms.image.find_blobs_log`
+    with :py:func:`sigima.tools.image.find_blobs_log`
 
     Args:
         imageOutput: input image
@@ -423,7 +423,7 @@ class BlobOpenCVParam(gds.DataSet):
 @computation_function()
 def blob_opencv(image: ImageObj, p: BlobOpenCVParam) -> ResultShape | None:
     """Compute blobs using OpenCV
-    with :py:func:`sigima.algorithms.image.find_blobs_opencv`
+    with :py:func:`sigima.tools.image.find_blobs_opencv`
 
     Args:
         imageOutput: input image
@@ -473,7 +473,7 @@ class HoughCircleParam(gds.DataSet):
 @computation_function()
 def hough_circle_peaks(image: ImageObj, p: HoughCircleParam) -> ResultShape | None:
     """Compute Hough circles
-    with :py:func:`sigima.algorithms.image.get_hough_circle_peaks`
+    with :py:func:`sigima.tools.image.get_hough_circle_peaks`
 
     Args:
         image: input image

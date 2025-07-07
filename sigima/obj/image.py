@@ -22,10 +22,10 @@ import numpy as np
 from numpy import ma
 from skimage import draw
 
-from sigima.algorithms.datatypes import clip_astype
-from sigima.algorithms.image import scale_data_to_min_max
 from sigima.config import _
 from sigima.obj import base
+from sigima.tools.datatypes import clip_astype
+from sigima.tools.image import scale_data_to_min_max
 
 
 def to_builtin(obj) -> str | int | float | list | dict | np.ndarray | None:

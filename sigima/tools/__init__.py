@@ -1,5 +1,5 @@
 """
-Algorithms (:mod:`sigima.algorithms`)
+Algorithms (:mod:`sigima.tools`)
 --------------------------------------
 
 This package contains the algorithms used by the DataLab project. Those algorithms
@@ -8,7 +8,7 @@ but can be used independently as well.
 
 .. seealso::
 
-    The :mod:`sigima.algorithms` package is the main entry point for the DataLab
+    The :mod:`sigima.tools` package is the main entry point for the DataLab
     algorithms when manipulating NumPy arrays. See the :mod:`sigima.computation`
     package for algorithms that operate directly on DataLab objects (i.e.
     :class:`sigima.obj.SignalObj` and :class:`sigima.obj.ImageObj`).
@@ -16,33 +16,33 @@ but can be used independently as well.
 The algorithms are organized in subpackages according to their purpose. The following
 subpackages are available:
 
-- :mod:`sigima.algorithms.signal`: Signal processing algorithms
-- :mod:`sigima.algorithms.image`: Image processing algorithms
-- :mod:`sigima.algorithms.datatypes`: Data type conversion algorithms
-- :mod:`sigima.algorithms.coordinates`: Coordinate conversion algorithms
+- :mod:`sigima.tools.signal`: Signal processing algorithms
+- :mod:`sigima.tools.image`: Image processing algorithms
+- :mod:`sigima.tools.datatypes`: Data type conversion algorithms
+- :mod:`sigima.tools.coordinates`: Coordinate conversion algorithms
 
 Signal Processing Algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: sigima.algorithms.signal
+.. automodule:: sigima.tools.signal
    :members:
 
 Image Processing Algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: sigima.algorithms.image
+.. automodule:: sigima.tools.image
    :members:
 
 Data Type Conversion Algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: sigima.algorithms.datatypes
+.. automodule:: sigima.tools.datatypes
    :members:
 
 Coordinate Conversion Algorithms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: sigima.algorithms.coordinates
+.. automodule:: sigima.tools.coordinates
    :members:
 
 """

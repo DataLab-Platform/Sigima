@@ -25,11 +25,11 @@ import scipy.ndimage as spi
 import scipy.signal as sps
 from packaging.version import Version
 
-import sigima.algorithms.coordinates as alg_coords
 import sigima.computation.signal as sigima_signal
 import sigima.obj
 import sigima.params
 import sigima.tests.data as ctd
+import sigima.tools.coordinates as alg_coords
 from sigima.tests.data import get_test_signal
 from sigima.tests.helpers import check_array_result, check_scalar_result
 

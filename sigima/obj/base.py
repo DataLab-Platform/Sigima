@@ -20,8 +20,8 @@ import numpy as np
 import pandas as pd
 from numpy import ma
 
-from sigima.algorithms import coordinates
 from sigima.config import _
+from sigima.tools import coordinates
 
 if sys.version_info >= (3, 11):
     # Use Self from typing module in Python 3.11+

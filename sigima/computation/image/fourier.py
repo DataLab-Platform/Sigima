@@ -30,7 +30,7 @@ from __future__ import annotations
 import guidata.dataset as gds
 import numpy as np
 
-import sigima.algorithms.image as alg
+import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.base import FFTParam, SpectrumParam, dst_1_to_1
 from sigima.computation.image.base import Wrap1to1Func
@@ -83,7 +83,7 @@ class ZeroPadding2DParam(gds.DataSet):
 @computation_function()
 def zero_padding(src: ImageObj, p: ZeroPadding2DParam) -> ImageObj:
     """
-    Compute zero padding for an image using `sigima.algorithms.image.zero_padding`.
+    Compute zero padding for an image using `sigima.tools.image.zero_padding`.
 
     Args:
         src: source image object
@@ -110,7 +110,7 @@ def zero_padding(src: ImageObj, p: ZeroPadding2DParam) -> ImageObj:
 
 @computation_function()
 def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
-    """Compute FFT with :py:func:`sigima.algorithms.image.fft2d`
+    """Compute FFT with :py:func:`sigima.tools.image.fft2d`
 
     Args:
         src: input image object
@@ -131,7 +131,7 @@ def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
 
 @computation_function()
 def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
-    """Compute inverse FFT with :py:func:`sigima.algorithms.image.ifft2d`
+    """Compute inverse FFT with :py:func:`sigima.tools.image.ifft2d`
 
     Args:
         src: input image object
@@ -153,7 +153,7 @@ def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
 @computation_function()
 def magnitude_spectrum(src: ImageObj, p: SpectrumParam | None = None) -> ImageObj:
     """Compute magnitude spectrum
-    with :py:func:`sigima.algorithms.image.magnitude_spectrum`
+    with :py:func:`sigima.tools.image.magnitude_spectrum`
 
     Args:
         src: input image object
@@ -173,7 +173,7 @@ def magnitude_spectrum(src: ImageObj, p: SpectrumParam | None = None) -> ImageOb
 @computation_function()
 def phase_spectrum(src: ImageObj) -> ImageObj:
     """Compute phase spectrum
-    with :py:func:`sigima.algorithms.image.phase_spectrum`
+    with :py:func:`sigima.tools.image.phase_spectrum`
 
     Args:
         src: input image object
@@ -190,7 +190,7 @@ def phase_spectrum(src: ImageObj) -> ImageObj:
 @computation_function()
 def psd(src: ImageObj, p: SpectrumParam | None = None) -> ImageObj:
     """Compute power spectral density
-    with :py:func:`sigima.algorithms.image.psd`
+    with :py:func:`sigima.tools.image.psd`
 
     Args:
         src: input image object

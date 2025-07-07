@@ -44,14 +44,14 @@ The library is organized to separate concerns clearly:
 - `sigima.obj`: defines the object model for signals and images.
 - `sigima.computation`: provides high-level processing functions that operate directly on `SignalObj` and `ImageObj` instances.
 - `sigima.io`: handles input/output operations (CSV files, image formats, etc.) for signals and images.
-- `sigima.algorithms`: contains **low-level, NumPy-based functions** that implement the core logic behind many processing routines.
+- `sigima.tools`: contains **low-level, NumPy-based functions** that implement the core logic behind many processing routines.
 
 This structure supports a **layered programming model**:
 
 - Developers can use `computation` to process full signal/image objects in an object-oriented manner.
-- Or they can directly use `algorithms` to process raw NumPy arrays — for instance, in custom tools or when integrating Sigima into other projects.
+- Or they can directly use `tools` to process raw NumPy arrays — for instance, in custom tools or when integrating Sigima into other projects.
 
-> ⚠️ `sigima.algorithms` is not intended as a general-purpose NumPy extension. Its purpose is to **fill in the gaps** of common scientific libraries (NumPy, SciPy, scikit-image, etc.), offering consistent tools for signal/image processing in the context of Sigima and similar projects.
+> ⚠️ `sigima.tools` is not intended as a general-purpose NumPy extension. Its purpose is to **fill in the gaps** of common scientific libraries (NumPy, SciPy, scikit-image, etc.), offering consistent tools for signal/image processing in the context of Sigima and similar projects.
 
 ---
 
@@ -59,9 +59,9 @@ This structure supports a **layered programming model**:
 
 Although Sigima is designed primarily for object-based processing, some of its core functions are useful on their own.
 
-For instance, the [DataLab](https://datalab-platform.com) project — an open-source platform for signal/image processing — uses many functions from `sigima.algorithms` independently of the object model. This demonstrates how `sigima.algorithms` can serve as a **lightweight utility layer** in scientific and industrial Python applications, even when the object model is not used directly.
+For instance, the [DataLab](https://datalab-platform.com) project — an open-source platform for signal/image processing — uses many functions from `sigima.tools` independently of the object model. This demonstrates how `sigima.tools` can serve as a **lightweight utility layer** in scientific and industrial Python applications, even when the object model is not used directly.
 
-To maintain this flexibility and avoid confusion, the distinction between `algorithms` (array-based) and `computation` (object-based) is intentional and explicit.
+To maintain this flexibility and avoid confusion, the distinction between `tools` (array-based) and `computation` (object-based) is intentional and explicit.
 
 ---
 
@@ -97,7 +97,7 @@ Sigima is organized by data type:
 
 ```text
 sigima/
-├── algorithms/   # Low-level NumPy-based algorithms supporting some computation functions
+├── tools/   # Low-level NumPy-based algorithms supporting some computation functions
 ├── computation/  # High-level processing functions operating on SignalObj/ImageObj
 │   ├── base/     # Common processing functions
 │   ├── signal/   # 1D signal processing

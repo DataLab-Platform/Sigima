@@ -10,11 +10,11 @@ Image FFT unit test.
 import numpy as np
 import pytest
 
-import sigima.algorithms.image as alg
 import sigima.computation.image as sigima_image
 import sigima.obj
 import sigima.params
 import sigima.tests.data as ctd
+import sigima.tools.image as alg
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result, check_scalar_result
 

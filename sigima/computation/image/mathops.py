@@ -30,12 +30,12 @@ import warnings
 import guidata.dataset as gds
 import numpy as np
 
-from sigima.algorithms.datatypes import clip_astype
 from sigima.computation import computation_function
 from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import Wrap1to1Func, restore_data_outside_roi
 from sigima.config import _
 from sigima.obj.image import ImageObj
+from sigima.tools.datatypes import clip_astype
 
 
 @computation_function()
@@ -157,7 +157,7 @@ class DataTypeIParam(gds.DataSet):
 
 @computation_function()
 def astype(src: ImageObj, p: DataTypeIParam) -> ImageObj:
-    """Convert image data type with :py:func:`sigima.algorithms.datatypes.clip_astype`
+    """Convert image data type with :py:func:`sigima.tools.datatypes.clip_astype`
 
     Args:
         src: input image object

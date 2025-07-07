@@ -12,10 +12,10 @@ import time
 
 import pytest
 
-from sigima.algorithms import coordinates
-from sigima.algorithms.image import get_2d_peaks_coords, get_contour_shapes
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
+from sigima.tools import coordinates
+from sigima.tools.image import get_2d_peaks_coords, get_contour_shapes
 
 
 def find_contours(data):

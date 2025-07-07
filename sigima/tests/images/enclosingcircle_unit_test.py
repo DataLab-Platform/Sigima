@@ -11,10 +11,10 @@ Testing enclsoing circle function on various test images.
 
 import pytest
 
-from sigima.algorithms.image import get_centroid_fourier, get_enclosing_circle
 from sigima.config import _
 from sigima.tests.data import get_laser_spot_data
 from sigima.tests.env import execenv
+from sigima.tools.image import get_centroid_fourier, get_enclosing_circle
 
 
 def __enclosingcircle_test(data):

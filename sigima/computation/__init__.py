@@ -11,7 +11,7 @@ but can be used independently as well.
 
     The :mod:`sigima.computation` package is the main entry point for the DataLab
     computation functions when manipulating DataLab objects.
-    See the :mod:`sigima.algorithms` package for algorithms that operate directly on
+    See the :mod:`sigima.tools` package for algorithms that operate directly on
     NumPy arrays.
 
 Each computation module defines a set of computation objects, that is, functions
@@ -25,7 +25,7 @@ average window).
 
 In DataLab overall architecture, the purpose of this package is to provide the
 computation functions that are used by the :mod:`sigima.core.gui.processor` module,
-based on the algorithms defined in the :mod:`sigima.algorithms` module and on the
+based on the algorithms defined in the :mod:`sigima.tools` module and on the
 data model defined in the :mod:`sigima.obj` (or :mod:`sigima.core.model`) module.
 
 The computation modules are organized in subpackages according to their purpose.

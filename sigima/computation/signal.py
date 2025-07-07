@@ -24,18 +24,6 @@ import scipy.integrate as spt
 import scipy.ndimage as spi
 import scipy.signal as sps
 
-from sigima.algorithms import coordinates
-from sigima.algorithms.signal import (
-    dynamic,
-    features,
-    fourier,
-    interpolation,
-    peakdetection,
-    pulse,
-    scaling,
-    stability,
-    windowing,
-)
 from sigima.computation import computation_function
 from sigima.computation.base import (
     ArithmeticParam,
@@ -57,6 +45,18 @@ from sigima.computation.base import (
 from sigima.config import _, options
 from sigima.obj.base import ResultProperties, ResultShape
 from sigima.obj.signal import ROI1DParam, SignalObj
+from sigima.tools import coordinates
+from sigima.tools.signal import (
+    dynamic,
+    features,
+    fourier,
+    interpolation,
+    peakdetection,
+    pulse,
+    scaling,
+    stability,
+    windowing,
+)
 
 
 def restore_data_outside_roi(dst: SignalObj, src: SignalObj) -> None:
@@ -622,7 +622,7 @@ class PeakDetectionParam(gds.DataSet):
 @computation_function()
 def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     """Peak detection with
-    :py:func:`sigima.algorithms.signal.peakdetection.peak_indices`
+    :py:func:`sigima.tools.signal.peakdetection.peak_indices`
 
     Args:
         src: source signal
@@ -645,7 +645,7 @@ def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
 
 @computation_function()
 def normalize(src: SignalObj, p: NormalizeParam) -> SignalObj:
-    """Normalize data with :py:func:`sigima.algorithms.signal.level.normalize`
+    """Normalize data with :py:func:`sigima.tools.signal.level.normalize`
 
     Args:
         src: source signal
@@ -1059,7 +1059,7 @@ class ZeroPadding1DParam(gds.DataSet):
 @computation_function()
 def zero_padding(src: SignalObj, p: ZeroPadding1DParam) -> SignalObj:
     """Compute zero padding with
-    :py:func:`sigima.algorithms.signal.fourier.zero_padding`
+    :py:func:`sigima.tools.signal.fourier.zero_padding`
 
     Args:
         src: source signal
@@ -1080,7 +1080,7 @@ def zero_padding(src: SignalObj, p: ZeroPadding1DParam) -> SignalObj:
 
 @computation_function()
 def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
-    """Compute FFT with :py:func:`sigima.algorithms.signal.fourier.fft1d`
+    """Compute FFT with :py:func:`sigima.tools.signal.fourier.fft1d`
 
     Args:
         src: source signal
@@ -1100,7 +1100,7 @@ def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
 
 @computation_function()
 def ifft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
-    """Compute iFFT with :py:func:`sigima.algorithms.signal.fourier.ifft1d`
+    """Compute iFFT with :py:func:`sigima.tools.signal.fourier.ifft1d`
 
     Args:
         src: source signal
@@ -1121,7 +1121,7 @@ def ifft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
 @computation_function()
 def magnitude_spectrum(src: SignalObj, p: SpectrumParam | None = None) -> SignalObj:
     """Compute magnitude spectrum
-    with :py:func:`sigima.algorithms.signal.fourier.magnitude_spectrum`
+    with :py:func:`sigima.tools.signal.fourier.magnitude_spectrum`
 
     Args:
         src: source signal
@@ -1143,7 +1143,7 @@ def magnitude_spectrum(src: SignalObj, p: SpectrumParam | None = None) -> Signal
 @computation_function()
 def phase_spectrum(src: SignalObj) -> SignalObj:
     """Compute phase spectrum
-    with :py:func:`sigima.algorithms.signal.fourier.phase_spectrum`
+    with :py:func:`sigima.tools.signal.fourier.phase_spectrum`
 
     Args:
         src: source signal
@@ -1163,7 +1163,7 @@ def phase_spectrum(src: SignalObj) -> SignalObj:
 @computation_function()
 def psd(src: SignalObj, p: SpectrumParam | None = None) -> SignalObj:
     """Compute power spectral density
-    with :py:func:`sigima.algorithms.signal.fourier.psd`
+    with :py:func:`sigima.tools.signal.fourier.psd`
 
     Args:
         src: source signal
@@ -1248,7 +1248,7 @@ class InterpolationParam(gds.DataSet):
 @computation_function()
 def interpolate(src1: SignalObj, src2: SignalObj, p: InterpolationParam) -> SignalObj:
     """Interpolate data with
-    :py:func:`sigima.algorithms.signal.interpolation.interpolate`
+    :py:func:`sigima.tools.signal.interpolation.interpolate`
 
     Args:
         src1: source signal 1
@@ -1300,7 +1300,7 @@ class ResamplingParam(InterpolationParam):
 
 @computation_function()
 def resampling(src: SignalObj, p: ResamplingParam) -> SignalObj:
-    """Resample data with :py:func:`sigima.algorithms.signal.interpolation.interpolate`
+    """Resample data with :py:func:`sigima.tools.signal.interpolation.interpolate`
 
     Args:
         src: source signal
@@ -1449,7 +1449,7 @@ class WindowingParam(gds.DataSet):
 @computation_function()
 def apply_window(src: SignalObj, p: WindowingParam) -> SignalObj:
     """Compute windowing (available methods: hamming, hanning, bartlett, blackman,
-    tukey, rectangular) with :py:func:`sigima.algorithms.signal.windowing.apply_window`
+    tukey, rectangular) with :py:func:`sigima.tools.signal.windowing.apply_window`
 
     Args:
         dst: destination signal
@@ -1496,7 +1496,7 @@ class AngleUnitParam(gds.DataSet):
 @computation_function()
 def to_polar(src: SignalObj, p: AngleUnitParam) -> SignalObj:
     """Convert cartesian coordinates to polar coordinates with
-    :py:func:`sigima.algorithms.coordinates.to_polar`.
+    :py:func:`sigima.tools.coordinates.to_polar`.
 
     Args:
         src: Source signal.
@@ -1515,7 +1515,7 @@ def to_polar(src: SignalObj, p: AngleUnitParam) -> SignalObj:
 @computation_function()
 def to_cartesian(src: SignalObj, p: AngleUnitParam) -> SignalObj:
     """Convert polar coordinates to cartesian coordinates with
-    :py:func:`sigima.algorithms.coordinates.to_cartesian`.
+    :py:func:`sigima.tools.coordinates.to_cartesian`.
 
     Args:
         src: Source signal.
@@ -1546,7 +1546,7 @@ class AllanVarianceParam(gds.DataSet):
 @computation_function()
 def allan_variance(src: SignalObj, p: AllanVarianceParam) -> SignalObj:
     """Compute Allan variance with
-    :py:func:`sigima.algorithms.signal.stability.allan_variance`
+    :py:func:`sigima.tools.signal.stability.allan_variance`
 
     Args:
         src: source signal
@@ -1566,7 +1566,7 @@ def allan_variance(src: SignalObj, p: AllanVarianceParam) -> SignalObj:
 @computation_function()
 def allan_deviation(src: SignalObj, p: AllanVarianceParam) -> SignalObj:
     """Compute Allan deviation with
-    :py:func:`sigima.algorithms.signal.stability.allan_deviation`
+    :py:func:`sigima.tools.signal.stability.allan_deviation`
 
     Args:
         src: source signal
@@ -1766,7 +1766,7 @@ class FWHMParam(gds.DataSet):
 
 @computation_function()
 def fwhm(obj: SignalObj, param: FWHMParam) -> ResultShape | None:
-    """Compute FWHM with :py:func:`sigima.algorithms.signal.pulse.fwhm`
+    """Compute FWHM with :py:func:`sigima.tools.signal.pulse.fwhm`
 
     Args:
         obj: source signal
@@ -1789,7 +1789,7 @@ def fwhm(obj: SignalObj, param: FWHMParam) -> ResultShape | None:
 
 @computation_function()
 def fw1e2(obj: SignalObj) -> ResultShape | None:
-    """Compute FW at 1/e² with :py:func:`sigima.algorithms.signal.pulse.fw1e2`
+    """Compute FW at 1/e² with :py:func:`sigima.tools.signal.pulse.fw1e2`
 
     Args:
         obj: source signal
@@ -1898,7 +1898,7 @@ def stats(obj: SignalObj) -> ResultProperties:
 @computation_function()
 def bandwidth_3db(obj: SignalObj) -> ResultShape | None:
     """Compute bandwidth at -3 dB with
-    :py:func:`sigima.algorithms.signal.misc.bandwidth`
+    :py:func:`sigima.tools.signal.misc.bandwidth`
 
     Args:
         obj: source signal
@@ -1932,12 +1932,12 @@ def dynamic_parameters(src: SignalObj, p: DynamicParam) -> ResultProperties:
     """Compute Dynamic parameters
     using the following functions:
 
-    - Freq: :py:func:`sigima.algorithms.signal.dynamic.sinus_frequency`
-    - ENOB: :py:func:`sigima.algorithms.signal.dynamic.enob`
-    - SNR: :py:func:`sigima.algorithms.signal.dynamic.snr`
-    - SINAD: :py:func:`sigima.algorithms.signal.dynamic.sinad`
-    - THD: :py:func:`sigima.algorithms.signal.dynamic.thd`
-    - SFDR: :py:func:`sigima.algorithms.signal.dynamic.sfdr`
+    - Freq: :py:func:`sigima.tools.signal.dynamic.sinus_frequency`
+    - ENOB: :py:func:`sigima.tools.signal.dynamic.enob`
+    - SNR: :py:func:`sigima.tools.signal.dynamic.snr`
+    - SINAD: :py:func:`sigima.tools.signal.dynamic.sinad`
+    - THD: :py:func:`sigima.tools.signal.dynamic.thd`
+    - SFDR: :py:func:`sigima.tools.signal.dynamic.sfdr`
 
     Args:
         src: source signal
@@ -1965,8 +1965,8 @@ def sampling_rate_period(obj: SignalObj) -> ResultProperties:
     """Compute sampling rate and period
     using the following functions:
 
-    - fs: :py:func:`sigima.algorithms.signal.dynamic.sampling_rate`
-    - T: :py:func:`sigima.algorithms.signal.dynamic.sampling_period`
+    - fs: :py:func:`sigima.tools.signal.dynamic.sampling_rate`
+    - T: :py:func:`sigima.tools.signal.dynamic.sampling_period`
 
     Args:
         obj: source signal
@@ -1986,7 +1986,7 @@ def sampling_rate_period(obj: SignalObj) -> ResultProperties:
 
 @computation_function()
 def contrast(obj: SignalObj) -> ResultProperties:
-    """Compute contrast with :py:func:`sigima.algorithms.signal.misc.contrast`"""
+    """Compute contrast with :py:func:`sigima.tools.signal.misc.contrast`"""
     return calc_resultproperties(
         "contrast",
         obj,

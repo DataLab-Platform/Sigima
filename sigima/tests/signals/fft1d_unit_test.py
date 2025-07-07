@@ -17,10 +17,10 @@ import sigima.computation.signal as sigima_signal
 import sigima.obj
 import sigima.params
 import sigima.tests.data as ctd
-from sigima.algorithms.signal import fourier
 from sigima.tests import guiutils
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result, check_scalar_result
+from sigima.tools.signal import fourier
 
 
 @pytest.mark.validation

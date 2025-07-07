@@ -29,7 +29,7 @@ from __future__ import annotations
 import numpy as np
 from numpy import ma
 
-import sigima.algorithms.image as alg
+import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.base import calc_resultproperties
 from sigima.computation.image.base import calc_resultshape
@@ -39,7 +39,7 @@ from sigima.obj.image import ImageObj
 
 def get_centroid_coords(data: np.ndarray) -> np.ndarray:
     """Return centroid coordinates
-    with :py:func:`sigima.algorithms.image.get_centroid_fourier`
+    with :py:func:`sigima.tools.image.get_centroid_fourier`
 
     Args:
         data: input data
@@ -54,7 +54,7 @@ def get_centroid_coords(data: np.ndarray) -> np.ndarray:
 @computation_function()
 def centroid(image: ImageObj) -> ResultShape | None:
     """Compute centroid
-    with :py:func:`sigima.algorithms.image.get_centroid_fourier`
+    with :py:func:`sigima.tools.image.get_centroid_fourier`
 
     Args:
         image: input image
@@ -82,7 +82,7 @@ def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
 @computation_function()
 def enclosing_circle(image: ImageObj) -> ResultShape | None:
     """Compute minimum enclosing circle
-    with :py:func:`sigima.algorithms.image.get_enclosing_circle`
+    with :py:func:`sigima.tools.image.get_enclosing_circle`
 
     Args:
         image: input image

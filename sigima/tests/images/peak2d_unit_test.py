@@ -17,10 +17,10 @@ import pytest
 import sigima.computation.image as sigima_image
 import sigima.obj
 import sigima.params
-from sigima.algorithms.image import get_2d_peaks_coords
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result
+from sigima.tools.image import get_2d_peaks_coords
 
 
 def exec_image_peak_detection_func(data: np.ndarray) -> np.ndarray:

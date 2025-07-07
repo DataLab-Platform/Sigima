@@ -17,13 +17,13 @@ import guidata.dataset as gds
 import numpy as np
 import scipy.signal as sps
 
-from sigima.algorithms.signal.fitmodels import (
+from sigima.config import _
+from sigima.obj import base
+from sigima.tools.signal.fitmodels import (
     GaussianModel,
     LorentzianModel,
     VoigtModel,
 )
-from sigima.config import _
-from sigima.obj import base
 
 
 class ROI1DParam(base.BaseROIParam["SignalObj", "SegmentROI"]):

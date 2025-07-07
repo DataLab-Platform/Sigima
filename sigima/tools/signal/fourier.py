@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-.. Fourier Analysis (see parent package :mod:`sigima.algorithms.signal`)
+.. Fourier Analysis (see parent package :mod:`sigima.tools.signal`)
 
 """
 
@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 import scipy.signal
 
-from sigima.algorithms.signal.dynamic import sampling_rate
+from sigima.tools.signal.dynamic import sampling_rate
 
 
 def zero_padding(x: np.ndarray, y: np.ndarray, n: int) -> tuple[np.ndarray, np.ndarray]:

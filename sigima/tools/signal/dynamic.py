@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-.. Dynamic Parameters (see parent package :mod:`sigima.algorithms.signal`)
+.. Dynamic Parameters (see parent package :mod:`sigima.tools.signal`)
 
 """
 

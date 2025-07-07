@@ -8,12 +8,12 @@ Image peak detection test: testing algorithm limits
 
 import pytest
 
-from sigima.algorithms.image import get_2d_peaks_coords
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
 from sigima.tests.images.peak2d_unit_test import (
     exec_image_peak_detection_func,
 )
+from sigima.tools.image import get_2d_peaks_coords
 
 
 @pytest.mark.skip(reason="Limit testing, not required for automated testing")

@@ -30,7 +30,7 @@ import guidata.dataset as gds
 import numpy as np
 from skimage import exposure
 
-import sigima.algorithms.image as alg
+import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.base import (
     ClipParam,
@@ -280,7 +280,7 @@ class FlatFieldParam(BaseProcParam):
 
 @computation_function()
 def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
-    """Compute flat field correction with :py:func:`sigima.algorithms.image.flatfield`
+    """Compute flat field correction with :py:func:`sigima.tools.image.flatfield`
 
     Args:
         src1: raw data image object
@@ -305,7 +305,7 @@ def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
 def normalize(src: ImageObj, p: NormalizeParam) -> ImageObj:
     """
     Normalize image data depending on its maximum,
-    with :py:func:`sigima.algorithms.image.normalize`
+    with :py:func:`sigima.tools.image.normalize`
 
     Args:
         src: input image object

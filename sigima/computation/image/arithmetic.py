@@ -32,7 +32,6 @@ import warnings
 
 import numpy as np
 
-from sigima.algorithms.datatypes import clip_astype
 from sigima.computation import computation_function
 from sigima.computation.base import (
     ArithmeticParam,
@@ -44,6 +43,7 @@ from sigima.computation.base import (
 from sigima.computation.image.base import restore_data_outside_roi
 from sigima.config import options
 from sigima.obj.image import ImageObj
+from sigima.tools.datatypes import clip_astype
 
 # MARK: compute_n_to_1 functions -------------------------------------------------------
 # Functions with N input images and 1 output image

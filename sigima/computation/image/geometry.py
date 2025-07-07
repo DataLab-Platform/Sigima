@@ -31,13 +31,13 @@ import guidata.dataset as gds
 import numpy as np
 import scipy.ndimage as spi
 
-import sigima.algorithms.image as alg
-from sigima.algorithms.coordinates import vector_rotation
+import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import Wrap1to1Func
 from sigima.config import _
 from sigima.obj.image import ImageObj
+from sigima.tools.coordinates import vector_rotation
 
 
 class RotateParam(gds.DataSet):
@@ -314,7 +314,7 @@ class BinningParam(gds.DataSet):
 
 @computation_function()
 def binning(src: ImageObj, param: BinningParam) -> ImageObj:
-    """Binning function on data with :py:func:`sigima.algorithms.image.binning`
+    """Binning function on data with :py:func:`sigima.tools.image.binning`
 
     Args:
         src: input image object

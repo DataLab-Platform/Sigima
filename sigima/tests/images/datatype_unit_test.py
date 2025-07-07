@@ -12,9 +12,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from sigima.algorithms.datatypes import clip_astype
 from sigima.obj import ImageDatatypes
 from sigima.tests.env import execenv
+from sigima.tools.datatypes import clip_astype
 
 
 def get_integer_datatypes() -> list[ImageDatatypes]:

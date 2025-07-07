@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-.. Pulse analysis (see parent package :mod:`sigima.algorithms.signal`)
+.. Pulse analysis (see parent package :mod:`sigima.tools.signal`)
 """
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
@@ -14,7 +14,7 @@ from typing import Literal
 import numpy as np
 import scipy.optimize
 
-from sigima.algorithms.signal import features, fitmodels, peakdetection
+from sigima.tools.signal import features, fitmodels, peakdetection
 
 # MARK: Pulse analysis -----------------------------------------------------------------
 

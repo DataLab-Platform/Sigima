@@ -30,7 +30,7 @@ import guidata.dataset as gds
 import numpy as np
 from numpy import ma
 
-import sigima.algorithms.image as alg
+import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import dst_1_to_1_signal
@@ -285,7 +285,7 @@ class RadialProfileParam(gds.DataSet):
 @computation_function()
 def radial_profile(src: ImageObj, p: RadialProfileParam) -> SignalObj:
     """Compute radial profile around the centroid
-    with :py:func:`sigima.algorithms.image.get_radial_profile`
+    with :py:func:`sigima.tools.image.get_radial_profile`
 
     Args:
         src: input image object
