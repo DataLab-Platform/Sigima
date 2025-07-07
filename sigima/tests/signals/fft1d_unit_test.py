@@ -13,9 +13,9 @@ import numpy as np
 import pytest
 import scipy.signal as sps
 
-import sigima.computation.signal as sigima_signal
 import sigima.objects
 import sigima.params
+import sigima.proc.signal as sigima_signal
 import sigima.tests.data as ctd
 from sigima.tests import guiutils
 from sigima.tests.env import execenv

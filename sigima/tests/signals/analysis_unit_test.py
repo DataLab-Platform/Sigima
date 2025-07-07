@@ -16,9 +16,9 @@ from __future__ import annotations
 
 import pytest
 
-import sigima.computation.signal as sigima_signal
 import sigima.objects
 import sigima.params
+import sigima.proc.signal as sigima_signal
 from sigima.tests.data import get_test_signal
 from sigima.tests.helpers import check_scalar_result
 

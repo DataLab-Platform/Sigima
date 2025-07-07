@@ -12,9 +12,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import sigima.computation.image as sigima_image
 import sigima.objects
 import sigima.params
+import sigima.proc.image as sigima_image
 from sigima.tests.data import create_noisygauss_image
 
 

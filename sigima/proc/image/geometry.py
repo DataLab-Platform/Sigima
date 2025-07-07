@@ -23,7 +23,7 @@ These functions are useful for preparing and augmenting image data.
 # - All `guidata.dataset.DataSet` parameter classes must also be imported
 #   in the `sigima.params` module.
 # - All functions decorated by `computation_function` must be imported in the upper
-#   level `sigima.computation.image` module.
+#   level `sigima.proc.image` module.
 
 from __future__ import annotations
 
@@ -32,11 +32,11 @@ import numpy as np
 import scipy.ndimage as spi
 
 import sigima.tools.image as alg
-from sigima.computation import computation_function
-from sigima.computation.base import dst_1_to_1
-from sigima.computation.image.base import Wrap1to1Func
 from sigima.config import _
 from sigima.objects.image import ImageObj
+from sigima.proc import computation_function
+from sigima.proc.base import dst_1_to_1
+from sigima.proc.image.base import Wrap1to1Func
 from sigima.tools.coordinates import vector_rotation
 
 

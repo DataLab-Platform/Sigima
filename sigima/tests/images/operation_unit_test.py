@@ -20,9 +20,9 @@ import numpy as np
 import pytest
 import scipy.ndimage as spi
 
-import sigima.computation.image as sigima_image
 import sigima.objects
 import sigima.params
+import sigima.proc.image as sigima_image
 from sigima.tests import guiutils
 from sigima.tests.data import create_noisygauss_image
 from sigima.tests.env import execenv

@@ -9,7 +9,7 @@ but can be used independently as well.
 .. seealso::
 
     The :mod:`sigima.tools` package is the main entry point for the DataLab
-    algorithms when manipulating NumPy arrays. See the :mod:`sigima.computation`
+    algorithms when manipulating NumPy arrays. See the :mod:`sigima.proc`
     package for algorithms that operate directly on DataLab objects (i.e.
     :class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`).
 

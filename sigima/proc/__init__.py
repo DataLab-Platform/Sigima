@@ -1,5 +1,5 @@
 """
-Computation (:mod:`sigima.computation`)
+Computation (:mod:`sigima.proc`)
 ----------------------------------------
 
 This package contains the computation functions used by the DataLab project.
@@ -9,7 +9,7 @@ designed to be used in the DataLab pipeline, but can be used independently as we
 
 .. seealso::
 
-    The :mod:`sigima.computation` package is the main entry point for the DataLab
+    The :mod:`sigima.proc` package is the main entry point for the DataLab
     computation functions when manipulating DataLab objects.
     See the :mod:`sigima.tools` package for algorithms that operate directly on
     NumPy arrays.
@@ -32,20 +32,20 @@ data model defined in the :mod:`sigima.objects` (or :mod:`sigima.core.model`) mo
 The computation modules are organized in subpackages according to their purpose.
 The following subpackages are available:
 
-- :mod:`sigima.computation.base`: Common processing features
-- :mod:`sigima.computation.signal`: Signal processing features
-- :mod:`sigima.computation.image`: Image processing features
+- :mod:`sigima.proc.base`: Common processing features
+- :mod:`sigima.proc.signal`: Signal processing features
+- :mod:`sigima.proc.image`: Image processing features
 
 Common processing features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: sigima.computation.base
+.. automodule:: sigima.proc.base
    :members:
 
 Signal processing features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: sigima.computation.signal
+.. automodule:: sigima.proc.signal
    :members:
 
 Image processing features
@@ -54,42 +54,42 @@ Image processing features
 Base image processing features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image
+.. automodule:: sigima.proc.image
    :members:
 
 Threshold features
 ~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image.threshold
+.. automodule:: sigima.proc.image.threshold
     :members:
 
 Exposure correction features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image.exposure
+.. automodule:: sigima.proc.image.exposure
     :members:
 
 Restoration features
 ~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image.restoration
+.. automodule:: sigima.proc.image.restoration
     :members:
 
 Morphological features
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image.morphology
+.. automodule:: sigima.proc.image.morphology
     :members:
 
 Edge detection features
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image.edges
+.. automodule:: sigima.proc.image.edges
 
 Detection features
 ~~~~~~~~~~~~~~~~~~
 
-.. automodule:: sigima.computation.image.detection
+.. automodule:: sigima.proc.image.detection
     :members:
 """
 
@@ -203,10 +203,10 @@ def get_computation_metadata(function: Callable) -> ComputationMetadata:
 def find_computation_functions(
     module: ModuleType | None = None,
 ) -> list[tuple[str, Callable]]:
-    """Find all computation functions in the `sigima.computation` package.
+    """Find all computation functions in the `sigima.proc` package.
 
     This function uses introspection to locate all functions decorated with
-    `@computation_function` in the `sigima.computation` package and its subpackages.
+    `@computation_function` in the `sigima.proc` package and its subpackages.
 
     Args:
         module: Optional module to search in. If None, the current module is used.

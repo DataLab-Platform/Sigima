@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import pytest
 
-import sigima.computation.signal as sigima_signal
 import sigima.objects
 import sigima.params
+import sigima.proc.signal as sigima_signal
 import sigima.tests.data as cdltd
 import sigima.tests.helpers
 from sigima.tests.env import execenv

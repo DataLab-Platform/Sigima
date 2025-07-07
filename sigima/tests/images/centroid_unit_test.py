@@ -21,8 +21,8 @@ import pytest
 import scipy.ndimage as spi
 from numpy import ma
 
-import sigima.computation.image as sigima_image
 import sigima.objects
+import sigima.proc.image as sigima_image
 import sigima.tools.image as alg
 from sigima.config import _
 from sigima.tests.data import create_noisygauss_image, get_laser_spot_data

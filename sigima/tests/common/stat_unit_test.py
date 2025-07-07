@@ -18,9 +18,9 @@ import numpy as np
 import pytest
 import scipy.integrate as spt
 
-import sigima.computation.image as sigima_image
-import sigima.computation.signal as sigima_signal
 import sigima.objects
+import sigima.proc.image as sigima_image
+import sigima.proc.signal as sigima_signal
 
 
 def get_analytical_stats(data: np.ndarray) -> dict[str, float]:

@@ -24,7 +24,7 @@ of image data.
 # - All `guidata.dataset.DataSet` parameter classes must also be imported
 #   in the `sigima.params` module.
 # - All functions decorated by `computation_function` must be imported in the upper
-#   level `sigima.computation.image` module.
+#   level `sigima.proc.image` module.
 
 from __future__ import annotations
 
@@ -32,17 +32,17 @@ import warnings
 
 import numpy as np
 
-from sigima.computation import computation_function
-from sigima.computation.base import (
+from sigima.config import options
+from sigima.objects.image import ImageObj
+from sigima.proc import computation_function
+from sigima.proc.base import (
     ArithmeticParam,
     ConstantParam,
     dst_1_to_1,
     dst_2_to_1,
     dst_n_to_1,
 )
-from sigima.computation.image.base import restore_data_outside_roi
-from sigima.config import options
-from sigima.objects.image import ImageObj
+from sigima.proc.image.base import restore_data_outside_roi
 from sigima.tools.datatypes import clip_astype
 
 # MARK: compute_n_to_1 functions -------------------------------------------------------

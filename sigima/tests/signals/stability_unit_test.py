@@ -12,9 +12,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import sigima.computation.signal as sigima_signal
 import sigima.objects
 import sigima.params
+import sigima.proc.signal as sigima_signal
 from sigima.tests.helpers import check_array_result
 
 

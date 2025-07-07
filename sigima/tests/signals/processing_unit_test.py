@@ -25,9 +25,9 @@ import scipy.ndimage as spi
 import scipy.signal as sps
 from packaging.version import Version
 
-import sigima.computation.signal as sigima_signal
 import sigima.objects
 import sigima.params
+import sigima.proc.signal as sigima_signal
 import sigima.tests.data as ctd
 import sigima.tools.coordinates as alg_coords
 from sigima.tests.data import get_test_signal

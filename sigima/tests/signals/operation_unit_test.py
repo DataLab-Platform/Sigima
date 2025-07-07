@@ -18,9 +18,9 @@ import warnings
 import numpy as np
 import pytest
 
-import sigima.computation.signal as sigima_signal
 import sigima.objects
 import sigima.params as sigima_param
+import sigima.proc.signal as sigima_signal
 import sigima.tests.data as ctd
 from sigima.tests.helpers import check_array_result
 

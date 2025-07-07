@@ -5,13 +5,13 @@ Parameters (:mod:`sigima.params`)
 ---------------------------------
 
 The :mod:`sigima.params` module aims at providing all the dataset parameters that are
-used by the :mod:`sigima.computation` and DataLab's processors.
+used by the :mod:`sigima.proc` and DataLab's processors.
 
 Those datasets are defined in other modules:
 
-    - :mod:`sigima.computation.base`
-    - :mod:`sigima.computation.image`
-    - :mod:`sigima.computation.signal`
+    - :mod:`sigima.proc.base`
+    - :mod:`sigima.proc.image`
+    - :mod:`sigima.proc.signal`
 
 The :mod:`sigima.params` module is thus a convenient way to import all the sets of
 parameters at once.
@@ -21,9 +21,9 @@ As a matter of fact, the following import statement is equivalent to the previou
 .. code-block:: python
 
     # Original import statement
-    from sigima.computation.base import MovingAverageParam
-    from sigima.computation.signal import PolynomialFitParam
-    from sigima.computation.image.exposure import EqualizeHistParam
+    from sigima.proc.base import MovingAverageParam
+    from sigima.proc.signal import PolynomialFitParam
+    from sigima.proc.image.exposure import EqualizeHistParam
 
     # Equivalent import statement
     from sigima.params import MovingAverageParam, PolynomialFitParam, EqualizeHistParam
@@ -213,7 +213,7 @@ Threshold parameters
 # pylint:disable=unused-import
 # flake8: noqa
 
-from sigima.computation.base import (
+from sigima.proc.base import (
     ArithmeticParam,
     ClipParam,
     ConstantParam,
@@ -225,7 +225,7 @@ from sigima.computation.base import (
     NormalizeParam,
     SpectrumParam,
 )
-from sigima.computation.signal import (
+from sigima.proc.signal import (
     AllanVarianceParam,
     AbscissaParam,
     AngleUnitParam,
@@ -248,10 +248,10 @@ from sigima.computation.signal import (
     ZeroPadding1DParam,
 )
 
-from sigima.computation.image import (
+from sigima.proc.image import (
     GridParam,
 )
-from sigima.computation.image import (
+from sigima.proc.image import (
     BlobDOGParam,
     BlobDOHParam,
     BlobLOGParam,
@@ -260,8 +260,8 @@ from sigima.computation.image import (
     HoughCircleParam,
     Peak2DDetectionParam,
 )
-from sigima.computation.image import CannyParam
-from sigima.computation.image import (
+from sigima.proc.image import CannyParam
+from sigima.proc.image import (
     AdjustGammaParam,
     AdjustLogParam,
     AdjustSigmoidParam,
@@ -271,20 +271,20 @@ from sigima.computation.image import (
     RescaleIntensityParam,
     ZCalibrateParam,
 )
-from sigima.computation.image import (
+from sigima.proc.image import (
     AverageProfileParam,
     LineProfileParam,
     RadialProfileParam,
     SegmentProfileParam,
 )
-from sigima.computation.image import ButterworthParam
-from sigima.computation.image import ZeroPadding2DParam
-from sigima.computation.image import BinningParam, ResizeParam, RotateParam
-from sigima.computation.image import DataTypeIParam, LogP1Param
-from sigima.computation.image import MorphologyParam
-from sigima.computation.image import (
+from sigima.proc.image import ButterworthParam
+from sigima.proc.image import ZeroPadding2DParam
+from sigima.proc.image import BinningParam, ResizeParam, RotateParam
+from sigima.proc.image import DataTypeIParam, LogP1Param
+from sigima.proc.image import MorphologyParam
+from sigima.proc.image import (
     DenoiseBilateralParam,
     DenoiseTVParam,
     DenoiseWaveletParam,
 )
-from sigima.computation.image import ThresholdParam
+from sigima.proc.image import ThresholdParam

@@ -21,7 +21,7 @@ and removing noise prior to further analysis.
 # - All `guidata.dataset.DataSet` parameter classes must also be imported
 #   in the `sigima.params` module.
 # - All functions decorated by `computation_function` must be imported in the upper
-#   level `sigima.computation.image` module.
+#   level `sigima.proc.image` module.
 
 from __future__ import annotations
 
@@ -30,16 +30,16 @@ import scipy.ndimage as spi
 import scipy.signal as sps
 from skimage import filters
 
-from sigima.computation import computation_function
-from sigima.computation.base import (
+from sigima.config import _
+from sigima.objects.image import ImageObj
+from sigima.proc import computation_function
+from sigima.proc.base import (
     GaussianParam,
     MovingAverageParam,
     MovingMedianParam,
     dst_1_to_1,
 )
-from sigima.computation.image.base import Wrap1to1Func, restore_data_outside_roi
-from sigima.config import _
-from sigima.objects.image import ImageObj
+from sigima.proc.image.base import Wrap1to1Func, restore_data_outside_roi
 
 
 @computation_function()

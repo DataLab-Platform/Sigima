@@ -22,10 +22,10 @@ from typing import Any, Literal
 
 import numpy as np
 
-from sigima.computation.base import dst_1_to_1, new_signal_result
 from sigima.objects.base import ResultShape
 from sigima.objects.image import ImageObj
 from sigima.objects.signal import SignalObj
+from sigima.proc.base import dst_1_to_1, new_signal_result
 
 
 def restore_data_outside_roi(dst: ImageObj, src: ImageObj) -> None:
@@ -66,7 +66,7 @@ class Wrap1to1Func:
     Example:
 
         >>> import numpy as np
-        >>> from sigima.computation.image import Wrap1to1Func
+        >>> from sigima.proc.image import Wrap1to1Func
         >>> import sigima.objects
         >>> def add_noise(data):
         ...     return data + np.random.random(data.shape)

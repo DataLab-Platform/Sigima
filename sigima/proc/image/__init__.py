@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-.. Image computation objects (see parent package :mod:`sigima.computation`)
+.. Image computation objects (see parent package :mod:`sigima.proc`)
 """
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
@@ -21,13 +21,13 @@ from __future__ import annotations
 import guidata.dataset as gds
 
 from sigima.config import _
-from sigima.computation.image.base import (
+from sigima.proc.image.base import (
     Wrap1to1Func,
     calc_resultshape,
     dst_1_to_1_signal,
     restore_data_outside_roi,
 )
-from sigima.computation.image.arithmetic import (
+from sigima.proc.image.arithmetic import (
     addition,
     average,
     product,
@@ -40,7 +40,7 @@ from sigima.computation.image.arithmetic import (
     quadratic_difference,
     division,
 )
-from sigima.computation.image.detection import (
+from sigima.proc.image.detection import (
     BlobDOGParam,
     BlobDOHParam,
     BlobLOGParam,
@@ -56,7 +56,7 @@ from sigima.computation.image.detection import (
     hough_circle_peaks,
     peak_detection,
 )
-from sigima.computation.image.edges import (
+from sigima.proc.image.edges import (
     CannyParam,
     canny,
     farid,
@@ -74,7 +74,7 @@ from sigima.computation.image.edges import (
     sobel_h,
     sobel_v,
 )
-from sigima.computation.image.exposure import (
+from sigima.proc.image.exposure import (
     AdjustGammaParam,
     AdjustLogParam,
     AdjustSigmoidParam,
@@ -96,7 +96,7 @@ from sigima.computation.image.exposure import (
     offset_correction,
     rescale_intensity,
 )
-from sigima.computation.image.extraction import (
+from sigima.proc.image.extraction import (
     AverageProfileParam,
     LineProfileParam,
     RadialProfileParam,
@@ -108,7 +108,7 @@ from sigima.computation.image.extraction import (
     radial_profile,
     segment_profile,
 )
-from sigima.computation.image.filtering import (
+from sigima.proc.image.filtering import (
     ButterworthParam,
     butterworth,
     gaussian_filter,
@@ -116,7 +116,7 @@ from sigima.computation.image.filtering import (
     moving_median,
     wiener,
 )
-from sigima.computation.image.fourier import (
+from sigima.proc.image.fourier import (
     ZeroPadding2DParam,
     fft,
     ifft,
@@ -125,7 +125,7 @@ from sigima.computation.image.fourier import (
     psd,
     zero_padding,
 )
-from sigima.computation.image.geometry import (
+from sigima.proc.image.geometry import (
     BinningParam,
     ResizeParam,
     RotateParam,
@@ -138,7 +138,7 @@ from sigima.computation.image.geometry import (
     rotate270,
     swap_axes,
 )
-from sigima.computation.image.mathops import (
+from sigima.proc.image.mathops import (
     DataTypeIParam,
     LogP1Param,
     absolute,
@@ -150,8 +150,8 @@ from sigima.computation.image.mathops import (
     logp1,
     real,
 )
-from sigima.computation.image.measurement import centroid, enclosing_circle, stats
-from sigima.computation.image.morphology import (
+from sigima.proc.image.measurement import centroid, enclosing_circle, stats
+from sigima.proc.image.morphology import (
     MorphologyParam,
     black_tophat,
     closing,
@@ -160,7 +160,7 @@ from sigima.computation.image.morphology import (
     opening,
     white_tophat,
 )
-from sigima.computation.image.restoration import (
+from sigima.proc.image.restoration import (
     DenoiseBilateralParam,
     DenoiseTVParam,
     DenoiseWaveletParam,
@@ -169,7 +169,7 @@ from sigima.computation.image.restoration import (
     denoise_tv,
     denoise_wavelet,
 )
-from sigima.computation.image.threshold import (
+from sigima.proc.image.threshold import (
     ThresholdParam,
     threshold,
     threshold_isodata,

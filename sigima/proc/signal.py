@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-.. Signal computation objects (see parent package :mod:`sigima.computation`)
+.. Signal computation objects (see parent package :mod:`sigima.proc`)
 """
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
@@ -24,8 +24,11 @@ import scipy.integrate as spt
 import scipy.ndimage as spi
 import scipy.signal as sps
 
-from sigima.computation import computation_function
-from sigima.computation.base import (
+from sigima.config import _, options
+from sigima.objects.base import ResultProperties, ResultShape
+from sigima.objects.signal import ROI1DParam, SignalObj
+from sigima.proc import computation_function
+from sigima.proc.base import (
     ArithmeticParam,
     ClipParam,
     ConstantParam,
@@ -42,9 +45,6 @@ from sigima.computation.base import (
     dst_n_to_1,
     new_signal_result,
 )
-from sigima.config import _, options
-from sigima.objects.base import ResultProperties, ResultShape
-from sigima.objects.signal import ROI1DParam, SignalObj
 from sigima.tools import coordinates
 from sigima.tools.signal import (
     dynamic,
@@ -94,7 +94,7 @@ class Wrap1to1Func:
     Example:
 
         >>> import numpy as np
-        >>> from sigima.computation.signal import Wrap1to1Func
+        >>> from sigima.proc.signal import Wrap1to1Func
         >>> import sigima.objects
         >>> def square(y):
         ...     return y**2

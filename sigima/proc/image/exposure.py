@@ -22,7 +22,7 @@ especially under variable lighting conditions.
 # - All `guidata.dataset.DataSet` parameter classes must also be imported
 #   in the `sigima.params` module.
 # - All functions decorated by `computation_function` must be imported in the upper
-#   level `sigima.computation.image` module.
+#   level `sigima.proc.image` module.
 
 from __future__ import annotations
 
@@ -31,8 +31,12 @@ import numpy as np
 from skimage import exposure
 
 import sigima.tools.image as alg
-from sigima.computation import computation_function
-from sigima.computation.base import (
+from sigima.config import _
+from sigima.objects.base import BaseProcParam
+from sigima.objects.image import ImageObj, ROI2DParam
+from sigima.objects.signal import SignalObj
+from sigima.proc import computation_function
+from sigima.proc.base import (
     ClipParam,
     HistogramParam,
     NormalizeParam,
@@ -40,11 +44,7 @@ from sigima.computation.base import (
     dst_2_to_1,
     new_signal_result,
 )
-from sigima.computation.image.base import Wrap1to1Func, restore_data_outside_roi
-from sigima.config import _
-from sigima.objects.base import BaseProcParam
-from sigima.objects.image import ImageObj, ROI2DParam
-from sigima.objects.signal import SignalObj
+from sigima.proc.image.base import Wrap1to1Func, restore_data_outside_roi
 
 
 class AdjustGammaParam(gds.DataSet):

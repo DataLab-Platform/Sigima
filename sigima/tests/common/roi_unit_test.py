@@ -12,8 +12,8 @@ from __future__ import annotations
 from typing import Generator
 
 import sigima.objects
-from sigima.computation import image as sigima_image
-from sigima.computation import signal as sigima_signal
+from sigima.proc import image as sigima_image
+from sigima.proc import signal as sigima_signal
 from sigima.tests.data import create_multigauss_image, create_paracetamol_signal
 from sigima.tests.env import execenv
 

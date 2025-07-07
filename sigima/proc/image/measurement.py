@@ -22,7 +22,7 @@ These functions are useful for image quantification and morphometric analysis.
 # - All `guidata.dataset.DataSet` parameter classes must also be imported
 #   in the `sigima.params` module.
 # - All functions decorated by `computation_function` must be imported in the upper
-#   level `sigima.computation.image` module.
+#   level `sigima.proc.image` module.
 
 from __future__ import annotations
 
@@ -30,11 +30,11 @@ import numpy as np
 from numpy import ma
 
 import sigima.tools.image as alg
-from sigima.computation import computation_function
-from sigima.computation.base import calc_resultproperties
-from sigima.computation.image.base import calc_resultshape
 from sigima.objects.base import ResultProperties, ResultShape
 from sigima.objects.image import ImageObj
+from sigima.proc import computation_function
+from sigima.proc.base import calc_resultproperties
+from sigima.proc.image.base import calc_resultshape
 
 
 def get_centroid_coords(data: np.ndarray) -> np.ndarray:
