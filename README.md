@@ -1,3 +1,5 @@
+# Sigima - Scientific Image and Signal Processing Library
+
 ![Sigima](https://raw.githubusercontent.com/DataLab-Platform/Sigima/main/doc/images/Sigima-Banner.svg)
 
 [![license](https://img.shields.io/pypi/l/sigima.svg)](./LICENSE)
@@ -15,7 +17,7 @@ designed as a modular and testable foundation for building advanced analysis pip
 ## ✨ Highlights
 
 - Unified processing model for **1D signals** and **2D images**
-- Works with **NumPy arrays** and **object-oriented wrappers** (`SignalObj`, `ImageObj`)
+- Works with **object-oriented wrappers** (`SignalObj`, `ImageObj`) extending NumPy arrays
 - Includes common algorithms: filtering, smoothing, binning, thresholding, labeling, etc.
 - Structured for **testability**, **modularity**, and **headless usage**
 - 100% **independent of GUI frameworks** (no Qt/PlotPyStack dependencies)
@@ -30,6 +32,23 @@ Sigima is meant to be:
 - A library to **build reproducible analysis pipelines**
 - A component for **headless automation or remote execution**
 - A testbed for **developing and validating new signal/image operations**
+
+---
+
+## 📖 Design Philosophy
+
+The main goal of **Sigima** is to provide a unified, high-level API for handling and processing **1D signals** and **2D images**, through dedicated Python objects: `SignalObj` and `ImageObj`.
+
+The library is organized to separate concerns clearly:
+
+- `sigima.obj`: defines the object model for signals and images.
+- `sigima.computation`: provides processing functions that operate directly on these objects.
+- `sigima.io`: handles input/output operations (CSV, images, etc.) for signal/image objects.
+- `sigima.algorithms`: contains low-level helper functions that complement NumPy, SciPy or scikit-image — these are **internal tools**, not part of the public API.
+
+This structure allows users and developers to write readable, object-oriented signal/image processing code, while keeping a clean separation between user-facing APIs and internal building blocks.
+
+> 📌 **Note:** `sigima.algorithms` is not meant to be used directly. Its purpose is to support the implementation of higher-level functions in `sigima.computation`.
 
 ---
 
@@ -63,13 +82,13 @@ pip install -e .
 
 Sigima is organized by data type:
 
-```
+```text
 sigima/
-├── algorithms/   # Functions operating on NumPy arrays
-├── computation/  # High-level processing functions operating on SignalObj/ImageObj
-│   ├── base/     # Common processing functions
-│   ├── signal/   # 1D signal processing
-│   └── image/    # 2D image processing
+├── algorithms/   # ❌ Internal low-level algorithms (not part of public API)
+├── computation/  # ✅ High-level processing functions operating on SignalObj/ImageObj
+│   ├── base/     #    Common processing functions
+│   ├── signal/   #    1D signal processing
+│   └── image/    #    2D image processing
 ```
 
 Each domain provides:
