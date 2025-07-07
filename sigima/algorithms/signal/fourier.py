@@ -32,7 +32,7 @@ def zero_padding(x: np.ndarray, y: np.ndarray, n: int) -> tuple[np.ndarray, np.n
 
 
 def fft1d(
-    x: np.ndarray, y: np.ndarray, shifted: bool = True
+    x: np.ndarray, y: np.ndarray, shift: bool = True
 ) -> tuple[np.ndarray, np.ndarray]:
     """
     Compute the Fast Fourier Transform (FFT) of a 1D real signal.
@@ -40,7 +40,8 @@ def fft1d(
     Args:
         x: Time domain axis (evenly spaced).
         y: Signal values.
-        shifted: If True, shift zero frequency to the center of the spectrum.
+        shift: If True, shift zero frequency and its corresponding FFT component to the
+        center.
 
     Returns:
         Tuple (f, sp): Frequency axis and corresponding FFT values.
@@ -48,44 +49,50 @@ def fft1d(
     dt = x[1] - x[0]
     f = np.fft.fftfreq(x.size, d=dt)  # Frequency axis
     sp = np.fft.fft(y)  # Spectrum values
-    if shifted:
+    if shift:
         f = np.fft.fftshift(f)
         sp = np.fft.fftshift(sp)
     return f, sp
 
 
 def ifft1d(
-    f: np.ndarray, sp: np.ndarray, shifted: bool = True, initial: float = 0.0
+    f: np.ndarray, sp: np.ndarray, initial: float = 0.0
 ) -> tuple[np.ndarray, np.ndarray]:
     """
-    Compute the inverse FFT of a spectrum.
+    Compute the inverse Fast Fourier Transform (FFT) of a 1D complex spectrum.
 
     Args:
         f: Frequency axis (evenly spaced).
-        spectrum: FFT values.
-        shifted: If True, the input spectrum is centered (zero frequency in the middle).
+        sp: FFT values.
         initial: Starting value for the time axis.
 
     Returns:
-        Tuple (x, y): Time axis and reconstructed real signal.
+        Tuple (x, y): Time axis and real signal.
 
     Raises:
         ValueError: If frequency array is not evenly spaced or has fewer than 2 points.
     """
     if f.size < 2:
         raise ValueError("Frequency array must have at least two elements.")
-    if shifted:
+
+    if np.all(np.diff(f) >= 0.0):
+        # If frequencies are sorted, assume input is shifted.
+        # The spectrum needs to be unshifted.
         sp = np.fft.ifftshift(sp)
     else:
+        # Otherwise assume input is not shifted.
+        # The frequencies need to be shifted.
         f = np.fft.fftshift(f)
 
-    df = np.mean(np.diff(f))
-    if not np.allclose(np.diff(f), df):
+    diff_f = np.diff(f)
+    df = np.mean(diff_f)
+    if not np.allclose(diff_f, df):
         raise ValueError("Frequency array must be evenly spaced.")
 
     y = np.fft.ifft(sp)
     dt = 1.0 / (f.size * df)
-    x = np.linspace(initial, initial + (len(y) - 1) * dt, y.size)
+    x = np.linspace(initial, initial + (y.size - 1) * dt, y.size)
+
     return x, y.real
 
 
@@ -154,5 +161,5 @@ def sort_frequencies(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     Returns:
         Sorted frequencies in ascending order
     """
-    freqs, fourier = fft1d(x, y, shifted=False)
+    freqs, fourier = fft1d(x, y, shift=False)
     return freqs[np.argsort(fourier)]

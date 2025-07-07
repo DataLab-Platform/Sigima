@@ -1091,7 +1091,7 @@ def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
     """
     dst = dst_1_to_1(src, "fft")
     x, y = src.get_data()
-    dst.set_xydata(*fourier.fft1d(x, y, shifted=True if p is None else p.shift))
+    dst.set_xydata(*fourier.fft1d(x, y, shift=True if p is None else p.shift))
     dst.save_attr_to_metadata("xunit", "Hz" if dst.xunit == "s" else "")
     dst.save_attr_to_metadata("yunit", "")
     dst.save_attr_to_metadata("xlabel", _("Frequency"))
@@ -1099,19 +1099,18 @@ def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
 
 
 @computation_function()
-def ifft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
-    """Compute iFFT with :py:func:`sigima.algorithms.signal.fourier.ifft1d`
+def ifft(src: SignalObj) -> SignalObj:
+    """Compute the inverse FFT with :py:func:`sigima.algorithms.signal.fourier.ifft1d`.
 
     Args:
-        src: source signal
-        p: parameters
+        src: Source signal.
 
     Returns:
-        Result signal object
+        Result signal object.
     """
     dst = dst_1_to_1(src, "ifft")
     x, y = src.get_data()
-    dst.set_xydata(*fourier.ifft1d(x, y, shifted=True if p is None else p.shift))
+    dst.set_xydata(*fourier.ifft1d(x, y))
     dst.restore_attr_from_metadata("xunit", "s" if src.xunit == "Hz" else "")
     dst.restore_attr_from_metadata("yunit", "")
     dst.restore_attr_from_metadata("xlabel", "")

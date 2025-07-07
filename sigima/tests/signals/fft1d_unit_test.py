@@ -133,12 +133,12 @@ def test_signal_ifft(request: pytest.FixtureRequest | None = None) -> None:
     extra_param = sigima.obj.PeriodicParam()
     s1 = sigima.obj.create_signal_from_param(newparam, extra_param=extra_param)
     t1, y1 = s1.xydata
-    for shifted in (True, False):
-        f1, sp1 = fourier.fft1d(t1, y1, shifted=shifted)
-        t2, y2 = fourier.ifft1d(f1, sp1, shifted=shifted)
+    for shift in (True, False):
+        f1, sp1 = fourier.fft1d(t1, y1, shift=shift)
+        t2, y2 = fourier.ifft1d(f1, sp1)
 
         execenv.print(
-            f"Comparing original and recovered signals for `shifted={shifted}`...",
+            f"Comparing original and recovered signals for `shift={shift}`...",
             end=" ",
         )
         check_array_result("Original and recovered x data", t2, t1, verbose=False)
