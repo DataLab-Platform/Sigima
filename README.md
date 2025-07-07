@@ -10,7 +10,14 @@
 **Sigima** is an **open-source Python library for scientific image and signal processing**,
 designed as a modular and testable foundation for building advanced analysis pipelines.
 
-🔬 Developed by [Codra](https://codra.net/) and the [DataLab Platform Developers](https://github.com/DataLab-Platform), Sigima powers the computation backend of [DataLab](https://datalab-platform.com/).
+🔬 Developed by the [DataLab Platform Developers](https://github.com/DataLab-Platform), Sigima powers the computation backend of [DataLab](https://datalab-platform.com/).
+
+## 🌟 Project & Sponsors
+
+| Project/Sponsor     | Description |
+|---------------------|-------------|
+| <a href="https://datalab-platform.com/"><img src="https://raw.githubusercontent.com/DataLab-Platform/DataLab/main/resources/DataLab-Banner.svg" alt="DataLab logo" style="height:80px;"/></a> | Open-source platform for scientific signal and image processing, powered by Sigima. |
+| <a href="https://nlnet.nl/"><img src="https://nlnet.nl/logo/banner.svg" alt="NLnet logo" style="height:80px;width:209px;"/></a> | European non-profit supporting open-source and internet projects. Sigima has received funding from NLnet for its development, through the DataLab project. |
 
 ---
 
@@ -151,4 +158,4 @@ See the [CONTRIBUTING](https://datalab-platform.com/en/contributing) guide to ge
 
 ---
 
-© Codra / DataLab Platform Developers
+© DataLab Platform Developers

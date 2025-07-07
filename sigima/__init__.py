@@ -33,11 +33,6 @@ the DataLab application.
 # **   Milestone 1.b. Decouple I/O features (including I/O plugins) **
 # TODO: Implement a I/O plugin system similar to the `cdl.plugins` module
 # **   Milestone 1.c. Redesign the API for the new core library **
-# TODO: Remove "sigima*" from "cdl" pyproject.toml (`include = ["cdl*", "sigima*"]`)
-# TODO: Rename "cdl" package to "datalab" (at last! finally!)
-# TODO: Rename "sigima" (temporary name until the package is fully migrated)
-#       to "sigima" when the migration is complete.
-# TODO: Add local translations for the `sigima` package
 #
 # ** Task 2. Technical Validation and Testing **
 # TODO: Add `pytest` infrastructure. Step 2: migrate `cdl/tests/sigima_tests`
