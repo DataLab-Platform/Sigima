@@ -79,8 +79,8 @@ from __future__ import annotations
 
 from sigima.io.image.base import ImageIORegistry
 from sigima.io.signal.base import SignalIORegistry
-from sigima.obj.image import ImageObj
-from sigima.obj.signal import SignalObj
+from sigima.objects.image import ImageObj
+from sigima.objects.signal import SignalObj
 
 SIGNAL_FORMAT_INFO = SignalIORegistry.get_format_info(rst=True)
 IMAGE_FORMAT_INFO = ImageIORegistry.get_format_info(rst=True)

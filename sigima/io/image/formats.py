@@ -19,7 +19,7 @@ from sigima.io.base import FormatInfo
 from sigima.io.common.converters import convert_array_to_standard_type
 from sigima.io.image import funcs
 from sigima.io.image.base import ImageFormatBase, MultipleImagesFormatBase
-from sigima.obj.image import ImageObj
+from sigima.objects.image import ImageObj
 from sigima.worker import CallbackWorkerProtocol
 
 

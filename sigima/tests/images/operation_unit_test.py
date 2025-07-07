@@ -21,7 +21,7 @@ import pytest
 import scipy.ndimage as spi
 
 import sigima.computation.image as sigima_image
-import sigima.obj
+import sigima.objects
 import sigima.params
 from sigima.tests import guiutils
 from sigima.tests.data import create_noisygauss_image
@@ -29,36 +29,40 @@ from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result
 
 
-def __iterate_images() -> Generator[sigima.obj.ImageObj, None, None]:
+def __iterate_images() -> Generator[sigima.objects.ImageObj, None, None]:
     """Iterate over all possible image types for testing."""
     size = 128
-    for dtype in sigima.obj.ImageDatatypes:
-        param = sigima.obj.NewImageParam.create(dtype=dtype, height=size, width=size)
+    for dtype in sigima.objects.ImageDatatypes:
+        param = sigima.objects.NewImageParam.create(
+            dtype=dtype, height=size, width=size
+        )
         yield create_noisygauss_image(param, level=0.0)
 
 
 def __iterate_image_couples() -> Generator[
-    tuple[sigima.obj.ImageObj, sigima.obj.ImageObj], None, None
+    tuple[sigima.objects.ImageObj, sigima.objects.ImageObj], None, None
 ]:
     """Iterate over all possible image couples for testing."""
     size = 128
-    for dtype1 in sigima.obj.ImageDatatypes:
-        param1 = sigima.obj.NewImageParam.create(dtype=dtype1, height=size, width=size)
+    for dtype1 in sigima.objects.ImageDatatypes:
+        param1 = sigima.objects.NewImageParam.create(
+            dtype=dtype1, height=size, width=size
+        )
         ima1 = create_noisygauss_image(param1, level=0.0)
-        for dtype2 in sigima.obj.ImageDatatypes:
-            param2 = sigima.obj.NewImageParam.create(
+        for dtype2 in sigima.objects.ImageDatatypes:
+            param2 = sigima.objects.NewImageParam.create(
                 dtype=dtype2, height=size, width=size
             )
             ima2 = create_noisygauss_image(param2, level=0.0)
             yield ima1, ima2
 
 
-def __create_n_images(n: int = 100) -> list[sigima.obj.ImageObj]:
+def __create_n_images(n: int = 100) -> list[sigima.objects.ImageObj]:
     """Create a list of N different images for testing."""
     images = []
     for i in range(n):
-        param = sigima.obj.NewImageParam.create(
-            dtype=sigima.obj.ImageDatatypes.FLOAT32,
+        param = sigima.objects.NewImageParam.create(
+            dtype=sigima.objects.ImageDatatypes.FLOAT32,
             height=128,
             width=128,
         )
@@ -183,12 +187,14 @@ def __constparam(value: float) -> sigima.params.ConstantParam:
 
 
 def __iterate_image_with_constant() -> Generator[
-    tuple[sigima.obj.ImageObj, sigima.params.ConstantParam], None, None
+    tuple[sigima.objects.ImageObj, sigima.params.ConstantParam], None, None
 ]:
     """Iterate over all possible image and constant couples for testing."""
     size = 128
-    for dtype in sigima.obj.ImageDatatypes:
-        param = sigima.obj.NewImageParam.create(dtype=dtype, height=size, width=size)
+    for dtype in sigima.objects.ImageDatatypes:
+        param = sigima.objects.NewImageParam.create(
+            dtype=dtype, height=size, width=size
+        )
         ima = create_noisygauss_image(param, level=0.0)
         for value in (-1.0, 3.14, 5):
             p = __constparam(value)
@@ -340,7 +346,7 @@ def test_image_astype() -> None:
     """Image type conversion test."""
     execenv.print("*** Testing image type conversion:")
     for ima1 in __iterate_images():
-        for dtype_str in sigima.obj.ImageObj.get_valid_dtypenames():
+        for dtype_str in sigima.objects.ImageObj.get_valid_dtypenames():
             dtype1_str = str(ima1.data.dtype)
             execenv.print(f"  {dtype1_str} -> {dtype_str}: ", end="")
             dtype_exp = np.dtype(dtype_str)
@@ -398,7 +404,7 @@ def __generic_flip_check(compfunc: callable, expfunc: callable) -> None:
     execenv.print(f"*** Testing image flip: {compfunc.__name__}")
     for ima1 in __iterate_images():
         execenv.print(f"  {compfunc.__name__}({ima1.data.dtype}): ", end="")
-        ima2: sigima.obj.ImageObj = compfunc(ima1)
+        ima2: sigima.objects.ImageObj = compfunc(ima1)
         check_array_result("Image flip", ima2.data, expfunc(ima1.data))
 
 

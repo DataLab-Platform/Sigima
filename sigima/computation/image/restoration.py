@@ -26,7 +26,7 @@ from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import Wrap1to1Func, restore_data_outside_roi
 from sigima.computation.image.morphology import MorphologyParam
 from sigima.config import _
-from sigima.obj.image import ImageObj
+from sigima.objects.image import ImageObj
 
 
 class DenoiseTVParam(gds.DataSet):

@@ -35,8 +35,8 @@ from sigima.computation import computation_function
 from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import dst_1_to_1_signal
 from sigima.config import _
-from sigima.obj.image import ImageObj, ImageROI, ROI2DParam
-from sigima.obj.signal import SignalObj
+from sigima.objects.image import ImageObj, ImageROI, ROI2DParam
+from sigima.objects.signal import SignalObj
 
 
 @computation_function()

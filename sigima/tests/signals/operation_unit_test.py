@@ -19,25 +19,29 @@ import numpy as np
 import pytest
 
 import sigima.computation.signal as sigima_signal
-import sigima.obj
+import sigima.objects
 import sigima.params as sigima_param
 import sigima.tests.data as ctd
 from sigima.tests.helpers import check_array_result
 
 
-def __create_two_signals() -> tuple[sigima.obj.SignalObj, sigima.obj.SignalObj]:
+def __create_two_signals() -> tuple[sigima.objects.SignalObj, sigima.objects.SignalObj]:
     """Create two signals for testing."""
-    s1 = ctd.create_periodic_signal(sigima.obj.SignalTypes.COSINUS, freq=50.0, size=100)
-    s2 = ctd.create_periodic_signal(sigima.obj.SignalTypes.SINUS, freq=25.0, size=100)
+    s1 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.COSINUS, freq=50.0, size=100
+    )
+    s2 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.SINUS, freq=25.0, size=100
+    )
     return s1, s2
 
 
-def __create_n_signals(n: int = 100) -> list[sigima.obj.SignalObj]:
+def __create_n_signals(n: int = 100) -> list[sigima.objects.SignalObj]:
     """Create a list of N different signals for testing."""
     signals = []
     for i in range(n):
         s = ctd.create_periodic_signal(
-            sigima.obj.SignalTypes.COSINUS,
+            sigima.objects.SignalTypes.COSINUS,
             freq=50.0 + i,
             size=100,
             a=(i + 1) * 0.1,
@@ -47,10 +51,12 @@ def __create_n_signals(n: int = 100) -> list[sigima.obj.SignalObj]:
 
 
 def __create_one_signal_and_constant() -> tuple[
-    sigima.obj.SignalObj, sigima_param.ConstantParam
+    sigima.objects.SignalObj, sigima_param.ConstantParam
 ]:
     """Create one signal and a constant for testing."""
-    s1 = ctd.create_periodic_signal(sigima.obj.SignalTypes.COSINUS, freq=50.0, size=100)
+    s1 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.COSINUS, freq=50.0, size=100
+    )
     param = sigima_param.ConstantParam.create(value=-np.pi)
     return s1, param
 
@@ -191,7 +197,7 @@ def test_signal_imag() -> None:
 def test_signal_astype() -> None:
     """Data type conversion validation test."""
     s1 = __create_two_signals()[0]
-    for dtype_str in sigima.obj.SignalObj.get_valid_dtypenames():
+    for dtype_str in sigima.objects.SignalObj.get_valid_dtypenames():
         p = sigima_param.DataTypeSParam.create(dtype_str=dtype_str)
         astype_signal = sigima_signal.astype(s1, p)
         assert astype_signal.y.dtype == np.dtype(dtype_str)

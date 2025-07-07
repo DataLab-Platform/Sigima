@@ -26,7 +26,7 @@ import scipy.signal as sps
 from packaging.version import Version
 
 import sigima.computation.signal as sigima_signal
-import sigima.obj
+import sigima.objects
 import sigima.params
 import sigima.tests.data as ctd
 import sigima.tools.coordinates as alg_coords
@@ -126,7 +126,7 @@ def test_signal_to_polar() -> None:
     p = sigima.params.AngleUnitParam()
     x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
     y = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
-    src = sigima.obj.create_signal("test", x, y)
+    src = sigima.objects.create_signal("test", x, y)
 
     for p.unit, _unit_name in sigima.params.AngleUnitParam.units:
         dst1 = sigima_signal.to_polar(src, p)
@@ -146,7 +146,7 @@ def test_signal_to_cartesian() -> None:
     angles_rad = np.array([0.0, np.pi / 4.0, np.pi / 4.0, np.pi / 4.0, np.pi / 4.0])
     for p.unit, _unit_name in sigima.params.AngleUnitParam.units:
         theta = angles_rad if p.unit == "rad" else angles_deg
-        src = sigima.obj.create_signal("test", r, theta)
+        src = sigima.objects.create_signal("test", r, theta)
         dst1 = sigima_signal.to_cartesian(src, p)
         dst2 = sigima_signal.to_polar(dst1, p)
         check_array_result(f"{title}|x", dst2.x, r)
@@ -205,11 +205,11 @@ def test_signal_clip() -> None:
 def test_signal_convolution() -> None:
     """Validation test for the signal convolution processing."""
     src1 = get_test_signal("paracetamol.txt")
-    snew = sigima.obj.NewSignalParam.create(
-        title="Gaussian", stype=sigima.obj.SignalTypes.GAUSS
+    snew = sigima.objects.NewSignalParam.create(
+        title="Gaussian", stype=sigima.objects.SignalTypes.GAUSS
     )
-    extra_param = sigima.obj.GaussLorentzVoigtParam.create(sigma=10.0)
-    src2 = sigima.obj.create_signal_from_param(snew, extra_param=extra_param)
+    extra_param = sigima.objects.GaussLorentzVoigtParam.create(sigma=10.0)
+    src2 = sigima.objects.create_signal_from_param(snew, extra_param=extra_param)
 
     dst = sigima_signal.convolution(src1, src2)
     exp = np.convolve(src1.data, src2.data, mode="same")
@@ -276,7 +276,7 @@ def test_signal_offset_correction() -> None:
     src = get_test_signal("paracetamol.txt")
     # Defining the ROI that will be used to estimate the offset
     imin, imax = 0, 20
-    p = sigima.obj.ROI1DParam.create(xmin=src.x[imin], xmax=src.x[imax])
+    p = sigima.objects.ROI1DParam.create(xmin=src.x[imin], xmax=src.x[imax])
     dst = sigima_signal.offset_correction(src, p)
     exp = src.data - np.mean(src.data[imin:imax])
     check_array_result("OffsetCorrection", dst.data, exp)
@@ -346,7 +346,9 @@ def test_signal_wiener() -> None:
 @pytest.mark.validation
 def test_signal_resampling() -> None:
     """Validation test for the signal resampling processing."""
-    src1 = ctd.create_periodic_signal(sigima.obj.SignalTypes.SINUS, freq=50.0, size=5)
+    src1 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.SINUS, freq=50.0, size=5
+    )
     x1, y1 = src1.xydata
     p1 = sigima.params.ResamplingParam.create(
         xmin=src1.x[0], xmax=src1.x[-1], nbpts=src1.x.size
@@ -356,7 +358,9 @@ def test_signal_resampling() -> None:
     check_array_result("x1new", dst1x, x1)
     check_array_result("y1new", dst1y, y1)
 
-    src2 = ctd.create_periodic_signal(sigima.obj.SignalTypes.SINUS, freq=50.0, size=9)
+    src2 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.SINUS, freq=50.0, size=9
+    )
     p2 = sigima.params.ResamplingParam.create(
         xmin=src1.x[0], xmax=src1.x[-1], nbpts=src1.x.size
     )
@@ -369,16 +373,20 @@ def test_signal_resampling() -> None:
 @pytest.mark.validation
 def test_signal_XY_mode() -> None:
     """Validation test for the signal X-Y mode processing."""
-    s1 = ctd.create_periodic_signal(sigima.obj.SignalTypes.COSINUS, freq=50.0, size=5)
-    s2 = ctd.create_periodic_signal(sigima.obj.SignalTypes.SINUS, freq=50.0, size=5)
+    s1 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.COSINUS, freq=50.0, size=5
+    )
+    s2 = ctd.create_periodic_signal(sigima.objects.SignalTypes.SINUS, freq=50.0, size=5)
     dst = sigima_signal.xy_mode(s1, s2)
     x, y = dst.xydata
     check_array_result("XYMode", x, s1.y)
     check_array_result("XYMode", y, s2.y)
     check_array_result("XYMode", x**2 + y**2, np.ones_like(x))
 
-    s1 = ctd.create_periodic_signal(sigima.obj.SignalTypes.COSINUS, freq=50.0, size=9)
-    s2 = ctd.create_periodic_signal(sigima.obj.SignalTypes.SINUS, freq=50.0, size=5)
+    s1 = ctd.create_periodic_signal(
+        sigima.objects.SignalTypes.COSINUS, freq=50.0, size=9
+    )
+    s2 = ctd.create_periodic_signal(sigima.objects.SignalTypes.SINUS, freq=50.0, size=5)
     dst = sigima_signal.xy_mode(s1, s2)
     x, y = dst.xydata
     check_array_result("XYMode2", x, s1.y[::2])

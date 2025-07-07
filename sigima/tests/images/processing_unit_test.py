@@ -47,7 +47,7 @@ import scipy.signal as sps
 from skimage import exposure, feature, filters, morphology, restoration, util
 
 import sigima.computation.image as sigima_image
-import sigima.obj
+import sigima.objects
 import sigima.params
 from sigima.tests.data import get_test_image
 from sigima.tests.helpers import check_array_result, check_scalar_result
@@ -135,7 +135,7 @@ def test_image_offset_correction() -> None:
     """Validation test for the image offset correction processing."""
     src = get_test_image("flower.npy")
     # Defining the ROI that will be used to estimate the offset
-    p = sigima.obj.ROI2DParam.create(x0=0, y0=0, dx=50, dy=20)
+    p = sigima.objects.ROI2DParam.create(x0=0, y0=0, dx=50, dy=20)
     dst = sigima_image.offset_correction(src, p)
     ix0, iy0 = int(p.x0), int(p.y0)
     ix1, iy1 = int(p.x0 + p.dx), int(p.y0 + p.dy)
@@ -403,7 +403,7 @@ def __generic_morphology_validation(method: str) -> None:
     # See [1] for more information about the validation of morphology methods.
     src = get_test_image("flower.npy")
     p = sigima.params.MorphologyParam.create(radius=10)
-    dst: sigima.obj.ImageObj = getattr(sigima_image, method)(src, p)
+    dst: sigima.objects.ImageObj = getattr(sigima_image, method)(src, p)
     exp = getattr(morphology, method)(src.data, footprint=morphology.disk(p.radius))
     check_array_result(f"{method.capitalize()}[radius={p.radius}]", dst.data, exp)
 
@@ -476,7 +476,7 @@ def __generic_edge_validation(method: str) -> None:
     """Generic test for edge detection methods."""
     # See [1] for more information about the validation of edge detection methods.
     src = get_test_image("flower.npy")
-    dst: sigima.obj.ImageObj = getattr(sigima_image, method)(src)
+    dst: sigima.objects.ImageObj = getattr(sigima_image, method)(src)
     exp = getattr(filters, method)(src.data)
     check_array_result(f"{method.capitalize()}", dst.data, exp)
 

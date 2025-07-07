@@ -18,7 +18,7 @@ import numpy as np
 
 from sigima.config import _
 from sigima.io import read_image, read_signal
-from sigima.obj import (
+from sigima.objects import (
     GaussLorentzVoigtParam,
     ImageDatatypes,
     ImageObj,

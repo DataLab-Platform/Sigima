@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Generator
 
-import sigima.obj
+import sigima.objects
 from sigima.computation import image as sigima_image
 from sigima.computation import signal as sigima_signal
 from sigima.tests.data import create_multigauss_image, create_paracetamol_signal
@@ -21,9 +21,9 @@ CLASS_NAME = "class_name"
 
 
 def create_test_signal_rois(
-    obj: sigima.obj.SignalObj,
-) -> Generator[sigima.obj.SignalROI, None, None]:
-    """Create test signal ROIs (sigima.obj.SignalROI test object)
+    obj: sigima.objects.SignalObj,
+) -> Generator[sigima.objects.SignalROI, None, None]:
+    """Create test signal ROIs (sigima.objects.SignalROI test object)
 
     Yields:
         SignalROI object
@@ -43,7 +43,7 @@ def create_test_signal_rois(
         for geometry, coords in roi_coords.items():
             execenv.print("  geometry:", geometry)
 
-            roi = sigima.obj.create_signal_roi(coords[indices], indices=indices)
+            roi = sigima.objects.create_signal_roi(coords[indices], indices=indices)
 
             sroi = roi.get_single_roi(0)
             assert sroi.__class__.__name__ == coords[CLASS_NAME]
@@ -61,9 +61,9 @@ def create_test_signal_rois(
 
 
 def create_test_image_rois(
-    obj: sigima.obj.ImageObj,
-) -> Generator[sigima.obj.ImageROI, None, None]:
-    """Create test image ROIs (sigima.obj.ImageROI test object)
+    obj: sigima.objects.ImageObj,
+) -> Generator[sigima.objects.ImageROI, None, None]:
+    """Create test image ROIs (sigima.objects.ImageROI test object)
 
     Yields:
         ImageROI object
@@ -93,7 +93,7 @@ def create_test_image_rois(
         for geometry, coords in roi_coords.items():
             execenv.print("  geometry:", geometry)
 
-            roi = sigima.obj.create_image_roi(
+            roi = sigima.objects.create_image_roi(
                 geometry, coords[indices], indices=indices
             )
 
@@ -125,8 +125,8 @@ def create_test_image_rois(
 
 
 def __conversion_methods(
-    roi: sigima.obj.SignalROI | sigima.obj.ImageROI,
-    obj: sigima.obj.SignalObj | sigima.obj.ImageObj,
+    roi: sigima.objects.SignalROI | sigima.objects.ImageROI,
+    obj: sigima.objects.SignalObj | sigima.objects.ImageObj,
 ) -> None:
     """Test conversion methods for single ROI objects"""
     execenv.print("    test `to_dict` and `from_dict` methods")
@@ -156,7 +156,7 @@ def test_signal_roi_creation() -> None:
         for geometry, coords in roi_coords.items():
             execenv.print("  geometry:", geometry)
 
-            roi = sigima.obj.create_signal_roi(coords[indices], indices=indices)
+            roi = sigima.objects.create_signal_roi(coords[indices], indices=indices)
 
             sroi = roi.get_single_roi(0)
             assert sroi.__class__.__name__ == coords[CLASS_NAME]
@@ -182,8 +182,8 @@ def test_signal_roi_merge() -> None:
 
     obj1 = create_paracetamol_signal()
     obj2 = create_paracetamol_signal()
-    obj2.roi = sigima.obj.create_signal_roi([60, 120], indices=True)
-    obj1.roi = sigima.obj.create_signal_roi([50, 100], indices=True)
+    obj2.roi = sigima.objects.create_signal_roi([60, 120], indices=True)
+    obj1.roi = sigima.objects.create_signal_roi([50, 100], indices=True)
 
     # Compute the average of the two objects
     obj3 = sigima_signal.average([obj1, obj2])
@@ -226,7 +226,7 @@ def test_image_roi_creation() -> None:
         for geometry, coords in roi_coords.items():
             execenv.print("  geometry:", geometry)
 
-            roi = sigima.obj.create_image_roi(
+            roi = sigima.objects.create_image_roi(
                 geometry, coords[indices], indices=indices
             )
 
@@ -266,8 +266,8 @@ def test_image_roi_merge() -> None:
 
     obj1 = create_multigauss_image()
     obj2 = create_multigauss_image()
-    obj2.roi = sigima.obj.create_image_roi("rectangle", [600, 800, 1000, 1200])
-    obj1.roi = sigima.obj.create_image_roi("rectangle", [500, 750, 1000, 1250])
+    obj2.roi = sigima.objects.create_image_roi("rectangle", [600, 800, 1000, 1200])
+    obj1.roi = sigima.objects.create_image_roi("rectangle", [500, 750, 1000, 1250])
 
     # Compute the average of the two objects
     obj3 = sigima_image.average([obj1, obj2])

@@ -15,7 +15,7 @@ import numpy as np
 
 from sigima.config import _
 from sigima.io.base import BaseIORegistry, FormatBase
-from sigima.obj.signal import SignalObj, create_signal
+from sigima.objects.signal import SignalObj, create_signal
 from sigima.worker import CallbackWorkerProtocol
 
 

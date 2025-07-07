@@ -33,8 +33,8 @@ import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.base import calc_resultproperties
 from sigima.computation.image.base import calc_resultshape
-from sigima.obj.base import ResultProperties, ResultShape
-from sigima.obj.image import ImageObj
+from sigima.objects.base import ResultProperties, ResultShape
+from sigima.objects.image import ImageObj
 
 
 def get_centroid_coords(data: np.ndarray) -> np.ndarray:

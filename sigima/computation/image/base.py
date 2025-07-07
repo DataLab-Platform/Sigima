@@ -23,9 +23,9 @@ from typing import Any, Literal
 import numpy as np
 
 from sigima.computation.base import dst_1_to_1, new_signal_result
-from sigima.obj.base import ResultShape
-from sigima.obj.image import ImageObj
-from sigima.obj.signal import SignalObj
+from sigima.objects.base import ResultShape
+from sigima.objects.image import ImageObj
+from sigima.objects.signal import SignalObj
 
 
 def restore_data_outside_roi(dst: ImageObj, src: ImageObj) -> None:
@@ -60,19 +60,19 @@ class Wrap1to1Func:
     This wrapping mechanism using a class is necessary for the resulted function to be
     pickable by the ``multiprocessing`` module.
 
-    The instance of this wrapper is callable and returns a :class:`sigima.obj.ImageObj`
-    object.
+    The instance of this wrapper is callable and returns a
+    :class:`sigima.objects.ImageObj` object.
 
     Example:
 
         >>> import numpy as np
         >>> from sigima.computation.image import Wrap1to1Func
-        >>> import sigima.obj
+        >>> import sigima.objects
         >>> def add_noise(data):
         ...     return data + np.random.random(data.shape)
         >>> compute_add_noise = Wrap1to1Func(add_noise)
         >>> data= np.ones((100, 100))
-        >>> ima0 = sigima.obj.create_image("Example", data)
+        >>> ima0 = sigima.objects.create_image("Example", data)
         >>> ima1 = compute_add_noise(ima0)
 
     Args:

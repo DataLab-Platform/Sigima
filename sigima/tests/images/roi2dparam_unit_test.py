@@ -12,7 +12,7 @@ import guidata.dataset as gds
 import numpy as np
 import pytest
 
-from sigima.obj import ROI2DParam
+from sigima.objects import ROI2DParam
 from sigima.tests.env import execenv
 
 

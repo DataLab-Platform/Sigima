@@ -12,14 +12,14 @@ from __future__ import annotations
 import pytest
 
 import sigima.computation.signal as sigima_signal
-import sigima.obj
+import sigima.objects
 import sigima.params
 import sigima.tests.data as cdltd
 import sigima.tests.helpers
 from sigima.tests.env import execenv
 
 
-def __test_fwhm_interactive(obj: sigima.obj.SignalObj, method: str) -> None:
+def __test_fwhm_interactive(obj: sigima.objects.SignalObj, method: str) -> None:
     """Interactive test for the full width at half maximum computation."""
     # pylint: disable=import-outside-toplevel
     from plotpy.builder import make

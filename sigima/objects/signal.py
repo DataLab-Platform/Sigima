@@ -18,7 +18,7 @@ import numpy as np
 import scipy.signal as sps
 
 from sigima.config import _
-from sigima.obj import base
+from sigima.objects import base
 from sigima.tools.signal.fitmodels import (
     GaussianModel,
     LorentzianModel,

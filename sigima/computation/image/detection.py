@@ -30,8 +30,8 @@ import sigima.tools.image as alg
 from sigima.computation import computation_function
 from sigima.computation.image.base import calc_resultshape
 from sigima.config import _
-from sigima.obj.base import ResultShape, ShapeTypes
-from sigima.obj.image import ImageObj, create_image_roi
+from sigima.objects.base import ResultShape, ShapeTypes
+from sigima.objects.image import ImageObj, create_image_roi
 
 
 class GenericDetectionParam(gds.DataSet):
@@ -113,7 +113,7 @@ class ContourShapeParam(GenericDetectionParam):
     # by the `cdl.gui.processor.base.BaseProcessor.compute_1_to_0` method
     # (see DataLab's main package).
     # The keys of the item choices (i.e. the first element of each tuple of `shapes`)
-    # must match the names of the `sigima.obj.base.ShapeTypes` (when uppercased).
+    # must match the names of the `sigima.objects.base.ShapeTypes` (when uppercased).
     assert {shape[0].upper() for shape in shapes}.issubset(
         set(ShapeTypes.__members__.keys())
     )

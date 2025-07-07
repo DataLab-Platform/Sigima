@@ -43,8 +43,8 @@ from sigima.computation.base import (
     new_signal_result,
 )
 from sigima.config import _, options
-from sigima.obj.base import ResultProperties, ResultShape
-from sigima.obj.signal import ROI1DParam, SignalObj
+from sigima.objects.base import ResultProperties, ResultShape
+from sigima.objects.signal import ROI1DParam, SignalObj
 from sigima.tools import coordinates
 from sigima.tools.signal import (
     dynamic,
@@ -89,19 +89,19 @@ class Wrap1to1Func:
     pickable by the ``multiprocessing`` module.
 
     The instance of this wrapper is callable and returns
-    a :class:`sigima.obj.SignalObj` object.
+    a :class:`sigima.objects.SignalObj` object.
 
     Example:
 
         >>> import numpy as np
         >>> from sigima.computation.signal import Wrap1to1Func
-        >>> import sigima.obj
+        >>> import sigima.objects
         >>> def square(y):
         ...     return y**2
         >>> compute_square = Wrap1to1Func(square)
         >>> x = np.linspace(0, 10, 100)
         >>> y = np.sin(x)
-        >>> sig0 = sigima.obj.create_signal("Example", x, y)
+        >>> sig0 = sigima.objects.create_signal("Example", x, y)
         >>> sig1 = compute_square(sig0)
 
     Args:

@@ -24,7 +24,7 @@ from sigima.computation import computation_function
 from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import restore_data_outside_roi
 from sigima.config import _
-from sigima.obj.image import ImageObj
+from sigima.objects.image import ImageObj
 
 
 class MorphologyParam(gds.DataSet):

@@ -23,7 +23,7 @@ from numpy import ma
 from skimage import draw
 
 from sigima.config import _
-from sigima.obj import base
+from sigima.objects import base
 from sigima.tools.datatypes import clip_astype
 from sigima.tools.image import scale_data_to_min_max
 
@@ -186,8 +186,8 @@ class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
     .. note::
 
         The image ROI coords are expressed in physical coordinates (floats). The
-        conversion to pixel coordinates is done in :class:`sigima.obj.ImageObj`
-        (see :meth:`sigima.obj.ImageObj.physical_to_indices`). Most of the time,
+        conversion to pixel coordinates is done in :class:`sigima.objects.ImageObj`
+        (see :meth:`sigima.objects.ImageObj.physical_to_indices`). Most of the time,
         the physical coordinates are the same as the pixel coordinates, but this
         is not always the case (e.g. after image binning), so it's better to keep the
         physical coordinates in the ROI object: this will help reusing the ROI with

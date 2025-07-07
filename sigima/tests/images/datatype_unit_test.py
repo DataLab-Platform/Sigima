@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from sigima.obj import ImageDatatypes
+from sigima.objects import ImageDatatypes
 from sigima.tests.env import execenv
 from sigima.tools.datatypes import clip_astype
 

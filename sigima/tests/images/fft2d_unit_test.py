@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 import sigima.computation.image as sigima_image
-import sigima.obj
+import sigima.objects
 import sigima.params
 import sigima.tests.data as ctd
 import sigima.tools.image as alg
@@ -100,7 +100,7 @@ def test_image_zero_padding() -> None:
     # Validate zero padding with strategies other than custom size
     # Image size is (200, 300) and the next power of 2 is (256, 512)
     # The multiple of 64 is (256, 320)
-    ima4 = sigima.obj.create_image("", np.zeros((200, 300)))
+    ima4 = sigima.objects.create_image("", np.zeros((200, 300)))
     for strategy, (exp_rows, exp_cols) in (
         ("next_pow2", (56, 212)),
         ("multiple_of_64", (56, 20)),

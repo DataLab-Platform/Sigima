@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 
 import sigima.computation.image as sigima_image
-import sigima.obj
+import sigima.objects
 import sigima.params
 from sigima.tests.data import create_sincos_image
 from sigima.tests.helpers import check_array_result
@@ -20,8 +20,10 @@ from sigima.tests.helpers import check_array_result
 def test_line_profile() -> None:
     """Test line profile computation"""
     width, height = 256, 128
-    dtype = sigima.obj.ImageDatatypes.UINT16
-    newparam = sigima.obj.NewImageParam.create(dtype=dtype, height=height, width=width)
+    dtype = sigima.objects.ImageDatatypes.UINT16
+    newparam = sigima.objects.NewImageParam.create(
+        dtype=dtype, height=height, width=width
+    )
     ima = create_sincos_image(newparam)
 
     # Test horizontal line profile
@@ -47,8 +49,10 @@ def test_line_profile() -> None:
 def test_segment_profile() -> None:
     """Test segment profile computation"""
     width, height = 256, 128
-    dtype = sigima.obj.ImageDatatypes.UINT16
-    newparam = sigima.obj.NewImageParam.create(dtype=dtype, height=height, width=width)
+    dtype = sigima.objects.ImageDatatypes.UINT16
+    newparam = sigima.objects.NewImageParam.create(
+        dtype=dtype, height=height, width=width
+    )
     ima = create_sincos_image(newparam)
 
     # Test segment profile
@@ -67,8 +71,10 @@ def test_segment_profile() -> None:
 def test_average_profile() -> None:
     """Test average profile computation"""
     width, height = 256, 128
-    dtype = sigima.obj.ImageDatatypes.UINT16
-    newparam = sigima.obj.NewImageParam.create(dtype=dtype, height=height, width=width)
+    dtype = sigima.objects.ImageDatatypes.UINT16
+    newparam = sigima.objects.NewImageParam.create(
+        dtype=dtype, height=height, width=width
+    )
     ima = create_sincos_image(newparam)
     row1, col1, row2, col2 = 10, 20, 200, 230
     param = sigima.params.AverageProfileParam.create(

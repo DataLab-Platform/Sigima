@@ -42,7 +42,7 @@ from sigima.computation.base import (
 )
 from sigima.computation.image.base import restore_data_outside_roi
 from sigima.config import options
-from sigima.obj.image import ImageObj
+from sigima.objects.image import ImageObj
 from sigima.tools.datatypes import clip_astype
 
 # MARK: compute_n_to_1 functions -------------------------------------------------------

@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 
 import sigima.computation.image as sigima_image
-import sigima.obj
+import sigima.objects
 import sigima.params
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
@@ -78,7 +78,7 @@ def test_image_peak_detection():
     """2D peak detection unit test"""
     data, coords_expected = get_peak2d_data(seed=1, multi=False)
     for create_rois in (True, False):
-        obj = sigima.obj.create_image("peak2d_unit_test", data=data)
+        obj = sigima.objects.create_image("peak2d_unit_test", data=data)
         param = sigima.params.Peak2DDetectionParam.create(create_rois=create_rois)
         result = sigima_image.peak_detection(obj, param)
         df = result.to_dataframe()
@@ -98,7 +98,7 @@ def test_image_peak_detection():
             )
             for i, roi in enumerate(result.roi):
                 # Check that ROIs are rectangles
-                assert isinstance(roi, sigima.obj.RectangularROI), (
+                assert isinstance(roi, sigima.objects.RectangularROI), (
                     f"Expected RectangularROI, got {type(roi)}"
                 )
                 # Check that ROIs are correctly positioned

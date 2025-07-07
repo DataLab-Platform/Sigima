@@ -36,7 +36,7 @@ from sigima.computation import computation_function
 from sigima.computation.base import dst_1_to_1
 from sigima.computation.image.base import Wrap1to1Func
 from sigima.config import _
-from sigima.obj.image import ImageObj
+from sigima.objects.image import ImageObj
 from sigima.tools.coordinates import vector_rotation
 
 

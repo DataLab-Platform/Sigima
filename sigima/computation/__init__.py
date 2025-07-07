@@ -3,9 +3,9 @@ Computation (:mod:`sigima.computation`)
 ----------------------------------------
 
 This package contains the computation functions used by the DataLab project.
-Those functions operate directly on DataLab objects (i.e. :class:`sigima.obj.SignalObj`
-and :class:`sigima.obj.ImageObj`) and are designed to be used in the DataLab pipeline,
-but can be used independently as well.
+Those functions operate directly on DataLab objects (i.e.
+:class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`) and are
+designed to be used in the DataLab pipeline, but can be used independently as well.
 
 .. seealso::
 
@@ -17,7 +17,8 @@ but can be used independently as well.
 Each computation module defines a set of computation objects, that is, functions
 that implement processing features and classes that implement the corresponding
 parameters (in the form of :py:class:`guidata.dataset.datatypes.Dataset` subclasses).
-The computation functions takes a DataLab object (e.g. :class:`sigima.obj.SignalObj`)
+The computation functions takes a DataLab object (e.g.
+:class:`sigima.objects.SignalObj`)
 and a parameter object (e.g. :py:class:`sigima.params.MovingAverageParam`) as input
 and return a DataLab object as output (the result of the computation). The parameter
 object is used to configure the computation function (e.g. the size of the moving
@@ -26,7 +27,7 @@ average window).
 In DataLab overall architecture, the purpose of this package is to provide the
 computation functions that are used by the :mod:`sigima.core.gui.processor` module,
 based on the algorithms defined in the :mod:`sigima.tools` module and on the
-data model defined in the :mod:`sigima.obj` (or :mod:`sigima.core.model`) module.
+data model defined in the :mod:`sigima.objects` (or :mod:`sigima.core.model`) module.
 
 The computation modules are organized in subpackages according to their purpose.
 The following subpackages are available:

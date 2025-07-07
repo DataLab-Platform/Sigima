@@ -63,7 +63,7 @@ from sigima.io import (
     read_image,
     read_signal,
 )
-from sigima.obj import (
+from sigima.objects import (
     CircularROI,
     ExponentialParam,
     Gauss2DParam,
