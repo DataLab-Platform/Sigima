@@ -15,6 +15,7 @@ import scipy.io as sio
 import skimage.io
 
 from sigima.config import _, options
+from sigima.io import ftlab
 from sigima.io.base import FormatInfo
 from sigima.io.common.converters import convert_array_to_standard_type
 from sigima.io.image import funcs
@@ -344,3 +345,26 @@ class XYZImageFormat(ImageFormatBase):
             arr = np.fromfile(fdesc, dtype=np.uint16, count=cols * rows)
             arr = arr.reshape((rows, cols))
         return np.fliplr(arr)
+
+
+class FTLabImageFormat(ImageFormatBase):
+    """FT-Lab image file."""
+
+    FORMAT_INFO = FormatInfo(
+        name="FT-Lab",
+        extensions="*.ima",
+        readable=True,
+        writeable=False,
+    )
+
+    @staticmethod
+    def read_data(filename: str) -> np.ndarray:
+        """Read and return data.
+
+        Args:
+            filename: Path to FT-Lab file.
+
+        Returns:
+            Image data.
+        """
+        return ftlab.imread_ftlabima(filename)

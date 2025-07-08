@@ -12,6 +12,7 @@ import numpy as np
 import scipy.io as sio
 
 from sigima.config import _
+from sigima.io import ftlab
 from sigima.io.base import FormatInfo
 from sigima.io.common.converters import convert_array_to_standard_type
 from sigima.io.signal import funcs
@@ -155,3 +156,25 @@ class MatSignalFormat(SignalFormatBase):
         # metadata cannot be saved as such as their type will be lost and
         # cause problems when reading the file back
         sio.savemat(filename, {"sig": obj.xydata.T})
+
+
+class FTLabSignalFormat(SignalFormatBase):
+    """FT-Lab signal file."""
+
+    FORMAT_INFO = FormatInfo(
+        name=_("FT-Lab"),
+        extensions="*.sig",
+        readable=True,
+        writeable=False,
+    )
+
+    def read_xydata(self, filename: str) -> np.ndarray:
+        """Read data and metadata from file, populate metadata, return xydata.
+
+        Args:
+            filename: Path to FT-Lab file.
+
+        Returns:
+            Signal data.
+        """
+        return ftlab.sigread_ftlabsig(filename)

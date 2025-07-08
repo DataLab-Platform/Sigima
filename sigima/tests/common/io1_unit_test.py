@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 
 from sigima.io import read_images, read_signals
+from sigima.io.ftlab import FTLabImageFile, imread_ftlabima, sigread_ftlabsig
 from sigima.io.image import funcs as image_funcs
 from sigima.objects import ImageObj, SignalObj
 from sigima.tests import guiutils, helpers
@@ -59,6 +60,19 @@ def open_csv(fname: str | None = None) -> None:
             vistools.view_curves_and_images(objs, title="CSV file")
 
 
+@helpers.try_open_test_data("Testing FTLab signal file reader", "*.sig")
+def open_sigdata(fname: str | None = None) -> None:
+    """Testing FTLab signal files"""
+    objs = __read_objs(fname)
+    if guiutils.is_gui_enabled():
+        from sigima.tests import vistools  # pylint: disable=import-outside-toplevel
+
+        vistools.view_curves_and_images(objs, title="FTLab signal file")
+    data = sigread_ftlabsig(fname)
+    ref = read_signals(fname.replace(".sig", ".npy"))[0]
+    helpers.check_array_result(f"{fname}", data, ref.xydata)
+
+
 @helpers.try_open_test_data("Testing MAT-File reader", "*.mat")
 def open_mat(fname: str | None = None) -> None:
     """Testing MAT files"""
@@ -94,14 +108,36 @@ def open_scordata(fname: str | None = None) -> None:
             vistools.view_images(data, title="SCOR-DATA file")
 
 
+@helpers.try_open_test_data("Testing FTLab image file handler", "*.ima")
+def open_imadata(fname: str | None = None) -> None:
+    """Testing FTLab image files.
+
+    Args:
+        fname: Name of the file to open.
+    """
+    objs = __read_objs(fname)
+    if guiutils.is_gui_enabled():
+        from sigima.tests import vistools  # pylint: disable=import-outside-toplevel
+
+        vistools.view_curves_and_images(objs, title="FTLab image file")
+    ftlab_file = FTLabImageFile(fname)
+    _ = ftlab_file.read_data()
+    execenv.print(ftlab_file)
+    data = imread_ftlabima(fname)
+    ref = read_images(fname.replace(".ima", ".npy"))[0]
+    helpers.check_array_result(f"{fname}", data, ref.data)
+
+
 def test_io1(request: pytest.FixtureRequest | None = None) -> None:
     """I/O test"""
     guiutils.set_current_request(request)
     open_txt()
     open_csv()
+    open_sigdata()
     open_mat()
     open_sif()
     open_scordata()
+    open_imadata()
 
 
 if __name__ == "__main__":
