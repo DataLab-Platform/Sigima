@@ -231,6 +231,7 @@ def find_computation_functions(
         path = [osp.dirname(__file__)]
     else:
         path = module.__path__
+    objs = []
     for _, modname, _ in pkgutil.walk_packages(path=path, prefix=__name__ + "."):
         try:
             module = importlib.import_module(modname)
@@ -238,5 +239,8 @@ def find_computation_functions(
             continue
         for name, obj in inspect.getmembers(module, inspect.isfunction):
             if is_computation_function(obj):
+                if obj in objs:  # Avoid double entries for the same function
+                    continue
+                objs.append(obj)
                 functions.append((modname, name, obj.__doc__))
     return functions
