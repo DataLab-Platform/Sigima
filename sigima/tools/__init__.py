@@ -13,8 +13,8 @@ scientific Python ecosystem.
 
 .. seealso::
 
-    The :mod:`sigima.proc` contains the Sigima computation functions that operate on
-    signal and image objects (i.e. :class:`sigima.objects.SignalObj` and
+    The :mod:`sigima.proc` module contains the Sigima computation functions that
+    operate on signal and image objects (i.e. :class:`sigima.objects.SignalObj` and
     :class:`sigima.objects.ImageObj`, defined in the :mod:`sigima.objects` package).
 
 The algorithms are organized in subpackages according to their purpose. The following
