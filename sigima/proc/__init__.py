@@ -52,43 +52,43 @@ Signal processing features
 Image processing features
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Base image processing features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Basic image processing
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: sigima.proc.image
    :members:
 
-Threshold features
-~~~~~~~~~~~~~~~~~~
+Thresholding
+~~~~~~~~~~~~
 
 .. automodule:: sigima.proc.image.threshold
     :members:
 
-Exposure correction features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Exposure correction
+~~~~~~~~~~~~~~~~~~~
 
 .. automodule:: sigima.proc.image.exposure
     :members:
 
-Restoration features
-~~~~~~~~~~~~~~~~~~~~
+Restoration
+~~~~~~~~~~~
 
 .. automodule:: sigima.proc.image.restoration
     :members:
 
-Morphological features
-~~~~~~~~~~~~~~~~~~~~~~
+Morphology
+~~~~~~~~~~
 
 .. automodule:: sigima.proc.image.morphology
     :members:
 
-Edge detection features
-~~~~~~~~~~~~~~~~~~~~~~~
+Edge detection
+~~~~~~~~~~~~~~
 
 .. automodule:: sigima.proc.image.edges
 
-Detection features
-~~~~~~~~~~~~~~~~~~
+Detection
+~~~~~~~~~
 
 .. automodule:: sigima.proc.image.detection
     :members:
