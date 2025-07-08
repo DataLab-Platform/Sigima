@@ -13,11 +13,11 @@ import numpy as np
 import pytest
 from numpy import ma
 
-import sigima.computation.image as sigima_image
-import sigima.param
-from sigima.algorithms.image import BINNING_OPERATIONS, binning
+import sigima.params
+import sigima.proc.image as sigima_image
 from sigima.tests.data import get_test_image
 from sigima.tests.env import execenv
+from sigima.tools.image import BINNING_OPERATIONS, binning
 
 
 def compare_binning_images(data: ma.MaskedArray) -> None:
@@ -93,7 +93,7 @@ def test_binning() -> None:
     src.data = data = np.array(src.data[:500, :500], dtype=float)
     ny, nx = data.shape
 
-    p = sigima.param.BinningParam()
+    p = sigima.params.BinningParam()
     for operation in p.operations:
         p.operation = operation
         for sx in range(1, 3):

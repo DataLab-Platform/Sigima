@@ -9,7 +9,7 @@ Image spectrum unit test.
 
 import pytest
 
-import sigima.algorithms.image as alg
+import sigima.tools.image as alg
 from sigima.tests.data import get_test_image
 
 

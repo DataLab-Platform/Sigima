@@ -15,7 +15,7 @@ import pytest
 
 from sigima.io import read_images, read_signals
 from sigima.io.image import funcs as image_funcs
-from sigima.obj import ImageObj, SignalObj
+from sigima.objects import ImageObj, SignalObj
 from sigima.tests import guiutils, helpers
 from sigima.tests.env import execenv
 

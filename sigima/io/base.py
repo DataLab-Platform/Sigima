@@ -15,7 +15,7 @@ import os.path as osp
 import re
 
 from sigima.config import _
-from sigima.obj.base import BaseObj
+from sigima.objects.base import BaseObj
 from sigima.worker import CallbackWorkerProtocol
 
 

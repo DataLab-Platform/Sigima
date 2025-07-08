@@ -14,13 +14,13 @@ import time
 import numpy as np
 import pytest
 
-import sigima.computation.image as sigima_image
-import sigima.obj
-import sigima.param
-from sigima.algorithms.image import get_2d_peaks_coords
+import sigima.objects
+import sigima.params
+import sigima.proc.image as sigima_image
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result
+from sigima.tools.image import get_2d_peaks_coords
 
 
 def exec_image_peak_detection_func(data: np.ndarray) -> np.ndarray:
@@ -78,8 +78,8 @@ def test_image_peak_detection():
     """2D peak detection unit test"""
     data, coords_expected = get_peak2d_data(seed=1, multi=False)
     for create_rois in (True, False):
-        obj = sigima.obj.create_image("peak2d_unit_test", data=data)
-        param = sigima.param.Peak2DDetectionParam.create(create_rois=create_rois)
+        obj = sigima.objects.create_image("peak2d_unit_test", data=data)
+        param = sigima.params.Peak2DDetectionParam.create(create_rois=create_rois)
         result = sigima_image.peak_detection(obj, param)
         df = result.to_dataframe()
         coords = df.to_numpy(int)
@@ -98,7 +98,7 @@ def test_image_peak_detection():
             )
             for i, roi in enumerate(result.roi):
                 # Check that ROIs are rectangles
-                assert isinstance(roi, sigima.obj.RectangularROI), (
+                assert isinstance(roi, sigima.objects.RectangularROI), (
                     f"Expected RectangularROI, got {type(roi)}"
                 )
                 # Check that ROIs are correctly positioned

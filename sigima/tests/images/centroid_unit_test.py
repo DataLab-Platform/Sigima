@@ -21,9 +21,9 @@ import pytest
 import scipy.ndimage as spi
 from numpy import ma
 
-import sigima.algorithms.image as alg
-import sigima.computation.image as sigima_image
-import sigima.obj
+import sigima.objects
+import sigima.proc.image as sigima_image
+import sigima.tools.image as alg
 from sigima.config import _
 from sigima.tests.data import create_noisygauss_image, get_laser_spot_data
 from sigima.tests.env import execenv
@@ -104,9 +104,9 @@ def __check_centroid(image, expected_x, expected_y):
 @pytest.mark.validation
 def test_image_centroid():
     """Test centroid computation"""
-    param = sigima.obj.NewImageParam.create(height=500, width=500)
+    param = sigima.objects.NewImageParam.create(height=500, width=500)
     image = create_noisygauss_image(param, center=(-2.0, 3.0), add_annotations=True)
-    circle_roi = sigima.obj.create_image_roi("circle", [200, 325, 10])
+    circle_roi = sigima.objects.create_image_roi("circle", [200, 325, 10])
     for roi, x0, y0 in (
         (None, 0, 0),
         (None, 100, 100),

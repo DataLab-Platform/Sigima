@@ -13,7 +13,7 @@ import numpy as np
 
 from sigima.config import _
 from sigima.io.base import BaseIORegistry, FormatBase
-from sigima.obj.image import ImageObj, create_image
+from sigima.objects.image import ImageObj, create_image
 from sigima.worker import CallbackWorkerProtocol
 
 

@@ -12,9 +12,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import sigima.computation.signal as sigima_signal
-import sigima.obj
-import sigima.param
+import sigima.objects
+import sigima.params
+import sigima.proc.signal as sigima_signal
 from sigima.tests.helpers import check_array_result
 
 
@@ -57,10 +57,10 @@ def test_signal_allan_variance():
     # Generate and test white noise signal
     time_white = np.arange(n_points)
     values_white = generate_white_noise(n_points, sigma)
-    sig1 = sigima.obj.create_signal("White Noise Test", time_white, values_white)
+    sig1 = sigima.objects.create_signal("White Noise Test", time_white, values_white)
 
     # Define Allan variance parameters
-    param = sigima.param.AllanVarianceParam()
+    param = sigima.params.AllanVarianceParam()
     param.max_tau = max(tau_values)
 
     # Compute Allan variance using the high-level function
@@ -72,7 +72,7 @@ def test_signal_allan_variance():
     # Generate and test drift signal
     slope = 0.01
     time, values = generate_drift_signal(n_points, slope)
-    sig2 = sigima.obj.create_signal("Drift Test", time, values)
+    sig2 = sigima.objects.create_signal("Drift Test", time, values)
 
     # Compute Allan variance using the high-level function
     res2 = sigima_signal.allan_variance(sig2, param)
@@ -91,10 +91,10 @@ def test_signal_allan_deviation():
     # Generate and test white noise signal
     time_white = np.arange(n_points)
     values_white = generate_white_noise(n_points, sigma)
-    sig1 = sigima.obj.create_signal("White Noise Test", time_white, values_white)
+    sig1 = sigima.objects.create_signal("White Noise Test", time_white, values_white)
 
     # Define Allan variance parameters
-    param = sigima.param.AllanVarianceParam()
+    param = sigima.params.AllanVarianceParam()
     param.max_tau = max(tau_values)
 
     # Compute Allan deviation using the high-level function
@@ -108,7 +108,7 @@ def test_signal_allan_deviation():
     # Generate and test drift signal
     slope = 0.01
     time, values = generate_drift_signal(n_points, slope)
-    sig2 = sigima.obj.create_signal("Drift Test", time, values)
+    sig2 = sigima.objects.create_signal("Drift Test", time, values)
 
     # Compute Allan deviation using the high-level function
     res2 = sigima_signal.allan_deviation(sig2, param)

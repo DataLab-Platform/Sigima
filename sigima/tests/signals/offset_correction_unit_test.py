@@ -12,8 +12,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-import sigima.computation.signal as sigima_signal
-import sigima.obj
+import sigima.objects
+import sigima.proc.signal as sigima_signal
 from sigima.tests.data import create_paracetamol_signal
 
 
@@ -21,7 +21,7 @@ from sigima.tests.data import create_paracetamol_signal
 def test_signal_offset_correction() -> None:
     """Signal offset correction validation test."""
     s1 = create_paracetamol_signal()
-    param = sigima.obj.ROI1DParam.create(xmin=10.0, xmax=12.0)
+    param = sigima.objects.ROI1DParam.create(xmin=10.0, xmax=12.0)
     s2 = sigima_signal.offset_correction(s1, param)
 
     # Check that the offset correction has been applied

@@ -18,9 +18,9 @@ import numpy as np
 import pytest
 import scipy.integrate as spt
 
-import sigima.computation.image as sigima_image
-import sigima.computation.signal as sigima_signal
-import sigima.obj
+import sigima.objects
+import sigima.proc.image as sigima_image
+import sigima.proc.signal as sigima_signal
 
 
 def get_analytical_stats(data: np.ndarray) -> dict[str, float]:
@@ -52,28 +52,28 @@ def get_analytical_stats(data: np.ndarray) -> dict[str, float]:
     return results
 
 
-def create_reference_signal() -> sigima.obj.SignalObj:
+def create_reference_signal() -> sigima.objects.SignalObj:
     """Create reference signal"""
-    snew = sigima.obj.NewSignalParam.create(
-        title="Gaussian", stype=sigima.obj.SignalTypes.GAUSS
+    snew = sigima.objects.NewSignalParam.create(
+        title="Gaussian", stype=sigima.objects.SignalTypes.GAUSS
     )
-    extra_param = sigima.obj.GaussLorentzVoigtParam()
-    sig = sigima.obj.create_signal_from_param(snew, extra_param=extra_param)
-    sig.roi = sigima.obj.create_signal_roi(
+    extra_param = sigima.objects.GaussLorentzVoigtParam()
+    sig = sigima.objects.create_signal_from_param(snew, extra_param=extra_param)
+    sig.roi = sigima.objects.create_signal_roi(
         [len(sig.x) // 2, len(sig.x) - 1], indices=True
     )
     return sig
 
 
-def create_reference_image() -> sigima.obj.ImageObj:
+def create_reference_image() -> sigima.objects.ImageObj:
     """Create reference image"""
-    inew = sigima.obj.NewImageParam.create(
-        title="2D-Gaussian", itype=sigima.obj.ImageTypes.GAUSS
+    inew = sigima.objects.NewImageParam.create(
+        title="2D-Gaussian", itype=sigima.objects.ImageTypes.GAUSS
     )
-    extra_param = sigima.obj.Gauss2DParam()
-    ima = sigima.obj.create_image_from_param(inew, extra_param=extra_param)
+    extra_param = sigima.objects.Gauss2DParam()
+    ima = sigima.objects.create_image_from_param(inew, extra_param=extra_param)
     dy, dx = ima.data.shape
-    ima.roi = sigima.obj.create_image_roi(
+    ima.roi = sigima.objects.create_image_roi(
         "rectangle",
         [
             [dx // 2, 0, dx, dy],

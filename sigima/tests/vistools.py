@@ -20,7 +20,7 @@ from plotpy.plot import (
 )
 
 from sigima.config import _
-from sigima.obj import ImageObj, SignalObj
+from sigima.objects import ImageObj, SignalObj
 from sigima.tests.helpers import get_default_test_name
 
 TEST_NB = {}

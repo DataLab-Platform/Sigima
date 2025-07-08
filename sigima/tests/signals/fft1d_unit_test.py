@@ -13,25 +13,25 @@ import numpy as np
 import pytest
 import scipy.signal as sps
 
-import sigima.computation.signal as sigima_signal
-import sigima.obj
-import sigima.param
+import sigima.objects
+import sigima.params
+import sigima.proc.signal as sigima_signal
 import sigima.tests.data as ctd
-from sigima.algorithms.signal import fourier
 from sigima.tests import guiutils
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result, check_scalar_result
+from sigima.tools.signal import fourier
 
 
 @pytest.mark.validation
 def test_signal_zero_padding() -> None:
     """1D FFT zero padding validation test."""
     s1 = ctd.create_periodic_signal(
-        sigima.obj.SignalTypes.COSINUS, freq=50.0, size=1000
+        sigima.objects.SignalTypes.COSINUS, freq=50.0, size=1000
     )
 
     # Validate zero padding with custom length
-    param = sigima.param.ZeroPadding1DParam.create(n=250)
+    param = sigima.params.ZeroPadding1DParam.create(n=250)
     assert param.strategy == "custom", (
         f"Wrong default strategy: {param.strategy} (expected 'custom')"
     )
@@ -59,7 +59,7 @@ def test_signal_zero_padding() -> None:
         ("double", 1000),
         ("triple", 2000),
     ):
-        param = sigima.param.ZeroPadding1DParam.create(strategy=strategy)
+        param = sigima.params.ZeroPadding1DParam.create(strategy=strategy)
         param.update_from_obj(s1)
         assert param.n == expected_length, (
             f"Wrong length for '{param.strategy}' strategy: {param.n}"
@@ -77,7 +77,7 @@ def test_signal_fft() -> None:
     xmin = 0.0
 
     s1 = ctd.create_periodic_signal(
-        sigima.obj.SignalTypes.COSINUS, freq=freq, size=size, xmin=xmin
+        sigima.objects.SignalTypes.COSINUS, freq=freq, size=size, xmin=xmin
     )
     fft = sigima_signal.fft(s1)
     ifft = sigima_signal.ifft(fft)
@@ -118,8 +118,8 @@ def test_signal_ifft(request: pytest.FixtureRequest | None = None) -> None:
 
     guiutils.set_current_request(request)
 
-    newparam = sigima.obj.NewSignalParam.create(
-        stype=sigima.obj.SignalTypes.COSINUS, size=500
+    newparam = sigima.objects.NewSignalParam.create(
+        stype=sigima.objects.SignalTypes.COSINUS, size=500
     )
 
     # *** Note ***
@@ -130,8 +130,8 @@ def test_signal_ifft(request: pytest.FixtureRequest | None = None) -> None:
     # is not meaningful if xmin is different.
     newparam.xmin = 0.0
 
-    extra_param = sigima.obj.PeriodicParam()
-    s1 = sigima.obj.create_signal_from_param(newparam, extra_param=extra_param)
+    extra_param = sigima.objects.PeriodicParam()
+    s1 = sigima.objects.create_signal_from_param(newparam, extra_param=extra_param)
     t1, y1 = s1.xydata
     for shift in (True, False):
         f1, sp1 = fourier.fft1d(t1, y1, shift=shift)
@@ -154,8 +154,8 @@ def test_signal_ifft(request: pytest.FixtureRequest | None = None) -> None:
             with qt_app_context():
                 view_curves(
                     [
-                        sigima.obj.create_signal("Original", t1, y1),
-                        sigima.obj.create_signal("Recovered", t2, y2),
+                        sigima.objects.create_signal("Original", t1, y1),
+                        sigima.objects.create_signal("Recovered", t2, y2),
                     ]
                 )
 
@@ -167,7 +167,7 @@ def test_signal_magnitude_spectrum() -> None:
     size = 10000
 
     s1 = ctd.create_periodic_signal(
-        sigima.obj.SignalTypes.COSINUS, freq=freq, size=size
+        sigima.objects.SignalTypes.COSINUS, freq=freq, size=size
     )
     fft = sigima_signal.fft(s1)
     mag = sigima_signal.magnitude_spectrum(s1)
@@ -186,7 +186,7 @@ def test_signal_phase_spectrum() -> None:
     size = 10000
 
     s1 = ctd.create_periodic_signal(
-        sigima.obj.SignalTypes.COSINUS, freq=freq, size=size
+        sigima.objects.SignalTypes.COSINUS, freq=freq, size=size
     )
     fft = sigima_signal.fft(s1)
     phase = sigima_signal.phase_spectrum(s1)
@@ -206,9 +206,9 @@ def test_signal_psd() -> None:
     size = 10000
 
     s1 = ctd.create_periodic_signal(
-        sigima.obj.SignalTypes.COSINUS, freq=freq, size=size
+        sigima.objects.SignalTypes.COSINUS, freq=freq, size=size
     )
-    param = sigima.param.SpectrumParam()
+    param = sigima.params.SpectrumParam()
     for log_scale in (False, True):
         param.log = log_scale
         psd = sigima_signal.psd(s1, param)

@@ -33,11 +33,6 @@ the DataLab application.
 # **   Milestone 1.b. Decouple I/O features (including I/O plugins) **
 # TODO: Implement a I/O plugin system similar to the `cdl.plugins` module
 # **   Milestone 1.c. Redesign the API for the new core library **
-# TODO: Remove "sigima*" from "cdl" pyproject.toml (`include = ["cdl*", "sigima*"]`)
-# TODO: Rename "cdl" package to "datalab" (at last! finally!)
-# TODO: Rename "sigima" (temporary name until the package is fully migrated)
-#       to "sigima" when the migration is complete.
-# TODO: Add local translations for the `sigima` package
 #
 # ** Task 2. Technical Validation and Testing **
 # TODO: Add `pytest` infrastructure. Step 2: migrate `cdl/tests/sigima_tests`
@@ -50,6 +45,8 @@ the DataLab application.
 # ** Task 3. Documentation and Training Materials **
 # TODO: Add documentation. Step 1: initiate `sigima` package documentation
 # TODO: Add documentation. Step 2: migrate parts of `cdl` package documentation
+#
+# TODO: Migrate `cdlclient` features to a subpackage of `sigima` (e.g., `sigima.client`)
 # --------------------------------------------------------------------------------------
 
 # pylint:disable=unused-import
@@ -63,7 +60,7 @@ from sigima.io import (
     read_image,
     read_signal,
 )
-from sigima.obj import (
+from sigima.objects import (
     CircularROI,
     ExponentialParam,
     Gauss2DParam,
@@ -99,7 +96,7 @@ from sigima.obj import (
     create_signal_roi,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __docurl__ = __homeurl__ = "https://datalab-platform.com/"
 __supporturl__ = "https://github.com/DataLab-Platform/sigima/issues/new/choose"
 
