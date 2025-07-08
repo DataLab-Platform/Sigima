@@ -2,7 +2,7 @@
 
 """
 Model classes for signals and images (:mod:`sigima.objects`)
----------------------------------------------------------
+------------------------------------------------------------
 
 The :mod:`sigima.objects` module aims at providing all the necessary classes and functions
 to create and manipulate DataLab signal and image objects.
