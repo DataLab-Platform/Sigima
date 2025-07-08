@@ -49,6 +49,7 @@ The main goal of **Sigima** is to provide a unified, high-level API for handling
 The library is organized to separate concerns clearly:
 
 - `sigima.objects`: defines the object model for signals and images.
+- `sigima.params`: contains parameter classes for configuring processing functions.
 - `sigima.proc`: provides high-level processing functions that operate directly on `SignalObj` and `ImageObj` instances.
 - `sigima.io`: handles input/output operations (CSV files, image formats, etc.) for signals and images.
 - `sigima.tools`: contains **low-level, NumPy-based functions** that implement the core logic behind many processing routines.
