@@ -25,9 +25,7 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Installation information**
-
-- DataLab installation type ["Python package" or "stand-alone Windows version"]
-- Copy/paste here the contents of "About DataLab installation..." window (Menu "?")
+Describe how you installed Sigima (e.g., via pip, conda, or from source) and provide the version of Sigima you are using.
 
 **Additional context**
 Add any other context about the problem here.
