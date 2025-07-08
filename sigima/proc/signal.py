@@ -82,8 +82,9 @@ def restore_data_outside_roi(dst: SignalObj, src: SignalObj) -> None:
 
 class Wrap1to1Func:
     """Wrap a 1 array → 1 array function (the simple case of y1 = f(y0)) to produce
-    a 1 signal → 1 signal function, which can be used inside DataLab's infrastructure
-    to perform computations with the Signal Processor object.
+    a 1 signal → 1 signal function, which can be used as a Sigima computation function
+    and inside DataLab's infrastructure to perform computations with the Signal
+    Processor object.
 
     This wrapping mechanism using a class is necessary for the resulted function to be
     pickable by the ``multiprocessing`` module.

@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-DataLab I/O image functions
+Sigima I/O image functions
 """
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...

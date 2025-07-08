@@ -1,17 +1,21 @@
 """
-Algorithms (:mod:`sigima.tools`)
---------------------------------------
+Tools (:mod:`sigima.tools`)
+---------------------------
 
-This package contains the algorithms used by the DataLab project. Those algorithms
-operate directly on NumPy arrays and are designed to be used in the DataLab pipeline,
-but can be used independently as well.
+This package contains functions operating on NumPy arrays that are intended to be
+used in Sigima computation functions. These functions are complementary to the
+algorithms provided by external libraries such as SciPy, NumPy, and scikit-image.
+
+Even though these functions are primarily designed to be used in the Sigima pipeline,
+they can also be used independently. They provide a wide range of algorithms but are
+not exhaustive due to the vast number of algorithms already available in the
+scientific Python ecosystem.
 
 .. seealso::
 
-    The :mod:`sigima.tools` package is the main entry point for the DataLab
-    algorithms when manipulating NumPy arrays. See the :mod:`sigima.proc`
-    package for algorithms that operate directly on DataLab objects (i.e.
-    :class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`).
+    The :mod:`sigima.proc` contains the Sigima computation functions that operate on
+    signal and image objects (i.e. :class:`sigima.objects.SignalObj` and
+    :class:`sigima.objects.ImageObj`, defined in the :mod:`sigima.objects` package).
 
 The algorithms are organized in subpackages according to their purpose. The following
 subpackages are available:

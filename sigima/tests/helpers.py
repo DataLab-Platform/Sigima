@@ -72,7 +72,7 @@ def add_test_module_path(modname: str, relpath: str) -> None:
     add_test_path(get_module_data_path(modname, relpath=relpath))
 
 
-# Add test data files and folders for the DataLab module:
+# Add test data files and folders for the Sigima module:
 add_test_module_path(MOD_NAME, osp.join("data", "tests"))
 
 

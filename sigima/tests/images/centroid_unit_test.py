@@ -8,7 +8,7 @@ Comparing different algorithms for centroid calculation:
 - SciPy (measurements.center_of_mass)
 - OpenCV (moments)
 - Method based on moments
-- Method based on Fourier (DataLab)
+- Method based on Fourier (Sigima's algorithm)
 """
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...

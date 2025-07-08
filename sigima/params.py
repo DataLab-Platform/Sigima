@@ -32,7 +32,7 @@ Introduction to `DataSet` parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The datasets listed in the following sections are used to define the parameters
-necessary for the various computations and processing operations available in DataLab.
+necessary for the various computations and processing operations available in Sigima.
 
 Each dataset is a subclass of :py:class:`guidata.dataset.datatypes.DataSet` and thus
 needs to be instantiated before being used.

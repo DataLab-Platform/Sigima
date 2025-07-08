@@ -1,30 +1,31 @@
 """
 Computation (:mod:`sigima.proc`)
-----------------------------------------
+--------------------------------
 
-This package contains the computation functions used by the DataLab project.
-Those functions operate directly on DataLab objects (i.e.
-:class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`) and are
-designed to be used in the DataLab pipeline, but can be used independently as well.
+This package contains the Sigima computation functions that implement processing
+features for signal and image objects. These functions are designed to operate directly
+on :class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj` objects,
+which are defined in the :mod:`sigima.objects` package.
+
+Even though these functions are primarily designed to be used in the Sigima pipeline,
+they can also be used independently.
 
 .. seealso::
 
-    The :mod:`sigima.proc` package is the main entry point for the DataLab
-    computation functions when manipulating DataLab objects.
-    See the :mod:`sigima.tools` package for algorithms that operate directly on
+    See the :mod:`sigima.tools` package for some algorithms that operate directly on
     NumPy arrays.
 
 Each computation module defines a set of computation objects, that is, functions
 that implement processing features and classes that implement the corresponding
 parameters (in the form of :py:class:`guidata.dataset.datatypes.Dataset` subclasses).
-The computation functions takes a DataLab object (e.g.
-:class:`sigima.objects.SignalObj`)
+The computation functions takes a signal or image object
+(e.g. :py:class:`sigima.objects.SignalObj`)
 and a parameter object (e.g. :py:class:`sigima.params.MovingAverageParam`) as input
-and return a DataLab object as output (the result of the computation). The parameter
-object is used to configure the computation function (e.g. the size of the moving
-average window).
+and return a signal or image object as output (the result of the computation).
+The parameter object is used to configure the computation function
+(e.g. the size of the moving average window).
 
-In DataLab overall architecture, the purpose of this package is to provide the
+In Sigima overall architecture, the purpose of this package is to provide the
 computation functions that are used by the :mod:`sigima.core.gui.processor` module,
 based on the algorithms defined in the :mod:`sigima.tools` module and on the
 data model defined in the :mod:`sigima.objects` (or :mod:`sigima.core.model`) module.
@@ -91,6 +92,17 @@ Detection features
 
 .. automodule:: sigima.proc.image.detection
     :members:
+
+Utilities
+^^^^^^^^^
+
+This package also provides some utility functions to help with the creation and
+introspection of computation functions:
+
+.. autofunction:: sigima.proc.computation_function
+.. autofunction:: sigima.proc.is_computation_function
+.. autofunction:: sigima.proc.get_computation_metadata
+.. autofunction:: sigima.proc.find_computation_functions
 """
 
 from __future__ import annotations
@@ -137,7 +149,7 @@ def computation_function(
     name: Optional[str] = None,
     description: Optional[str] = None,
 ) -> Callable[[Callable[P, R]], Callable[P, R]]:
-    """Decorator to mark a function as a DataLab computation function.
+    """Decorator to mark a function as a Sigima computation function.
 
     Args:
         name: Optional name to override the function name.
@@ -148,7 +160,7 @@ def computation_function(
     """
 
     def decorator(f: Callable[P, R]) -> Callable[P, R]:
-        """Decorator to mark a function as a DataLab computation function.
+        """Decorator to mark a function as a Sigima computation function.
         This decorator adds a marker attribute to the function, allowing
         it to be identified as a computation function.
         It also allows for optional name and description overrides.
@@ -169,19 +181,19 @@ def computation_function(
 
 
 def is_computation_function(function: Callable) -> bool:
-    """Check if a function is a DataLab computation function.
+    """Check if a function is a Sigima computation function.
 
     Args:
         function: The function to check.
 
     Returns:
-        True if the function is a DataLab computation function, False otherwise.
+        True if the function is a Sigima computation function, False otherwise.
     """
     return getattr(function, COMPUTATION_METADATA_ATTR, None) is not None
 
 
 def get_computation_metadata(function: Callable) -> ComputationMetadata:
-    """Get the metadata of a DataLab computation function.
+    """Get the metadata of a Sigima computation function.
 
     Args:
         function: The function to get metadata from.
@@ -190,12 +202,12 @@ def get_computation_metadata(function: Callable) -> ComputationMetadata:
         Computation function metadata.
 
     Raises:
-        ValueError: If the function is not a DataLab computation function.
+        ValueError: If the function is not a Sigima computation function.
     """
     metadata = getattr(function, COMPUTATION_METADATA_ATTR, None)
     if not isinstance(metadata, ComputationMetadata):
         raise ValueError(
-            f"The function {function.__name__} is not a DataLab computation function."
+            f"The function {function.__name__} is not a Sigima computation function."
         )
     return metadata
 

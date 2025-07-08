@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-DataLab I/O image formats
+Sigima I/O image formats
 """
 
 from __future__ import annotations

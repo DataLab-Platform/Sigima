@@ -5,9 +5,9 @@ Environment (:mod:`sigima.env`)
 --------------------------------
 
 This module defines the execution environment for `sigima` library, which is used
-by DataLab. It provides a way to manage execution settings, such as unattended mode
-and verbosity level, and allows for parsing command line arguments to set these
-settings.
+by Sigima test suite. It provides a way to manage execution settings, such as
+unattended mode and verbosity level, and allows for parsing command line arguments
+to set these settings.
 
 .. note::
 

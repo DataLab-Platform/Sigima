@@ -31,7 +31,7 @@ if the methods are correctly called and if the results are consistent with
 the reference implementation.
 
 In other words, we are not testing the correctness of the algorithms, but
-the correctness of the interface between the DataLab and the scikit-image
+the correctness of the interface between the Sigima and the scikit-image
 libraries.
 """
 

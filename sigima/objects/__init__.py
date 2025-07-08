@@ -4,13 +4,14 @@
 Model classes for signals and images (:mod:`sigima.objects`)
 ------------------------------------------------------------
 
-The :mod:`sigima.objects` module aims at providing all the necessary classes and functions
-to create and manipulate DataLab signal and image objects.
+The :mod:`sigima.objects` module aims at providing all the necessary classes and
+functions to create and manipulate Sigima signal and image objects.
 
 Those classes and functions are defined in submodules:
-    - :mod:`sigima.objects.base`
-    - :mod:`sigima.objects.image`
-    - :mod:`sigima.objects.signal`
+
+- :mod:`sigima.objects.base`
+- :mod:`sigima.objects.image`
+- :mod:`sigima.objects.signal`
 
 .. code-block:: python
 
@@ -36,7 +37,6 @@ Common objects
 .. autoclass:: sigima.objects.TypeROI
 .. autoclass:: sigima.objects.TypeROIParam
 .. autoclass:: sigima.objects.TypeSingleROI
-
 
 Signal model
 ^^^^^^^^^^^^

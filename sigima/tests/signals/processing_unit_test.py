@@ -309,7 +309,7 @@ def test_signal_moving_average() -> None:
         # The SciPy's `uniform_filter` handles the edges more accurately than
         # a method based on a simple convolution with a kernel of ones like this:
         # (the following function was the original implementation of the moving average
-        # in DataLab before it was replaced by the SciPy's `uniform_filter` function)
+        # in Sigima before it was replaced by the SciPy's `uniform_filter` function)
         #
         # def moving_average(y: np.ndarray, n: int) -> np.ndarray:
         #     y_padded = np.pad(y, (n // 2, n - 1 - n // 2), mode="edge")

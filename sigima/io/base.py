@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-DataLab Common tools for signal and image io support
+Sigima Common tools for signal and image io support
 """
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
