@@ -844,15 +844,14 @@ class BaseHighLowBandParam(gds.DataSet):
     )
 
     order = gds.IntItem(_("Filter order"), default=3, min=1)
-    f_cut0 = gds.FloatItem(
-        _("Low cutoff frequency"), min=0, nonzero=True, unit="Hz"
-    ).set_prop(
-        "display", hide=gds.FuncProp(_type_prop, lambda x: x is FilterType.HIGHPASS)
-    )
-    f_cut1 = gds.FloatItem(
+    cut0 = gds.FloatItem(_("Low cutoff frequency"), min=0, nonzero=True, unit="Hz")
+    cut1 = gds.FloatItem(
         _("High cutoff frequency"), min=0, nonzero=True, unit="Hz"
     ).set_prop(
-        "display", hide=gds.FuncProp(_type_prop, lambda x: x is FilterType.LOWPASS)
+        "display",
+        hide=gds.FuncProp(
+            _type_prop, lambda x: x in (FilterType.LOWPASS, FilterType.HIGHPASS)
+        ),
     )
     rp = gds.FloatItem(
         _("Passband ripple"), min=0, default=1, nonzero=True, unit="dB"
@@ -884,10 +883,17 @@ class BaseHighLowBandParam(gds.DataSet):
             obj: signal object
         """
         f_nyquist = self.get_nyquist_frequency(obj)
-        if self.f_cut0 is None:
-            self.f_cut0 = 0.1 * f_nyquist
-        if self.f_cut1 is None:
-            self.f_cut1 = 0.9 * f_nyquist
+        if self.cut0 is None:
+            if self.TYPE is FilterType.LOWPASS:
+                self.cut0 = 0.1 * f_nyquist
+            elif self.TYPE is FilterType.HIGHPASS:
+                self.cut0 = 0.9 * f_nyquist
+            elif self.TYPE is FilterType.BANDPASS:
+                self.cut0 = 0.1 * f_nyquist
+                self.cut1 = 0.9 * f_nyquist
+            elif self.TYPE is FilterType.BANDSTOP:
+                self.cut0 = 0.4 * f_nyquist
+                self.cut1 = 0.6 * f_nyquist
 
     def get_filter_params(self, obj: SignalObj) -> tuple[float | str, float | str]:
         """Return the filter parameters (a and b) as a tuple. These parameters are used
@@ -908,12 +914,10 @@ class BaseHighLowBandParam(gds.DataSet):
             args += [self.rs]
         elif self.method == "ellip":
             args += [self.rp, self.rs]
-        if self.TYPE is FilterType.HIGHPASS:
-            args += [self.f_cut1 / f_nyquist]
-        elif self.TYPE is FilterType.LOWPASS:
-            args += [self.f_cut0 / f_nyquist]
+        if self.TYPE in (FilterType.HIGHPASS, FilterType.LOWPASS):
+            args += [self.cut0 / f_nyquist]
         else:
-            args += [[self.f_cut0 / f_nyquist, self.f_cut1 / f_nyquist]]
+            args += [[self.cut0 / f_nyquist, self.cut1 / f_nyquist]]
         args += [self.TYPE.value]
         return func(*args)
 
@@ -923,11 +927,17 @@ class LowPassFilterParam(BaseHighLowBandParam):
 
     TYPE = FilterType.LOWPASS
 
+    # Redefine cut0 just to change its label (instead of "Low cutoff frequency")
+    cut0 = gds.FloatItem(_("Cutoff frequency"), min=0, nonzero=True, unit="Hz")
+
 
 class HighPassFilterParam(BaseHighLowBandParam):
     """High-pass filter parameters"""
 
     TYPE = FilterType.HIGHPASS
+
+    # Redefine cut0 just to change its label (instead of "High cutoff frequency")
+    cut0 = gds.FloatItem(_("Cutoff frequency"), min=0, nonzero=True, unit="Hz")
 
 
 class BandPassFilterParam(BaseHighLowBandParam):
@@ -955,12 +965,10 @@ def frequency_filter(src: SignalObj, p: BaseHighLowBandParam) -> SignalObj:
     """
     name = f"{p.TYPE.value}"
     suffix = f"order={p.order:d}"
-    if p.TYPE is FilterType.LOWPASS:
-        suffix += f", cutoff={p.f_cut0:.2f}"
-    elif p.TYPE is FilterType.HIGHPASS:
-        suffix += f", cutoff={p.f_cut1:.2f}"
+    if p.TYPE in (FilterType.LOWPASS, FilterType.HIGHPASS):
+        suffix += f", cutoff={p.cut0:.2f}"
     else:
-        suffix += f", cutoff={p.f_cut0:.2f}:{p.f_cut1:.2f}"
+        suffix += f", cutoff={p.cut0:.2f}:{p.cut1:.2f}"
     dst = dst_1_to_1(src, name, suffix)
     b, a = p.get_filter_params(dst)
     dst.y = sps.filtfilt(b, a, dst.y)
