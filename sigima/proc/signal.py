@@ -832,6 +832,7 @@ class BaseHighLowBandParam(gds.DataSet):
         ("cheby1", _("Chebyshev type 1")),
         ("cheby2", _("Chebyshev type 2")),
         ("ellip", _("Elliptic")),
+        ("brickwall", _("Brickwall")),
     )
 
     TYPE: FilterType = FilterType.LOWPASS
@@ -843,7 +844,10 @@ class BaseHighLowBandParam(gds.DataSet):
         "display", store=_method_prop
     )
 
-    order = gds.IntItem(_("Filter order"), default=3, min=1)
+    order = gds.IntItem(_("Filter order"), default=3, min=1).set_prop(
+        "display",
+        active=gds.FuncProp(_method_prop, lambda x: x not in ("brickwall",)),
+    )
     cut0 = gds.FloatItem(_("Low cutoff frequency"), min=0, nonzero=True, unit="Hz")
     cut1 = gds.FloatItem(
         _("High cutoff frequency"), min=0, nonzero=True, unit="Hz"
@@ -864,6 +868,26 @@ class BaseHighLowBandParam(gds.DataSet):
     ).set_prop(
         "display",
         active=gds.FuncProp(_method_prop, lambda x: x in ("cheby2", "ellip")),
+    )
+
+    _zp_prop = gds.GetAttrProp("zero_padding")
+    zero_padding = gds.BoolItem(
+        _("Zero padding"),
+        default=True,
+    ).set_prop(
+        "display",
+        active=gds.FuncProp(_method_prop, lambda x: x == "brickwall"),
+        store=_zp_prop,
+    )
+    nfft = gds.IntItem(
+        _("Minimum FFT points number"),
+        default=0,
+    ).set_prop(
+        "display",
+        active=gds.FuncPropMulti(
+            [_method_prop, _zp_prop],
+            lambda x, y: x == "brickwall" and y,
+        ),
     )
 
     @staticmethod
@@ -964,14 +988,30 @@ def frequency_filter(src: SignalObj, p: BaseHighLowBandParam) -> SignalObj:
         Result signal object
     """
     name = f"{p.TYPE.value}"
-    suffix = f"order={p.order:d}"
+    suffix = "" if p.method == "brickwall" else f"order={p.order:d}, "
     if p.TYPE in (FilterType.LOWPASS, FilterType.HIGHPASS):
-        suffix += f", cutoff={p.cut0:.2f}"
+        suffix += f"cutoff={p.cut0:.2f}"
     else:
-        suffix += f", cutoff={p.cut0:.2f}:{p.cut1:.2f}"
+        suffix += f"cutoff={p.cut0:.2f}:{p.cut1:.2f}"
     dst = dst_1_to_1(src, name, suffix)
-    b, a = p.get_filter_params(dst)
-    dst.y = sps.filtfilt(b, a, dst.y)
+
+    if p.method == "brickwall":
+        x_pad, y_pad = src.get_data()
+        if p.zero_padding:
+            min_lenght = max(len(src.y), p.nfft) if p.nfft is not None else len(src.y)
+            lenght = 2 ** int(np.ceil(np.log2(min_lenght)))
+
+            if len(src.y) < lenght:
+                # Zero-pad the signal to the specified nfft length
+                x_pad, y_pad = fourier.zero_padding(
+                    src.x, src.y, int(lenght - len(src.y))
+                )
+        x, y = fourier.brickwall_filter(x_pad, y_pad, p.cut0, p.cut1, p.TYPE.value)
+        dst.set_xydata(x, y)
+    else:
+        b, a = p.get_filter_params(dst)
+        dst.y = sps.filtfilt(b, a, dst.y)
+
     restore_data_outside_roi(dst, src)
     return dst
 
