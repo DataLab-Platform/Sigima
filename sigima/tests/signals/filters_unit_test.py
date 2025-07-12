@@ -18,6 +18,10 @@ from sigima.tests import guiutils
 from sigima.tests.helpers import check_array_result, check_scalar_result
 from sigima.tools.signal.fourier import brickwall_filter
 
+# TODO: For each test, check all filter methods (brickwall, butterworth, etc.)
+#       by using something like:
+#       for method_name, _method_label in sigima_signal.LowPassFilterParam.methods:
+
 
 def build_clean_noisy_signals(
     length: int = 2**15,
