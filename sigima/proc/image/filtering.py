@@ -40,6 +40,7 @@ from sigima.proc.base import (
     dst_1_to_1,
 )
 from sigima.proc.image.base import Wrap1to1Func, restore_data_outside_roi
+from sigima.tools.image import freq_fft_filter
 
 
 @computation_function()
@@ -137,5 +138,51 @@ def butterworth(src: ImageObj, p: ButterworthParam) -> ImageObj:
         f"cut_off={p.cut_off:.3f}, order={p.order}, high_pass={p.high_pass}",
     )
     dst.data = filters.butterworth(src.data, p.cut_off, p.high_pass, p.order)
+    restore_data_outside_roi(dst, src)
+    return dst
+
+
+class FreqFFTParam(gds.DataSet):
+    """2D Gaussian bandpass FFT filter parameters"""
+
+    f0 = gds.FloatItem(
+        _("Center frequency"),
+        default=1,
+        unit="pixels⁻¹",
+        min=0.0,
+        help=_("Center frequency of the Gaussian filter"),
+    )
+    sigma = gds.FloatItem(
+        _("σ"),
+        default=0.5,
+        unit="pixels⁻¹",
+        min=0.0,
+        help=_("Standard deviation of the Gaussian filter"),
+    )
+    ifft_result_type = gds.ChoiceItem(
+        _("IFFT result type"),
+        (("real", _("Real part")), ("abs", _("Absolute value"))),
+        default="real",
+        help=_("How to return the inverse FFT result"),
+    )
+
+
+@computation_function()
+def freq_fft(src: ImageObj, p: FreqFFTParam) -> ImageObj:
+    """Apply a 2D Gaussian bandpass filter in the frequency domain to an image.
+
+    Args:
+        src: input image object
+        p: parameters
+
+    Returns:
+        Output image object
+    """
+    dst = dst_1_to_1(
+        src,
+        "freq_fft",
+        f"f0={p.f0:.3f}, sigma={p.sigma:.3f}, type={p.ifft_result_type}",
+    )
+    dst.data = freq_fft_filter(src.data, p.f0, p.sigma, p.ifft_result_type)
     restore_data_outside_roi(dst, src)
     return dst

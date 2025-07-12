@@ -115,6 +115,8 @@ from sigima.proc.image.filtering import (
     moving_average,
     moving_median,
     wiener,
+    freq_fft,
+    FreqFFTParam,
 )
 from sigima.proc.image.fourier import (
     ZeroPadding2DParam,
