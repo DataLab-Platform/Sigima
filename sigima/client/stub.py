@@ -166,6 +166,7 @@ class DataLabStubServer:
         self.server.register_function(self.select_groups, "select_groups")
         self.server.register_function(self.get_sel_object_uuids, "get_sel_object_uuids")
         self.server.register_function(self.delete_object, "delete_object")
+        self.server.register_function(self.remove_object, "remove_object")
         self.server.register_function(self.duplicate_object, "duplicate_object")
         self.server.register_function(self.copy_metadata, "copy_metadata")
 
@@ -550,6 +551,22 @@ class DataLabStubServer:
             del self.images[uuid_str]
             return True
         return False
+
+    def remove_object(self, force: bool = False) -> None:
+        """Remove current object (stub implementation).
+
+        Args:
+            force: if True, remove object without asking for confirmation
+        """
+        if self.verbose:
+            execenv.print(f"[STUB] Removing current object (force={force})")
+        # In stub mode, get first selected object and remove it
+        if self.selected_objects:
+            obj_uuid = self.selected_objects[0]
+            if self.delete_object(obj_uuid):
+                self.selected_objects.remove(obj_uuid)
+                if self.verbose:
+                    execenv.print(f"[STUB] Removed object with UUID {obj_uuid}")
 
     def duplicate_object(self, uuid_str: str) -> str | None:
         """Duplicate object and return new UUID."""
