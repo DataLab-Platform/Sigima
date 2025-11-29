@@ -28,8 +28,8 @@ msgstr "La bibliothèque `sigima` fait partie de la plateforme open-source DataL
 msgid "sigima 1.0.2"
 msgstr "sigima 1.0.2"
 
-msgid "💥 New features and enhancements:"
-msgstr "💥 Nouvelles fonctionnalités et améliorations:"
+msgid "✨ New features and enhancements:"
+msgstr "✨ Nouvelles fonctionnalités et améliorations:"
 
 msgid "**New parametric image types**: Added five new parametric image generation types for testing and calibration"
 msgstr "**Nouveaux types d'images paramétriques** : Ajout de cinq nouveaux types de génération d'images paramétriques pour les tests et l'étalonnage"
