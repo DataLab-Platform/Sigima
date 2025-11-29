@@ -5,7 +5,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 
 ## sigima 1.0.2 ##
 
-💥 New features and enhancements:
+✨ New features and enhancements:
 
 * **New parametric image types**: Added five new parametric image generation types for testing and calibration
   * **Checkerboard pattern**: Alternating squares for camera calibration and spatial frequency analysis. Parameters include square size, offset, and min/max values
@@ -47,7 +47,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 
 ## sigima 1.0.1 ##
 
-💥 New features and enhancements:
+✨ New features and enhancements:
 
 * **Detection ROI creation**: Generic mechanism for ROI creation across all detection functions
   * New `DetectionROIParam` parameter class providing standardized ROI creation fields
@@ -146,7 +146,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 
 ## sigima 1.0.0 ##
 
-💥 New features and enhancements:
+✨ New features and enhancements:
 
 * **Signals to image conversion**: New feature to combine multiple signals into a 2D image
   * New computation function `signals_to_image()` in `sigima.proc.signal.arithmetic`
