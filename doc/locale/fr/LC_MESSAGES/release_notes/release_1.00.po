@@ -19,8 +19,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-msgid "Version 1.0"
-msgstr ""
+msgid "Release notes"
+msgstr "Notes de version"
 
 msgid "Sigima Version 1.0.3 (unreleased)"
 msgstr ""
@@ -177,6 +177,9 @@ msgstr "Exemple : `x, y = proxy.compute_x_at_y(params).value` fournit un accès 
 
 msgid "Breaking change: Scripts accessing results as tables need to update to use `.value` property or `.coords` array"
 msgstr "Changement majeur : Les scripts accédant aux résultats sous forme de tableaux doivent être mis à jour pour utiliser la propriété `.value` ou le tableau `.coords`"
+
+msgid "🛠️ Bug fixes:"
+msgstr "🛠️ Correctifs:"
 
 msgid "Detection functions:"
 msgstr "Fonctions de détection :"
