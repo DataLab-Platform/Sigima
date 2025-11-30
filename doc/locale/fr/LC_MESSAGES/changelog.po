@@ -49,8 +49,8 @@ msgstr "Les coefficients nuls sont automatiquement omis de l'expression (par exe
 msgid "Handles edge cases including all-zero polynomials (returns `\"0\"`), single terms, and negative coefficients"
 msgstr "Gère les cas limites, y compris les polynômes tous nuls (renvoie `\"0\"`), les termes uniques et les coefficients négatifs"
 
-msgid "This closes [Issue #2](https://github.com/DataLab-Platform/Sigima/issues/2) - Polynomial signal titles should use mathematical notation instead of parameter listing"
-msgstr "Ceci clôture [Issue #2](https://github.com/DataLab-Platform/Sigima/issues/2) - Les titres des signaux polynomiaux doivent utiliser une notation mathématique au lieu d'une liste de paramètres"
+msgid "This closes [Issue #3](https://github.com/DataLab-Platform/Sigima/issues/3) - Polynomial signal titles should use mathematical notation instead of parameter listing"
+msgstr "Ceci clôture [Issue #3](https://github.com/DataLab-Platform/Sigima/issues/3) - Les titres des signaux polynomiaux doivent utiliser une notation mathématique au lieu d'une liste de paramètres"
 
 msgid "ROI data extraction:"
 msgstr "Extraction de données ROI :"

@@ -13,7 +13,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
   * Improves readability in DataLab GUI and signal listings by presenting polynomials in standard mathematical form
   * Zero coefficients are automatically omitted from the expression (e.g., `1+x+x³` when a2=0)
   * Handles edge cases including all-zero polynomials (returns `"0"`), single terms, and negative coefficients
-  * This closes [Issue #2](https://github.com/DataLab-Platform/Sigima/issues/2) - Polynomial signal titles should use mathematical notation instead of parameter listing
+  * This closes [Issue #3](https://github.com/DataLab-Platform/Sigima/issues/3) - Polynomial signal titles should use mathematical notation instead of parameter listing
 
 * ROI data extraction:
   * Fixed `ValueError: zero-size array to reduction operation minimum which has no identity` error when computing statistics on images with ROI extending beyond canvas boundaries
