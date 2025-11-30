@@ -7,6 +7,14 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 
 🛠️ Bug fixes:
 
+* Signal title formatting:
+  * **Polynomial signal titles**: Fixed polynomial signal title generation to display mathematical notation (e.g., `1+2x-3x²+4x³`) instead of verbose parameter listing (e.g., `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)
+  * The `PolyParam.generate_title()` method now constructs proper mathematical expressions with correct sign handling, coefficient simplification (e.g., `x` instead of `1x`, `-x` instead of `-1x`), and exponent notation using `^` symbol
+  * Improves readability in DataLab GUI and signal listings by presenting polynomials in standard mathematical form
+  * Zero coefficients are automatically omitted from the expression (e.g., `1+x+x³` when a2=0)
+  * Handles edge cases including all-zero polynomials (returns `"0"`), single terms, and negative coefficients
+  * This closes [Issue #2](https://github.com/DataLab-Platform/Sigima/issues/2) - Polynomial signal titles should use mathematical notation instead of parameter listing
+
 * ROI data extraction:
   * Fixed `ValueError: zero-size array to reduction operation minimum which has no identity` error when computing statistics on images with ROI extending beyond canvas boundaries
   * The `ImageObj.get_data()` method now properly clips ROI bounding boxes to image boundaries

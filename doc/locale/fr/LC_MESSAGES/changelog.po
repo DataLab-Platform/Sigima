@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-30 11:51+0100\n"
+"POT-Creation-Date: 2025-11-30 18:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -30,6 +30,27 @@ msgstr "sigima 1.0.3 (non publié)"
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs:"
+
+msgid "Signal title formatting:"
+msgstr "Formatage des titres de signaux :"
+
+msgid "**Polynomial signal titles**: Fixed polynomial signal title generation to display mathematical notation (e.g., `1+2x-3x²+4x³`) instead of verbose parameter listing (e.g., `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)"
+msgstr "**Titres de signaux polynomiaux** : Correction de la génération des titres de signaux polynomiaux pour afficher une notation mathématique (par exemple, `1+2x-3x²+4x³`) au lieu d'une liste de paramètres verbeuse (par exemple, `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)"
+
+msgid "The `PolyParam.generate_title()` method now constructs proper mathematical expressions with correct sign handling, coefficient simplification (e.g., `x` instead of `1x`, `-x` instead of `-1x`), and exponent notation using `^` symbol"
+msgstr "La méthode `PolyParam.generate_title()` construit désormais des expressions mathématiques appropriées avec une gestion correcte des signes, une simplification des coefficients (par exemple, `x` au lieu de `1x`, `-x` au lieu de `-1x`) et une notation des exposants utilisant le symbole `^`"
+
+msgid "Improves readability in DataLab GUI and signal listings by presenting polynomials in standard mathematical form"
+msgstr "Améliore la lisibilité dans l'interface graphique de DataLab et les listes de signaux en présentant les polynômes sous une forme mathématique standard"
+
+msgid "Zero coefficients are automatically omitted from the expression (e.g., `1+x+x³` when a2=0)"
+msgstr "Les coefficients nuls sont automatiquement omis de l'expression (par exemple, `1+x+x³` lorsque a2=0)"
+
+msgid "Handles edge cases including all-zero polynomials (returns `\"0\"`), single terms, and negative coefficients"
+msgstr "Gère les cas limites, y compris les polynômes tous nuls (renvoie `\"0\"`), les termes uniques et les coefficients négatifs"
+
+msgid "This closes [Issue #2](https://github.com/DataLab-Platform/Sigima/issues/2) - Polynomial signal titles should use mathematical notation instead of parameter listing"
+msgstr "Ceci clôture [Issue #2](https://github.com/DataLab-Platform/Sigima/issues/2) - Les titres des signaux polynomiaux doivent utiliser une notation mathématique au lieu d'une liste de paramètres"
 
 msgid "ROI data extraction:"
 msgstr "Extraction de données ROI :"
