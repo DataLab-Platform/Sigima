@@ -3,6 +3,18 @@
 The `sigima` library is part of the DataLab open-source platform.
 See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.html) for future and past milestones.
 
+## sigima 1.0.3 (unreleased) ##
+
+🛠️ Bug fixes:
+
+* ROI data extraction:
+  * Fixed `ValueError: zero-size array to reduction operation minimum which has no identity` error when computing statistics on images with ROI extending beyond canvas boundaries
+  * The `ImageObj.get_data()` method now properly clips ROI bounding boxes to image boundaries
+  * When a ROI is completely outside the image bounds, returns a fully masked 1x1 array (containing NaN) to avoid zero-size array errors in statistics computations
+  * Partial overlap ROIs are correctly handled by clipping coordinates to valid image ranges
+  * This fix ensures robust statistics computation regardless of ROI position relative to image boundaries
+  * This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` when computing statistics on ROI extending beyond image boundaries
+
 ## sigima 1.0.2 ##
 
 ✨ New features and enhancements:

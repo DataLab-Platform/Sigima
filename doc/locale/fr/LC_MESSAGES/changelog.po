@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-10 10:47+0100\n"
+"POT-Creation-Date: 2025-11-30 11:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -24,6 +24,33 @@ msgstr "Notes de version"
 
 msgid "The `sigima` library is part of the DataLab open-source platform. See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.html) for future and past milestones."
 msgstr "La bibliothèque `sigima` fait partie de la plateforme open-source DataLab. Consultez la [page de feuille de route](https://datalab-platform.com/en/contributing/roadmap.html) de DataLab pour les jalons futurs et passés."
+
+msgid "sigima 1.0.3 (unreleased)"
+msgstr "sigima 1.0.3 (non publié)"
+
+msgid "🛠️ Bug fixes:"
+msgstr "🛠️ Correctifs:"
+
+msgid "ROI data extraction:"
+msgstr "Extraction de données ROI :"
+
+msgid "Fixed `ValueError: zero-size array to reduction operation minimum which has no identity` error when computing statistics on images with ROI extending beyond canvas boundaries"
+msgstr "Correction de l'erreur `ValueError: zero-size array to reduction operation minimum which has no identity` lors du calcul des statistiques sur des images avec ROI s'étendant au-delà des limites de la zone de dessin"
+
+msgid "The `ImageObj.get_data()` method now properly clips ROI bounding boxes to image boundaries"
+msgstr "La méthode `ImageObj.get_data()` limite désormais correctement les boîtes englobantes des ROI aux limites de l'image"
+
+msgid "When a ROI is completely outside the image bounds, returns a fully masked 1x1 array (containing NaN) to avoid zero-size array errors in statistics computations"
+msgstr "Lorsqu'une ROI est complètement en dehors des limites de l'image, renvoie un tableau 1x1 entièrement masqué (contenant NaN) pour éviter les erreurs de tableau de taille zéro dans les calculs statistiques"
+
+msgid "Partial overlap ROIs are correctly handled by clipping coordinates to valid image ranges"
+msgstr "Les ROI partiellement superposées sont correctement gérées en limitant les coordonnées aux plages valides de l'image"
+
+msgid "This fix ensures robust statistics computation regardless of ROI position relative to image boundaries"
+msgstr "Ce correctif garantit un calcul statistique robuste quel que soit la position de la ROI par rapport aux limites de l'image"
+
+msgid "This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` when computing statistics on ROI extending beyond image boundaries"
+msgstr "Ceci clôture [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` lors du calcul des statistiques sur ROI s'étendant au-delà des limites de l'image"
 
 msgid "sigima 1.0.2"
 msgstr "sigima 1.0.2"
@@ -93,9 +120,6 @@ msgstr "Exemple : `x, y = proxy.compute_x_at_y(params).value` fournit un accès 
 
 msgid "Breaking change: Scripts accessing results as tables need to update to use `.value` property or `.coords` array"
 msgstr "Changement majeur : Les scripts accédant aux résultats sous forme de tableaux doivent être mis à jour pour utiliser la propriété `.value` ou le tableau `.coords`"
-
-msgid "🛠️ Bug fixes:"
-msgstr "🛠️ Correctifs:"
 
 msgid "Detection functions:"
 msgstr "Fonctions de détection :"
