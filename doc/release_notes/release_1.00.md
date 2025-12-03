@@ -1,6 +1,6 @@
 # Version 1.0 #
 
-## Sigima Version 1.0.3 (unreleased) ##
+## Sigima Version 1.0.3 (2025-12-03) ##
 
 🛠️ Bug fixes:
 
