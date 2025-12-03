@@ -565,3 +565,37 @@ def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
     dst.title = "{1} = f({0})"
     restore_data_outside_roi(dst, src1)
     return dst
+
+
+@computation_function()
+def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
+    """Create a new signal using Y from src1 and Y from src2 as X coordinates.
+
+    This is useful for calibration scenarios where one signal contains calibration
+    data (e.g., wavelengths) in its Y values, and you want to plot another signal's
+    Y values against these calibration points.
+
+    The two signals must have the same number of points.
+
+    Args:
+        src1: First signal (provides Y data for output).
+        src2: Second signal (provides Y data to be used as X coordinates for output).
+
+    Returns:
+        A new signal with X from src2.y and Y from src1.y.
+
+    Raises:
+        ValueError: If signals don't have the same number of points.
+    """
+    if src1.y.size != src2.y.size:
+        raise ValueError(
+            f"Signals must have the same number of points: "
+            f"{src1.y.size} != {src2.y.size}"
+        )
+    dst = dst_2_to_1(src1, src2, "replace_x_by_other_y")
+    dst.set_xydata(src2.y, src1.y)
+    dst.xlabel = src2.ylabel if src2.ylabel else "X"
+    dst.xunit = src2.yunit if src2.yunit else ""
+    # Y label and unit remain from src1
+    restore_data_outside_roi(dst, src1)
+    return dst

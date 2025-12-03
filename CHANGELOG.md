@@ -7,6 +7,15 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 
 🛠️ Bug fixes:
 
+* **Signal axis calibration**: Added `replace_x_by_other_y()` function to replace signal X coordinates with Y values from another signal
+  * Addresses missing functionality for wavelength calibration and similar use cases where calibration data is stored in a separate signal's Y values
+  * This operation was previously impossible, even if the ambiguous X-Y mode feature existed and seemed related to this use case (but this feature performs resampling/interpolation, which is not desired here)
+  * The new function directly uses Y arrays from both signals without interpolation, requiring signals to have the same number of points
+  * Takes two signals: first provides Y data for output, second provides Y data to become X coordinates
+  * Automatically transfers metadata: X label/unit from second signal's Y label/unit, Y label/unit preserved from first signal
+  * Typical use case: spectroscopy wavelength calibration (combine absorption measurements with wavelength scale)
+  * This closes [Issue #4](https://github.com/DataLab-Platform/Sigima/issues/4) - Missing functionality: Replace X coordinates with Y values from another signal for calibration
+
 * Signal title formatting:
   * **Polynomial signal titles**: Fixed polynomial signal title generation to display mathematical notation (e.g., `1+2x-3x²+4x³`) instead of verbose parameter listing (e.g., `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)
   * The `PolyParam.generate_title()` method now constructs proper mathematical expressions with correct sign handling, coefficient simplification (e.g., `x` instead of `1x`, `-x` instead of `-1x`), and exponent notation using `^` symbol

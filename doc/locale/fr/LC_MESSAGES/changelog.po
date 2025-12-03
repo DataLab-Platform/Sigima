@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-30 18:21+0100\n"
+"POT-Creation-Date: 2025-12-03 11:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -30,6 +30,30 @@ msgstr "sigima 1.0.3 (non publié)"
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs:"
+
+msgid "**Signal axis calibration**: Added `replace_x_by_other_y()` function to replace signal X coordinates with Y values from another signal"
+msgstr "**Étalonnage de l'axe des signaux** : Ajout de la fonction `replace_x_by_other_y()` pour remplacer les coordonnées X d'un signal par les valeurs Y d'un autre signal"
+
+msgid "Addresses missing functionality for wavelength calibration and similar use cases where calibration data is stored in a separate signal's Y values"
+msgstr "Répond à un manque de fonctionnalité pour l'étalonnage en longueur d'onde et des cas d'utilisation similaires où les données d'étalonnage sont stockées dans les valeurs Y d'un signal séparé"
+
+msgid "This operation was previously impossible, even if the ambiguous X-Y mode feature existed and seemed related to this use case (but this feature performs resampling/interpolation, which is not desired here)"
+msgstr "Cette opération était auparavant impossible, même si la fonctionnalité ambiguë du mode X-Y existait et semblait liée à ce cas d'utilisation (mais cette fonctionnalité effectue un rééchantillonnage/interpolation, ce qui n'est pas souhaité ici)"
+
+msgid "The new function directly uses Y arrays from both signals without interpolation, requiring signals to have the same number of points"
+msgstr "La nouvelle fonction utilise directement les tableaux Y des deux signaux sans interpolation, nécessitant que les signaux aient le même nombre de points"
+
+msgid "Takes two signals: first provides Y data for output, second provides Y data to become X coordinates"
+msgstr "A partir de deux signaux en entrée : le premier fournit les données Y pour la sortie, le second fournit les données Y qui deviendront les coordonnées X"
+
+msgid "Automatically transfers metadata: X label/unit from second signal's Y label/unit, Y label/unit preserved from first signal"
+msgstr "Transfert automatique des métadonnées : étiquette/unité X à partir de l'étiquette/unité Y du second signal, étiquette/unité Y préservée du premier signal"
+
+msgid "Typical use case: spectroscopy wavelength calibration (combine absorption measurements with wavelength scale)"
+msgstr "Cas d'utilisation typique : étalonnage en longueur d'onde en spectroscopie (combiner les mesures d'absorption avec l'échelle de longueur d'onde)"
+
+msgid "This closes [Issue #4](https://github.com/DataLab-Platform/Sigima/issues/4) - Missing functionality: Replace X coordinates with Y values from another signal for calibration"
+msgstr "Ceci clôture [Issue #4](https://github.com/DataLab-Platform/Sigima/issues/4) - Fonctionnalité manquante : Remplacer les coordonnées X par les valeurs Y d'un autre signal pour l'étalonnage"
 
 msgid "Signal title formatting:"
 msgstr "Formatage des titres de signaux :"
