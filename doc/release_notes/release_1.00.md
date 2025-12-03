@@ -1,9 +1,6 @@
-# Release notes #
+# Version 1.0 #
 
-The `sigima` library is part of the DataLab open-source platform.
-See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.html) for future and past milestones.
-
-## sigima 1.0.3 (unreleased) ##
+## Sigima Version 1.0.3 (unreleased) ##
 
 🛠️ Bug fixes:
 
@@ -38,7 +35,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
   * This fix ensures robust statistics computation regardless of ROI position relative to image boundaries
   * This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` when computing statistics on ROI extending beyond image boundaries
 
-## sigima 1.0.2 ##
+## Sigima Version 1.0.2 (2025-11-12) ##
 
 ✨ New features and enhancements:
 
@@ -80,7 +77,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 * Public API:
   * Made `BaseObj.roi_has_changed` method private (by renaming to `BaseObj.__roi_has_changed`) to avoid accidental external usage. This would interfere with the internal mask refresh mechanism that relies on controlled access to this method. The method is not part of the public API and should not be called directly by applications.
 
-## sigima 1.0.1 ##
+## Sigima Version 1.0.1 (2025-11-05) ##
 
 ✨ New features and enhancements:
 
@@ -179,7 +176,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
   * These methods were implemented for API completeness but were not used in the Sigima/DataLab codebase
   * Added comprehensive unit tests covering all ROI types (rectangular, circular, polygonal) and edge cases
 
-## sigima 1.0.0 ##
+## Sigima Version 1.0.0 (2025-10-28) ##
 
 ✨ New features and enhancements:
 
@@ -465,24 +462,3 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
   * Updated minimum requirement from 4.5.4.60 to 4.8.1.78
   * Addresses libwebp binaries vulnerability in bundled OpenCV wheels
   * See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details
-
-## sigima 0.2.0 ##
-
-⚠️ Major API changes:
-
-* Rename `sigima.computation` to `sigima.proc`.
-* Rename `sigima.algorithms` to `sigima.tools`.
-* Rename `sigima.obj` to `sigima.objects`.
-* Rename `sigima.param` to `sigima.params`.
-
-ℹ️ Various changes:
-
-* Add Sigima SVG logo.
-
-🛠️ Bug fixes:
-
-* Fix API documentation and docstrings.
-
-## sigima 0.1.0 ##
-
-This first version of the library is the result of the externalization of the signal and image processing features from the DataLab main repository.

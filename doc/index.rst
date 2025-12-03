@@ -83,7 +83,7 @@ Sigima has been funded by the following stakeholders:
     auto_examples/index
     api/index
     contributing/index
-    changelog
+    release_notes/index
 
 
 .. _DataLab: https://www.datalab-platform.com

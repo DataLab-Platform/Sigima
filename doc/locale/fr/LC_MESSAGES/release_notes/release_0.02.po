@@ -1,0 +1,53 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Sigima \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-03 16:20+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid "Version 0.2"
+msgstr ""
+
+msgid "Sigima Version 0.2.0 (2025-07-07)"
+msgstr "Sigima Version 0.2.0 (07/07/2025)"
+
+msgid "⚠️ Major API changes:"
+msgstr "⚠️ Changements majeurs de l'API:"
+
+msgid "Rename `sigima.computation` to `sigima.proc`."
+msgstr "Renommage de `sigima.computation` en `sigima.proc`."
+
+msgid "Rename `sigima.algorithms` to `sigima.tools`."
+msgstr "Renommage de `sigima.algorithms` en `sigima.tools`."
+
+msgid "Rename `sigima.obj` to `sigima.objects`."
+msgstr "Renommage de `sigima.obj` en `sigima.objects`."
+
+msgid "Rename `sigima.param` to `sigima.params`."
+msgstr "Renommage de `sigima.param` en `sigima.params`."
+
+msgid "ℹ️ Various changes:"
+msgstr "ℹ️ Divers changements:"
+
+msgid "Add Sigima SVG logo."
+msgstr "Ajout du logo SVG de Sigima."
+
+msgid "🛠️ Bug fixes:"
+msgstr "🛠️ Correctifs:"
+
+msgid "Fix API documentation and docstrings."
+msgstr "Correction de la documentation de l'API et des docstrings."
