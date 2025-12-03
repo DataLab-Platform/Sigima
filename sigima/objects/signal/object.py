@@ -40,6 +40,28 @@ from sigima.objects.signal.constants import (
 from sigima.objects.signal.roi import SignalROI
 
 
+def validate_and_convert_dtype(x: np.ndarray) -> np.ndarray:
+    """Check if data type is valid, convert integer to float64 if needed.
+
+    Args:
+        x: Input array
+
+    Returns:
+        Original array if data type is valid, array converted to float64 if integer
+
+    Raises:
+        ValueError: If data type is not valid
+    """
+    if np.issubdtype(x.dtype, np.integer):
+        return x.astype(np.float64)
+    if x.dtype not in SignalObj.VALID_DTYPES:
+        raise ValueError(
+            f"Invalid data type: {x.dtype}. "
+            f"Valid types: {', '.join(str(dt) for dt in SignalObj.VALID_DTYPES)}"
+        )
+    return x
+
+
 class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
     """Signal object"""
 
@@ -196,14 +218,15 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         if dy is not None:
             dy = np.array(dy)
         if dx is None and dy is None:
-            self.xydata = np.vstack([x, y])
+            xydata = np.vstack([x, y])
         else:
             if dx is None:
                 dx = np.full_like(x, np.nan)
             if dy is None:
                 dy = np.full_like(y, np.nan)
             assert x is not None and y is not None
-            self.xydata = np.vstack((x, y, dx, dy))
+            xydata = np.vstack((x, y, dx, dy))
+        self.xydata = validate_and_convert_dtype(xydata)
 
     def __get_x(self) -> np.ndarray | None:
         """Get x data"""
@@ -225,7 +248,7 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         )
         if not np.all(np.diff(data) >= 0.0):
             raise ValueError("X data must be monotonic (sorted in ascending order)")
-        self.xydata[0] = data
+        self.xydata[0] = validate_and_convert_dtype(data)
 
     def __get_y(self) -> np.ndarray | None:
         """Get y data"""
@@ -242,7 +265,7 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
             "Y data size must match X data size"
         )
         assert np.issubdtype(data.dtype, np.inexact), "Y data must be float or complex"
-        self.xydata[1] = data
+        self.xydata[1] = validate_and_convert_dtype(data)
 
     def __get_dx(self) -> np.ndarray | None:
         """Get dx data"""
@@ -266,7 +289,7 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         )
         if len(self.xydata) == 2:
             self.xydata = np.vstack((self.xydata, np.zeros((2, self.xydata.shape[1]))))
-        self.xydata[2] = np.array(data)
+        self.xydata[2] = validate_and_convert_dtype(data)
 
     def __get_dy(self) -> np.ndarray | None:
         """Get dy data"""
@@ -290,7 +313,7 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         )
         if len(self.xydata) == 2:
             self.xydata = np.vstack((self.xydata, np.zeros((2, self.xydata.shape[1]))))
-        self.xydata[3] = np.array(data)
+        self.xydata[3] = validate_and_convert_dtype(data)
 
     x = property(__get_x, __set_x)
     y = data = property(__get_y, __set_y)

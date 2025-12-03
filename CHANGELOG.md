@@ -7,6 +7,12 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 
 🛠️ Bug fixes:
 
+* **Signal data type validation**: Fixed integer arrays not being automatically converted to float64
+  * Integer input arrays are now automatically converted to float64 instead of raising errors
+  * Validation applied consistently across all signal data setters: `set_xydata()`, `x`, `y`, `dx`, `dy`
+  * Improves usability by accepting integer inputs (common in test data and calibration values) while maintaining computational precision
+  * Raises clear `ValueError` for truly invalid dtypes with helpful error message listing valid types
+
 * **Signal axis calibration**: Added `replace_x_by_other_y()` function to replace signal X coordinates with Y values from another signal
   * Addresses missing functionality for wavelength calibration and similar use cases where calibration data is stored in a separate signal's Y values
   * This operation was previously impossible, even if the ambiguous X-Y mode feature existed and seemed related to this use case (but this feature performs resampling/interpolation, which is not desired here)

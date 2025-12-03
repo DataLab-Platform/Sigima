@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-03 11:32+0100\n"
+"POT-Creation-Date: 2025-12-03 13:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -30,6 +30,21 @@ msgstr "sigima 1.0.3 (non publié)"
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs:"
+
+msgid "**Signal data type validation**: Fixed integer arrays not being automatically converted to float64"
+msgstr "**Validation du type de données du signal** : Correction des tableaux entiers qui n'étaient pas automatiquement convertis en float64"
+
+msgid "Integer input arrays are now automatically converted to float64 instead of raising errors"
+msgstr "Les tableaux d'entrée entiers sont désormais automatiquement convertis en float64 au lieu de générer des erreurs"
+
+msgid "Validation applied consistently across all signal data setters: `set_xydata()`, `x`, `y`, `dx`, `dy`"
+msgstr "La validation est appliquée de manière cohérente à tous les accesseurs de données de signal : `set_xydata()`, `x`, `y`, `dx`, `dy`"
+
+msgid "Improves usability by accepting integer inputs (common in test data and calibration values) while maintaining computational precision"
+msgstr "Améliore l'utilisabilité en acceptant les entrées entières (courantes dans les données de test et les valeurs d'étalonnage) tout en maintenant la précision de calcul"
+
+msgid "Raises clear `ValueError` for truly invalid dtypes with helpful error message listing valid types"
+msgstr "Lève une exception `ValueError` claire pour les types de données vraiment invalides avec un message d'erreur utile répertoriant les types valides"
 
 msgid "**Signal axis calibration**: Added `replace_x_by_other_y()` function to replace signal X coordinates with Y values from another signal"
 msgstr "**Étalonnage de l'axe des signaux** : Ajout de la fonction `replace_x_by_other_y()` pour remplacer les coordonnées X d'un signal par les valeurs Y d'un autre signal"
