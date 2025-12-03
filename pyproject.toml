@@ -8,8 +8,7 @@ maintainers = [
 ]
 description = "Scientific computing engine for 1D signals and 2D images, part of the DataLab open-source platform."
 readme = "README.md"
-license = "BSD-3-Clause"
-license-files = ["LICENSE"]
+license = { file = "LICENSE" }
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
