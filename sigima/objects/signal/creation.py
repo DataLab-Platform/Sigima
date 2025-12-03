@@ -1286,10 +1286,44 @@ class PolyParam(NewSignalParam, title=_("Polynomial")):
 
     def generate_title(self) -> str:
         """Generate a title based on current parameters."""
-        return (
-            f"polynomial(a0={self.a0:.3g},a1={self.a1:.3g},a2={self.a2:.3g},"
-            f"a3={self.a3:.3g},a4={self.a4:.3g},a5={self.a5:.3g})"
-        )
+        coeffs = [self.a0, self.a1, self.a2, self.a3, self.a4, self.a5]
+        terms = []
+        for i, coeff in enumerate(coeffs):
+            if coeff == 0:
+                continue
+            # Format coefficient
+            if i == 0:
+                # Constant term
+                terms.append(f"{coeff:.3g}")
+            elif i == 1:
+                # Linear term
+                if coeff == 1:
+                    terms.append("x")
+                elif coeff == -1:
+                    terms.append("-x")
+                else:
+                    terms.append(f"{coeff:.3g}x")
+            else:
+                # Higher order terms
+                if coeff == 1:
+                    terms.append(f"x^{i}")
+                elif coeff == -1:
+                    terms.append(f"-x^{i}")
+                else:
+                    terms.append(f"{coeff:.3g}x^{i}")
+
+        if not terms:
+            return "0"
+
+        # Join terms with + or - signs
+        result = terms[0]
+        for term in terms[1:]:
+            if term.startswith("-"):
+                result += term
+            else:
+                result += f"+{term}"
+
+        return result
 
     def generate_1d_data(self) -> tuple[np.ndarray, np.ndarray]:
         """Compute 1D data based on current parameters.

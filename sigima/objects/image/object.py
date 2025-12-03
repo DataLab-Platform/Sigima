@@ -391,6 +391,16 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
         single_roi = self.roi.get_single_roi(roi_index)
         # pylint: disable=unbalanced-tuple-unpacking
         x0, y0, x1, y1 = self.physical_to_indices(single_roi.get_bounding_box(self))
+        # Clip coordinates to image boundaries to handle ROIs extending beyond canvas
+        x0 = max(0, x0)
+        y0 = max(0, y0)
+        x1 = min(self.data.shape[1], x1)
+        y1 = min(self.data.shape[0], y1)
+        # If ROI is completely outside the image, return a fully masked array
+        # with a single element to avoid zero-size array errors in statistics
+        if x0 >= x1 or y0 >= y1:
+            empty_array = ma.masked_array([[np.nan]], dtype=self.data.dtype, mask=True)
+            return empty_array
         return self.get_masked_view()[y0:y1, x0:x1]
 
     def copy(

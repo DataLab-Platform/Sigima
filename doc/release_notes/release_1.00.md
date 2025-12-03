@@ -1,15 +1,47 @@
-# Release notes #
+# Version 1.0 #
 
-The `sigima` library is part of the DataLab open-source platform.
-See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.html) for future and past milestones.
-
-## sigima 1.1.0 ##
+## Sigima Version 1.1.0 (unreleased) ##
 
 ✨ New features and enhancements:
 
 * **Stub server**: Added `remove_object()` method to `DataLabStubServer` for testing DataLab's proxy remove functionality
 
-## sigima 1.0.2 ##
+## Sigima Version 1.0.3 (unreleased) ##
+
+🛠️ Bug fixes:
+
+* **Signal data type validation**: Fixed integer arrays not being automatically converted to float64
+  * Integer input arrays are now automatically converted to float64 instead of raising errors
+  * Validation applied consistently across all signal data setters: `set_xydata()`, `x`, `y`, `dx`, `dy`
+  * Improves usability by accepting integer inputs (common in test data and calibration values) while maintaining computational precision
+  * Raises clear `ValueError` for truly invalid dtypes with helpful error message listing valid types
+
+* **Signal axis calibration**: Added `replace_x_by_other_y()` function to replace signal X coordinates with Y values from another signal
+  * Addresses missing functionality for wavelength calibration and similar use cases where calibration data is stored in a separate signal's Y values
+  * This operation was previously impossible, even if the ambiguous X-Y mode feature existed and seemed related to this use case (but this feature performs resampling/interpolation, which is not desired here)
+  * The new function directly uses Y arrays from both signals without interpolation, requiring signals to have the same number of points
+  * Takes two signals: first provides Y data for output, second provides Y data to become X coordinates
+  * Automatically transfers metadata: X label/unit from second signal's Y label/unit, Y label/unit preserved from first signal
+  * Typical use case: spectroscopy wavelength calibration (combine absorption measurements with wavelength scale)
+  * This closes [Issue #4](https://github.com/DataLab-Platform/Sigima/issues/4) - Missing functionality: Replace X coordinates with Y values from another signal for calibration
+
+* Signal title formatting:
+  * **Polynomial signal titles**: Fixed polynomial signal title generation to display mathematical notation (e.g., `1+2x-3x²+4x³`) instead of verbose parameter listing (e.g., `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)
+  * The `PolyParam.generate_title()` method now constructs proper mathematical expressions with correct sign handling, coefficient simplification (e.g., `x` instead of `1x`, `-x` instead of `-1x`), and exponent notation using `^` symbol
+  * Improves readability in DataLab GUI and signal listings by presenting polynomials in standard mathematical form
+  * Zero coefficients are automatically omitted from the expression (e.g., `1+x+x³` when a2=0)
+  * Handles edge cases including all-zero polynomials (returns `"0"`), single terms, and negative coefficients
+  * This closes [Issue #3](https://github.com/DataLab-Platform/Sigima/issues/3) - Polynomial signal titles should use mathematical notation instead of parameter listing
+
+* ROI data extraction:
+  * Fixed `ValueError: zero-size array to reduction operation minimum which has no identity` error when computing statistics on images with ROI extending beyond canvas boundaries
+  * The `ImageObj.get_data()` method now properly clips ROI bounding boxes to image boundaries
+  * When a ROI is completely outside the image bounds, returns a fully masked 1x1 array (containing NaN) to avoid zero-size array errors in statistics computations
+  * Partial overlap ROIs are correctly handled by clipping coordinates to valid image ranges
+  * This fix ensures robust statistics computation regardless of ROI position relative to image boundaries
+  * This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` when computing statistics on ROI extending beyond image boundaries
+
+## Sigima Version 1.0.2 (2025-11-12) ##
 
 ✨ New features and enhancements:
 
@@ -51,7 +83,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
 * Public API:
   * Made `BaseObj.roi_has_changed` method private (by renaming to `BaseObj.__roi_has_changed`) to avoid accidental external usage. This would interfere with the internal mask refresh mechanism that relies on controlled access to this method. The method is not part of the public API and should not be called directly by applications.
 
-## sigima 1.0.1 ##
+## Sigima Version 1.0.1 (2025-11-05) ##
 
 ✨ New features and enhancements:
 
@@ -150,7 +182,7 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
   * These methods were implemented for API completeness but were not used in the Sigima/DataLab codebase
   * Added comprehensive unit tests covering all ROI types (rectangular, circular, polygonal) and edge cases
 
-## sigima 1.0.0 ##
+## Sigima Version 1.0.0 (2025-10-28) ##
 
 ✨ New features and enhancements:
 
@@ -436,24 +468,3 @@ See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.
   * Updated minimum requirement from 4.5.4.60 to 4.8.1.78
   * Addresses libwebp binaries vulnerability in bundled OpenCV wheels
   * See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details
-
-## sigima 0.2.0 ##
-
-⚠️ Major API changes:
-
-* Rename `sigima.computation` to `sigima.proc`.
-* Rename `sigima.algorithms` to `sigima.tools`.
-* Rename `sigima.obj` to `sigima.objects`.
-* Rename `sigima.param` to `sigima.params`.
-
-ℹ️ Various changes:
-
-* Add Sigima SVG logo.
-
-🛠️ Bug fixes:
-
-* Fix API documentation and docstrings.
-
-## sigima 0.1.0 ##
-
-This first version of the library is the result of the externalization of the signal and image processing features from the DataLab main repository.

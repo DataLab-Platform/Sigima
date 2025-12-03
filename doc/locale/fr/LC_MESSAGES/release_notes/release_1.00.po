@@ -19,14 +19,98 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-msgid "Release notes"
-msgstr "Notes de version"
+msgid "Version 1.0"
+msgstr ""
 
-msgid "The `sigima` library is part of the DataLab open-source platform. See DataLab [roadmap page](https://datalab-platform.com/en/contributing/roadmap.html) for future and past milestones."
-msgstr "La bibliothèque `sigima` fait partie de la plateforme open-source DataLab. Consultez la [page de feuille de route](https://datalab-platform.com/en/contributing/roadmap.html) de DataLab pour les jalons futurs et passés."
+msgid "Sigima Version 1.0.3 (unreleased)"
+msgstr ""
 
-msgid "sigima 1.0.2"
-msgstr "sigima 1.0.2"
+msgid "🛠️ Bug fixes:"
+msgstr "🛠️ Correctifs:"
+
+msgid "**Signal data type validation**: Fixed integer arrays not being automatically converted to float64"
+msgstr "**Validation du type de données du signal** : Correction des tableaux entiers qui n'étaient pas automatiquement convertis en float64"
+
+msgid "Integer input arrays are now automatically converted to float64 instead of raising errors"
+msgstr "Les tableaux d'entrée entiers sont désormais automatiquement convertis en float64 au lieu de générer des erreurs"
+
+msgid "Validation applied consistently across all signal data setters: `set_xydata()`, `x`, `y`, `dx`, `dy`"
+msgstr "La validation est appliquée de manière cohérente à tous les accesseurs de données de signal : `set_xydata()`, `x`, `y`, `dx`, `dy`"
+
+msgid "Improves usability by accepting integer inputs (common in test data and calibration values) while maintaining computational precision"
+msgstr "Améliore l'utilisabilité en acceptant les entrées entières (courantes dans les données de test et les valeurs d'étalonnage) tout en maintenant la précision de calcul"
+
+msgid "Raises clear `ValueError` for truly invalid dtypes with helpful error message listing valid types"
+msgstr "Lève une exception `ValueError` claire pour les types de données vraiment invalides avec un message d'erreur utile répertoriant les types valides"
+
+msgid "**Signal axis calibration**: Added `replace_x_by_other_y()` function to replace signal X coordinates with Y values from another signal"
+msgstr "**Étalonnage de l'axe des signaux** : Ajout de la fonction `replace_x_by_other_y()` pour remplacer les coordonnées X d'un signal par les valeurs Y d'un autre signal"
+
+msgid "Addresses missing functionality for wavelength calibration and similar use cases where calibration data is stored in a separate signal's Y values"
+msgstr "Répond à un manque de fonctionnalité pour l'étalonnage en longueur d'onde et des cas d'utilisation similaires où les données d'étalonnage sont stockées dans les valeurs Y d'un signal séparé"
+
+msgid "This operation was previously impossible, even if the ambiguous X-Y mode feature existed and seemed related to this use case (but this feature performs resampling/interpolation, which is not desired here)"
+msgstr "Cette opération était auparavant impossible, même si la fonctionnalité ambiguë du mode X-Y existait et semblait liée à ce cas d'utilisation (mais cette fonctionnalité effectue un rééchantillonnage/interpolation, ce qui n'est pas souhaité ici)"
+
+msgid "The new function directly uses Y arrays from both signals without interpolation, requiring signals to have the same number of points"
+msgstr "La nouvelle fonction utilise directement les tableaux Y des deux signaux sans interpolation, nécessitant que les signaux aient le même nombre de points"
+
+msgid "Takes two signals: first provides Y data for output, second provides Y data to become X coordinates"
+msgstr "A partir de deux signaux en entrée : le premier fournit les données Y pour la sortie, le second fournit les données Y qui deviendront les coordonnées X"
+
+msgid "Automatically transfers metadata: X label/unit from second signal's Y label/unit, Y label/unit preserved from first signal"
+msgstr "Transfert automatique des métadonnées : étiquette/unité X à partir de l'étiquette/unité Y du second signal, étiquette/unité Y préservée du premier signal"
+
+msgid "Typical use case: spectroscopy wavelength calibration (combine absorption measurements with wavelength scale)"
+msgstr "Cas d'utilisation typique : étalonnage en longueur d'onde en spectroscopie (combiner les mesures d'absorption avec l'échelle de longueur d'onde)"
+
+msgid "This closes [Issue #4](https://github.com/DataLab-Platform/Sigima/issues/4) - Missing functionality: Replace X coordinates with Y values from another signal for calibration"
+msgstr "Ceci clôture [Issue #4](https://github.com/DataLab-Platform/Sigima/issues/4) - Fonctionnalité manquante : Remplacer les coordonnées X par les valeurs Y d'un autre signal pour l'étalonnage"
+
+msgid "Signal title formatting:"
+msgstr "Formatage des titres de signaux :"
+
+msgid "**Polynomial signal titles**: Fixed polynomial signal title generation to display mathematical notation (e.g., `1+2x-3x²+4x³`) instead of verbose parameter listing (e.g., `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)"
+msgstr "**Titres de signaux polynomiaux** : Correction de la génération des titres de signaux polynomiaux pour afficher une notation mathématique (par exemple, `1+2x-3x²+4x³`) au lieu d'une liste de paramètres verbeuse (par exemple, `polynomial(a0=1,a1=2,a2=-3,a3=4,a4=0,a5=0)`)"
+
+msgid "The `PolyParam.generate_title()` method now constructs proper mathematical expressions with correct sign handling, coefficient simplification (e.g., `x` instead of `1x`, `-x` instead of `-1x`), and exponent notation using `^` symbol"
+msgstr "La méthode `PolyParam.generate_title()` construit désormais des expressions mathématiques appropriées avec une gestion correcte des signes, une simplification des coefficients (par exemple, `x` au lieu de `1x`, `-x` au lieu de `-1x`) et une notation des exposants utilisant le symbole `^`"
+
+msgid "Improves readability in DataLab GUI and signal listings by presenting polynomials in standard mathematical form"
+msgstr "Améliore la lisibilité dans l'interface graphique de DataLab et les listes de signaux en présentant les polynômes sous une forme mathématique standard"
+
+msgid "Zero coefficients are automatically omitted from the expression (e.g., `1+x+x³` when a2=0)"
+msgstr "Les coefficients nuls sont automatiquement omis de l'expression (par exemple, `1+x+x³` lorsque a2=0)"
+
+msgid "Handles edge cases including all-zero polynomials (returns `\"0\"`), single terms, and negative coefficients"
+msgstr "Gère les cas limites, y compris les polynômes tous nuls (renvoie `\"0\"`), les termes uniques et les coefficients négatifs"
+
+msgid "This closes [Issue #3](https://github.com/DataLab-Platform/Sigima/issues/3) - Polynomial signal titles should use mathematical notation instead of parameter listing"
+msgstr "Ceci clôture [Issue #3](https://github.com/DataLab-Platform/Sigima/issues/3) - Les titres des signaux polynomiaux doivent utiliser une notation mathématique au lieu d'une liste de paramètres"
+
+msgid "ROI data extraction:"
+msgstr "Extraction de données ROI :"
+
+msgid "Fixed `ValueError: zero-size array to reduction operation minimum which has no identity` error when computing statistics on images with ROI extending beyond canvas boundaries"
+msgstr "Correction de l'erreur `ValueError: zero-size array to reduction operation minimum which has no identity` lors du calcul des statistiques sur des images avec ROI s'étendant au-delà des limites de la zone de dessin"
+
+msgid "The `ImageObj.get_data()` method now properly clips ROI bounding boxes to image boundaries"
+msgstr "La méthode `ImageObj.get_data()` limite désormais correctement les boîtes englobantes des ROI aux limites de l'image"
+
+msgid "When a ROI is completely outside the image bounds, returns a fully masked 1x1 array (containing NaN) to avoid zero-size array errors in statistics computations"
+msgstr "Lorsqu'une ROI est complètement en dehors des limites de l'image, renvoie un tableau 1x1 entièrement masqué (contenant NaN) pour éviter les erreurs de tableau de taille zéro dans les calculs statistiques"
+
+msgid "Partial overlap ROIs are correctly handled by clipping coordinates to valid image ranges"
+msgstr "Les ROI partiellement superposées sont correctement gérées en limitant les coordonnées aux plages valides de l'image"
+
+msgid "This fix ensures robust statistics computation regardless of ROI position relative to image boundaries"
+msgstr "Ce correctif garantit un calcul statistique robuste quel que soit la position de la ROI par rapport aux limites de l'image"
+
+msgid "This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` when computing statistics on ROI extending beyond image boundaries"
+msgstr "Ceci clôture [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` lors du calcul des statistiques sur ROI s'étendant au-delà des limites de l'image"
+
+msgid "Sigima Version 1.0.2 (2025-11-12)"
+msgstr "Sigima Version 1.0.2 (12/11/2025)"
 
 msgid "✨ New features and enhancements:"
 msgstr "✨ Nouvelles fonctionnalités et améliorations:"
@@ -94,9 +178,6 @@ msgstr "Exemple : `x, y = proxy.compute_x_at_y(params).value` fournit un accès 
 msgid "Breaking change: Scripts accessing results as tables need to update to use `.value` property or `.coords` array"
 msgstr "Changement majeur : Les scripts accédant aux résultats sous forme de tableaux doivent être mis à jour pour utiliser la propriété `.value` ou le tableau `.coords`"
 
-msgid "🛠️ Bug fixes:"
-msgstr "🛠️ Correctifs:"
-
 msgid "Detection functions:"
 msgstr "Fonctions de détection :"
 
@@ -124,8 +205,8 @@ msgstr "API publique :"
 msgid "Made `BaseObj.roi_has_changed` method private (by renaming to `BaseObj.__roi_has_changed`) to avoid accidental external usage. This would interfere with the internal mask refresh mechanism that relies on controlled access to this method. The method is not part of the public API and should not be called directly by applications."
 msgstr "La méthode `BaseObj.roi_has_changed` a été rendue privée (en la renommant en `BaseObj.__roi_has_changed`) pour éviter une utilisation externe accidentelle. Cela interférerait avec le mécanisme interne de rafraîchissement des masques qui repose sur un accès contrôlé à cette méthode. La méthode ne fait pas partie de l'API publique et ne doit pas être appelée directement par les applications."
 
-msgid "sigima 1.0.1"
-msgstr "sigima 1.0.1"
+msgid "Sigima Version 1.0.1 (2025-11-05)"
+msgstr "Sigima Version 1.0.1 (05/11/2025)"
 
 msgid "**Detection ROI creation**: Generic mechanism for ROI creation across all detection functions"
 msgstr "**Création de ROI de détection** : Mécanisme générique de création de ROI pour toutes les fonctions de détection"
@@ -278,28 +359,28 @@ msgid "Fully compatible with DataLab's PlotPy adapter pattern for visualization"
 msgstr "Entièrement compatible avec le modèle d'adaptateur PlotPy de DataLab pour la visualisation"
 
 msgid "**2D peak detection**: Fixed architectural violation in `peak_detection()` computation function"
-msgstr ""
+msgstr "**Détection de pics 2D** : Correction d'une violation architecturale dans la fonction de calcul `peak_detection()`"
 
 msgid "Removed direct ROI creation from computation function (was modifying input objects)"
-msgstr ""
+msgstr "Suppression de la création directe de ROI dans la fonction de calcul (modifiait les objets d'entrée)"
 
 msgid "Computation functions decorated with `@computation_function()` must be pure (no side effects)"
-msgstr ""
+msgstr "Les fonctions de calcul décorées avec `@computation_function()` doivent être pures (pas d'effets de bord)"
 
 msgid "Removed line 128: `obj.roi = create_image_roi(...)` which violated this principle"
-msgstr ""
+msgstr "Suppression de la ligne 128 : `obj.roi = create_image_roi(...)` qui contrevenait à ce principe"
 
 msgid "ROI creation now handled by applications in their presentation layer"
-msgstr ""
+msgstr "La création de ROI est désormais gérée par les applications dans leur couche de présentation"
 
 msgid "DataLab uses new `create_image_roi_around_points()` utility for this purpose"
-msgstr ""
+msgstr "DataLab utilise la nouvelle utilité `create_image_roi_around_points()` à cet effet"
 
 msgid "Maintains separation of concerns: Sigima computes results, applications create visual representations"
-msgstr ""
+msgstr "Maintient la séparation des concepts : Sigima calcule les résultats, les applications créent des représentations visuelles"
 
 msgid "Fixes regression where ROIs were not appearing in DataLab's processor-based workflow"
-msgstr ""
+msgstr "Corrige la régression où les ROI n'apparaissaient pas dans le flux de travail basé sur les processeurs de DataLab"
 
 msgid "**Parameter classes**: Removed default titles from generic `OrdinateParam` and `AbscissaParam` classes"
 msgstr "**Classes de paramètres** : Suppression des titres par défaut des classes génériques `OrdinateParam` et `AbscissaParam`"
@@ -364,8 +445,8 @@ msgstr "Ces méthodes ont été implémentées pour compléter l'API mais n'ont 
 msgid "Added comprehensive unit tests covering all ROI types (rectangular, circular, polygonal) and edge cases"
 msgstr "Ajout de tests unitaires complets couvrant tous les types de ROI (rectangulaire, circulaire, polygonal) et les cas limites"
 
-msgid "sigima 1.0.0"
-msgstr "sigima 1.0.0"
+msgid "Sigima Version 1.0.0 (2025-10-28)"
+msgstr "Sigima Version 1.0.0 (28/10/2025)"
 
 msgid "**Signals to image conversion**: New feature to combine multiple signals into a 2D image"
 msgstr "**Conversion de signaux en image** : Nouvelle fonctionnalité pour combiner plusieurs signaux en une image 2D"
@@ -1087,36 +1168,3 @@ msgstr "Correction de la vulnérabilité des binaires libwebp dans les paquets W
 
 msgid "See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details"
 msgstr "Voir l'[avis de sécurité DataLab](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) pour plus de détails."
-
-msgid "sigima 0.2.0"
-msgstr "sigima 0.2.0"
-
-msgid "⚠️ Major API changes:"
-msgstr "⚠️ Changements majeurs de l'API:"
-
-msgid "Rename `sigima.computation` to `sigima.proc`."
-msgstr "Renommage de `sigima.computation` en `sigima.proc`."
-
-msgid "Rename `sigima.algorithms` to `sigima.tools`."
-msgstr "Renommage de `sigima.algorithms` en `sigima.tools`."
-
-msgid "Rename `sigima.obj` to `sigima.objects`."
-msgstr "Renommage de `sigima.obj` en `sigima.objects`."
-
-msgid "Rename `sigima.param` to `sigima.params`."
-msgstr "Renommage de `sigima.param` en `sigima.params`."
-
-msgid "ℹ️ Various changes:"
-msgstr "ℹ️ Divers changements:"
-
-msgid "Add Sigima SVG logo."
-msgstr "Ajout du logo SVG de Sigima."
-
-msgid "Fix API documentation and docstrings."
-msgstr "Correction de la documentation de l'API et des docstrings."
-
-msgid "sigima 0.1.0"
-msgstr "sigima 0.1.0"
-
-msgid "This first version of the library is the result of the externalization of the signal and image processing features from the DataLab main repository."
-msgstr "Cette première version de la bibliothèque est le résultat de l'externalisation des fonctionnalités de traitement des signaux et des images du référentiel principal de DataLab."

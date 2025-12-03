@@ -4,7 +4,6 @@
 
 import os
 import os.path as osp
-import shutil
 import sys
 
 import guidata.config as gcfg
@@ -44,29 +43,6 @@ import sigima
 # Turn off validation of guidata config
 # (documentation build is not the right place for validation)
 gcfg.set_validation_mode(gcfg.ValidationMode.DISABLED)
-
-
-def copy_changelog(app):
-    """Copy CHANGELOG.md to doc folder."""
-    docpath = osp.abspath(osp.dirname(__file__))
-    dest_fname = osp.join(docpath, "changelog.md")
-    if osp.exists(dest_fname):
-        os.remove(dest_fname)
-    shutil.copyfile(osp.join(docpath, "..", "CHANGELOG.md"), dest_fname)
-    app.env.temp_changelog_path = dest_fname
-
-
-def cleanup_changelog(app, exception):
-    """Remove CHANGELOG.md from doc folder."""
-    try:
-        path = getattr(app.env, "temp_changelog_path", None)
-        if path and osp.exists(path):
-            os.remove(path)
-    except Exception as exc:
-        print(f"Warning: failed to remove {path}: {exc}")
-    finally:
-        if hasattr(app.env, "temp_changelog_path"):
-            del app.env.temp_changelog_path
 
 
 def exclude_api_from_gettext(app):
@@ -113,8 +89,6 @@ def patch_datalab_client_example():
 
 def setup(app):
     """Setup function for Sphinx."""
-    app.connect("builder-inited", copy_changelog)
-    app.connect("build-finished", cleanup_changelog)
     app.add_directive("options-table", OptionsTableDirective)
     app.connect("builder-inited", exclude_api_from_gettext)
 

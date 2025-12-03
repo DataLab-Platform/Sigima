@@ -7,9 +7,9 @@ name: Install and Test on Ubuntu (latest)
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "release" ]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "release" ]
 
 jobs:
   build:
@@ -39,6 +39,20 @@ jobs:
            pip uninstall -y guidata
            cd ..
            git clone --depth 1 --branch develop https://github.com/PlotPyStack/guidata.git
+           cd Sigima
+           pip install -e ../guidata
+           # Install tomli for TOML parsing (safe if already present)
+           pip install tomli
+           # Extract dependencies and save to file, then install
+           python -c "import tomli; f=open('pyproject.toml','rb'); data=tomli.load(f); deps=[d for d in data['project']['dependencies'] if not any(p in d for p in ['guidata'])]; open('deps.txt','w').write('\n'.join(deps))"
+           pip install -r deps.txt
+           # Install Sigima without dependencies
+           pip install --no-deps .
+        elif [ "${{ github.ref_name }}" = "release" ]; then
+           pip uninstall -y guidata
+           cd ..
+           # Try cloning guidata from release, fallback to main or master
+           git clone --depth 1 --branch release https://github.com/PlotPyStack/guidata.git || git clone --depth 1 https://github.com/PlotPyStack/guidata.git || git clone --depth 1 --branch master https://github.com/PlotPyStack/guidata.git
            cd Sigima
            pip install -e ../guidata
            # Install tomli for TOML parsing (safe if already present)
