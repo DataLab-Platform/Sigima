@@ -340,6 +340,8 @@ Signal Conditioning & Processing
      - Reverse x-axis order
    * - :func:`xy_mode <sigima.proc.signal.xy_mode>`
      - Handle XY coordinate modes
+   * - :func:`replace_x_by_other_y <sigima.proc.signal.replace_x_by_other_y>`
+     - Replace X axis using another signal's Y values
    * - :func:`zero_padding <sigima.proc.signal.zero_padding>`
      - Zero-padding for signals
 
