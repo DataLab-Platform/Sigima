@@ -1,12 +1,6 @@
 # Release notes #
 
-## Sigima Version 1.1.0 (unreleased) ##
-
-✨ New features and enhancements:
-
-* **Stub server**: Added `remove_object()` method to `DataLabStubServer` for testing DataLab's proxy remove functionality
-
-## Sigima Version 1.0.3 (unreleased) ##
+## Sigima Version 1.0.3 (2025-12-03) ##
 
 🛠️ Bug fixes:
 

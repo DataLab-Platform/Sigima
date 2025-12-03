@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-03 11:32+0100\n"
+"POT-Creation-Date: 2025-12-04 19:43+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Release notes"
 msgstr "Notes de version"
 
-msgid "Sigima Version 1.0.3 (unreleased)"
+msgid "Sigima Version 1.0.3"
 msgstr ""
 
 msgid "🛠️ Bug fixes:"
@@ -177,9 +177,6 @@ msgstr "Exemple : `x, y = proxy.compute_x_at_y(params).value` fournit un accès 
 
 msgid "Breaking change: Scripts accessing results as tables need to update to use `.value` property or `.coords` array"
 msgstr "Changement majeur : Les scripts accédant aux résultats sous forme de tableaux doivent être mis à jour pour utiliser la propriété `.value` ou le tableau `.coords`"
-
-msgid "🛠️ Bug fixes:"
-msgstr "🛠️ Correctifs:"
 
 msgid "Detection functions:"
 msgstr "Fonctions de détection :"
