@@ -4,4 +4,6 @@
 
 ✨ New features and enhancements:
 
-* **Stub server**: Added `remove_object()` method to `DataLabStubServer` for testing DataLab's proxy remove functionality
+* **Stub server**: Added missing methods to `DataLabStubServer` to support new DataLab features
+  * Added `remove_object()` method (removes an object from DataLab)
+  * Added `call_method()` method (simulates calling a method on DataLab's main interface or panels)
