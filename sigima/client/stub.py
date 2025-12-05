@@ -166,19 +166,12 @@ class DataLabStubServer:
         self.server.register_function(self.select_objects, "select_objects")
         self.server.register_function(self.select_groups, "select_groups")
         self.server.register_function(self.get_sel_object_uuids, "get_sel_object_uuids")
-        self.server.register_function(self.delete_object, "delete_object")
-        self.server.register_function(self.duplicate_object, "duplicate_object")
-        self.server.register_function(self.copy_metadata, "copy_metadata")
 
         # Group operations
         self.server.register_function(self.add_group, "add_group")
-        self.server.register_function(self.get_group_titles, "get_group_titles")
         self.server.register_function(
             self.get_group_titles_with_object_info, "get_group_titles_with_object_info"
         )
-        self.server.register_function(self.move_up, "move_up")
-        self.server.register_function(self.move_down, "move_down")
-        self.server.register_function(self.delete_group, "delete_group")
 
         # Calculation operations
         self.server.register_function(self.calc, "calc")
@@ -567,46 +560,6 @@ class DataLabStubServer:
             group_uuids[i] for i in selection if 0 <= i < len(group_uuids)
         ]
 
-    def delete_object(self, uuid_str: str) -> bool:
-        """Delete object by UUID."""
-        if uuid_str in self.signals:
-            del self.signals[uuid_str]
-            return True
-        if uuid_str in self.images:
-            del self.images[uuid_str]
-            return True
-        return False
-
-    def duplicate_object(self, uuid_str: str) -> str | None:
-        """Duplicate object and return new UUID."""
-        obj = self.signals.get(uuid_str) or self.images.get(uuid_str)
-        if obj is None:
-            return None
-
-        # Create a copy using serialization/deserialization
-        json_data = utils.dataset_to_rpcjson(obj)
-        new_obj: SignalObj | ImageObj = utils.rpcjson_to_dataset(json_data)
-        obj_uuid = str(uuid.uuid4())
-        new_obj.title = f"{obj.title} (copy)"
-
-        # Store the copy
-        if isinstance(obj, SignalObj):
-            self.signals[obj_uuid] = new_obj
-        else:
-            self.images[obj_uuid] = new_obj
-        return obj_uuid
-
-    def copy_metadata(self, src_uuid: str, dst_uuid: str) -> bool:
-        """Copy metadata from source to destination object."""
-        src_obj = self.signals.get(src_uuid) or self.images.get(src_uuid)
-        dst_obj = self.signals.get(dst_uuid) or self.images.get(dst_uuid)
-
-        if src_obj is None or dst_obj is None:
-            return False
-
-        dst_obj.metadata.update(src_obj.metadata)
-        return True
-
     # Group operations
     # pylint: disable=unused-argument
     def add_group(
@@ -654,36 +607,6 @@ class DataLabStubServer:
             group_titles_lists.append(object_titles)
 
         return (group_titles, group_uuids_lists, group_titles_lists)
-
-    def get_group_titles(self, panel: str | None = None) -> list[str]:
-        """Get group titles."""
-        panel = panel or self.current_panel
-        if panel == "signal":
-            return [group.title for group in self.signal_groups.values()]
-        if panel == "image":
-            return [group.title for group in self.image_groups.values()]
-        return []
-
-    def move_up(self, uuid_str: str) -> bool:  # pylint: disable=unused-argument
-        """Move object up in list."""
-        # In stub mode, just return success
-        return True
-
-    def move_down(self, uuid_str: str) -> bool:  # pylint: disable=unused-argument
-        """Move object down in list."""
-        # In stub mode, just return success
-        return True
-
-    def delete_group(self, group_id: str, panel: str | None = None) -> bool:
-        """Delete group."""
-        panel = panel or self.current_panel
-        if panel == "signal" and group_id in self.signal_groups:
-            del self.signal_groups[group_id]
-            return True
-        if panel == "image" and group_id in self.image_groups:
-            del self.image_groups[group_id]
-            return True
-        return False
 
     # Macro operations (stub implementations)
     def import_macro_from_file(self, filename: str) -> None:
