@@ -383,7 +383,7 @@ class SimpleRemoteProxy(SimpleBaseProxy):
             group_id: group id in which to add the object. Defaults to ""
             set_current: if True, set the added object as current
         """
-        self._datalab.add_object(obj.serialize(), group_id, set_current)
+        self._datalab.add_object(dataset_to_rpcjson(obj), group_id, set_current)
 
     def load_from_directory(self, path: str) -> None:
         """Open objects from directory in current panel (signals/images).
