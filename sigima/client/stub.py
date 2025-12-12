@@ -152,6 +152,8 @@ class DataLabStubServer:
         self.server.register_function(self.save_to_h5_file, "save_to_h5_file")
         self.server.register_function(self.open_h5_files, "open_h5_files")
         self.server.register_function(self.import_h5_file, "import_h5_file")
+        self.server.register_function(self.load_h5_workspace, "load_h5_workspace")
+        self.server.register_function(self.save_h5_workspace, "save_h5_workspace")
 
         # Object operations
         self.server.register_function(self.add_signal, "add_signal")
@@ -315,6 +317,56 @@ class DataLabStubServer:
     def import_h5_file(self, filename: str, reset_all: bool | None = None) -> None:
         """Open DataLab HDF5 browser to Import HDF5 file."""
         self.open_h5_files([filename], import_all=True, reset_all=reset_all)
+
+    def load_h5_workspace(self, h5files: list[str], reset_all: bool = True) -> None:
+        """Load HDF5 workspace files without showing file dialog.
+
+        This is a headless version that bypasses Qt file dialogs.
+
+        Args:
+            h5files: List of HDF5 file paths to load
+            reset_all: If True (default), reset workspace before loading
+        """
+        if self.verbose:
+            execenv.print(f"[STUB] load_h5_workspace: {h5files}, reset_all={reset_all}")
+
+        if reset_all:
+            self.reset_all()
+
+        # Simulate loading by creating dummy objects for each file
+        for filename in h5files:
+            signal = create_signal(f"Loaded Signal from {os.path.basename(filename)}")
+            self.signals[str(uuid.uuid4())] = signal
+            image = create_image(f"Loaded Image from {os.path.basename(filename)}")
+            self.images[str(uuid.uuid4())] = image
+            if self.verbose:
+                execenv.print(f"[STUB] Created dummy signal and image for: {filename}")
+
+    def save_h5_workspace(self, filename: str) -> None:
+        """Save workspace to HDF5 file without showing file dialog.
+
+        This is a headless version that bypasses Qt file dialogs.
+
+        Args:
+            filename: Path to the output HDF5 file
+        """
+        if self.verbose:
+            execenv.print(f"[STUB] save_h5_workspace: {filename}")
+
+        # Create a dummy file to simulate save
+        try:
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write("# DataLab workspace stub file (for testing)\n")
+                f.write(f"# Signals: {len(self.signals)}\n")
+                f.write(f"# Images: {len(self.images)}\n")
+            if self.verbose:
+                execenv.print(
+                    f"[STUB] Successfully saved workspace with {len(self.signals)} "
+                    f"signals and {len(self.images)} images"
+                )
+        except Exception as exc:  # pylint: disable=broad-except
+            if self.verbose:
+                execenv.print(f"[STUB] Failed to save workspace: {exc}")
 
     # Object operations
     # pylint: disable=unused-argument
