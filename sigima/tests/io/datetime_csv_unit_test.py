@@ -194,5 +194,64 @@ def test_datetime_csv_roundtrip() -> None:
             os.unlink(tmp_path)
 
 
+def test_numeric_csv_not_interpreted_as_datetime() -> None:
+    """Test that purely numeric CSV columns are not misinterpreted as datetime.
+
+    Regression test: When X column contains large numeric values like frequencies
+    in Hz (e.g., 4.884e+06), pd.to_datetime() would interpret them as nanoseconds
+    since Unix epoch, causing the data to be corrupted. Numeric columns should be
+    skipped by the datetime detection logic.
+    """
+    execenv.print("Testing numeric CSV not interpreted as datetime...")
+
+    # Create a signal with large numeric X values (frequencies in Hz)
+    # Values range from 0 to 20 GHz - these should NOT be interpreted as datetime
+    x = np.linspace(0, 2e10, 100)  # 0 to 20 GHz
+    y = np.sin(x / 1e9)  # Some arbitrary Y data
+
+    signal = create_signal("Frequency Response")
+    signal.set_xydata(x, y)
+    signal.xlabel = "Frequency"
+    signal.xunit = "Hz"
+    signal.ylabel = "Amplitude"
+    signal.yunit = "dB"
+
+    # Write to temporary file
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False, newline=""
+    ) as tmp:
+        tmp_path = tmp.name
+
+    try:
+        write_signal(tmp_path, signal)
+        execenv.print(f"  Wrote signal to: {tmp_path}")
+
+        # Read it back
+        signal_read = read_signal(tmp_path)
+        execenv.print("  Signal read back successfully")
+
+        # CRITICAL: Should NOT be interpreted as datetime
+        assert not signal_read.is_x_datetime(), (
+            "Numeric X data should NOT be interpreted as datetime"
+        )
+
+        # Check X values are preserved (not corrupted by datetime conversion)
+        assert np.allclose(signal_read.x, x), (
+            "X values should be preserved (not converted to timestamps)"
+        )
+        assert signal_read.x.min() == 0, "X min should be 0"
+        assert np.isclose(signal_read.x.max(), 2e10), "X max should be 2e10"
+
+        # Check Y values match
+        assert np.allclose(signal_read.y, y, atol=0.01), "Y values should match"
+
+        execenv.print("  ✓ Numeric CSV not interpreted as datetime test passed")
+
+    finally:
+        # Clean up temporary file
+        if osp.exists(tmp_path):
+            os.unlink(tmp_path)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
