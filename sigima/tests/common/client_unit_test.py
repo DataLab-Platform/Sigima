@@ -281,6 +281,43 @@ class RemoteClientTester:
             titles = self.datalab.get_object_titles("signal")
             assert len(titles) > 0, "Should have signals after reload"
 
+    def test_workspace_headless_api(self) -> None:
+        """Test load_h5_workspace and save_h5_workspace headless API (Issue #275)"""
+        if self.datalab is None:
+            return
+
+        with temporary_directory() as tmpdir:
+            # First add some data
+            self.add_test_signals()
+            self.add_test_images()
+
+            # Save workspace using headless API
+            fname = osp.join(tmpdir, "test_workspace.h5")
+            self.datalab.save_h5_workspace(fname)
+            self.log(f"Saved workspace to: {fname}")
+            assert osp.exists(fname), "Workspace file should exist"
+
+            # Clear all data
+            self.datalab.reset_all()
+            titles = self.datalab.get_object_titles("signal")
+            assert len(titles) == 0, "Signal panel should be empty after reset"
+
+            # Load workspace using headless API
+            self.datalab.load_h5_workspace([fname], reset_all=True)
+            self.log("Loaded workspace from file")
+
+            # Verify data is restored
+            titles = self.datalab.get_object_titles("signal")
+            assert len(titles) > 0, "Should have signals after load_h5_workspace"
+            self.log(f"Workspace loaded with {len(titles)} signals")
+
+            # Test with single file path (string instead of list)
+            self.datalab.reset_all()
+            self.datalab.load_h5_workspace(fname, reset_all=True)
+            titles = self.datalab.get_object_titles("signal")
+            assert len(titles) > 0, "Should work with single file path string"
+            self.log("load_h5_workspace works with single file path")
+
     def test_computation_operations(self) -> None:
         """Test computation operations"""
         if self.datalab is None:
@@ -373,6 +410,9 @@ class RemoteClientTester:
 
             # Test file operations (this will reset data)
             self.test_file_operations()
+
+            # Test workspace headless API (Issue #275)
+            self.test_workspace_headless_api()
 
             self.log("✅ All tests completed successfully!")
 

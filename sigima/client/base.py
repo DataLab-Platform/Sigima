@@ -164,6 +164,38 @@ class SimpleAbstractDLControl(abc.ABC):
         """
 
     @abc.abstractmethod
+    def load_h5_workspace(
+        self, h5files: list[str] | str, reset_all: bool = True
+    ) -> None:
+        """Load HDF5 workspace files without showing file dialog.
+
+        This method loads one or more DataLab native HDF5 files directly, bypassing
+        the file dialog. It is safe to call from the internal console or any context
+        where Qt dialogs would cause threading issues.
+
+        Args:
+            h5files: Path(s) to HDF5 file(s). Can be a single path string or a list
+             of paths.
+            reset_all: If True (default), reset workspace before loading.
+             If False, append to existing workspace.
+
+        Raises:
+            ValueError: if file is not a DataLab native HDF5 file
+        """
+
+    @abc.abstractmethod
+    def save_h5_workspace(self, filename: str) -> None:
+        """Save workspace to HDF5 file without showing file dialog.
+
+        This method saves the current workspace to a DataLab native HDF5 file
+        directly, bypassing the file dialog. It is safe to call from the internal
+        console or any context where Qt dialogs would cause threading issues.
+
+        Args:
+            filename: Path to the output HDF5 file
+        """
+
+    @abc.abstractmethod
     def load_from_files(self, filenames: list[str]) -> None:
         """Open objects from files in current panel (signals/images).
 
@@ -624,6 +656,40 @@ class SimpleBaseProxy(SimpleAbstractDLControl, metaclass=abc.ABCMeta):
             reset_all (bool | None): Reset all application data. Defaults to None.
         """
         self._datalab.import_h5_file(filename, reset_all)
+
+    def load_h5_workspace(
+        self, h5files: list[str] | str, reset_all: bool = True
+    ) -> None:
+        """Load HDF5 workspace files without showing file dialog.
+
+        This method loads one or more DataLab native HDF5 files directly, bypassing
+        the file dialog. It is safe to call from the internal console or any context
+        where Qt dialogs would cause threading issues.
+
+        Args:
+            h5files: Path(s) to HDF5 file(s). Can be a single path string or a list
+             of paths.
+            reset_all: If True (default), reset workspace before loading.
+             If False, append to existing workspace.
+
+        Raises:
+            ValueError: if file is not a DataLab native HDF5 file
+        """
+        if isinstance(h5files, str):
+            h5files = [h5files]
+        self._datalab.load_h5_workspace(h5files, reset_all)
+
+    def save_h5_workspace(self, filename: str) -> None:
+        """Save workspace to HDF5 file without showing file dialog.
+
+        This method saves the current workspace to a DataLab native HDF5 file
+        directly, bypassing the file dialog. It is safe to call from the internal
+        console or any context where Qt dialogs would cause threading issues.
+
+        Args:
+            filename: Path to the output HDF5 file
+        """
+        self._datalab.save_h5_workspace(filename)
 
     def load_from_files(self, filenames: list[str]) -> None:
         """Open objects from files in current panel (signals/images).
