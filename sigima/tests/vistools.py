@@ -354,7 +354,8 @@ def create_curve_item(
         assert obj.xydata is not None
         xdata, ydata = obj.xydata
         title = obj.title or title or ""
-    item = make.mcurve(xdata, ydata)
+    # Only display the real part for signals (for simplicity):
+    item = make.mcurve(xdata.real, ydata.real)
     item.param.line.width = 1.25
     item.param.update_item(item)
     item.setTitle(title)
