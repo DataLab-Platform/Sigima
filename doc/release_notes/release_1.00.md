@@ -2,6 +2,14 @@
 
 ## Sigima Version 1.0.4 ##
 
+🛠️ Bug fixes:
+
+* **CSV numeric data import**: Fixed numeric columns being incorrectly interpreted as datetime values ([Issue #6](https://github.com/DataLab-Platform/Sigima/issues/6))
+  * When importing CSV files with large numeric values (e.g., frequencies in Hz like `4.884e+06`), the data was incorrectly converted to datetime timestamps
+  * The `pd.to_datetime()` function was interpreting numeric values as nanoseconds since Unix epoch, corrupting the original data
+  * Added check to skip columns with numeric dtypes in datetime detection - real datetime columns are loaded as string (`object`) dtype
+  * Numeric data (frequencies, voltages, etc.) is now correctly preserved during CSV import
+
 📚 Documentation:
 
 * **Parameter usage documentation**: Improved documentation for parameters requiring signal/image context ([Issue #5](https://github.com/DataLab-Platform/Sigima/issues/5))

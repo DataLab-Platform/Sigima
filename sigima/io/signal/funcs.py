@@ -275,6 +275,13 @@ def _detect_datetime_col(df: pd.DataFrame) -> tuple[pd.DataFrame, dict | None]:
 
     for col_idx in [0, 1]:  # Check first two columns
         col_data = df.iloc[:, col_idx]
+
+        # Skip numeric columns - datetime columns in CSV are loaded as object (string)
+        # dtype, not as float/int. Numeric values (like frequencies in Hz) would be
+        # wrongly interpreted as nanoseconds since Unix epoch by pd.to_datetime.
+        if pd.api.types.is_numeric_dtype(col_data):
+            continue
+
         # Try to convert to datetime
         try:
             # Attempt to parse as datetime

@@ -28,6 +28,24 @@ msgstr ""
 msgid "Sigima Version 1.0.4"
 msgstr ""
 
+msgid "🛠️ Bug fixes:"
+msgstr "🛠️ Correctifs :"
+
+msgid "**CSV numeric data import**: Fixed numeric columns being incorrectly interpreted as datetime values ([Issue #6](https://github.com/DataLab-Platform/Sigima/issues/6))"
+msgstr "**Import de données numériques CSV** : Correction des colonnes numériques incorrectement interprétées comme des valeurs datetime ([Issue #6](https://github.com/DataLab-Platform/Sigima/issues/6))"
+
+msgid "When importing CSV files with large numeric values (e.g., frequencies in Hz like `4.884e+06`), the data was incorrectly converted to datetime timestamps"
+msgstr "Lors de l'import de fichiers CSV avec de grandes valeurs numériques (par exemple, des fréquences en Hz comme `4.884e+06`), les données étaient incorrectement converties en horodatages datetime"
+
+msgid "The `pd.to_datetime()` function was interpreting numeric values as nanoseconds since Unix epoch, corrupting the original data"
+msgstr "La fonction `pd.to_datetime()` interprétait les valeurs numériques comme des nanosecondes depuis l'époque Unix, corrompant les données originales"
+
+msgid "Added check to skip columns with numeric dtypes in datetime detection - real datetime columns are loaded as string (`object`) dtype"
+msgstr "Ajout d'une vérification pour ignorer les colonnes avec des types numériques lors de la détection datetime - les vraies colonnes datetime sont chargées comme type chaîne (`object`)"
+
+msgid "Numeric data (frequencies, voltages, etc.) is now correctly preserved during CSV import"
+msgstr "Les données numériques (fréquences, tensions, etc.) sont maintenant correctement préservées lors de l'import CSV"
+
 msgid "📚 Documentation:"
 msgstr "📚 Documentation :"
 
