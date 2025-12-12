@@ -1,0 +1,125 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Sigima \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-12 18:04+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid ":ref:`Go to the end <sphx_glr_download_auto_examples_features_zero_padding.py>` to download the full example code."
+msgstr ""
+
+msgid "Zero Padding for FFT Enhancement"
+msgstr "Remplissage par zéro pour l'amélioration de la FFT"
+
+msgid "This example demonstrates how to apply zero-padding to signals, a common technique used to improve FFT frequency resolution. It shows the proper usage of :class:`sigima.params.ZeroPadding1DParam`, including the important ``update_from_obj()`` call."
+msgstr "Cet exemple montre comment appliquer un remplissage par zéro aux signaux, une technique courante utilisée pour améliorer la résolution en fréquence de la FFT. Il montre l'utilisation correcte de :class:`sigima.params.ZeroPadding1DParam`, y compris l'appel important à ``update_from_obj()``."
+
+msgid "Zero-padding adds zeros to a signal, effectively interpolating the frequency domain representation. This is particularly useful for:"
+msgstr "Le remplissage par zéro ajoute des zéros à un signal, interpolant ainsi la représentation dans le domaine fréquentiel. Cela est particulièrement utile pour :"
+
+msgid "Improving frequency resolution in FFT analysis"
+msgstr "Amélioration de la résolution en fréquence dans l'analyse FFT"
+
+msgid "Preparing signals for convolution operations"
+msgstr "Préparation des signaux pour les opérations de convolution"
+
+msgid "Matching signal lengths for spectral comparisons"
+msgstr "Correspondance des longueurs de signal pour les comparaisons spectrales"
+
+msgid "Importing the required modules"
+msgstr "Importation des modules requis"
+
+msgid "Create a test signal"
+msgstr "Créer un signal de test"
+
+msgid "We create a simple cosine signal with a specific frequency."
+msgstr "Nous créons un simple signal cosinus avec une fréquence spécifique."
+
+msgid "Qt widget 1"
+msgstr ""
+
+msgid "Zero-padding with \"next_pow2\" strategy"
+msgstr "Remplissage par zéro avec la stratégie \"next_pow2\""
+
+msgid "The \"next_pow2\" strategy pads the signal to the next power of 2, which is optimal for FFT computations."
+msgstr "La stratégie \"next_pow2\" remplit le signal jusqu'à la prochaine puissance de 2, ce qui est optimal pour les calculs FFT."
+
+msgid "When using strategies other than \"custom\", you **must call** ``update_from_obj()`` to compute the number of padding points based on the actual signal size."
+msgstr "Lors de l'utilisation de stratégies autres que \"custom\", vous **devez appeler** ``update_from_obj()`` pour calculer le nombre de points de remplissage en fonction de la taille réelle du signal."
+
+msgid "Compare original and padded signals"
+msgstr "Comparer les signaux originaux et remplis"
+
+msgid "The padded signal has zeros appended at the end."
+msgstr "Le signal rempli a des zéros ajoutés à la fin."
+
+msgid "FFT comparison: improved frequency resolution"
+msgstr "Comparaison FFT : résolution en fréquence améliorée"
+
+msgid "Zero-padding improves the apparent frequency resolution of the FFT by interpolating between frequency bins."
+msgstr "Le remplissage par zéro améliore la résolution en fréquence apparente de la FFT en interpolant entre les bins de fréquence."
+
+msgid "Using different strategies"
+msgstr "Utilisation de différentes stratégies"
+
+msgid "The available strategies are:"
+msgstr "Les stratégies disponibles sont :"
+
+msgid "``\"next_pow2\"``: Pad to the next power of 2 (optimal for FFT)"
+msgstr "``\"next_pow2\"`` : Remplir jusqu'à la prochaine puissance de 2 (optimal pour la FFT)"
+
+msgid "``\"double\"``: Double the signal length"
+msgstr "``\"double\"`` : Doubler la longueur du signal"
+
+msgid "``\"triple\"``: Triple the signal length"
+msgstr "``\"triple\"`` : Tripler la longueur du signal"
+
+msgid "``\"custom\"``: Specify the exact number of points to add"
+msgstr "``\"custom\"`` : Spécifier le nombre exact de points à ajouter"
+
+msgid "Using \"custom\" strategy"
+msgstr "Utilisation de la stratégie \"custom\""
+
+msgid "With the \"custom\" strategy, you specify the exact number of points. In this case, ``update_from_obj()`` is not strictly necessary (but harmless)."
+msgstr "Avec la stratégie \"custom\", vous spécifiez le nombre exact de points. Dans ce cas, ``update_from_obj()`` n'est pas strictement nécessaire (mais sans danger)."
+
+msgid "Choosing padding location"
+msgstr "Choix de l'emplacement du remplissage"
+
+msgid "Zero-padding can be applied at different locations:"
+msgstr "Le remplissage par zéro peut être appliqué à différents emplacements :"
+
+msgid "``\"append\"``: Add zeros at the end (default)"
+msgstr "``\"append\"`` : Ajouter des zéros à la fin (par défaut)"
+
+msgid "``\"prepend\"``: Add zeros at the beginning"
+msgstr "``\"prepend\"`` : Ajouter des zéros au début"
+
+msgid "``\"both\"``: Split zeros between beginning and end"
+msgstr "``\"both\"`` : Répartir les zéros entre le début et la fin"
+
+msgid ":download:`Download Jupyter notebook: zero_padding.ipynb <zero_padding.ipynb>`"
+msgstr ""
+
+msgid ":download:`Download Python source code: zero_padding.py <zero_padding.py>`"
+msgstr ""
+
+msgid ":download:`Download zipped: zero_padding.zip <zero_padding.zip>`"
+msgstr ""
+
+msgid "`Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_"
+msgstr "`Galerie générée par Sphinx-Gallery <https://sphinx-gallery.github.io>`_"

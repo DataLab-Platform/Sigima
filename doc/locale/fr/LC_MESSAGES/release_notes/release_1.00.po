@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-03 16:20+0100\n"
+"POT-Creation-Date: 2025-12-12 18:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -22,7 +22,31 @@ msgstr ""
 msgid "Version 1.0"
 msgstr ""
 
-msgid "Sigima Version 1.0.3 (unreleased)"
+msgid "Sigima Version 1.0.4"
+msgstr ""
+
+msgid "📚 Documentation:"
+msgstr "📚 Documentation :"
+
+msgid "**Parameter usage documentation**: Improved documentation for parameters requiring signal/image context ([Issue #5](https://github.com/DataLab-Platform/Sigima/issues/5))"
+msgstr "**Documentation de l'utilisation des paramètres** : Amélioration de la documentation pour les paramètres nécessitant un contexte de signal/image ([Issue #5](https://github.com/DataLab-Platform/Sigima/issues/5))"
+
+msgid "Added comprehensive documentation explaining the `update_from_obj()` pattern for parameters like `ZeroPadding1DParam`"
+msgstr "Ajout d'une documentation complète expliquant le modèle `update_from_obj()` pour les paramètres tels que `ZeroPadding1DParam`"
+
+msgid "Clarified that `sigima.params` is the recommended import location for all parameter classes"
+msgstr "Clarification que `sigima.params` est l'emplacement d'importation recommandé pour toutes les classes de paramètres"
+
+msgid "Enhanced `ZeroPadding1DParam` class docstring with usage example and \"Important\" admonition"
+msgstr "Amélioration de la docstring de la classe `ZeroPadding1DParam` avec un exemple d'utilisation et une admonition \"Important\""
+
+msgid "Added new section in `sigima.params` module listing all parameters requiring `update_from_obj()`"
+msgstr "Ajout d'une nouvelle section dans le module `sigima.params` répertoriant tous les paramètres nécessitant `update_from_obj()`"
+
+msgid "Created new example `doc/examples/features/zero_padding.py` demonstrating proper parameter initialization"
+msgstr "Création d'un nouvel exemple `doc/examples/features/zero_padding.py` démontrant l'initialisation correcte des paramètres"
+
+msgid "Sigima Version 1.0.3 (2025-12-03)"
 msgstr ""
 
 msgid "🛠️ Bug fixes:"
@@ -110,7 +134,7 @@ msgid "This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/
 msgstr "Ceci clôture [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` lors du calcul des statistiques sur ROI s'étendant au-delà des limites de l'image"
 
 msgid "Sigima Version 1.0.2 (2025-11-12)"
-msgstr "Sigima Version 1.0.2 (12/11/2025)"
+msgstr ""
 
 msgid "✨ New features and enhancements:"
 msgstr "✨ Nouvelles fonctionnalités et améliorations:"
@@ -206,7 +230,7 @@ msgid "Made `BaseObj.roi_has_changed` method private (by renaming to `BaseObj.__
 msgstr "La méthode `BaseObj.roi_has_changed` a été rendue privée (en la renommant en `BaseObj.__roi_has_changed`) pour éviter une utilisation externe accidentelle. Cela interférerait avec le mécanisme interne de rafraîchissement des masques qui repose sur un accès contrôlé à cette méthode. La méthode ne fait pas partie de l'API publique et ne doit pas être appelée directement par les applications."
 
 msgid "Sigima Version 1.0.1 (2025-11-05)"
-msgstr "Sigima Version 1.0.1 (05/11/2025)"
+msgstr ""
 
 msgid "**Detection ROI creation**: Generic mechanism for ROI creation across all detection functions"
 msgstr "**Création de ROI de détection** : Mécanisme générique de création de ROI pour toutes les fonctions de détection"
@@ -446,7 +470,7 @@ msgid "Added comprehensive unit tests covering all ROI types (rectangular, circu
 msgstr "Ajout de tests unitaires complets couvrant tous les types de ROI (rectangulaire, circulaire, polygonal) et les cas limites"
 
 msgid "Sigima Version 1.0.0 (2025-10-28)"
-msgstr "Sigima Version 1.0.0 (28/10/2025)"
+msgstr ""
 
 msgid "**Signals to image conversion**: New feature to combine multiple signals into a 2D image"
 msgstr "**Conversion de signaux en image** : Nouvelle fonctionnalité pour combiner plusieurs signaux en une image 2D"

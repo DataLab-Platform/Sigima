@@ -35,14 +35,48 @@ from sigima.tools.signal import fourier
 
 
 class ZeroPadding1DParam(gds.DataSet, title=_("Zero padding")):
-    """ZeroPadding1DParam manages the parameters for applying zero-padding to signals.
+    """Zero-padding parameters for signals.
+
+    This class manages parameters for applying zero-padding to signals,
+    commonly used to improve FFT resolution or prepare signals for convolution.
+
+    .. important::
+
+        For strategies other than "custom", the number of points to add (``n``)
+        is **automatically calculated** based on the signal size. However, this
+        calculation requires knowledge of the signal, so you **must call**
+        :meth:`update_from_obj` before using the parameters.
+
+    Example usage:
+
+    .. code-block:: python
+
+        import sigima.params
+        import sigima.proc.signal as sips
+
+        # Create the parameter object
+        param = sigima.params.ZeroPadding1DParam.create(strategy="next_pow2")
+
+        # IMPORTANT: Update parameters from the signal to compute 'n'
+        param.update_from_obj(signal)
+
+        # Now the parameters are ready to use
+        result = sips.zero_padding(signal, param)
 
     Attributes:
-        strategies: Available strategies ("next_pow2", "double", "triple", "custom").
-        strategy: Choice item for selecting the zero-padding strategy.
-        locations: Available locations for padding ("append", "prepend", "both").
-        location: Choice item for selecting where to add the padding.
-        n: Number of points to add as padding (active only for "custom" strategy).
+
+    - strategies: Available strategies ("next_pow2", "double", "triple", "custom").
+    - strategy: Choice item for selecting the zero-padding strategy.
+
+      - ``"next_pow2"``: Pad to the next power of 2 (optimal for FFT)
+      - ``"double"``: Double the signal length
+      - ``"triple"``: Triple the signal length
+      - ``"custom"``: Use a user-specified number of points
+
+    - location: Where to add the padding ("append", "prepend", or "both").
+    - n: Number of points to add as padding. For "custom" strategy, this is
+      user-specified. For other strategies, it is computed automatically
+      by :meth:`update_from_obj`.
     """
 
     def __init__(self, *args, **kwargs) -> None:
@@ -56,10 +90,14 @@ class ZeroPadding1DParam(gds.DataSet, title=_("Zero padding")):
         self.__obj: SignalObj | None = None
 
     def update_from_obj(self, obj: SignalObj) -> None:
-        """Update parameters from signal.
+        """Update parameters based on a signal object.
+
+        This method computes the number of padding points (``n``) based on
+        the selected strategy and the actual signal size. **This must be called
+        before using the parameters** for strategies other than "custom".
 
         Args:
-            obj: Signal object from which to update the dataset.
+            obj: Signal object from which to compute the padding parameters.
         """
         self.__obj = obj
         self.strategy_callback(None, self.strategy)
