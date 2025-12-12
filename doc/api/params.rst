@@ -1,2 +1,2 @@
 .. automodule:: sigima.params
-    :no-index:
+    :no-members:

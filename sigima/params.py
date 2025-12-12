@@ -4,38 +4,94 @@
 Parameters (:mod:`sigima.params`)
 ---------------------------------
 
-The :mod:`sigima.params` module aims at providing all the dataset parameters that are
-used by the :mod:`sigima.proc` and DataLab's processors.
+The :mod:`sigima.params` module provides all the dataset parameter classes used by
+:mod:`sigima.proc` processing functions and DataLab's GUI.
 
-Those datasets are defined in other modules:
+.. tip::
 
-    - :mod:`sigima.proc.base`
-    - :mod:`sigima.proc.image`
-    - :mod:`sigima.proc.signal`
+    **Always import parameters from** :mod:`sigima.params`. While parameter classes
+    are defined in various submodules (e.g., ``sigima.proc.signal.fourier``), they are
+    all re-exported here for convenience. This avoids confusion about where to import
+    from.
 
-The :mod:`sigima.params` module is thus a convenient way to import all the sets of
-parameters at once.
+    .. code-block:: python
 
-As a matter of fact, the following import statement is equivalent to the previous one:
+        # ✅ Recommended: import from sigima.params
+        import sigima.params
+        param = sigima.params.ZeroPadding1DParam.create(strategy="next_pow2")
+
+        # ❌ Avoid: importing from internal modules (works but less clear)
+        from sigima.proc.signal.fourier import ZeroPadding1DParam
+
+Introduction to ``DataSet`` Parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The datasets listed in the following sections define the parameters necessary for
+computation and processing operations in Sigima. Each dataset is a subclass of
+:py:class:`guidata.dataset.datatypes.DataSet` and needs to be instantiated before use.
+
+Creating Parameter Instances
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Parameter classes provide a ``create()`` class method for easy instantiation:
 
 .. code-block:: python
 
-    # Original import statement
-    from sigima.proc.base import MovingAverageParam
-    from sigima.proc.signal import PolynomialFitParam
-    from sigima.proc.image.exposure import EqualizeHistParam
+    import sigima.params
 
-    # Equivalent import statement
-    from sigima.params import MovingAverageParam, PolynomialFitParam, EqualizeHistParam
+    # Create with default values
+    param = sigima.params.NormalizeParam.create()
 
-Introduction to `DataSet` parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    # Create with custom values
+    param = sigima.params.NormalizeParam.create(method="maximum")
 
-The datasets listed in the following sections are used to define the parameters
-necessary for the various computations and processing operations available in Sigima.
+Parameters Requiring Signal/Image Context
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Each dataset is a subclass of :py:class:`guidata.dataset.datatypes.DataSet` and thus
-needs to be instantiated before being used.
+Some parameters need to know about the signal or image they will process in order
+to compute their values. For example, :class:`ZeroPadding1DParam` needs to know
+the signal size to calculate how many points to add for the "next_pow2" strategy.
+
+These parameters provide an ``update_from_obj()`` method that **must be called**
+before using the parameters:
+
+.. code-block:: python
+
+    import sigima.params
+    import sigima.proc.signal as sips
+
+    # Create the parameter object
+    param = sigima.params.ZeroPadding1DParam.create(strategy="next_pow2")
+
+    # ⚠️ At this point, param.n is still the default value (1)
+    # because the parameter doesn't know the signal size yet
+
+    # IMPORTANT: Update parameters from the signal
+    param.update_from_obj(signal)
+
+    # ✅ Now param.n is computed (e.g., 24 for a 1000-point signal)
+    result = sips.zero_padding(signal, param)
+
+Parameter classes that require ``update_from_obj()``:
+
+- :class:`ZeroPadding1DParam`: Computes ``n`` based on strategy and signal size
+- :class:`ZeroPadding2DParam`: Computes padding based on strategy and image size
+- :class:`Resampling1DParam`: Updates bounds based on signal range
+- :class:`Resampling2DParam`: Updates bounds based on signal range
+- :class:`ResizeParam`: Updates bounds based on image dimensions
+- :class:`TranslateParam`: Updates bounds based on image dimensions
+- :class:`LineProfileParam`: Updates line coordinates based on image dimensions
+- :class:`BandPassFilterParam`, :class:`BandStopFilterParam`,
+  :class:`HighPassFilterParam`, :class:`LowPassFilterParam`: Update frequency bounds
+
+.. note::
+
+    Not all parameters require ``update_from_obj()``. Simple parameters like
+    :class:`NormalizeParam` or :class:`GaussianParam` work with fixed values and
+    don't need signal/image context.
+
+Complete Example
+~~~~~~~~~~~~~~~~
 
 Here is a complete example of how to instantiate a dataset and access its parameters
 with the :py:class:`sigima.params.BinningParam` dataset:

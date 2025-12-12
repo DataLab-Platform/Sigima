@@ -1,5 +1,16 @@
 # Release notes #
 
+## Sigima Version 1.0.4 ##
+
+📚 Documentation:
+
+* **Parameter usage documentation**: Improved documentation for parameters requiring signal/image context ([Issue #5](https://github.com/DataLab-Platform/Sigima/issues/5))
+  * Added comprehensive documentation explaining the `update_from_obj()` pattern for parameters like `ZeroPadding1DParam`
+  * Clarified that `sigima.params` is the recommended import location for all parameter classes
+  * Enhanced `ZeroPadding1DParam` class docstring with usage example and "Important" admonition
+  * Added new section in `sigima.params` module listing all parameters requiring `update_from_obj()`
+  * Created new example `doc/examples/features/zero_padding.py` demonstrating proper parameter initialization
+
 ## Sigima Version 1.0.3 (2025-12-03) ##
 
 🛠️ Bug fixes:
