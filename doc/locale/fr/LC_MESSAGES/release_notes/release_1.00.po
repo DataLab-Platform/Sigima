@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-13 13:58+0100\n"
+"POT-Creation-Date: 2025-12-13 18:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -27,6 +27,30 @@ msgstr "Sigima Version 1.0.4"
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs :"
+
+msgid "**Grid ROI - Missing spacing parameters for non-uniform grids**: Fixed grid ROI extraction to support non-uniform feature spacing"
+msgstr "**ROI de grille - Paramètres d'espacement manquants pour les grilles non uniformes :** Correction de l'extraction ROI de grille pour prendre en charge un espacement des caractéristiques non uniforme"
+
+msgid "Grid ROI extraction previously assumed evenly distributed features (spacing = width/nx), which failed for images where features don't fill the entire grid area"
+msgstr "L'extraction ROI de grille supposait auparavant des caractéristiques uniformément réparties (espacement = largeur/nx), ce qui échouait pour les images où les caractéristiques ne remplissent pas toute la zone de la grille"
+
+msgid "Example: `laser_spot_array_raw.png` has laser spots spaced ~300 pixels apart, but the grid was defined over 3100×3100 pixels, causing incorrect ROI placement"
+msgstr "Exemple : `laser_spot_array_raw.png` a des points laser espacés d'environ 300 pixels, mais la grille était définie sur 3100×3100 pixels, ce qui a causé un placement incorrect des ROI"
+
+msgid "Added `xstep` and `ystep` percentage parameters (1-200%, default 100%) to `ROIGridParam` to specify spacing between ROI centers"
+msgstr "Ajout des paramètres de pourcentage `xstep` et `ystep` (1-200 %, par défaut 100 %) à `ROIGridParam` pour spécifier l'espacement entre les centres des ROI"
+
+msgid "Updated `generate_image_grid_roi()` function to use separate step calculation: `dx_step = dx_cell * p.xstep / 100.0`"
+msgstr "Mise à jour de la fonction `generate_image_grid_roi()` pour utiliser un calcul d'étape séparé : `dx_step = dx_cell * p.xstep / 100.0`"
+
+msgid "Position calculation now uses: `x0 = src.x0 + (ic + 0.5) * dx_step + xtrans - 0.5 * dx` (preserving backward compatibility)"
+msgstr "Le calcul de la position utilise désormais : `x0 = src.x0 + (ic + 0.5) * dx_step + xtrans - 0.5 * dx` (préservant la compatibilité ascendante)"
+
+msgid "Default values (100%) maintain exact original behavior for existing workflows"
+msgstr "Les valeurs par défaut (100 %) maintiennent le comportement original exact pour les flux de travail existants"
+
+msgid "This allows precise ROI placement for gapped grids (e.g., laser spot arrays, sample arrays) by adjusting spacing independently of ROI size"
+msgstr "Cela permet un placement précis des ROI pour les grilles avec des espaces (par exemple, les tableaux de points laser, les tableaux d'échantillons) en ajustant l'espacement indépendamment de la taille des ROI"
 
 msgid "**Signal result title formatting**: Fixed duplicate suffix in result titles for image-to-signal functions"
 msgstr "**Formatage du titre du résultat du signal** : Correction du suffixe en double dans les titres des résultats pour les fonctions image-vers-signal"

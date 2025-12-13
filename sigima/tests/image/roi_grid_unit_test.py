@@ -275,5 +275,103 @@ def test_roi_grid_import_export() -> None:
     gds.assert_datasets_equal(new_p, p, "Imported ROI grid does not match original")
 
 
+def test_roi_grid_custom_step() -> None:
+    """Test grid ROI with custom xstep/ystep parameters.
+
+    This tests the bug fix for cases where ROI spacing differs from evenly
+    distributed grid (e.g., laser spot arrays with gaps between spots).
+    """
+    # Create a test image
+    img = create_image(
+        title="Test Grid",
+        data=np.random.rand(200, 300),
+    )
+
+    # Test Case 1: Default behavior (100% step = evenly distributed)
+    p_default = ROIGridParam()
+    p_default.nx = p_default.ny = 3
+    p_default.xsize = p_default.ysize = 30  # 30% of cell size
+    p_default.xtranslation = p_default.ytranslation = 50  # centered
+    p_default.xstep = p_default.ystep = 100  # evenly distributed
+
+    roi_default = generate_image_grid_roi(img, p_default)
+    items_default = list(roi_default)
+    assert len(items_default) == 9
+
+    # Get spacing between first two ROIs in X direction
+    r11 = _roi_by_title(roi_default, "ROI(1,1)")
+    r12 = _roi_by_title(roi_default, "ROI(1,2)")
+    x0_r11, _, _, _ = r11.get_physical_coords(img)
+    x0_r12, _, _, _ = r12.get_physical_coords(img)
+    default_x_spacing = x0_r12 - x0_r11
+
+    # Expected: width / nx
+    expected_default_spacing = img.width / p_default.nx
+    assert default_x_spacing == approx(expected_default_spacing)
+
+    # Test Case 2: Tighter spacing (50% step = half the cell width)
+    p_tight = deepcopy(p_default)
+    p_tight.xstep = p_tight.ystep = 50  # Half spacing
+
+    roi_tight = generate_image_grid_roi(img, p_tight)
+    items_tight = list(roi_tight)
+    assert len(items_tight) == 9
+
+    r11_tight = _roi_by_title(roi_tight, "ROI(1,1)")
+    r12_tight = _roi_by_title(roi_tight, "ROI(1,2)")
+    x0_r11_tight, _, _, _ = r11_tight.get_physical_coords(img)
+    x0_r12_tight, _, _, _ = r12_tight.get_physical_coords(img)
+    tight_x_spacing = x0_r12_tight - x0_r11_tight
+
+    # Should be half of default spacing
+    expected_tight_spacing = (img.width / p_tight.nx) * 0.5
+    assert tight_x_spacing == approx(expected_tight_spacing)
+    assert tight_x_spacing == approx(default_x_spacing * 0.5)
+
+    # Test Case 3: Wider spacing (150% step)
+    p_wide = deepcopy(p_default)
+    p_wide.xstep = p_wide.ystep = 150  # 1.5x spacing
+
+    roi_wide = generate_image_grid_roi(img, p_wide)
+    items_wide = list(roi_wide)
+    assert len(items_wide) == 9
+
+    r11_wide = _roi_by_title(roi_wide, "ROI(1,1)")
+    r12_wide = _roi_by_title(roi_wide, "ROI(1,2)")
+    x0_r11_wide, _, _, _ = r11_wide.get_physical_coords(img)
+    x0_r12_wide, _, _, _ = r12_wide.get_physical_coords(img)
+    wide_x_spacing = x0_r12_wide - x0_r11_wide
+
+    # Should be 1.5x of default spacing
+    expected_wide_spacing = (img.width / p_wide.nx) * 1.5
+    assert wide_x_spacing == approx(expected_wide_spacing)
+    assert wide_x_spacing == approx(default_x_spacing * 1.5)
+
+    # Test Case 4: Different X and Y steps
+    p_mixed = deepcopy(p_default)
+    p_mixed.xstep = 80
+    p_mixed.ystep = 120
+
+    roi_mixed = generate_image_grid_roi(img, p_mixed)
+    items_mixed = list(roi_mixed)
+    assert len(items_mixed) == 9
+
+    # Check X spacing
+    r11_mixed = _roi_by_title(roi_mixed, "ROI(1,1)")
+    r12_mixed = _roi_by_title(roi_mixed, "ROI(1,2)")
+    x0_r11_mixed, y0_r11_mixed, _, _ = r11_mixed.get_physical_coords(img)
+    x0_r12_mixed, _, _, _ = r12_mixed.get_physical_coords(img)
+    mixed_x_spacing = x0_r12_mixed - x0_r11_mixed
+
+    # Check Y spacing
+    r21_mixed = _roi_by_title(roi_mixed, "ROI(2,1)")
+    _, y0_r21_mixed, _, _ = r21_mixed.get_physical_coords(img)
+    mixed_y_spacing = y0_r21_mixed - y0_r11_mixed
+
+    assert mixed_x_spacing == approx((img.width / p_mixed.nx) * 0.8)
+    assert mixed_y_spacing == approx((img.height / p_mixed.ny) * 1.2)
+
+
 if __name__ == "__main__":
+    test_roi_grid_custom_step()
     test_roi_grid_import_export()

@@ -184,6 +184,30 @@ class ROIGridParam(gds.DataSet):
         unit="%",
         slider=True,
     ).set_prop("display", callback=geometry_changed)
+    xstep = gds.IntItem(
+        f"X step ({_('column spacing')})",
+        default=100,
+        min=1,
+        max=200,
+        unit="%",
+        slider=True,
+        help=_(
+            "Horizontal spacing between ROI centers, as a percentage of the "
+            "automatically computed cell width (100% = evenly distributed grid)"
+        ),
+    ).set_prop("display", callback=geometry_changed)
+    ystep = gds.IntItem(
+        f"Y step ({_('row spacing')})",
+        default=100,
+        min=1,
+        max=200,
+        unit="%",
+        slider=True,
+        help=_(
+            "Vertical spacing between ROI centers, as a percentage of the "
+            "automatically computed cell height (100% = evenly distributed grid)"
+        ),
+    ).set_prop("display", callback=geometry_changed)
     _e_group0 = gds.EndGroup(_("Geometry"))
     _b_group1 = gds.BeginGroup(_("ROI titles"))
     base_name = gds.StringItem(_("Base name"), default="ROI").set_prop(
@@ -217,6 +241,9 @@ def generate_image_grid_roi(src: ImageObj, p: ROIGridParam) -> ImageROI:
     dy_cell = src.height / p.ny
     dx = dx_cell * p.xsize / 100.0
     dy = dy_cell * p.ysize / 100.0
+    # Apply step multipliers to cell spacing
+    dx_step = dx_cell * p.xstep / 100.0
+    dy_step = dy_cell * p.ystep / 100.0
     xtrans = src.width * (p.xtranslation - 50.0) / 100.0
     ytrans = src.height * (p.ytranslation - 50.0) / 100.0
     lbl_rows = range(p.ny)
@@ -229,8 +256,8 @@ def generate_image_grid_roi(src: ImageObj, p: ROIGridParam) -> ImageROI:
     roi = ImageROI()
     for ir in range(p.ny):
         for ic in range(p.nx):
-            x0 = src.x0 + (ic + 0.5) * dx_cell + xtrans - 0.5 * dx
-            y0 = src.y0 + (ir + 0.5) * dy_cell + ytrans - 0.5 * dy
+            x0 = src.x0 + (ic + 0.5) * dx_step + xtrans - 0.5 * dx
+            y0 = src.y0 + (ir + 0.5) * dy_step + ytrans - 0.5 * dy
             nir, nic = lbl_rows[ir], lbl_cols[ic]
             try:
                 title = ptn.format(base=p.base_name, r=nir + 1, c=nic + 1)
