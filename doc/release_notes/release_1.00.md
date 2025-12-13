@@ -4,6 +4,15 @@
 
 🛠️ Bug fixes:
 
+* **Grid ROI - Missing spacing parameters for non-uniform grids**: Fixed grid ROI extraction to support non-uniform feature spacing
+  * Grid ROI extraction previously assumed evenly distributed features (spacing = width/nx), which failed for images where features don't fill the entire grid area
+  * Example: `laser_spot_array_raw.png` has laser spots spaced ~300 pixels apart, but the grid was defined over 3100×3100 pixels, causing incorrect ROI placement
+  * Added `xstep` and `ystep` percentage parameters (1-200%, default 100%) to `ROIGridParam` to specify spacing between ROI centers
+  * Updated `generate_image_grid_roi()` function to use separate step calculation: `dx_step = dx_cell * p.xstep / 100.0`
+  * Position calculation now uses: `x0 = src.x0 + (ic + 0.5) * dx_step + xtrans - 0.5 * dx` (preserving backward compatibility)
+  * Default values (100%) maintain exact original behavior for existing workflows
+  * This allows precise ROI placement for gapped grids (e.g., laser spot arrays, sample arrays) by adjusting spacing independently of ROI size
+
 * **Signal result title formatting**: Fixed duplicate suffix in result titles for image-to-signal functions
   * When computing radial profile or other operations using `new_signal_result`, the suffix (e.g., center coordinates) was appearing twice in the title
   * Example: `radial_profile(i019)|center=(192.500, 192.500)|center=(192.500, 192.500)` instead of `radial_profile(i019)|center=(192.500, 192.500)`
