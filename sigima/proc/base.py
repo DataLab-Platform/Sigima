@@ -374,8 +374,6 @@ def new_signal_result(
     formatter = get_default_title_formatter()
     title = formatter.format_1_to_1_title(name, suffix)
     dst = create_signal(title=title, units=units, labels=labels)
-    if suffix is not None:
-        dst.title += "|" + suffix
     if (source := src.metadata.get("source")) is not None:
         dst.metadata["source"] = source
     return dst

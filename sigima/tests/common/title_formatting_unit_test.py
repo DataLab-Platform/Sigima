@@ -291,5 +291,39 @@ class TestFormatterConsistency:
         assert func_name in placeholder_result
 
 
+class TestNewSignalResult:
+    """Test suite for new_signal_result function title formatting."""
+
+    def test_suffix_not_duplicated(self):
+        """Test that suffix is not duplicated in new_signal_result output.
+
+        Regression test for bug where suffix was added twice to the title:
+        once by the formatter and once explicitly in new_signal_result.
+        """
+        from sigima.proc.base import new_signal_result
+
+        src = create_signal(title="test_signal")
+        suffix = "center=(10.0, 20.0)"
+
+        # Test with SimpleTitleFormatter
+        original_formatter = get_default_title_formatter()
+        try:
+            set_default_title_formatter(SimpleTitleFormatter())
+            result = new_signal_result(src, "radial_profile", suffix)
+            # Count occurrences of suffix in title - should be exactly 1
+            assert result.title.count(suffix) == 1
+            assert result.title == "Radial Profile Result (center=(10.0, 20.0))"
+
+            # Test with PlaceholderTitleFormatter
+            set_default_title_formatter(PlaceholderTitleFormatter())
+            result = new_signal_result(src, "radial_profile", suffix)
+            # Count occurrences of suffix in title - should be exactly 1
+            assert result.title.count(suffix) == 1
+            assert result.title == "radial_profile({0})|center=(10.0, 20.0)"
+
+        finally:
+            set_default_title_formatter(original_formatter)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
