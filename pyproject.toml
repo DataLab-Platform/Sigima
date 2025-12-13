@@ -63,7 +63,6 @@ doc = [
     "sphinx_design",
     "sphinx-copybutton",
     "pydata-sphinx-theme",
-    "sphinx-gallery",
     "qtpy",
     "PyQt5",
     "plotpy",
