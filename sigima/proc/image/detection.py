@@ -118,7 +118,8 @@ def store_roi_creation_metadata(
         geometry.attrs["create_rois"] = True
         if roi_geometry is None:
             roi_geometry = sigima.enums.DetectionROIGeometry.RECTANGLE
-        geometry.attrs["roi_geometry"] = roi_geometry
+        # Store as string value for HDF5 serialization compatibility
+        geometry.attrs["roi_geometry"] = roi_geometry.value
     return geometry
 
 
