@@ -14,6 +14,16 @@ import sys
 import pytest
 
 
+def _has_matplotlib() -> bool:
+    """Check if matplotlib is available."""
+    try:
+        import matplotlib  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
 def get_public_functions(module) -> set[str]:
     """Get all public function names from a module.
 
@@ -33,6 +43,10 @@ def get_public_functions(module) -> set[str]:
     }
 
 
+@pytest.mark.skipif(
+    "matplotlib" not in sys.modules and not _has_matplotlib(),
+    reason="matplotlib not available",
+)
 def test_matplotlib_backend_has_all_plotpy_functions():
     """Test that matplotlib backend implements stubs for all PlotPy functions.
 
