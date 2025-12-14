@@ -162,10 +162,17 @@ def __getattr__(name: str):
 
 def __dir__():
     """Return list of available attributes (with lazy initialization)."""
-    _initialize_backend()
-    base_attrs = ["BACKEND_NAME", "BACKEND_SOURCE"]
-    backend_attrs = [name for name in dir(_backend_module) if not name.startswith("_")]
-    return base_attrs + backend_attrs
+    try:
+        _initialize_backend()
+        base_attrs = ["BACKEND_NAME", "BACKEND_SOURCE"]
+        backend_attrs = [
+            name for name in dir(_backend_module) if not name.startswith("_")
+        ]
+        return base_attrs + backend_attrs
+    except ImportError:
+        # During pytest collection or in environments without visualization backends,
+        # return minimal attributes to avoid breaking inspect.getmembers()
+        return ["BACKEND_NAME", "BACKEND_SOURCE"]
 
 
 # Define __all__ to include expected public API
