@@ -25,6 +25,7 @@ Module exports:
 
 from __future__ import annotations
 
+import importlib
 import os
 from typing import TYPE_CHECKING
 
@@ -39,6 +40,9 @@ if TYPE_CHECKING:
     # These tell static analyzers what functions are available
     BACKEND_NAME: str
     BACKEND_SOURCE: str
+
+    # pylint: disable=unused-argument
+    # pylint: disable=missing-function-docstring
 
     def view_curves(
         curves: list,
@@ -153,8 +157,8 @@ if TYPE_CHECKING:
 
 
 # Determine which backend to use
-_backend_name: str | None = None
-_backend_source: str = "auto"
+_BACKEND_NAME: str | None = None
+_BACKEND_SOURCE: str = "auto"
 
 
 def _select_backend() -> tuple[str, str]:
@@ -176,7 +180,7 @@ def _select_backend() -> tuple[str, str]:
     else:
         # Priority 2: Configuration option
         try:
-            from sigima.config import options
+            from sigima.config import options  # pylint: disable=import-outside-toplevel
 
             requested = options.vistools_backend.get(sync_env=False).lower()
             source = "config"
@@ -233,37 +237,36 @@ def _select_backend() -> tuple[str, str]:
 
 
 # Lazy backend initialization - deferred until first attribute access
-_backend_module = None
-_backend_name = None
-_backend_source = None
-_initializing = False  # Flag to prevent recursion
+_BACKEND_MODULE = None
+_BACKEND_NAME = None
+_BACKEND_SOURCE = None
+_INITIALIZING = False  # Flag to prevent recursion
 
 
 def _initialize_backend():
     """Initialize backend on first use (lazy loading)."""
-    global _backend_module, _backend_name, _backend_source, _initializing
+    # pylint: disable=global-statement
+    global _BACKEND_MODULE, _BACKEND_NAME, _BACKEND_SOURCE, _INITIALIZING
 
-    if _backend_module is not None:
+    if _BACKEND_MODULE is not None:
         return  # Already initialized
 
-    if _initializing:
+    if _INITIALIZING:
         return  # Prevent recursion during import
 
-    _initializing = True
+    _INITIALIZING = True
     try:
-        _backend_name, _backend_source = _select_backend()
+        _BACKEND_NAME, _BACKEND_SOURCE = _select_backend()
 
         # Import selected backend using importlib to avoid triggering __getattr__
-        import importlib
-
-        if _backend_name == "plotpy":
-            _backend_module = importlib.import_module(
+        if _BACKEND_NAME == "plotpy":
+            _BACKEND_MODULE = importlib.import_module(
                 ".vistools_plotpy", package=__name__
             )
-        elif _backend_name == "matplotlib":
-            _backend_module = importlib.import_module(".vistools_mpl", package=__name__)
+        elif _BACKEND_NAME == "matplotlib":
+            _BACKEND_MODULE = importlib.import_module(".vistools_mpl", package=__name__)
     finally:
-        _initializing = False
+        _INITIALIZING = False
 
 
 def __getattr__(name: str):
@@ -273,7 +276,7 @@ def __getattr__(name: str):
     if name.startswith("__") and name.endswith("__"):
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-    if name in ("BACKEND_NAME", "BACKEND_SOURCE", "_backend_module"):
+    if name in ("BACKEND_NAME", "BACKEND_SOURCE", "_BACKEND_MODULE"):
         try:
             _initialize_backend()
         except ImportError:
@@ -282,16 +285,16 @@ def __getattr__(name: str):
                 f"module '{__name__}' has no attribute '{name}'"
             ) from None
         if name == "BACKEND_NAME":
-            return _backend_name
+            return _BACKEND_NAME
         if name == "BACKEND_SOURCE":
-            return _backend_source
+            return _BACKEND_SOURCE
         if name == "_backend_module":
-            return _backend_module
+            return _BACKEND_MODULE
 
     # For any other attribute, initialize backend and forward to backend module
     try:
         _initialize_backend()
-        return getattr(_backend_module, name)
+        return getattr(_BACKEND_MODULE, name)
     except ImportError:
         # Backend not available - raise AttributeError for clean failure
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'") from None
@@ -305,7 +308,7 @@ def __dir__():
         _initialize_backend()
         base_attrs = ["BACKEND_NAME", "BACKEND_SOURCE"]
         backend_attrs = [
-            name for name in dir(_backend_module) if not name.startswith("_")
+            name for name in dir(_BACKEND_MODULE) if not name.startswith("_")
         ]
         return base_attrs + backend_attrs
     except ImportError:

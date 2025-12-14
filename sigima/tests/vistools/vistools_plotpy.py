@@ -206,8 +206,8 @@ def create_image(
     interpolation: str = "linear",
     colormap: str | None = None,
     alpha_function: str | None = None,
-    xdata: list[float] = [None, None],
-    ydata: list[float] = [None, None],
+    xdata: list[float] | None = None,
+    ydata: list[float] | None = None,
 ) -> ImageItem:
     """Create an image item from data
 
@@ -225,8 +225,8 @@ def create_image(
         title=title,
         interpolation=interpolation,
         colormap=colormap,
-        xdata=xdata,
-        ydata=ydata,
+        xdata=[None, None] if xdata is None else xdata,
+        ydata=[None, None] if ydata is None else ydata,
         eliminate_outliers=2.0,
         alpha_function=alpha_function,
     )
@@ -499,7 +499,7 @@ def __create_curve_item(
         xdata, ydata = obj.xydata
         title = obj.title or title or ""
     # Only display the real part for signals (for simplicity):
-    item = create_curve(xdata.real, ydata.real, label=title)
+    item = create_curve(xdata.real, ydata.real, title=title)
     item.param.line.width = 1.25
     item.param.update_item(item)
     return item

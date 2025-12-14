@@ -59,14 +59,14 @@ def view_curves(
     | SignalObj
     | np.ndarray
     | tuple[np.ndarray, np.ndarray],
-    name: str | None = None,  # Qt-specific: unused in matplotlib implementation
+    name: str | None = None,  # Qt-specific  # pylint: disable=unused-argument
     title: str | None = None,
     xlabel: str | None = None,
     ylabel: str | None = None,
     xunit: str | None = None,
     yunit: str | None = None,
     show_roi: bool = True,
-    object_name: str = "",  # Qt-specific: unused in matplotlib implementation
+    object_name: str = "",  # Qt-specific  # pylint: disable=unused-argument
 ) -> None:
     """Create a matplotlib figure and plot curves.
 
@@ -164,7 +164,7 @@ def view_curves(
 
 def view_images(
     data_or_objs: list[ImageObj | np.ndarray] | ImageObj | np.ndarray,
-    name: str | None = None,  # Qt-specific: unused in matplotlib implementation
+    name: str | None = None,  # Qt-specific  # pylint: disable=unused-argument
     title: str | None = None,
     xlabel: str | None = None,
     ylabel: str | None = None,
@@ -174,7 +174,6 @@ def view_images(
     zunit: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
-    object_name: str = "",  # Qt-specific: unused in matplotlib implementation
     **kwargs,
 ) -> None:
     """Create a matplotlib figure and show images.
@@ -403,11 +402,11 @@ def view_images_side_by_side(
     titles: list[str] | None = None,
     share_axes: bool = True,
     rows: int | None = None,
-    maximized: bool = False,  # Qt-specific: unused in matplotlib implementation
+    maximized: bool = False,  # Qt-specific  # pylint: disable=unused-argument
     title: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
-    object_name: str = "",  # Qt-specific: unused in matplotlib implementation
+    object_name: str = "",  # Qt-specific  # pylint: disable=unused-argument
     **kwargs,
 ) -> None:
     """Show sequence of images side by side.

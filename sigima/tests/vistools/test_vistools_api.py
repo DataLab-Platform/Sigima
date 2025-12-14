@@ -17,7 +17,7 @@ import pytest
 def _has_matplotlib() -> bool:
     """Check if matplotlib is available."""
     try:
-        import matplotlib  # noqa: F401
+        import matplotlib  # noqa: F401  # pylint: disable=unused-import
 
         return True
     except ImportError:
@@ -81,7 +81,7 @@ def test_backend_selection_env_var(monkeypatch):
 
     # Check if matplotlib is available
     try:
-        import matplotlib  # noqa: F401
+        import matplotlib  # noqa: F401  # pylint: disable=unused-import
     except ImportError:
         pytest.skip("matplotlib not available")
 
@@ -103,7 +103,7 @@ def test_backend_selection_option(monkeypatch):
 
     # Check if matplotlib is available
     try:
-        import matplotlib  # noqa: F401
+        import matplotlib  # noqa: F401  # pylint: disable=unused-import
     except ImportError:
         pytest.skip("matplotlib not available")
 
@@ -128,12 +128,12 @@ def test_backend_info_available():
     """Test that backend information is exposed."""
     # Check if any backend is available
     try:
-        import matplotlib  # noqa: F401
+        import matplotlib  # noqa: F401  # pylint: disable=unused-import
 
         backend_available = True
     except ImportError:
         try:
-            import plotpy  # noqa: F401
+            import plotpy  # noqa: F401  # pylint: disable=unused-import
 
             backend_available = True
         except ImportError:
@@ -151,7 +151,4 @@ def test_backend_info_available():
 
 
 if __name__ == "__main__":
-    test_matplotlib_backend_has_all_plotpy_functions()
-    test_backend_info_available()
-    test_backend_selection_env_var()
-    test_backend_selection_option()
+    pytest.main([__file__])

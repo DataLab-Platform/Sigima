@@ -232,6 +232,7 @@ class DataLabStubServer:
         # In stub mode, remove the first selected object if any
         if self.selected_objects:
             uuid_to_remove = self.selected_objects[0]
+            execenv.print(f"[STUB] Removing object: force={force}")
             if uuid_to_remove in self.signals:
                 del self.signals[uuid_to_remove]
                 self.selected_objects.remove(uuid_to_remove)
