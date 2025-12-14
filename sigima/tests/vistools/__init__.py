@@ -143,8 +143,19 @@ def _initialize_backend():
 
 def __getattr__(name: str):
     """Lazy loading of backend attributes."""
+    # Handle special/dunder attributes that inspect might access
+    # Raise AttributeError immediately to avoid backend initialization
+    if name.startswith("__") and name.endswith("__"):
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+
     if name in ("BACKEND_NAME", "BACKEND_SOURCE", "_backend_module"):
-        _initialize_backend()
+        try:
+            _initialize_backend()
+        except ImportError:
+            # During pytest collection or in environments without backends
+            raise AttributeError(
+                f"module '{__name__}' has no attribute '{name}'"
+            ) from None
         if name == "BACKEND_NAME":
             return _backend_name
         if name == "BACKEND_SOURCE":
@@ -153,9 +164,12 @@ def __getattr__(name: str):
             return _backend_module
 
     # For any other attribute, initialize backend and forward to backend module
-    _initialize_backend()
     try:
+        _initialize_backend()
         return getattr(_backend_module, name)
+    except ImportError:
+        # Backend not available - raise AttributeError for clean failure
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'") from None
     except AttributeError:
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'") from None
 
