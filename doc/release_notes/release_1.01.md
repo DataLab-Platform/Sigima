@@ -13,3 +13,11 @@
   * Added standardized helper functions: `create_curve()`, `create_image()`, `create_circle()`, `create_segment()`, `create_cursor()`, `create_marker()`, and `create_contour_shapes()`
   * Updated all interactive test functions to use the new unified API instead of direct PlotPy builder calls
   * Improved code consistency across signal and image test modules
+
+* **Visualization backend flexibility**: Added support for Matplotlib as an alternative to PlotPy for test visualizations
+  * New configuration option `vistools_backend` to select visualization library ("auto", "plotpy", or "matplotlib")
+  * Environment variable `SIGIMA_VISTOOLS_BACKEND` can override configuration
+  * Automatic fallback from PlotPy to Matplotlib when PlotPy is not available
+  * Backend information exposed via `sigima.tests.vistools.BACKEND_NAME` and `BACKEND_SOURCE`
+  * Matplotlib backend provides stubs for unsupported functions (raises `NotImplementedError`)
+  * Unit test ensures API compatibility between backends

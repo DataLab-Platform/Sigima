@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-04 19:43+0100\n"
+"POT-Creation-Date: 2025-12-14 11:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -28,5 +28,47 @@ msgstr ""
 msgid "✨ New features and enhancements:"
 msgstr "✨ Nouvelles fonctionnalités et améliorations:"
 
-msgid "**Stub server**: Added `remove_object()` method to `DataLabStubServer` for testing DataLab's proxy remove functionality"
-msgstr "**Serveur factice** : Ajout de la méthode `remove_object()` à `DataLabStubServer` pour tester la fonctionnalité de suppression du proxy DataLab"
+msgid "**Stub server**: Added missing methods to `DataLabStubServer` to support new DataLab features"
+msgstr "**Serveur factice** : Ajout de méthodes manquantes à `DataLabStubServer` pour prendre en charge les nouvelles fonctionnalités de DataLab"
+
+msgid "Added `remove_object()` method (removes an object from DataLab)"
+msgstr "Ajout de la méthode `remove_object()` (supprime un objet de DataLab)"
+
+msgid "Added `call_method()` method (simulates calling a method on DataLab's main interface or panels)"
+msgstr "Ajout de la méthode `call_method()` (simule l'appel d'une méthode sur l'interface principale ou les panneaux de DataLab)"
+
+msgid "**Test infrastructure**: Refactored visualization code in test suite for better maintainability"
+msgstr "**Infrastructure de test** : Refactorisation du code de visualisation dans la suite de tests pour une meilleure maintenabilité"
+
+msgid "Centralized PlotPy visualization utilities in `sigima.tests.vistools` module"
+msgstr "Centralisation des utilitaires de visualisation PlotPy dans le module `sigima.tests.vistools`"
+
+msgid "Added standardized helper functions: `create_curve()`, `create_image()`, `create_circle()`, `create_segment()`, `create_cursor()`, `create_marker()`, and `create_contour_shapes()`"
+msgstr "Ajout de fonctions d'aide standardisées : `create_curve()`, `create_image()`, `create_circle()`, `create_segment()`, `create_cursor()`, `create_marker()` et `create_contour_shapes()`"
+
+msgid "Updated all interactive test functions to use the new unified API instead of direct PlotPy builder calls"
+msgstr "Mise à jour de toutes les fonctions de test interactives pour utiliser la nouvelle API unifiée au lieu des appels directs au constructeur PlotPy"
+
+msgid "Improved code consistency across signal and image test modules"
+msgstr "Amélioration de la cohérence du code entre les modules de test de signaux et d'images"
+
+msgid "**Visualization backend flexibility**: Added support for Matplotlib as an alternative to PlotPy for test visualizations"
+msgstr "**Flexibilité du backend de visualisation** : Ajout de la prise en charge de Matplotlib comme alternative à PlotPy pour les visualisations de test"
+
+msgid "New configuration option `vistools_backend` to select visualization library (\"auto\", \"plotpy\", or \"matplotlib\")"
+msgstr "Nouvelle option de configuration `vistools_backend` pour sélectionner la bibliothèque de visualisation (\"auto\", \"plotpy\" ou \"matplotlib\")"
+
+msgid "Environment variable `SIGIMA_VISTOOLS_BACKEND` can override configuration"
+msgstr "La variable d'environnement `SIGIMA_VISTOOLS_BACKEND` peut remplacer la configuration"
+
+msgid "Automatic fallback from PlotPy to Matplotlib when PlotPy is not available"
+msgstr "Basculement automatique de PlotPy à Matplotlib lorsque PlotPy n'est pas disponible"
+
+msgid "Backend information exposed via `sigima.tests.vistools.BACKEND_NAME` and `BACKEND_SOURCE`"
+msgstr "Informations sur le backend exposées via `sigima.tests.vistools.BACKEND_NAME` et `BACKEND_SOURCE`"
+
+msgid "Matplotlib backend provides stubs for unsupported functions (raises `NotImplementedError`)"
+msgstr "Le backend Matplotlib fournit des stubs pour les fonctions non prises en charge (lève `NotImplementedError`)"
+
+msgid "Unit test ensures API compatibility between backends"
+msgstr "Test unitaire garantissant la compatibilité de l'API entre les backends"

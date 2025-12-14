@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-13 13:58+0100\n"
+"POT-Creation-Date: 2025-12-14 11:36+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -21,9 +21,6 @@ msgstr ""
 
 msgid "Release notes"
 msgstr "Notes de version"
-
-msgid "Version 1.0"
-msgstr ""
 
 msgid "Sigima Version 1.0.4"
 msgstr ""
@@ -132,9 +129,6 @@ msgstr "Création d'un nouvel exemple `doc/examples/features/zero_padding.py` d�
 
 msgid "Sigima Version 1.0.3 (2025-12-03)"
 msgstr ""
-
-msgid "🛠️ Bug fixes:"
-msgstr "🛠️ Correctifs:"
 
 msgid "**Signal data type validation**: Fixed integer arrays not being automatically converted to float64"
 msgstr "**Validation du type de données du signal** : Correction des tableaux entiers qui n'étaient pas automatiquement convertis en float64"
@@ -1276,3 +1270,4 @@ msgstr "Correction de la vulnérabilité des binaires libwebp dans les paquets W
 
 msgid "See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details"
 msgstr "Voir l'[avis de sécurité DataLab](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) pour plus de détails."
+
