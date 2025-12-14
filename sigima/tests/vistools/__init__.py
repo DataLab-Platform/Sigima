@@ -26,6 +26,131 @@ Module exports:
 from __future__ import annotations
 
 import os
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Import type hints for static analysis (Pylance, Pylint, mypy)
+    # These imports only happen during type checking, not at runtime
+    import numpy as np
+
+    from sigima.objects import GeometryResult, ImageObj
+
+    # Type stub declarations for public API
+    # These tell static analyzers what functions are available
+    BACKEND_NAME: str
+    BACKEND_SOURCE: str
+
+    def view_curves(
+        curves: list,
+        titles: list[str] | None = None,
+        title: str | None = None,
+        maximized: bool = False,
+        results: list[GeometryResult] | GeometryResult | None = None,
+        show_roi: bool = True,
+        object_name: str = "",
+        **kwargs,
+    ) -> None: ...
+
+    def view_images(
+        images: list,
+        titles: list[str] | None = None,
+        title: str | None = None,
+        maximized: bool = False,
+        results: list[GeometryResult] | GeometryResult | None = None,
+        show_roi: bool = True,
+        object_name: str = "",
+        **kwargs,
+    ) -> None: ...
+
+    def view_images_side_by_side(
+        images: list,
+        titles: list[str] | None = None,
+        share_axes: bool = True,
+        rows: int | None = None,
+        maximized: bool = False,
+        title: str | None = None,
+        results: list[GeometryResult] | GeometryResult | None = None,
+        show_roi: bool = True,
+        object_name: str = "",
+        **kwargs,
+    ) -> None: ...
+
+    def view_curves_and_images(
+        curves: list,
+        images: list,
+        curve_titles: list[str] | None = None,
+        image_titles: list[str] | None = None,
+        title: str | None = None,
+        maximized: bool = False,
+        results: list[GeometryResult] | GeometryResult | None = None,
+        show_roi: bool = True,
+        object_name: str = "",
+        **kwargs,
+    ) -> None: ...
+
+    def view_curve_items(
+        items: list, title: str | None = None, object_name: str = ""
+    ) -> None: ...
+
+    def view_image_items(
+        items: list, title: str | None = None, object_name: str = ""
+    ) -> None: ...
+
+    def create_curve(x: np.ndarray, y: np.ndarray, title: str | None = None): ...
+
+    def create_image(
+        data: np.ndarray,
+        title: str | None = None,
+        x0: float | None = None,
+        y0: float | None = None,
+        dx: float | None = None,
+        dy: float | None = None,
+        **kwargs,
+    ): ...
+
+    def create_contour_shapes(
+        obj: ImageObj,
+        threshold: float,
+        kind: str = "polygon",
+    ) -> list: ...
+
+    def create_circle(
+        xc: float,
+        yc: float,
+        r: float,
+        title: str | None = None,
+        **kwargs,
+    ): ...
+
+    def create_segment(
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        title: str | None = None,
+        **kwargs,
+    ): ...
+
+    def create_cursor(
+        x: float,
+        y: float,
+        title: str | None = None,
+        **kwargs,
+    ): ...
+
+    def create_range(
+        xmin: float | None = None,
+        xmax: float | None = None,
+        ymin: float | None = None,
+        ymax: float | None = None,
+        title: str | None = None,
+        **kwargs,
+    ): ...
+
+    def create_label(text: str): ...
+
+    def create_marker(x: float, y: float, title: str | None = None): ...
+
 
 # Determine which backend to use
 _backend_name: str | None = None
@@ -190,4 +315,24 @@ def __dir__():
 
 
 # Define __all__ to include expected public API
-__all__ = ["BACKEND_NAME", "BACKEND_SOURCE"]
+__all__ = [
+    "BACKEND_NAME",
+    "BACKEND_SOURCE",
+    # Creation functions
+    "create_circle",
+    "create_contour_shapes",
+    "create_cursor",
+    "create_curve",
+    "create_image",
+    "create_label",
+    "create_marker",
+    "create_range",
+    "create_segment",
+    # Viewer functions
+    "view_curve_items",
+    "view_curves",
+    "view_curves_and_images",
+    "view_image_items",
+    "view_images",
+    "view_images_side_by_side",
+]
