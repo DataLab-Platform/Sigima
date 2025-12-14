@@ -60,12 +60,14 @@ doc = [
     "sphinx-gallery",
     "sphinx_intl",
     "myst_parser",
+    "myst-nb",
     "sphinx_design",
     "sphinx-copybutton",
     "pydata-sphinx-theme",
     "qtpy",
     "PyQt5",
     "plotpy",
+    "matplotlib",
     "opencv-python-headless >= 4.8.1.78",
 ]
 test = ["pytest", "pytest-xvfb"]

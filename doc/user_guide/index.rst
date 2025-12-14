@@ -3,7 +3,7 @@ User Guide
 
 .. only:: html and not latex
 
-    .. grid:: 2 2 3 3
+    .. grid:: 2 2 4 4
         :gutter: 1 2 3 4
 
         .. grid-item-card:: :octicon:`download;1em;sd-text-info`  Installation
@@ -11,6 +11,12 @@ User Guide
             :link-type: doc
 
             How to install Sigima
+
+        .. grid-item-card:: :octicon:`rocket;1em;sd-text-info`  Getting Started
+            :link: getting_started
+            :link-type: doc
+
+            Quick start with examples
 
         .. grid-item-card:: :octicon:`book;1em;sd-text-info`  Overview
             :link: overview
@@ -29,5 +35,6 @@ User Guide
    :caption: Contents:
 
    installation
+   getting_started
    overview
    features

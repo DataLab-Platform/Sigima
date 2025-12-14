@@ -7,6 +7,8 @@ babel
 build
 guidata >= 3.13
 makefun >= 1.13.1
+matplotlib
+myst-nb
 myst_parser
 opencv-python-headless >= 4.8.1.78
 packaging >= 21.3

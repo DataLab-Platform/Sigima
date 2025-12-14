@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-29 11:01+0100\n"
+"POT-Creation-Date: 2025-12-14 12:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -292,6 +292,12 @@ msgstr ""
 msgid "An extended [CommonMark](https://spec.commonmark.org/) compliant parser,"
 msgstr "Un parseur étendu compatible avec [CommonMark](https://spec.commonmark.org/)"
 
+msgid "myst-nb"
+msgstr ""
+
+msgid "A Jupyter Notebook Sphinx reader built on top of the MyST markdown parser."
+msgstr ""
+
 msgid "sphinx_design"
 msgstr ""
 
@@ -309,6 +315,13 @@ msgstr ""
 
 msgid "Bootstrap-based Sphinx theme from the PyData community"
 msgstr "Thème Bootstrap pour Sphinx de la communauté PyData"
+
+msgid "matplotlib"
+msgstr ""
+
+#, fuzzy
+msgid "Python plotting package"
+msgstr "Langage de programmation Python"
 
 msgid "opencv-python-headless"
 msgstr ""
@@ -333,3 +346,4 @@ msgstr ""
 
 msgid "A pytest plugin to run Xvfb (or Xephyr/Xvnc) for tests."
 msgstr "Plugin pytest pour exécuter Xvfb (ou Xephyr/Xvnc) pour les tests."
+

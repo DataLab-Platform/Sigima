@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-28 10:04+0100\n"
+"POT-Creation-Date: 2025-12-14 12:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -30,6 +30,15 @@ msgstr "**Sigima** est une bibliothèque Python open-source pour le traitement s
 
 msgid "Sigima was created from the externalization of `DataLab <https://datalab-platform.com/>`_'s computing engine and is now an essential building block of the DataLab ecosystem, but is designed to be GUI-independent (and independent of DataLab itself) and can be used in a variety of scientific computing contexts."
 msgstr "Sigima a été créé à partir de l'externalisation du moteur de calcul de `DataLab <https://datalab-platform.com/>`_ et constitue maintenant un élément essentiel de l'écosystème DataLab, mais est conçu pour être indépendant de toute interface graphique (et indépendant de DataLab lui-même) et peut être utilisé dans une variété de contextes de calcul scientifique."
+
+msgid "Quick Start Example"
+msgstr "Exemple de démarrage rapide"
+
+msgid "Here's a simple example demonstrating image processing with Regions of Interest (ROIs) using Sigima. This example uses the matplotlib backend for visualization, making it web-friendly and easy to run in Jupyter notebooks."
+msgstr "Voici un exemple simple démontrant le traitement d'images avec des régions d'intérêt (ROI) en utilisant Sigima. Cet exemple utilise le backend matplotlib pour la visualisation, ce qui le rend adapté au web et facile à exécuter dans des notebooks Jupyter."
+
+msgid "See the complete interactive notebook in the :ref:`getting_started` section."
+msgstr "Voir le notebook interactif complet dans la section :ref:`getting_started`."
 
 msgid "Why Sigima?"
 msgstr "Pourquoi Sigima ?"
@@ -415,4 +424,3 @@ msgstr ":doc:`../api/index` - Référence API complète"
 
 msgid "Sigima is designed to be **GUI-independent**. If you need interactive visualization and analysis tools, check out `DataLab <https://datalab-platform.com/>`_, which uses Sigima as its processing backend and adds a complete graphical interface."
 msgstr "Sigima est conçu pour être **indépendant de toute interface graphique**. Si vous avez besoin d'outils de visualisation et d'analyse interactifs, consultez `DataLab <https://datalab-platform.com/>`_, qui utilise Sigima comme moteur de traitement et ajoute une interface graphique complète."
-

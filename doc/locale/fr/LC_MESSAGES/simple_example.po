@@ -1,0 +1,35 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Sigima \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-14 12:28+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid "Prepare data and compute processing feature"
+msgstr "Préparer les données et calculer la fonctionnalité de traitement"
+
+msgid "Demonstration of using Regions of Interest (ROIs) in image processing with **Sigima**"
+msgstr "Démonstration de l'utilisation des régions d'intérêt (ROI) dans le traitement d'images avec **Sigima**"
+
+msgid "Display results"
+msgstr "Afficher les résultats"
+
+msgid "ℹ️ The following code use `vistools` Matplotlib backend which has been introduced in Sigima V1.1"
+msgstr "ℹ️ Le code suivant utilise le backend Matplotlib de `vistools` qui a été introduit dans Sigima V1.1"
+
+msgid "Sigima V1.0 uses an internal version of `vistools` for image display based on PlotPy"
+msgstr "Sigima V1.0 utilise une version interne de `vistools` pour l'affichage des images basée sur PlotPy"
