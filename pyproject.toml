@@ -110,6 +110,7 @@ filterwarnings = [
     # Ignore specific deprecation warnings from external libraries
     "ignore::DeprecationWarning:pandas.*",
     "ignore::DeprecationWarning:scipy.*",
+    "ignore::DeprecationWarning:skimage.*",
     # Ignore specific user warnings from Sigima (expected behavior)
     "ignore:Multiple crossing points found. Returning last.:UserWarning:sigima.*",
 ]
