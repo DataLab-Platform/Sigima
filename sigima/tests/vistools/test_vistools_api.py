@@ -65,6 +65,12 @@ def test_backend_selection_env_var(monkeypatch):
     """Test that SIGIMA_VISTOOLS_BACKEND environment variable works."""
     import importlib
 
+    # Check if matplotlib is available
+    try:
+        import matplotlib  # noqa: F401
+    except ImportError:
+        pytest.skip("matplotlib not available")
+
     # Test with matplotlib
     monkeypatch.setenv("SIGIMA_VISTOOLS_BACKEND", "matplotlib")
     # Reload the module to pick up new env var
@@ -80,6 +86,12 @@ def test_backend_selection_env_var(monkeypatch):
 def test_backend_selection_option(monkeypatch):
     """Test that configuration option vistools_backend works."""
     import importlib
+
+    # Check if matplotlib is available
+    try:
+        import matplotlib  # noqa: F401
+    except ImportError:
+        pytest.skip("matplotlib not available")
 
     from sigima.config import options
 
@@ -100,6 +112,22 @@ def test_backend_selection_option(monkeypatch):
 
 def test_backend_info_available():
     """Test that backend information is exposed."""
+    # Check if any backend is available
+    try:
+        import matplotlib  # noqa: F401
+
+        backend_available = True
+    except ImportError:
+        try:
+            import plotpy  # noqa: F401
+
+            backend_available = True
+        except ImportError:
+            backend_available = False
+
+    if not backend_available:
+        pytest.skip("No visualization backend available")
+
     from sigima.tests import vistools
 
     assert hasattr(vistools, "BACKEND_NAME")

@@ -107,24 +107,66 @@ def _select_backend() -> tuple[str, str]:
         )
 
 
-# Select backend at module import time
-_backend_name, _backend_source = _select_backend()
+# Lazy backend initialization - deferred until first attribute access
+_backend_module = None
+_backend_name = None
+_backend_source = None
+_initializing = False  # Flag to prevent recursion
 
-# Import all symbols from selected backend
-if _backend_name == "plotpy":
-    from . import vistools_plotpy as _backend_module
-    from .vistools_plotpy import *  # noqa: F401,F403 # pylint: disable=wildcard-import,unused-wildcard-import
-elif _backend_name == "matplotlib":
-    from . import vistools_mpl as _backend_module
-    from .vistools_mpl import *  # noqa: F401,F403 # pylint: disable=wildcard-import,unused-wildcard-import
 
-# Export backend information
-BACKEND_NAME = _backend_name
-BACKEND_SOURCE = _backend_source
+def _initialize_backend():
+    """Initialize backend on first use (lazy loading)."""
+    global _backend_module, _backend_name, _backend_source, _initializing
 
-# Build __all__ list: backend info + all public functions from backend module
-__all__ = ["BACKEND_NAME", "BACKEND_SOURCE"] + [
-    name
-    for name in dir(_backend_module)
-    if not name.startswith("_") and name not in ("BACKEND_NAME", "BACKEND_SOURCE")
-]
+    if _backend_module is not None:
+        return  # Already initialized
+
+    if _initializing:
+        return  # Prevent recursion during import
+
+    _initializing = True
+    try:
+        _backend_name, _backend_source = _select_backend()
+
+        # Import selected backend using importlib to avoid triggering __getattr__
+        import importlib
+
+        if _backend_name == "plotpy":
+            _backend_module = importlib.import_module(
+                ".vistools_plotpy", package=__name__
+            )
+        elif _backend_name == "matplotlib":
+            _backend_module = importlib.import_module(".vistools_mpl", package=__name__)
+    finally:
+        _initializing = False
+
+
+def __getattr__(name: str):
+    """Lazy loading of backend attributes."""
+    if name in ("BACKEND_NAME", "BACKEND_SOURCE", "_backend_module"):
+        _initialize_backend()
+        if name == "BACKEND_NAME":
+            return _backend_name
+        if name == "BACKEND_SOURCE":
+            return _backend_source
+        if name == "_backend_module":
+            return _backend_module
+
+    # For any other attribute, initialize backend and forward to backend module
+    _initialize_backend()
+    try:
+        return getattr(_backend_module, name)
+    except AttributeError:
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'") from None
+
+
+def __dir__():
+    """Return list of available attributes (with lazy initialization)."""
+    _initialize_backend()
+    base_attrs = ["BACKEND_NAME", "BACKEND_SOURCE"]
+    backend_attrs = [name for name in dir(_backend_module) if not name.startswith("_")]
+    return base_attrs + backend_attrs
+
+
+# Define __all__ to include expected public API
+__all__ = ["BACKEND_NAME", "BACKEND_SOURCE"]
