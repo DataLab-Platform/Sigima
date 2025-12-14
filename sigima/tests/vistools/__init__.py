@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import importlib
 import os
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     # Import type hints for static analysis (Pylance, Pylint, mypy)
@@ -42,7 +42,6 @@ if TYPE_CHECKING:
     BACKEND_SOURCE: str
 
     # pylint: disable=unused-argument
-    # pylint: disable=missing-function-docstring
 
     def view_curves(
         curves: list,
@@ -53,7 +52,8 @@ if TYPE_CHECKING:
         show_roi: bool = True,
         object_name: str = "",
         **kwargs,
-    ) -> None: ...
+    ) -> None:
+        """Display multiple curves in a dialog."""
 
     def view_images(
         images: list,
@@ -64,7 +64,8 @@ if TYPE_CHECKING:
         show_roi: bool = True,
         object_name: str = "",
         **kwargs,
-    ) -> None: ...
+    ) -> None:
+        """Display multiple images in a dialog."""
 
     def view_images_side_by_side(
         images: list,
@@ -77,7 +78,8 @@ if TYPE_CHECKING:
         show_roi: bool = True,
         object_name: str = "",
         **kwargs,
-    ) -> None: ...
+    ) -> None:
+        """Display images side by side in a grid layout."""
 
     def view_curves_and_images(
         curves: list,
@@ -90,33 +92,61 @@ if TYPE_CHECKING:
         show_roi: bool = True,
         object_name: str = "",
         **kwargs,
-    ) -> None: ...
+    ) -> None:
+        """Display curves and images together in a dialog."""
 
     def view_curve_items(
-        items: list, title: str | None = None, object_name: str = ""
-    ) -> None: ...
+        items: list,
+        name: str | None = None,
+        title: str | None = None,
+        xlabel: str | None = None,
+        ylabel: str | None = None,
+        xunit: str | None = None,
+        yunit: str | None = None,
+        add_legend: bool = True,
+        datetime_format: str | None = None,
+        object_name: str = "",
+    ) -> None:
+        """Display curve items in a plot dialog."""
 
     def view_image_items(
-        items: list, title: str | None = None, object_name: str = ""
-    ) -> None: ...
+        items: list,
+        name: str | None = None,
+        title: str | None = None,
+        xlabel: str | None = None,
+        ylabel: str | None = None,
+        zlabel: str | None = None,
+        xunit: str | None = None,
+        yunit: str | None = None,
+        zunit: str | None = None,
+        show_itemlist: bool = False,
+        object_name: str = "",
+    ) -> None:
+        """Display image items in a plot dialog."""
 
-    def create_curve(x: np.ndarray, y: np.ndarray, title: str | None = None): ...
+    def create_curve(x: np.ndarray, y: np.ndarray, title: str | None = None) -> Any:
+        """Create a curve item from x and y data."""
 
     def create_image(
         data: np.ndarray,
         title: str | None = None,
-        x0: float | None = None,
-        y0: float | None = None,
-        dx: float | None = None,
-        dy: float | None = None,
+        interpolation: str = "linear",
+        colormap: str | None = None,
+        alpha_function: str | None = None,
+        xdata: list[float] | None = None,
+        ydata: list[float] | None = None,
         **kwargs,
-    ): ...
+    ) -> Any:
+        """Create an image item from array data."""
+        return object()
 
     def create_contour_shapes(
         obj: ImageObj,
         threshold: float,
         kind: str = "polygon",
-    ) -> list: ...
+    ) -> list[Any]:
+        """Create contour shape items from image object."""
+        return []
 
     def create_circle(
         xc: float,
@@ -124,7 +154,9 @@ if TYPE_CHECKING:
         r: float,
         title: str | None = None,
         **kwargs,
-    ): ...
+    ) -> Any:
+        """Create a circle annotation item."""
+        return object()
 
     def create_segment(
         x1: float,
@@ -133,14 +165,17 @@ if TYPE_CHECKING:
         y2: float,
         title: str | None = None,
         **kwargs,
-    ): ...
+    ) -> Any:
+        """Create a segment annotation item."""
+        return object()
 
     def create_cursor(
-        x: float,
-        y: float,
-        title: str | None = None,
-        **kwargs,
-    ): ...
+        orientation: str,
+        position: float | tuple[float, float],
+        label: str,
+    ) -> Any:
+        """Create a cursor marker item."""
+        return object()
 
     def create_range(
         xmin: float | None = None,
@@ -149,11 +184,17 @@ if TYPE_CHECKING:
         ymax: float | None = None,
         title: str | None = None,
         **kwargs,
-    ): ...
+    ) -> Any:
+        """Create a range annotation item."""
+        return object()
 
-    def create_label(text: str): ...
+    def create_label(text: str) -> Any:
+        """Create a text label item."""
+        return object()
 
-    def create_marker(x: float, y: float, title: str | None = None): ...
+    def create_marker(x: float, y: float, title: str | None = None) -> Any:
+        """Create a marker item at specified coordinates."""
+        return object()
 
 
 # Determine which backend to use
@@ -172,6 +213,9 @@ def _select_backend() -> tuple[str, str]:
     Raises:
         ImportError: If no suitable backend is available or selected backend not found
     """
+    # pylint: disable=import-outside-toplevel
+    # pylint: disable=unused-import
+
     # Priority 1: Environment variable
     env_backend = os.environ.get("SIGIMA_VISTOOLS_BACKEND", "").lower()
     if env_backend in ("plotpy", "matplotlib", "auto"):
@@ -180,18 +224,18 @@ def _select_backend() -> tuple[str, str]:
     else:
         # Priority 2: Configuration option
         try:
-            from sigima.config import options  # pylint: disable=import-outside-toplevel
+            from sigima.config import options
 
             requested = options.vistools_backend.get(sync_env=False).lower()
             source = "config"
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-exception-caught
             requested = "auto"
             source = "auto"
 
     # Try to import based on request
     if requested == "plotpy":
         try:
-            import plotpy  # noqa: F401 # pylint: disable=unused-import,import-outside-toplevel
+            import plotpy  # noqa: F401
 
             return ("plotpy", source)
         except ImportError as exc:
@@ -202,7 +246,7 @@ def _select_backend() -> tuple[str, str]:
 
     elif requested == "matplotlib":
         try:
-            import matplotlib  # noqa: F401 # pylint: disable=unused-import,import-outside-toplevel
+            import matplotlib  # noqa: F401
 
             return ("matplotlib", source)
         except ImportError as exc:
@@ -214,7 +258,7 @@ def _select_backend() -> tuple[str, str]:
     else:  # "auto"
         # Try PlotPy first
         try:
-            import plotpy  # noqa: F401 # pylint: disable=unused-import,import-outside-toplevel
+            import plotpy  # noqa: F401
 
             return ("plotpy", source)
         except ImportError:
@@ -222,7 +266,7 @@ def _select_backend() -> tuple[str, str]:
 
         # Fall back to Matplotlib
         try:
-            import matplotlib  # noqa: F401 # pylint: disable=unused-import,import-outside-toplevel
+            import matplotlib  # noqa: F401
 
             return ("matplotlib", source)
         except ImportError:

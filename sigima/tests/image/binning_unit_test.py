@@ -29,7 +29,7 @@ def compare_binning_images(data: ma.MaskedArray) -> None:
         data: Image data
     """
     # pylint: disable=import-outside-toplevel
-    from sigima.tests import vistools
+    import sigima.tests.vistools.vistools_plotpy as vistools
 
     items = []
     items += [vistools.create_image(data, interpolation="nearest")]
