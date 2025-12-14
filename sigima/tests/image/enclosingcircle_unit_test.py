@@ -23,27 +23,20 @@ from sigima.tests.helpers import check_scalar_result
 def __enclosingcircle_test(data):
     """Enclosing circle test function"""
     # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
     from sigima.tests import vistools
 
     items = []
-    items += [make.image(data, interpolation="nearest", eliminate_outliers=1.0)]
+    items += [vistools.create_image(data, interpolation="nearest")]
 
     # Computing centroid coordinates
     row, col = sigima.tools.image.get_centroid_auto(data)
     label = _("Centroid") + " (%d, %d)"
     execenv.print(label % (row, col))
-    cursor = make.xcursor(col, row, label=label)
-    cursor.set_resizable(False)
-    cursor.set_movable(False)
+    cursor = vistools.create_cursor("x", (col, row), label=label)
     items.append(cursor)
 
     x, y, radius = sigima.tools.image.get_enclosing_circle(data)
-    circle = make.circle(x - radius, y - radius, x + radius, y + radius)
-    circle.set_readonly(True)
-    circle.set_resizable(False)
-    circle.set_movable(False)
+    circle = vistools.create_circle(x, y, radius)
     items.append(circle)
     execenv.print(x, y, radius)
     execenv.print("")
@@ -62,13 +55,7 @@ def test_enclosing_circle_interactive():
 @pytest.mark.validation
 def test_image_enclosing_circle():
     """Test enclosing circle on a ring image."""
-    p = RingParam.create(
-        image_size=200,
-        xc=100,
-        yc=100,
-        radius=30,
-        thickness=5,
-    )
+    p = RingParam.create(image_size=200, xc=100, yc=100, radius=30, thickness=5)
     # Create a ring image, so that the outer circle radius is radius + thickness:
     obj = create_ring_image(p)
     execenv.print("Testing enclosing circle on a ring image...")

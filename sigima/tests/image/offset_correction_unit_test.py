@@ -24,7 +24,6 @@ def test_image_offset_correction_interactive() -> None:
     """Image offset correction interactive test."""
     with guiutils.lazy_qt_app_context(force=True):
         # pylint: disable=import-outside-toplevel
-        from plotpy.builder import make
         from plotpy.items import RectangleShape
         from plotpy.tools import RectangleTool
         from plotpy.widgets.selectdialog import SelectDialog, select_with_shape_tool
@@ -35,7 +34,7 @@ def test_image_offset_correction_interactive() -> None:
         shape: RectangleShape = select_with_shape_tool(
             None,
             RectangleTool,
-            make.image(i1.data, interpolation="nearest", eliminate_outliers=1.0),
+            vistools.create_image(i1.data, interpolation="nearest"),
             "Select background area",
             tooldialogclass=SelectDialog,
         )

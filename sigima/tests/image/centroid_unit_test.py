@@ -78,12 +78,10 @@ def __compare_centroid_funcs(data: np.ndarray) -> None:
         data: 2D array of image data
     """
     # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
     from sigima.tests import vistools
 
     items = []
-    items += [make.image(data, interpolation="nearest", eliminate_outliers=2.0)]
+    items += [vistools.create_image(data, interpolation="nearest")]
     # Computing centroid coordinates
     for name, func in (
         # ("SciPy", spi.center_of_mass),
@@ -106,8 +104,7 @@ def __compare_centroid_funcs(data: np.ndarray) -> None:
             dt = time.time() - t0
             label = "  " + f"{_('Centroid')}[{name}] (x=%s, y=%s)"
             execenv.print(label % (x, y))
-            cursor = make.xcursor(x, y, label=label)
-            cursor.setTitle(name)
+            cursor = vistools.create_cursor("x", (x, y), label=label)
             items.append(cursor)
             execenv.print(f"    Calculation time: {int(dt * 1e3):d} ms")
         except ImportError:

@@ -29,12 +29,10 @@ def compare_binning_images(data: ma.MaskedArray) -> None:
         data: Image data
     """
     # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
-    from sigima.tests.vistools import view_image_items
+    from sigima.tests import vistools
 
     items = []
-    items += [make.image(data, interpolation="nearest", eliminate_outliers=2.0)]
+    items += [vistools.create_image(data, interpolation="nearest")]
     # Computing pixel binning
     oa_t0 = time.time()
     for ix in range(1, 5):
@@ -45,11 +43,10 @@ def compare_binning_images(data: ma.MaskedArray) -> None:
                 t0 = time.time()
                 bdata = binning(data, sx=sx, sy=sy, operation=operation)
                 title = f"[{sx}x{sy},{operation.value}]"
-                item = make.image(
+                item = vistools.create_image(
                     bdata,
                     title=title,
                     interpolation="nearest",
-                    eliminate_outliers=2.0,
                     xdata=[0, data.shape[1]],
                     ydata=[0, data.shape[0]],
                 )
@@ -59,7 +56,7 @@ def compare_binning_images(data: ma.MaskedArray) -> None:
                 execenv.print(f"    {title}: {int(dt * 1e3):d} ms")
     oa_dt = time.time() - oa_t0
     execenv.print(f"    Overall calculation time: {int(oa_dt * 1e3):d} ms")
-    view_image_items(items, title="Binning test", show_itemlist=True)
+    vistools.view_image_items(items, title="Binning test", show_itemlist=True)
 
 
 @pytest.mark.gui
