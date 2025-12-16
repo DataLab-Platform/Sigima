@@ -31,9 +31,9 @@ from __future__ import annotations
 import sigima.tools.image
 from sigima.config import _
 from sigima.objects.image import ImageObj
-from sigima.proc.base import FFTParam, SpectrumParam, dst_1_to_1
+from sigima.proc.base import FFTParam, SpectrumParam
 from sigima.proc.decorator import computation_function
-from sigima.proc.image.base import Wrap1to1Func
+from sigima.proc.image.base import Wrap1to1Func, dst_1_to_1
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT

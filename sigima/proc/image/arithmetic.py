@@ -38,12 +38,14 @@ from sigima.objects.image import ImageObj
 from sigima.proc.base import (
     ArithmeticParam,
     ConstantParam,
+)
+from sigima.proc.decorator import computation_function
+from sigima.proc.image.base import (
     dst_1_to_1,
     dst_2_to_1,
     dst_n_to_1,
+    restore_data_outside_roi,
 )
-from sigima.proc.decorator import computation_function
-from sigima.proc.image.base import restore_data_outside_roi
 from sigima.tools.datatypes import clip_astype
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.

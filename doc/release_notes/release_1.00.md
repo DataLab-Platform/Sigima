@@ -4,6 +4,14 @@
 
 🛠️ Bug fixes:
 
+* **Image processing: LUT range incorrectly copied to result**: Fixed processed images showing incorrect contrast because LUT range was copied from original
+  * When processing an image (e.g., subtracting offset), the result image inherited the original's LUT range (`zscalemin`/`zscalemax`), causing incorrect visualization when data values changed significantly
+  * Example: After subtracting ~50 lsb background from an image with LUT 50-200, the result (data range ~-5 to ~175) was still displayed with the original 50-200 LUT, making parts of the image appear clipped or invisible
+  * Fixed by adding image-specific `dst_1_to_1`, `dst_2_to_1`, and `dst_n_to_1` wrapper functions in `sigima.proc.image.base` that reset the LUT range after copying the source image
+  * The `ImageObj.copy()` method remains unchanged (a copy should faithfully copy all attributes) - the fix is applied at the processing layer where it belongs
+  * Added regression test `test_image_offset_correction_lut_range` in `offset_correction_unit_test.py`
+  * This closes [Issue #9](https://github.com/DataLab-Platform/Sigima/issues/9) - LUT range incorrectly copied when processing images
+
 * **Backwards-defined rectangular ROI causes NaN statistics**: Fixed rectangular ROI coordinate normalization when defined in reverse direction
   * When a rectangular ROI was drawn graphically "backwards" in DataLab (from bottom-right to top-left instead of top-left to bottom-right), statistics analysis returned NaN values
   * The `RectangularROI.rect_to_coords()` method was producing negative Δx and Δy values when `x1 < x0` or `y1 < y0`

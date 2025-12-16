@@ -37,9 +37,8 @@ import sigima.tools.image
 from sigima.config import _
 from sigima.objects.image import ImageObj, ImageROI, RectangularROI, ROI2DParam
 from sigima.objects.signal import SignalObj
-from sigima.proc.base import dst_1_to_1
 from sigima.proc.decorator import computation_function
-from sigima.proc.image.base import dst_1_to_1_signal
+from sigima.proc.image.base import dst_1_to_1, dst_1_to_1_signal
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT

@@ -40,12 +40,15 @@ from sigima.proc.base import (
     ClipParam,
     HistogramParam,
     NormalizeParam,
-    dst_1_to_1,
-    dst_2_to_1,
     new_signal_result,
 )
 from sigima.proc.decorator import computation_function
-from sigima.proc.image.base import Wrap1to1Func, restore_data_outside_roi
+from sigima.proc.image.base import (
+    Wrap1to1Func,
+    dst_1_to_1,
+    dst_2_to_1,
+    restore_data_outside_roi,
+)
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT
