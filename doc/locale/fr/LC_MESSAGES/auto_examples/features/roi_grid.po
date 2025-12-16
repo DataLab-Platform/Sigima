@@ -1,0 +1,116 @@
+# Génération de grille de ROI.
+# Copyright (C) 2025, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# Pierre Raybaut, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Sigima \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2025-12-16 12:00+0100\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid ":ref:`Go to the end <sphx_glr_download_auto_examples_features_roi_grid.py>` to download the full example code."
+msgstr ":ref:`Aller à la fin <sphx_glr_download_auto_examples_features_roi_grid.py>` pour télécharger le code complet de l'exemple."
+
+msgid "ROI Grid Generation"
+msgstr "Génération de grille de ROI"
+
+msgid "This example focuses on generating grids of rectangular ROIs for systematic analysis of regular patterns in images using Sigima's ROI grid feature. Using a real laser spot array image, we'll explore how to create, configure, and apply ROI grids for extracting individual spots."
+msgstr "Cet exemple se concentre sur la génération de grilles de ROI rectangulaires pour l'analyse systématique de motifs réguliers dans les images à l'aide de la fonctionnalité de grille de ROI de Sigima. En utilisant une image réelle de matrice de spots laser, nous explorerons comment créer, configurer et appliquer des grilles de ROI pour extraire des spots individuels."
+
+msgid "The example shows:"
+msgstr "Cet exemple montre :"
+
+msgid "Loading a real-world laser spot array image"
+msgstr "Le chargement d'une image réelle de matrice de spots laser"
+
+msgid "Extracting a sub-region for clearer visualization"
+msgstr "L'extraction d'une sous-région pour une visualisation plus claire"
+
+msgid "Generating a grid of rectangular ROIs"
+msgstr "La génération d'une grille de ROI rectangulaires"
+
+msgid "Configuring grid parameters (size, translation, step spacing)"
+msgstr "La configuration des paramètres de la grille (taille, translation, espacement)"
+
+msgid "Understanding direction labels (row/column ordering)"
+msgstr "La compréhension des labels de direction (ordre des lignes/colonnes)"
+
+msgid "Extracting individual spots using the generated ROIs"
+msgstr "L'extraction de spots individuels à l'aide des ROI générées"
+
+msgid "Visualizing the ROIs on the image"
+msgstr "La visualisation des ROI sur l'image"
+
+msgid "This tutorial uses PlotPy for visualization, providing interactive plots that allow you to explore the ROI grid placement in detail."
+msgstr "Ce tutoriel utilise PlotPy pour la visualisation, fournissant des graphiques interactifs qui permettent d'explorer en détail le placement de la grille de ROI."
+
+msgid "Importing necessary modules"
+msgstr "Importation des modules nécessaires"
+
+msgid "We'll start by importing all the required modules for image processing and visualization."
+msgstr "Nous commencerons par importer tous les modules nécessaires au traitement d'images et à la visualisation."
+
+msgid "Loading a real laser spot array image"
+msgstr "Chargement d'une image réelle de matrice de spots laser"
+
+msgid "We'll use a laser spot array image with a 6×6 grid of spots. This is a realistic example where we need to analyze each spot individually."
+msgstr "Nous utiliserons une image de matrice de spots laser avec une grille 6×6 de spots. C'est un exemple réaliste où nous devons analyser chaque spot individuellement."
+
+msgid "Extracting a 2×2 sub-region"
+msgstr "Extraction d'une sous-région 2×2"
+
+msgid "For clearer visualization of the ROI grid feature, we'll extract a 2×2 sub-region from the center of the full 6×6 spot array."
+msgstr "Pour une visualisation plus claire de la fonctionnalité de grille de ROI, nous extrairons une sous-région 2×2 du centre de la matrice complète 6×6 de spots."
+
+msgid "Qt widget 1"
+msgstr ""
+
+msgid "Creating a basic grid of ROIs"
+msgstr "Création d'une grille de base de ROI"
+
+msgid "Now we'll generate a 2×2 grid of ROIs to match the extracted spot array. Each ROI will be centered on a spot for individual analysis."
+msgstr "Nous allons maintenant générer une grille 2×2 de ROI correspondant à la matrice de spots extraite. Chaque ROI sera centrée sur un spot pour une analyse individuelle."
+
+msgid "Extracting individual spots"
+msgstr "Extraction de spots individuels"
+
+msgid "Once the ROI grid is defined, we can extract individual spots as separate images for further analysis."
+msgstr "Une fois la grille de ROI définie, nous pouvons extraire les spots individuels sous forme d'images séparées pour une analyse plus approfondie."
+
+msgid "Adjusting ROI size and position"
+msgstr "Ajustement de la taille et de la position des ROI"
+
+msgid "The ROI size and translation parameters control how the ROIs are placed within each grid cell. Let's explore different configurations."
+msgstr "Les paramètres de taille et de translation des ROI contrôlent comment les ROI sont placées dans chaque cellule de la grille. Explorons différentes configurations."
+
+msgid "Understanding direction labels"
+msgstr "Compréhension des labels de direction"
+
+msgid "The xdirection and ydirection parameters control how rows and columns are numbered. This affects the ROI titles but not the geometry."
+msgstr "Les paramètres xdirection et ydirection contrôlent comment les lignes et les colonnes sont numérotées. Cela affecte les titres des ROI mais pas la géométrie."
+
+msgid "Summary and conclusions"
+msgstr "Résumé et conclusions"
+
+msgid "This tutorial demonstrated the key concepts of ROI grid generation for systematic analysis of regular patterns in images using Sigima."
+msgstr "Ce tutoriel a présenté les concepts clés de la génération de grille de ROI pour l'analyse systématique de motifs réguliers dans les images à l'aide de Sigima."
+
+msgid ":download:`Download Jupyter notebook: roi_grid.ipynb <roi_grid.ipynb>`"
+msgstr ":download:`Télécharger le notebook Jupyter : roi_grid.ipynb <roi_grid.ipynb>`"
+
+msgid ":download:`Download Python source code: roi_grid.py <roi_grid.py>`"
+msgstr ":download:`Télécharger le code source Python : roi_grid.py <roi_grid.py>`"
+
+msgid ":download:`Download zipped: roi_grid.zip <roi_grid.zip>`"
+msgstr ":download:`Télécharger l'archive : roi_grid.zip <roi_grid.zip>`"
+
+msgid "`Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_"
+msgstr "`Galerie générée par Sphinx-Gallery <https://sphinx-gallery.github.io>`_"
