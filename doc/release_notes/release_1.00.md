@@ -50,6 +50,11 @@
   * Added new section in `sigima.params` module listing all parameters requiring `update_from_obj()`
   * Created new example `doc/examples/features/zero_padding.py` demonstrating proper parameter initialization
 
+* **New ROI grid example**: Added example demonstrating the grid ROI feature
+  * Introduced `laser_spot_array.png` test image (6×6 laser spot array) to help debug an issue reported in DataLab
+  * Created new example `doc/examples/features/roi_grid.py` showcasing the `generate_image_grid_roi()` function
+  * Example covers: loading images, extracting sub-regions, generating ROI grids, configuring size/translation/step parameters, understanding direction labels, and extracting individual spots
+
 ## Sigima Version 1.0.3 (2025-12-03) ##
 
 🛠️ Bug fixes:
