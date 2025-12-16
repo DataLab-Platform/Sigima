@@ -1,4 +1,4 @@
-# Release notes #
+# Version 1.1 #
 
 ## Sigima Version 1.1.0 ##
 

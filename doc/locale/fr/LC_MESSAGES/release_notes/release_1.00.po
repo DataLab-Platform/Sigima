@@ -17,8 +17,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-msgid "Release notes"
-msgstr "Notes de version"
+msgid "Version 1.0"
+msgstr ""
 
 msgid "Sigima Version 1.0.4"
 msgstr ""
@@ -1319,3 +1319,4 @@ msgstr "Correction de la vulnérabilité des binaires libwebp dans les paquets W
 
 msgid "See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details"
 msgstr "Voir l'[avis de sécurité DataLab](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) pour plus de détails."
+

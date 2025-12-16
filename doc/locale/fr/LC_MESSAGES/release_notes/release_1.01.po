@@ -17,8 +17,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-msgid "Release notes"
-msgstr "Notes de version"
+msgid "Version 1.1"
+msgstr ""
 
 msgid "Sigima Version 1.1.0"
 msgstr ""
@@ -70,3 +70,4 @@ msgstr "Le backend Matplotlib fournit des stubs pour les fonctions non prises en
 
 msgid "Unit test ensures API compatibility between backends"
 msgstr "Test unitaire garantissant la compatibilité de l'API entre les backends"
+
