@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-13 18:46+0100\n"
+"POT-Creation-Date: 2025-12-16 10:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -20,13 +20,31 @@ msgstr ""
 "Generated-By: Babel 2.17.0\n"
 
 msgid "Version 1.0"
-msgstr "Version 1.0"
+msgstr ""
 
 msgid "Sigima Version 1.0.4"
-msgstr "Sigima Version 1.0.4"
+msgstr ""
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs :"
+
+msgid "**Backwards-defined rectangular ROI causes NaN statistics**: Fixed rectangular ROI coordinate normalization when defined in reverse direction"
+msgstr "**Une ROI rectangulaire définie à l'envers entraîne des statistiques NaN** : Correction de la normalisation des coordonnées de ROI rectangulaire lorsqu'elle est définie en sens inverse"
+
+msgid "When a rectangular ROI was drawn graphically \"backwards\" in DataLab (from bottom-right to top-left instead of top-left to bottom-right), statistics analysis returned NaN values"
+msgstr "Lorsqu'une ROI rectangulaire était dessinée graphiquement « à l'envers » dans DataLab (du coin inférieur droit vers le coin supérieur gauche au lieu du coin supérieur gauche vers le coin inférieur droit), l'analyse statistique retournait des valeurs NaN"
+
+msgid "The `RectangularROI.rect_to_coords()` method was producing negative Δx and Δy values when `x1 < x0` or `y1 < y0`"
+msgstr "La méthode `RectangularROI.rect_to_coords()` produisait des valeurs Δx et Δy négatives lorsque `x1 < x0` ou `y1 < y0`"
+
+msgid "Fixed by normalizing coordinates using min/max to ensure Δx and Δy are always positive"
+msgstr "Corrigé en normalisant les coordonnées avec min/max pour garantir que Δx et Δy sont toujours positifs"
+
+msgid "ROI mask generation now works correctly regardless of the direction in which the rectangle was drawn"
+msgstr "La génération du masque de ROI fonctionne désormais correctement quelle que soit la direction dans laquelle le rectangle a été dessiné"
+
+msgid "Added regression test `test_backwards_drawn_rectangle` in `roi_coords_unit_test.py`"
+msgstr "Ajout d'un test de régression `test_backwards_drawn_rectangle` dans `roi_coords_unit_test.py`"
 
 msgid "**Grid ROI - Missing spacing parameters for non-uniform grids**: Fixed grid ROI extraction to support non-uniform feature spacing"
 msgstr "**ROI de grille - Paramètres d'espacement manquants pour les grilles non uniformes :** Correction de l'extraction ROI de grille pour prendre en charge un espacement des caractéristiques non uniforme"

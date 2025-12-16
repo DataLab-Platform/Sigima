@@ -4,6 +4,13 @@
 
 🛠️ Bug fixes:
 
+* **Backwards-defined rectangular ROI causes NaN statistics**: Fixed rectangular ROI coordinate normalization when defined in reverse direction
+  * When a rectangular ROI was drawn graphically "backwards" in DataLab (from bottom-right to top-left instead of top-left to bottom-right), statistics analysis returned NaN values
+  * The `RectangularROI.rect_to_coords()` method was producing negative Δx and Δy values when `x1 < x0` or `y1 < y0`
+  * Fixed by normalizing coordinates using min/max to ensure Δx and Δy are always positive
+  * ROI mask generation now works correctly regardless of the direction in which the rectangle was drawn
+  * Added regression test `test_backwards_drawn_rectangle` in `roi_coords_unit_test.py`
+
 * **Grid ROI - Missing spacing parameters for non-uniform grids**: Fixed grid ROI extraction to support non-uniform feature spacing
   * Grid ROI extraction previously assumed evenly distributed features (spacing = width/nx), which failed for images where features don't fill the entire grid area
   * Example: `laser_spot_array_raw.png` has laser spots spaced ~300 pixels apart, but the grid was defined over 3100×3100 pixels, causing incorrect ROI placement
