@@ -485,6 +485,41 @@ class TestEdgeCases:
 
         np.testing.assert_allclose(retrieved_physical, [1050.0, 2050.0, 5.0])
 
+    def test_backwards_drawn_rectangle(self):
+        """Test rectangle drawn backwards (from bottom-right to top-left).
+
+        When a rectangle is drawn graphically by dragging from bottom-right to
+        top-left (instead of top-left to bottom-right), the x1 < x0 and y1 < y0.
+        This should still produce valid ROI coordinates with positive Δx and Δy.
+
+        Regression test for bug: backwards-drawn rectangles caused NaN statistics
+        because negative Δx/Δy resulted in empty masks.
+        """
+        obj = create_test_image()
+
+        # Simulate backwards drawing: start at (50, 50), drag to (10, 10)
+        # This means x0=50, y0=50, x1=10, y1=10 from get_rect()
+        coords = RectangularROI.rect_to_coords(50.0, 50.0, 10.0, 10.0)
+
+        # Coordinates should be normalized: (10, 10, 40, 40)
+        assert coords[0] == 10.0, f"x0 should be 10.0, got {coords[0]}"
+        assert coords[1] == 10.0, f"y0 should be 10.0, got {coords[1]}"
+        assert coords[2] == 40.0, f"Δx should be 40.0, got {coords[2]}"
+        assert coords[3] == 40.0, f"Δy should be 40.0, got {coords[3]}"
+
+        # Create ROI with these normalized coordinates
+        roi = RectangularROI(coords.tolist(), indices=False, title="Backwards")
+
+        # Mask should work correctly (not empty)
+        mask = roi.to_mask(obj)
+        # For normal (non-inverse) ROI, mask is False inside the ROI
+        pixels_inside_roi = np.sum(~mask)
+        assert pixels_inside_roi > 0, "ROI mask should contain pixels"
+
+        # Verify bounding box is correct
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert x0 == 10.0 and y0 == 10.0 and x1 == 50.0 and y1 == 50.0
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

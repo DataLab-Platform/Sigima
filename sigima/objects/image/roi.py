@@ -554,15 +554,22 @@ class RectangularROI(BaseSingleImageROI):
         """Convert rectangle to coordinates
 
         Args:
-            x0: x0 (top-left corner)
-            y0: y0 (top-left corner)
-            x1: x1 (bottom-right corner)
-            y1: y1 (bottom-right corner)
+            x0: x0 (first corner)
+            y0: y0 (first corner)
+            x1: x1 (opposite corner)
+            y1: y1 (opposite corner)
 
         Returns:
-            Rectangle coordinates (x0, y0, Δx, Δy)
+            Rectangle coordinates (x0, y0, Δx, Δy) with positive Δx and Δy
+
+        Note:
+            Coordinates are normalized so that Δx and Δy are always positive.
+            This handles rectangles drawn "backwards" (from bottom-right to top-left).
         """
-        return np.array([x0, y0, x1 - x0, y1 - y0], dtype=type(x0))
+        # Normalize coordinates to ensure Δx and Δy are positive
+        x_min, x_max = min(x0, x1), max(x0, x1)
+        y_min, y_max = min(y0, y1), max(y0, y1)
+        return np.array([x_min, y_min, x_max - x_min, y_max - y_min], dtype=type(x0))
 
 
 class CircularROI(BaseSingleImageROI):

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-14 11:36+0100\n"
+"POT-Creation-Date: 2025-12-13 18:46+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -19,14 +19,32 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-msgid "Release notes"
-msgstr "Notes de version"
+msgid "Version 1.0"
+msgstr "Version 1.0"
 
 msgid "Sigima Version 1.0.4"
-msgstr ""
+msgstr "Sigima Version 1.0.4"
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs :"
+
+msgid "**Backwards-defined rectangular ROI causes NaN statistics**: Fixed rectangular ROI coordinate normalization when defined in reverse direction"
+msgstr "**Une ROI rectangulaire définie à l'envers entraîne des statistiques NaN** : Correction de la normalisation des coordonnées de ROI rectangulaire lorsqu'elle est définie en sens inverse"
+
+msgid "When a rectangular ROI was drawn graphically \"backwards\" in DataLab (from bottom-right to top-left instead of top-left to bottom-right), statistics analysis returned NaN values"
+msgstr "Lorsqu'une ROI rectangulaire était dessinée graphiquement « à l'envers » dans DataLab (du coin inférieur droit vers le coin supérieur gauche au lieu du coin supérieur gauche vers le coin inférieur droit), l'analyse statistique retournait des valeurs NaN"
+
+msgid "The `RectangularROI.rect_to_coords()` method was producing negative Δx and Δy values when `x1 < x0` or `y1 < y0`"
+msgstr "La méthode `RectangularROI.rect_to_coords()` produisait des valeurs Δx et Δy négatives lorsque `x1 < x0` ou `y1 < y0`"
+
+msgid "Fixed by normalizing coordinates using min/max to ensure Δx and Δy are always positive"
+msgstr "Corrigé en normalisant les coordonnées avec min/max pour garantir que Δx et Δy sont toujours positifs"
+
+msgid "ROI mask generation now works correctly regardless of the direction in which the rectangle was drawn"
+msgstr "La génération du masque de ROI fonctionne désormais correctement quelle que soit la direction dans laquelle le rectangle a été dessiné"
+
+msgid "Added regression test `test_backwards_drawn_rectangle` in `roi_coords_unit_test.py`"
+msgstr "Ajout d'un test de régression `test_backwards_drawn_rectangle` dans `roi_coords_unit_test.py`"
 
 msgid "**Grid ROI - Missing spacing parameters for non-uniform grids**: Fixed grid ROI extraction to support non-uniform feature spacing"
 msgstr "**ROI de grille - Paramètres d'espacement manquants pour les grilles non uniformes :** Correction de l'extraction ROI de grille pour prendre en charge un espacement des caractéristiques non uniforme"
@@ -92,19 +110,19 @@ msgid "This closes [Issue #7](https://github.com/DataLab-Platform/Sigima/issues/
 msgstr "Ceci clôture [Issue #7](https://github.com/DataLab-Platform/Sigima/issues/7) - La sérialisation HDF5 échoue pour l'énumération de la géométrie ROI de détection"
 
 msgid "**CSV numeric data import**: Fixed numeric columns being incorrectly interpreted as datetime values ([Issue #6](https://github.com/DataLab-Platform/Sigima/issues/6))"
-msgstr "**Import de données numériques CSV** : Correction des colonnes numériques incorrectement interprétées comme des valeurs datetime ([Issue #6](https://github.com/DataLab-Platform/Sigima/issues/6))"
+msgstr "**Importation de données numériques CSV** : Correction des colonnes numériques interprétées incorrectement comme des valeurs datetime ([Issue #6](https://github.com/DataLab-Platform/Sigima/issues/6))"
 
 msgid "When importing CSV files with large numeric values (e.g., frequencies in Hz like `4.884e+06`), the data was incorrectly converted to datetime timestamps"
-msgstr "Lors de l'import de fichiers CSV avec de grandes valeurs numériques (par exemple, des fréquences en Hz comme `4.884e+06`), les données étaient incorrectement converties en horodatages datetime"
+msgstr "Lors de l'importation de fichiers CSV avec de grandes valeurs numériques (par exemple, des fréquences en Hz comme `4.884e+06`), les données étaient incorrectement converties en horodatages datetime"
 
 msgid "The `pd.to_datetime()` function was interpreting numeric values as nanoseconds since Unix epoch, corrupting the original data"
 msgstr "La fonction `pd.to_datetime()` interprétait les valeurs numériques comme des nanosecondes depuis l'époque Unix, corrompant les données originales"
 
 msgid "Added check to skip columns with numeric dtypes in datetime detection - real datetime columns are loaded as string (`object`) dtype"
-msgstr "Ajout d'une vérification pour ignorer les colonnes avec des types numériques lors de la détection datetime - les vraies colonnes datetime sont chargées comme type chaîne (`object`)"
+msgstr "Ajout d'une vérification pour ignorer les colonnes avec des types numériques dans la détection de datetime - les vraies colonnes datetime sont chargées comme type chaîne de caractères (`object`)"
 
 msgid "Numeric data (frequencies, voltages, etc.) is now correctly preserved during CSV import"
-msgstr "Les données numériques (fréquences, tensions, etc.) sont maintenant correctement préservées lors de l'import CSV"
+msgstr "Les données numériques (fréquences, tensions, etc.) sont désormais correctement préservées lors de l'importation CSV"
 
 msgid "📚 Documentation:"
 msgstr "📚 Documentation :"
@@ -128,7 +146,7 @@ msgid "Created new example `doc/examples/features/zero_padding.py` demonstrating
 msgstr "Création d'un nouvel exemple `doc/examples/features/zero_padding.py` démontrant l'initialisation correcte des paramètres"
 
 msgid "Sigima Version 1.0.3 (2025-12-03)"
-msgstr ""
+msgstr "Sigima Version 1.0.3 (2025-12-03)"
 
 msgid "**Signal data type validation**: Fixed integer arrays not being automatically converted to float64"
 msgstr "**Validation du type de données du signal** : Correction des tableaux entiers qui n'étaient pas automatiquement convertis en float64"
@@ -1270,4 +1288,3 @@ msgstr "Correction de la vulnérabilité des binaires libwebp dans les paquets W
 
 msgid "See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details"
 msgstr "Voir l'[avis de sécurité DataLab](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) pour plus de détails."
-
