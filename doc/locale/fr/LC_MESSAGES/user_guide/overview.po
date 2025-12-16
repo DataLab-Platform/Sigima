@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-28 10:04+0100\n"
+"POT-Creation-Date: 2025-12-16 06:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -403,9 +403,8 @@ msgstr "Pour commencer à utiliser Sigima, consultez :"
 msgid ":doc:`installation` - Set up Sigima in your environment"
 msgstr ":doc:`installation` - Installez Sigima dans votre environnement"
 
-#, fuzzy
 msgid ":doc:`features` - Explore Sigima's key features and capabilities"
-msgstr ":doc:`../features` - Explorez les principales fonctionnalités et capacités de Sigima"
+msgstr ":doc:`features` - Explorez les principales fonctionnalités et capacités de Sigima"
 
 msgid ":doc:`../auto_examples/index` - Practical examples showing signals and images in action"
 msgstr ":doc:`../auto_examples/index` - Exemples pratiques montrant les signaux et images en action"
@@ -415,4 +414,3 @@ msgstr ":doc:`../api/index` - Référence API complète"
 
 msgid "Sigima is designed to be **GUI-independent**. If you need interactive visualization and analysis tools, check out `DataLab <https://datalab-platform.com/>`_, which uses Sigima as its processing backend and adds a complete graphical interface."
 msgstr "Sigima est conçu pour être **indépendant de toute interface graphique**. Si vous avez besoin d'outils de visualisation et d'analyse interactifs, consultez `DataLab <https://datalab-platform.com/>`_, qui utilise Sigima comme moteur de traitement et ajoute une interface graphique complète."
-
