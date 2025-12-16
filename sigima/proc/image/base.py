@@ -24,7 +24,10 @@ from typing import Any
 import numpy as np
 
 from sigima.objects import NO_ROI, GeometryResult, ImageObj, KindShape, SignalObj
-from sigima.proc.base import dst_1_to_1, new_signal_result
+from sigima.proc.base import dst_1_to_1 as _dst_1_to_1_base
+from sigima.proc.base import dst_2_to_1 as _dst_2_to_1_base
+from sigima.proc.base import dst_n_to_1 as _dst_n_to_1_base
+from sigima.proc.base import new_signal_result
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT
@@ -33,9 +36,80 @@ from sigima.proc.base import dst_1_to_1, new_signal_result
 __all__ = [
     "Wrap1to1Func",
     "compute_geometry_from_obj",
+    "dst_1_to_1",
     "dst_1_to_1_signal",
+    "dst_2_to_1",
+    "dst_n_to_1",
     "restore_data_outside_roi",
 ]
+
+
+def _reset_lut_range(dst: ImageObj) -> None:
+    """Reset LUT range so the image auto-scales on display."""
+    dst.zscalemin = None
+    dst.zscalemax = None
+
+
+def dst_1_to_1(src: ImageObj, name: str, suffix: str | None = None) -> ImageObj:
+    """Create a result image object for 1-to-1 processing.
+
+    This is the image-specific version that resets the LUT range after copying,
+    so the result image auto-scales to fit its new data range.
+
+    Args:
+        src: source image object
+        name: name of the function
+        suffix: suffix to add to the title
+
+    Returns:
+        Result image object with LUT range reset
+    """
+    dst = _dst_1_to_1_base(src, name, suffix)
+    _reset_lut_range(dst)
+    return dst
+
+
+def dst_2_to_1(
+    src1: ImageObj, src2: ImageObj, name: str, suffix: str | None = None
+) -> ImageObj:
+    """Create a result image object for 2-to-1 processing.
+
+    This is the image-specific version that resets the LUT range after copying,
+    so the result image auto-scales to fit its new data range.
+
+    Args:
+        src1: first source image object
+        src2: second source image object
+        name: name of the function
+        suffix: suffix to add to the title
+
+    Returns:
+        Result image object with LUT range reset
+    """
+    dst = _dst_2_to_1_base(src1, src2, name, suffix)
+    _reset_lut_range(dst)
+    return dst
+
+
+def dst_n_to_1(
+    src_list: list[ImageObj], name: str, suffix: str | None = None
+) -> ImageObj:
+    """Create a result image object for n-to-1 processing.
+
+    This is the image-specific version that resets the LUT range after copying,
+    so the result image auto-scales to fit its new data range.
+
+    Args:
+        src_list: list of source image objects
+        name: name of the function
+        suffix: suffix to add to the title
+
+    Returns:
+        Result image object with LUT range reset
+    """
+    dst = _dst_n_to_1_base(src_list, name, suffix)
+    _reset_lut_range(dst)
+    return dst
 
 
 def restore_data_outside_roi(dst: ImageObj, src: ImageObj) -> None:

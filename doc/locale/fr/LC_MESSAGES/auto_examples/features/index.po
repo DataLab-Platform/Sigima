@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-12 18:04+0100\n"
+"POT-Creation-Date: 2025-12-16 17:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -29,6 +29,9 @@ msgid ":ref:`sphx_glr_auto_examples_features_datalab_client.py`"
 msgstr ""
 
 msgid ":ref:`sphx_glr_auto_examples_features_datetime_signals.py`"
+msgstr ""
+
+msgid ":ref:`sphx_glr_auto_examples_features_roi_grid.py`"
 msgstr ""
 
 msgid ":ref:`sphx_glr_auto_examples_features_coordinate_systems.py`"

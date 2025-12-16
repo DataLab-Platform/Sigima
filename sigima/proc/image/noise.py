@@ -30,9 +30,9 @@ from sigima.objects.image import (
     UniformDistribution2DParam,
     create_image_from_param,
 )
-from sigima.proc.base import dst_1_to_1
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.arithmetic import addition
+from sigima.proc.image.base import dst_1_to_1
 
 
 @computation_function()

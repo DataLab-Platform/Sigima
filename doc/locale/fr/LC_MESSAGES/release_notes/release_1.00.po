@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sigima \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-16 10:09+0100\n"
+"POT-Creation-Date: 2025-12-16 17:17+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -27,6 +27,27 @@ msgstr ""
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs :"
+
+msgid "**Image processing: LUT range incorrectly copied to result**: Fixed processed images showing incorrect contrast because LUT range was copied from original"
+msgstr "**Traitement d'image : plage LUT copiée incorrectement dans le résultat** : Correction des images traitées affichant un contraste incorrect car la plage LUT a été copiée de l'original"
+
+msgid "When processing an image (e.g., subtracting offset), the result image inherited the original's LUT range (`zscalemin`/`zscalemax`), causing incorrect visualization when data values changed significantly"
+msgstr "Lors du traitement d'une image (par exemple, en soustrayant un offset), l'image résultante héritait de la plage LUT de l'original (`zscalemin`/`zscalemax`), ce qui entraînait une visualisation incorrecte lorsque les valeurs de données changeaient de manière significative"
+
+msgid "Example: After subtracting ~50 lsb background from an image with LUT 50-200, the result (data range ~-5 to ~175) was still displayed with the original 50-200 LUT, making parts of the image appear clipped or invisible"
+msgstr "Exemple : Après avoir soustrait un fond d'environ 50 lsb d'une image avec une LUT de 50-200, le résultat (plage de données d'environ -5 à environ 175) était toujours affiché avec la LUT originale de 50-200, rendant certaines parties de l'image coupées ou invisibles"
+
+msgid "Fixed by adding image-specific `dst_1_to_1`, `dst_2_to_1`, and `dst_n_to_1` wrapper functions in `sigima.proc.image.base` that reset the LUT range after copying the source image"
+msgstr "Corrigé en ajoutant des fonctions wrapper spécifiques à l'image `dst_1_to_1`, `dst_2_to_1` et `dst_n_to_1` dans `sigima.proc.image.base` qui réinitialisent la plage LUT après la copie de l'image source"
+
+msgid "The `ImageObj.copy()` method remains unchanged (a copy should faithfully copy all attributes) - the fix is applied at the processing layer where it belongs"
+msgstr "La méthode `ImageObj.copy()` reste inchangée (une copie doit copier fidèlement tous les attributs) - la correction est appliquée à la couche de traitement où elle appartient"
+
+msgid "Added regression test `test_image_offset_correction_lut_range` in `offset_correction_unit_test.py`"
+msgstr "Ajout d'un test de régression `test_image_offset_correction_lut_range` dans `offset_correction_unit_test.py`"
+
+msgid "This closes [Issue #9](https://github.com/DataLab-Platform/Sigima/issues/9) - LUT range incorrectly copied when processing images"
+msgstr "Ceci clôture [Issue #9](https://github.com/DataLab-Platform/Sigima/issues/9) - Plage LUT copiée incorrectement lors du traitement des images"
 
 msgid "**Backwards-defined rectangular ROI causes NaN statistics**: Fixed rectangular ROI coordinate normalization when defined in reverse direction"
 msgstr "**Une ROI rectangulaire définie à l'envers entraîne des statistiques NaN** : Correction de la normalisation des coordonnées de ROI rectangulaire lorsqu'elle est définie en sens inverse"
@@ -146,16 +167,17 @@ msgid "Created new example `doc/examples/features/zero_padding.py` demonstrating
 msgstr "Création d'un nouvel exemple `doc/examples/features/zero_padding.py` démontrant l'initialisation correcte des paramètres"
 
 msgid "**New ROI grid example**: Added example demonstrating the grid ROI feature"
-msgstr "**Nouvel exemple de grille ROI** : Ajout d'un exemple démontrant la fonctionnalité de grille ROI"
+msgstr ""
 
 msgid "Introduced `laser_spot_array.png` test image (6×6 laser spot array) to help debug an issue reported in DataLab"
-msgstr "Introduction de l'image de test `laser_spot_array.png` (tableau de 6×6 points laser) pour aider à déboguer un problème signalé dans DataLab"
+msgstr ""
 
+#, fuzzy
 msgid "Created new example `doc/examples/features/roi_grid.py` showcasing the `generate_image_grid_roi()` function"
-msgstr "Création d'un nouvel exemple `doc/examples/features/roi_grid.py` présentant la fonction `generate_image_grid_roi()`"
+msgstr "Création d'un nouvel exemple `doc/examples/features/zero_padding.py` démontrant l'initialisation correcte des paramètres"
 
 msgid "Example covers: loading images, extracting sub-regions, generating ROI grids, configuring size/translation/step parameters, understanding direction labels, and extracting individual spots"
-msgstr "L'exemple couvre : le chargement d'images, l'extraction de sous-régions, la génération de grilles ROI, la configuration des paramètres de taille/translation/pas, la compréhension des labels de direction et l'extraction de spots individuels"
+msgstr ""
 
 msgid "Sigima Version 1.0.3 (2025-12-03)"
 msgstr "Sigima Version 1.0.3 (2025-12-03)"

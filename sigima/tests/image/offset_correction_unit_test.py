@@ -67,6 +67,35 @@ def test_image_offset_correction() -> None:
     assert np.allclose(i2.data, i1.data - offset), "Offset correction failed"
 
 
+def test_image_offset_correction_lut_range() -> None:
+    """Image offset correction LUT range regression test.
+
+    Verify that the LUT range is NOT copied from the original image when processing.
+    This is a regression test for the bug where the original image's LUT range
+    (zscalemin/zscalemax) was incorrectly copied to the result image, causing
+    incorrect visualization when the data range changes significantly.
+    """
+    i1 = create_noisy_gaussian_image()
+
+    # Simulate user setting a specific LUT range on the original image
+    # (as would happen when viewing in DataLab)
+    i1.zscalemin = 50.0
+    i1.zscalemax = 200.0
+
+    p = sigima.objects.ROI2DParam.create(x0=0, y0=0, dx=10, dy=10)
+    i2 = sigima.proc.image.offset_correction(i1, p)
+
+    # The result image should NOT have the original LUT range copied
+    # because the data values have changed significantly
+    assert i2.zscalemin is None, (
+        f"LUT range should not be copied from original: zscalemin={i2.zscalemin}"
+    )
+    assert i2.zscalemax is None, (
+        f"LUT range should not be copied from original: zscalemax={i2.zscalemax}"
+    )
+
+
 if __name__ == "__main__":
     test_image_offset_correction_interactive()
     test_image_offset_correction()
+    test_image_offset_correction_lut_range()

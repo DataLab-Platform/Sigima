@@ -37,10 +37,9 @@ from sigima.proc.base import (
     GaussianParam,
     MovingAverageParam,
     MovingMedianParam,
-    dst_1_to_1,
 )
 from sigima.proc.decorator import computation_function
-from sigima.proc.image.base import Wrap1to1Func, restore_data_outside_roi
+from sigima.proc.image.base import Wrap1to1Func, dst_1_to_1, restore_data_outside_roi
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT

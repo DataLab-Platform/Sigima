@@ -35,9 +35,8 @@ import scipy.ndimage as spi
 from sigima.config import _
 from sigima.enums import BorderMode, Interpolation2DMethod
 from sigima.objects.image import ImageObj
-from sigima.proc.base import dst_1_to_1
 from sigima.proc.decorator import computation_function
-from sigima.proc.image.base import restore_data_outside_roi
+from sigima.proc.image.base import dst_1_to_1, restore_data_outside_roi
 from sigima.proc.image.transformations import transformer
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
