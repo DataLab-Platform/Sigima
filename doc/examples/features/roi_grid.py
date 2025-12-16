@@ -3,9 +3,10 @@
 ROI Grid Generation
 ===================
 
-This example demonstrates the ROI grid feature provided by Sigima.
-Using a real laser spot array image, we'll explore how to generate
-a grid of rectangular ROIs to analyze individual spots systematically.
+This example focuses on generating grids of rectangular ROIs for systematic
+analysis of regular patterns in images using Sigima's ROI grid feature.
+Using a real laser spot array image, we'll explore how to create, configure,
+and apply ROI grids for extracting individual spots.
 
 The example shows:
 
@@ -234,26 +235,25 @@ vistools.view_images_side_by_side(
 
 
 # %%
-# Summary
-# -------
-# This example demonstrated the key features of Sigima's ROI grid generation:
-#
-# 1. **Grid dimensions** (nx, ny): Number of rows and columns
-# 2. **ROI size** (xsize, ysize): Size as percentage of cell size
-# 3. **Translation** (xtranslation, ytranslation): Position offset within cells
-# 5. **Direction** (xdirection, ydirection): Row/column numbering order
-#
-# The ROI grid feature is particularly useful for:
-#
-# * Analyzing arrays of spots (laser, LED, sensor arrays)
-# * Systematic sampling of image regions
-# * Batch processing of regular patterns
-# * Quality control inspections
-#
-# The generated ROIs can be used with other Sigima functions for
-# statistical analysis, centroid detection, or feature extraction
-# on each individual region.
+# Summary and conclusions
+# -----------------------
+# This tutorial demonstrated the key concepts of ROI grid generation
+# for systematic analysis of regular patterns in images using Sigima.
 
 print("\n" + "=" * 60)
-print("ROI Grid Example Complete!")
+print("ROI GRID TUTORIAL SUMMARY")
 print("=" * 60)
+print("✓ Loaded real-world laser spot array image")
+print("✓ Generated grids of rectangular ROIs")
+print("✓ Configured grid parameters (size, translation, step spacing)")
+print("✓ Explored direction labels (row/column ordering)")
+print("✓ Extracted individual spots using generated ROIs")
+print("✓ Visualized ROIs overlaid on images")
+print("\nKey Takeaways:")
+print("• Grid dimensions (nx, ny) define the number of rows and columns")
+print("• ROI size (xsize, ysize) controls the coverage as percentage of cell size")
+print("• Translation (xtranslation, ytranslation) offsets position within cells")
+print("• Direction (xdirection, ydirection) controls row/column numbering order")
+print(
+    "• ROI grids are ideal for analyzing arrays of spots, sensors, or regular patterns"
+)
