@@ -171,13 +171,13 @@ msgid "Introduced `laser_spot_array.png` test image (6×6 laser spot array) to h
 msgstr "Introduction de l'image de test `laser_spot_array.png` (tableau de 6×6 points laser) pour aider à déboguer un problème signalé dans DataLab"
 
 msgid "Created new example `doc/examples/features/roi_grid.py` showcasing the `generate_image_grid_roi()` function"
-msgstr "Création d'un nouvel exemple `doc/examples/features/roi_grid.py` présentant la fonction `generate_image_grid_roi()`"
+msgstr "Création d'un nouvel exemple `doc/examples/features/roi_grid.py` démontrant la fonction `generate_image_grid_roi()`"
 
 msgid "Example covers: loading images, extracting sub-regions, generating ROI grids, configuring size/translation/step parameters, understanding direction labels, and extracting individual spots"
 msgstr "L'exemple couvre : le chargement d'images, l'extraction de sous-régions, la génération de grilles ROI, la configuration des paramètres de taille/translation/pas, la compréhension des labels de direction et l'extraction de spots individuels"
 
 msgid "Sigima Version 1.0.3 (2025-12-03)"
-msgstr "Sigima Version 1.0.3 (2025-12-03)"
+msgstr ""
 
 msgid "**Signal data type validation**: Fixed integer arrays not being automatically converted to float64"
 msgstr "**Validation du type de données du signal** : Correction des tableaux entiers qui n'étaient pas automatiquement convertis en float64"
@@ -1319,4 +1319,3 @@ msgstr "Correction de la vulnérabilité des binaires libwebp dans les paquets W
 
 msgid "See [DataLab security advisory](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) for details"
 msgstr "Voir l'[avis de sécurité DataLab](https://github.com/DataLab-Platform/DataLab/security/dependabot/1) pour plus de détails."
-
