@@ -83,8 +83,14 @@ msgstr ""
 msgid "Creating specialized non-uniform coordinate examples"
 msgstr "Création d'exemples spécialisés de coordonnées non uniformes"
 
-msgid "Let's create some more realistic examples of non-uniform coordinates that might be encountered in real applications."
-msgstr "Créons des exemples plus réalistes de coordonnées non uniformes qui pourraient être rencontrées dans des applications réelles."
+msgid "Let's create some more realistic examples of non-uniform coordinates that might be encountered in real applications:"
+msgstr "Créons des exemples plus réalistes de coordonnées non uniformes qui pourraient être rencontrées dans des applications réelles :"
+
+msgid "Time-resolved spectroscopy with logarithmic wavelength scale"
+msgstr "Spectroscopie résolue en temps avec une échelle de longueur d'onde logarithmique"
+
+msgid "Polar to Cartesian mapping"
+msgstr "Conversion polaire en cartésien"
 
 msgid "Summary and best practices"
 msgstr "Résumé et meilleures pratiques"

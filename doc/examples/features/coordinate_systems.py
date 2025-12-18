@@ -175,32 +175,37 @@ view_images_side_by_side(
 # Creating specialized non-uniform coordinate examples
 # ----------------------------------------------------
 # Let's create some more realistic examples of non-uniform coordinates
-# that might be encountered in real applications.
+# that might be encountered in real applications:
+#
+# 1. Time-resolved spectroscopy with logarithmic wavelength scale
+# 2. Polar to Cartesian mapping
 
-# Example 1: Logarithmic spacing (common in spectroscopy)
+# Example 1: Logarithmic wavelength scale for spectroscopy
+# Simulating a time-resolved spectroscopy measurement with log-spaced wavelengths
 size_log = 80
 wavelengths = np.logspace(np.log10(400), np.log10(800), size_log)  # 400-800 nm
-intensities = np.linspace(0, 1, size_log)
-W, intensity_grid = np.meshgrid(wavelengths, intensities)
+time_points = np.linspace(0, 200, size_log)  # Time in milliseconds
+W, T = np.meshgrid(wavelengths, time_points)
 
-# Create a spectral response pattern
-spectral_data = np.exp(-(((W - 550) / 50) ** 2)) * (
-    1 + 0.3 * np.sin(10 * intensity_grid)
-)
+# Create a spectral response pattern: a peak that shifts over time
+# Simulates fluorescence decay with spectral shift
+peak_center = 500 + 0.5 * T  # Peak shifts from 500 to 600 nm over time
+spectral_data = np.exp(-(((W - peak_center) / 40) ** 2)) * np.exp(-T / 100)
 
 spectral_image = create_image(
-    title="Spectroscopy Data (Log Wavelength)",
+    title="Time-Resolved Spectroscopy (Log λ)",
     data=spectral_data,
-    units=("nm", "a.u.", "counts"),
-    labels=("Wavelength", "Intensity", "Signal"),
+    units=("nm", "ms", "counts"),
+    labels=("Wavelength", "Time", "Fluorescence"),
 )
-spectral_image.set_coords(xcoords=wavelengths, ycoords=intensities)
+spectral_image.set_coords(xcoords=wavelengths, ycoords=time_points)
 
-print("\n✓ Spectroscopy example created!")
+print("\n✓ Time-resolved spectroscopy example created!")
 print(f"Wavelength range: {wavelengths[0]:.1f} to {wavelengths[-1]:.1f} nm")
+print(f"Time range: {time_points[0]:.1f} to {time_points[-1]:.1f} ms")
 wl_spacing_min = np.min(np.diff(wavelengths))
 wl_spacing_max = np.max(np.diff(wavelengths))
-print(f"Log spacing: {wl_spacing_min:.2f} to {wl_spacing_max:.2f} nm")
+print(f"Log wavelength spacing: {wl_spacing_min:.2f} to {wl_spacing_max:.2f} nm")
 
 # Example 2: Polar to Cartesian mapping
 size_polar = 60
@@ -239,7 +244,7 @@ print(f"Angular range: {theta_coords[0]:.2f} to {theta_coords[-1]:.2f} rad")
 # Display the specialized examples
 view_images_side_by_side(
     [spectral_image, polar_image],
-    ["Spectroscopy (Log Scale)", "Polar Coordinates"],
+    ["Time-Resolved Spectroscopy (Log λ)", "Polar Coordinates"],
     title="Specialized Non-Uniform Coordinate Examples",
     share_axes=False,
 )
@@ -283,7 +288,7 @@ view_images_side_by_side(
     [
         "Uniform\n(Regular Grid)",
         "Non-Uniform\n(Variable Grid)",
-        "Logarithmic\n(Spectroscopy)",
+        "Time-Resolved\n(Log Wavelength)",
         "Polar\n(Radial Data)",
     ],
     title="Complete Coordinate Systems Overview",
