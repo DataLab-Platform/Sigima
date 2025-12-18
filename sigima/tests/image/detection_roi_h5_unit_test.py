@@ -15,6 +15,7 @@ See issue #7 in Sigima repository: https://github.com/DataLab-Platform/Sigima/is
 
 from __future__ import annotations
 
+import os
 import tempfile
 
 import h5py
@@ -94,8 +95,6 @@ def test_detection_roi_geometry_h5_serialization():
             loaded_value = grp.attrs["roi_geometry"]
             assert loaded_value == "rectangle"
     finally:
-        import os
-
         os.unlink(tmp_path)
 
 

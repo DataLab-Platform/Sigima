@@ -19,7 +19,7 @@ from __future__ import annotations
 import pytest
 
 from sigima import create_signal
-from sigima.proc.base import dst_1_to_1, dst_2_to_1, dst_n_to_1
+from sigima.proc.base import dst_1_to_1, dst_2_to_1, dst_n_to_1, new_signal_result
 from sigima.proc.title_formatting import (
     PlaceholderTitleFormatter,
     SimpleTitleFormatter,
@@ -300,8 +300,6 @@ class TestNewSignalResult:
         Regression test for bug where suffix was added twice to the title:
         once by the formatter and once explicitly in new_signal_result.
         """
-        from sigima.proc.base import new_signal_result
-
         src = create_signal(title="test_signal")
         suffix = "center=(10.0, 20.0)"
 
