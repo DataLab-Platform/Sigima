@@ -4,6 +4,27 @@ Sigima
 **Sigima** is an advanced Python library for *scientific image and signal processing*.
 It provides a wide range of functionalities for analyzing and processing data, including signal filtering, image enhancement, and feature extraction. Sigima is based on a simple but effective object-oriented design, making it easy to use and extend.
 
+With Sigima, do in 3 lines of code what would normally take dozens of lines:
+
+.. code-block:: python
+
+    import numpy as np
+    import sigima.objects
+    import sigima.proc.image
+
+    data = np.random.normal(100, 30, (100, 100))  # Prepare test image data
+
+    img = sigima.objects.create_image("Noisy", data)  # Create the image object
+    img.roi = sigima.objects.create_image_roi("circle", [30, 30, 20])  # Define ROI
+    result = sigima.proc.image.gaussian_filter(img, sigma=5.0)  # Apply Gaussian filter
+
+.. figure:: _static/DataLab-Banner.svg
+    :align: center
+    :width: 300 px
+    :class: dark-light no-scaled-link
+
+    Developed and maintained by the DataLab Platform Developers, **Sigima** powers the computation backend of `DataLab <https://www.datalab-platform.com>`_.
+
 .. only:: html and not latex
 
     .. grid:: 2 2 4 4
@@ -32,13 +53,6 @@ It provides a wide range of functionalities for analyzing and processing data, i
             :link-type: doc
 
             Getting involved in the project
-
-.. figure:: _static/DataLab-Banner.svg
-    :align: center
-    :width: 300 px
-    :class: dark-light no-scaled-link
-
-    Developed and maintained by the DataLab Platform Developers, **Sigima** powers the computation backend of `DataLab <https://www.datalab-platform.com>`_.
 
 Sigima has been funded by the following stakeholders:
 
