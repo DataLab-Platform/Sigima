@@ -645,6 +645,8 @@
                 "${command:python.interpreterPath}",
                 "-m",
                 "guidata.utils.securebuild",
+                "--prebuild",
+                "python -m guidata.utils.translations compile --name sigima --directory .",
             ],
             "options": {
                 "cwd": "${workspaceFolder}",
@@ -661,7 +663,6 @@
             "dependsOrder": "sequence",
             "dependsOn": [
                 "🧹 Clean Up",
-                "📚 Compile translations",
             ],
         },
         {
