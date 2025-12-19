@@ -20,11 +20,29 @@ msgstr ""
 msgid "Version 1.0"
 msgstr ""
 
-msgid "Sigima Version 1.0.4 (2025-12-18)"
+msgid "Sigima Version 1.0.5 (2025-12-19)"
 msgstr ""
+
+msgid "ℹ️ This is a hotfix release addressing a packaging issue where French translations were missing from the previous release package. This release contains no functional changes compared to version 1.0.4 - it only ensures that the compiled translation files (.mo) are properly included in the distribution package."
+msgstr "ℹ️ Ceci est une version corrective qui résout un problème d'emballage où les traductions françaises manquaient dans le package de la version précédente. Cette version ne contient aucun changement fonctionnel par rapport à la version 1.0.4 - elle garantit uniquement que les fichiers de traduction compilés (.mo) sont correctement inclus dans le package de distribution."
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs :"
+
+msgid "**Packaging**: Fixed missing French translation files in release package"
+msgstr "**Packaging** : Correction des fichiers de traduction française manquants dans le package de la version précédente"
+
+msgid "Previous release packages were missing compiled .mo translation files, causing the application to display only English text regardless of locale settings"
+msgstr "Les packages de la version précédente ne contenaient pas les fichiers de traduction compilés .mo, ce qui faisait que l'application affichait uniquement du texte en anglais quel que soit les paramètres régionaux"
+
+msgid "Updated build process to ensure all translation files are properly included in distribution packages"
+msgstr "Mise à jour du processus de construction pour garantir que tous les fichiers de traduction sont correctement inclus dans les packages de distribution"
+
+msgid "No functional code changes - this is purely a packaging fix to restore internationalization support"
+msgstr "Aucun changement de code fonctionnel - il s'agit purement d'une correction d'emballage pour restaurer la prise en charge de l'internationalisation"
+
+msgid "Sigima Version 1.0.4 (2025-12-18)"
+msgstr ""
 
 msgid "**Image processing: LUT range incorrectly copied to result**: Fixed processed images showing incorrect contrast because LUT range was copied from original"
 msgstr "**Traitement d'image : plage LUT copiée incorrectement dans le résultat** : Correction des images traitées affichant un contraste incorrect car la plage LUT a été copiée de l'original"

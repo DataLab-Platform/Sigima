@@ -1,5 +1,16 @@
 # Version 1.0 #
 
+## Sigima Version 1.0.5 (2025-12-19) ##
+
+> ℹ️ This is a hotfix release addressing a packaging issue where French translations were missing from the previous release package. This release contains no functional changes compared to version 1.0.4 - it only ensures that the compiled translation files (.mo) are properly included in the distribution package.
+
+🛠️ Bug fixes:
+
+* **Packaging**: Fixed missing French translation files in release package
+  * Previous release packages were missing compiled .mo translation files, causing the application to display only English text regardless of locale settings
+  * Updated build process to ensure all translation files are properly included in distribution packages
+  * No functional code changes - this is purely a packaging fix to restore internationalization support
+
 ## Sigima Version 1.0.4 (2025-12-18) ##
 
 🛠️ Bug fixes:
