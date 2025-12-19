@@ -661,6 +661,7 @@
             "dependsOrder": "sequence",
             "dependsOn": [
                 "🧹 Clean Up",
+                "📚 Compile translations",
             ],
         },
         {

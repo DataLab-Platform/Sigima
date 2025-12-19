@@ -1,3 +1,4 @@
 graft doc
+graft sigima/locale
 include CONTRIBUTING.md
 include requirements.txt
