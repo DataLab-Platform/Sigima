@@ -107,10 +107,8 @@ jobs:
         # Install Sigima itself, but do NOT install its pinned deps
         python -m pip install -e . --no-deps
 
-        # Upgrade the dependencies to their latest versions
-        python -m pip install -U --upgrade-strategy eager \
-          guidata numpy scipy scikit-image pandas \
-          PyWavelets packaging typing-extensions makefun
+        # Extract dependency names from pyproject.toml and install latest versions
+        python -m pip install -U --upgrade-strategy eager $(python -c "import tomllib, re; print(' '.join(re.sub(r'[\[\]<>=!~,.\s].*$', '', d).strip() for d in tomllib.loads(open('pyproject.toml', 'rb').read().decode())['project']['dependencies']))")
 
     - name: Lint with Ruff (latest)
       run: ruff check --output-format=github sigima
