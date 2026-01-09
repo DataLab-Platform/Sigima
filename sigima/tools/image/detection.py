@@ -99,16 +99,22 @@ def get_contour_shapes(
         ):
             continue
         if shape == ContourShape.CIRCLE:
-            model = measure.CircleModel()
-            if model.estimate(contour):
-                yc, xc, r = model.params
+            model = measure.CircleModel.from_estimate(contour)
+            if model:
+                yc = model.center[1]
+                xc = model.center[0]
+                r = model.radius
                 if r <= 1.0:
                     continue
                 coords.append([xc, yc, r])
         elif shape == ContourShape.ELLIPSE:
-            model = measure.EllipseModel()
-            if model.estimate(contour):
-                yc, xc, b, a, theta = model.params
+            model = measure.EllipseModel.from_estimate(contour)
+            if model:
+                yc = model.center[1]
+                xc = model.center[0]
+                b = model.axis_lengths[1]
+                a = model.axis_lengths[0]
+                theta = model.theta
                 if a <= 1.0 or b <= 1.0:
                     continue
                 coords.append([xc, yc, a, b, theta])

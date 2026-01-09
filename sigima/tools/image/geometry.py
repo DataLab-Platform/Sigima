@@ -176,12 +176,14 @@ def get_enclosing_circle(
     data_th = data.copy()
     data_th[data <= get_absolute_level(data, level)] = 0.0
     contours = measure.find_contours(data_th)
-    model = measure.CircleModel()
     result = None
     max_radius = 1.0
     for contour in contours:
-        if model.estimate(contour):
-            yc, xc, radius = model.params
+        model = measure.CircleModel.from_estimate(contour)
+        if model:
+            yc = model.center[1]
+            xc = model.center[0]
+            radius = model.radius
             if radius > max_radius:
                 result = (int(xc), int(yc), radius)
                 max_radius = radius
