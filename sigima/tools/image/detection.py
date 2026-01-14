@@ -23,7 +23,7 @@ from __future__ import annotations
 import numpy as np
 import scipy.ndimage as spi
 from numpy import ma
-from skimage import exposure, feature, measure, transform
+from skimage import __version__, exposure, feature, measure, transform
 
 from sigima.enums import ContourShape
 from sigima.tools.checks import check_2d_array
@@ -89,6 +89,17 @@ def get_contour_shapes(
         Coordinates of shapes fitted to contours
     """
     # pylint: disable=too-many-locals
+
+    # New shape model parameters introduce in scikit-image v0.26.0
+    # (see: https://github.com/scikit-image/scikit-image/commit/6d6e7924cca105320690f716a14c5bd11055bf43):
+    # In order to keep Python 3.9 compatibility, need to check  skimage.__version__
+    # In skimage v0.26.0, for CircleModel and EllipseModel, params length change:
+    # - CircleModel : xc and yc are combine in an array center
+    # - EllipseModel : xc and yc are combine in a center array,
+    # a and b are combine in a axis_lengths array
+    # TODO scikit-image v0.26.0 shape model parameters : check future updates and Python
+    # 3.9 compatibility
+    skimage_version_minor = int(str(__version__).split(".")[1])
     contours = measure.find_contours(data, level=get_absolute_level(data, level))
     coords = []
     for contour in contours:
@@ -99,25 +110,41 @@ def get_contour_shapes(
         ):
             continue
         if shape == ContourShape.CIRCLE:
-            model = measure.CircleModel.from_estimate(contour)
-            if model:
-                yc = model.center[1]
-                xc = model.center[0]
-                r = model.radius
-                if r <= 1.0:
-                    continue
-                coords.append([xc, yc, r])
+            if skimage_version_minor < 26:
+                model = measure.CircleModel()
+                if model.estimate(contour):
+                    yc, xc, r = model.params
+                    if r <= 1.0:
+                        continue
+                    coords.append([xc, yc, r])
+            else:
+                model = measure.CircleModel.from_estimate(contour)
+                if model:
+                    yc = model.center[1]
+                    xc = model.center[0]
+                    r = model.radius
+                    if r <= 1.0:
+                        continue
+                    coords.append([xc, yc, r])
         elif shape == ContourShape.ELLIPSE:
-            model = measure.EllipseModel.from_estimate(contour)
-            if model:
-                yc = model.center[1]
-                xc = model.center[0]
-                b = model.axis_lengths[1]
-                a = model.axis_lengths[0]
-                theta = model.theta
-                if a <= 1.0 or b <= 1.0:
-                    continue
-                coords.append([xc, yc, a, b, theta])
+            if skimage_version_minor < 26:
+                model = measure.EllipseModel()
+                if model.estimate(contour):
+                    yc, xc, b, a, theta = model.params
+                    if a <= 1.0 or b <= 1.0:
+                        continue
+                    coords.append([xc, yc, a, b, theta])
+            else:
+                model = measure.EllipseModel.from_estimate(contour)
+                if model:
+                    yc = model.center[1]
+                    xc = model.center[0]
+                    b = model.axis_lengths[1]
+                    a = model.axis_lengths[0]
+                    theta = model.theta
+                    if a <= 1.0 or b <= 1.0:
+                        continue
+                    coords.append([xc, yc, a, b, theta])
         elif shape == ContourShape.POLYGON:
             # `contour` is a (N, 2) array (rows, cols): we need to convert it
             # to a list of x, y coordinates flattened in a single list
