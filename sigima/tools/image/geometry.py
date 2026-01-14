@@ -141,7 +141,10 @@ def get_centroid_auto(
         row_f, col_f = float("nan"), float("nan")
 
     row_m, col_m = get_projected_profile_centroid(data, method="median")
-    row_s, col_s = measure.centroid(data)
+    # Convert data (ndarray) to a simple array to compute centroid with the new
+    # einsum optimisation introduce in numpy 2.4.0 and scikit-image 0.26.0
+    img = np.array(data)
+    row_s, col_s = measure.centroid(img)
 
     dist_f = np.hypot(row_f - row_m, col_f - col_m)
     dist_s = np.hypot(row_s - row_m, col_s - col_m)
