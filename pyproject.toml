@@ -33,11 +33,11 @@ classifiers = [
 requires-python = ">=3.9, <4"
 dependencies = [
     "guidata >= 3.13",
-    "NumPy >= 1.22",
-    "SciPy >= 1.10.1",
+    "NumPy >= 1.22, < 2.5",
+    "SciPy >= 1.10.1, < 1.17",
     "scikit-image >= 0.19.2, < 0.27",
-    "pandas >= 1.4",
-    "PyWavelets >= 1.2",
+    "pandas >= 1.4, < 3.0",
+    "PyWavelets >= 1.2, < 2.0",
     "packaging >= 21.3",
     "typing-extensions >= 4.0",
     "makefun >= 1.13.1",
