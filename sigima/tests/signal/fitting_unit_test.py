@@ -96,6 +96,8 @@ def __check_tools_proc_interface(
             assert key in fit_params, f"Missing fit parameter: {key}"
             act_value = fit_params[key]
             if isinstance(exp_value, (int, float, np.floating)):
+                # Increased absolute tolerance (atol=1e-6) to handle minor
+                # floating-point precision differences observed with newer dependencies
                 check_scalar_result(
                     f"Parameter {key}", act_value, exp_value, rtol=1e-5, atol=1e-6
                 )

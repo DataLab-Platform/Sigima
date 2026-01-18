@@ -24,10 +24,10 @@ from __future__ import annotations
 from typing import Literal
 
 import numpy as np
-from skimage import __version__, measure
+from skimage import measure
 
 from sigima.tools.checks import check_2d_array
-from sigima.tools.image.preprocessing import get_absolute_level
+from sigima.tools.image.preprocessing import fit_circle_model, get_absolute_level
 
 
 @check_2d_array
@@ -176,38 +176,18 @@ def get_enclosing_circle(
     Raises:
         ValueError: No contour was found
     """
-    # New shape model parameters introduce in scikit-image v0.26.0
-    # (see: https://github.com/scikit-image/scikit-image/commit/6d6e7924cca105320690f716a14c5bd11055bf43):
-    # In order to keep Python 3.9 compatibility, need to check  skimage.__version__
-    # In skimage v0.26.0, for CircleModel and EllipseModel, params length change:
-    # - CircleModel : xc and yc are combine in an array center
-    # - EllipseModel : xc and yc are combine in a center array,
-    # a and b are combine in a axis_lengths array
-    # TODO scikit-image v0.26.0 shape model parameters : check future updates and Python
-    # 3.9 compatibility
-    skimage_version_minor = int(str(__version__).split(".")[1])
     data_th = data.copy()
     data_th[data <= get_absolute_level(data, level)] = 0.0
     contours = measure.find_contours(data_th)
     result = None
     max_radius = 1.0
     for contour in contours:
-        if skimage_version_minor < 26:
-            model = measure.CircleModel()
-            if model.estimate(contour):
-                yc, xc, radius = model.params
-                if radius > max_radius:
-                    result = (int(xc), int(yc), radius)
-                    max_radius = radius
-        else:
-            model = measure.CircleModel.from_estimate(contour)
-            if model:
-                yc = model.center[1]
-                xc = model.center[0]
-                radius = model.radius
-                if radius > max_radius:
-                    result = (int(xc), int(yc), radius)
-                    max_radius = radius
+        fit_result = fit_circle_model(contour)
+        if fit_result:
+            xc, yc, radius = fit_result
+            if radius > max_radius:
+                result = (int(xc), int(yc), radius)
+                max_radius = radius
     if result is None:
         raise ValueError("No contour was found")
     return result
