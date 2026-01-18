@@ -27,7 +27,7 @@ import numpy as np
 from skimage import measure
 
 from sigima.tools.checks import check_2d_array
-from sigima.tools.image.preprocessing import get_absolute_level
+from sigima.tools.image.preprocessing import fit_circle_model, get_absolute_level
 
 
 @check_2d_array
@@ -141,7 +141,10 @@ def get_centroid_auto(
         row_f, col_f = float("nan"), float("nan")
 
     row_m, col_m = get_projected_profile_centroid(data, method="median")
-    row_s, col_s = measure.centroid(data)
+    # Convert data (ndarray) to a simple array to compute centroid with the new
+    # einsum optimisation introduce in numpy 2.4.0 and scikit-image 0.26.0
+    img = np.array(data)
+    row_s, col_s = measure.centroid(img)
 
     dist_f = np.hypot(row_f - row_m, col_f - col_m)
     dist_s = np.hypot(row_s - row_m, col_s - col_m)
@@ -176,12 +179,12 @@ def get_enclosing_circle(
     data_th = data.copy()
     data_th[data <= get_absolute_level(data, level)] = 0.0
     contours = measure.find_contours(data_th)
-    model = measure.CircleModel()
     result = None
     max_radius = 1.0
     for contour in contours:
-        if model.estimate(contour):
-            yc, xc, radius = model.params
+        fit_result = fit_circle_model(contour)
+        if fit_result:
+            xc, yc, radius = fit_result
             if radius > max_radius:
                 result = (int(xc), int(yc), radius)
                 max_radius = radius
