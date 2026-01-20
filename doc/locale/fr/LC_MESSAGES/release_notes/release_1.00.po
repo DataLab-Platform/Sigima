@@ -20,14 +20,86 @@ msgstr ""
 msgid "Version 1.0"
 msgstr ""
 
+msgid "Sigima Version 1.0.6"
+msgstr ""
+
+msgid "🛠️ Bug fixes:"
+msgstr "🛠️ Correctifs :"
+
+msgid "**Compatibility with scikit-image 0.26.0+**: Fixed deprecation warnings and API compatibility issues"
+msgstr "**Compatibilité avec scikit-image 0.26.0+** : Correction des avertissements de dépréciation et des problèmes de compatibilité API"
+
+msgid "scikit-image 0.26.0 introduced breaking changes to `CircleModel` and `EllipseModel` APIs: old API used `model.estimate(contour)` + `model.params`, new API uses `model.from_estimate(contour)` + property-based access (`model.center`, `model.radius`, `model.axis_lengths`)"
+msgstr "scikit-image 0.26.0 a introduit des changements majeurs dans les API de `CircleModel` et `EllipseModel` : l'ancienne API utilisait `model.estimate(contour)` + `model.params`, la nouvelle API utilise `model.from_estimate(contour)` + un accès basé sur les propriétés (`model.center`, `model.radius`, `model.axis_lengths`)"
+
+msgid "Added version-aware compatibility layer in `sigima.tools.image.preprocessing` with new helper functions `fit_circle_model()` and `fit_ellipse_model()` that handle both old and new APIs"
+msgstr "Ajout d'une couche de compatibilité sensible à la version dans `sigima.tools.image.preprocessing` avec de nouvelles fonctions d'aide `fit_circle_model()` et `fit_ellipse_model()` qui gèrent les anciennes et nouvelles API"
+
+msgid "Updated `get_contour_shapes()` in `sigima.tools.image.detection` to use compatibility functions"
+msgstr "Mise à jour de `get_contour_shapes()` dans `sigima.tools.image.detection` pour utiliser les fonctions de compatibilité"
+
+msgid "Updated `get_enclosing_circle()` in `sigima.tools.image.geometry` to use compatibility functions"
+msgstr "Mise à jour de `get_enclosing_circle()` dans `sigima.tools.image.geometry` pour utiliser les fonctions de compatibilité"
+
+msgid "Used `packaging.version.Version` for robust version checking instead of fragile string parsing"
+msgstr "Utilisation de `packaging.version.Version` pour une vérification robuste des versions au lieu d'une analyse de chaîne fragile"
+
+msgid "Eliminates deprecation warnings while maintaining backward compatibility with Python 3.9 and scikit-image < 0.26"
+msgstr "Élimine les avertissements de dépréciation tout en maintenant la compatibilité ascendante avec Python 3.9 et scikit-image < 0.26"
+
+msgid "This closes [Issue #10](https://github.com/DataLab-Platform/Sigima/issues/10) - Sigima is not compatible with NumPy 2.4.0 and scikit-image 0.26.0"
+msgstr "Ceci clôture [Issue #10](https://github.com/DataLab-Platform/Sigima/issues/10) - Sigima n'est pas compatible avec NumPy 2.4.0 et scikit-image 0.26.0"
+
+msgid "**Compatibility with NumPy 2.4.0**: Fixed centroid computation failure with NumPy 2.4.0's new einsum optimization"
+msgstr "**Compatibilité avec NumPy 2.4.0** : Correction de l'échec du calcul du centroïde avec la nouvelle optimisation einsum de NumPy 2.4.0"
+
+msgid "NumPy 2.4.0 introduced new einsum optimization used by `scikit-image.measure.centroid()` that fails with certain ndarray types"
+msgstr "NumPy 2.4.0 a introduit une nouvelle optimisation einsum utilisée par `scikit-image.measure.centroid()` qui échoue avec certains types de ndarray"
+
+msgid "Fixed by explicitly converting image data to basic NumPy array before calling `measure.centroid()` in `get_centroid_auto()` function"
+msgstr "Correction en convertissant explicitement les données d'image en tableau NumPy de base avant d'appeler `measure.centroid()` dans la fonction `get_centroid_auto()`"
+
+msgid "Ensures compatibility with NumPy 2.4.0+ and scikit-image 0.26.0+ without changing computational results"
+msgstr "Assure la compatibilité avec NumPy 2.4.0+ et scikit-image 0.26.0+ sans modifier les résultats de calcul"
+
+msgid "📦 Dependencies:"
+msgstr "📦 Dépendances :"
+
+msgid "**Dependency version constraints**: Added maximum version constraints to prevent future compatibility issues"
+msgstr "**Contraintes de version des dépendances** : Ajout de contraintes de version maximale pour éviter les futurs problèmes de compatibilité"
+
+msgid "Updated dependency specifications: `NumPy >= 1.22, < 2.5`, `SciPy >= 1.10.1, < 1.17`, `scikit-image >= 0.19.2, < 0.27`, `pandas >= 1.4, < 3.0`, `PyWavelets >= 1.2, < 2.0`"
+msgstr "Mise à jour des spécifications des dépendances : `NumPy >= 1.22, < 2.5`, `SciPy >= 1.10.1, < 1.17`, `scikit-image >= 0.19.2, < 0.27`, `pandas >= 1.4, < 3.0`, `PyWavelets >= 1.2, < 2.0`"
+
+msgid "New CI job `build_latest` runs scheduled tests against latest dependency versions to detect breaking changes early"
+msgstr "Le nouveau job CI `build_latest` exécute des tests programmés contre les dernières versions des dépendances pour détecter rapidement les changements majeurs"
+
+msgid "Prevents automatic breakage from major dependency updates while allowing controlled upgrades after validation"
+msgstr "Permets d'éviter les régressions dues aux mises à jour majeures des dépendances tout en permettant des mises à niveau contrôlées après validation"
+
+msgid "🚀 CI/CD improvements:"
+msgstr "🚀 Améliorations CI/CD :"
+
+msgid "**CI workflow enhancements**: Added automated testing against latest dependency versions"
+msgstr "**Améliorations du workflow CI** : Ajout de tests automatisés contre les dernières versions des dépendances"
+
+msgid "New `build_latest` job in GitHub Actions runs on schedule (weekly) and manual dispatch"
+msgstr "Nouveau job `build_latest` dans GitHub Actions s'exécute selon un calendrier (hebdomadaire) et sur demande manuelle"
+
+msgid "Extracts dependency names from `pyproject.toml` and installs latest available versions"
+msgstr "Extrait les noms des dépendances de `pyproject.toml` et installe les dernières versions disponibles"
+
+msgid "Provides early warning system for upcoming dependency compatibility issues"
+msgstr "Fournit un système d'alerte précoce pour les futurs problèmes de compatibilité des dépendances"
+
+msgid "Enhanced workflow dispatch with configurable job selection for flexible testing scenarios"
+msgstr "Amélioration du workflow de déclenchement avec une sélection de jobs configurable pour des scénarios de test flexibles"
+
 msgid "Sigima Version 1.0.5 (2025-12-19)"
 msgstr ""
 
 msgid "ℹ️ This is a hotfix release addressing a packaging issue where French translations were missing from the previous release package. This release contains no functional changes compared to version 1.0.4 - it only ensures that the compiled translation files (.mo) are properly included in the distribution package."
 msgstr "ℹ️ Ceci est une version corrective qui résout un problème d'emballage où les traductions françaises manquaient dans le package de la version précédente. Cette version ne contient aucun changement fonctionnel par rapport à la version 1.0.4 - elle garantit uniquement que les fichiers de traduction compilés (.mo) sont correctement inclus dans le package de distribution."
-
-msgid "🛠️ Bug fixes:"
-msgstr "🛠️ Correctifs :"
 
 msgid "**Packaging**: Fixed missing French translation files in release package"
 msgstr "**Packaging** : Correction des fichiers de traduction française manquants dans le package de la version précédente"
