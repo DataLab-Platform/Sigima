@@ -1,5 +1,38 @@
 # Version 1.0 #
 
+## Sigima Version 1.0.6 ##
+
+🛠️ Bug fixes:
+
+* **Compatibility with scikit-image 0.26.0+**: Fixed deprecation warnings and API compatibility issues
+  * scikit-image 0.26.0 introduced breaking changes to `CircleModel` and `EllipseModel` APIs: old API used `model.estimate(contour)` + `model.params`, new API uses `model.from_estimate(contour)` + property-based access (`model.center`, `model.radius`, `model.axis_lengths`)
+  * Added version-aware compatibility layer in `sigima.tools.image.preprocessing` with new helper functions `fit_circle_model()` and `fit_ellipse_model()` that handle both old and new APIs
+  * Updated `get_contour_shapes()` in `sigima.tools.image.detection` to use compatibility functions
+  * Updated `get_enclosing_circle()` in `sigima.tools.image.geometry` to use compatibility functions
+  * Used `packaging.version.Version` for robust version checking instead of fragile string parsing
+  * Eliminates deprecation warnings while maintaining backward compatibility with Python 3.9 and scikit-image < 0.26
+  * This closes [Issue #10](https://github.com/DataLab-Platform/Sigima/issues/10) - Sigima is not compatible with NumPy 2.4.0 and scikit-image 0.26.0
+
+* **Compatibility with NumPy 2.4.0**: Fixed centroid computation failure with NumPy 2.4.0's new einsum optimization
+  * NumPy 2.4.0 introduced new einsum optimization used by `scikit-image.measure.centroid()` that fails with certain ndarray types
+  * Fixed by explicitly converting image data to basic NumPy array before calling `measure.centroid()` in `get_centroid_auto()` function
+  * Ensures compatibility with NumPy 2.4.0+ and scikit-image 0.26.0+ without changing computational results
+
+📦 Dependencies:
+
+* **Dependency version constraints**: Added maximum version constraints to prevent future compatibility issues
+  * Updated dependency specifications: `NumPy >= 1.22, < 2.5`, `SciPy >= 1.10.1, < 1.17`, `scikit-image >= 0.19.2, < 0.27`, `pandas >= 1.4, < 3.0`, `PyWavelets >= 1.2, < 2.0`
+  * New CI job `build_latest` runs scheduled tests against latest dependency versions to detect breaking changes early
+  * Prevents automatic breakage from major dependency updates while allowing controlled upgrades after validation
+
+🚀 CI/CD improvements:
+
+* **CI workflow enhancements**: Added automated testing against latest dependency versions
+  * New `build_latest` job in GitHub Actions runs on schedule (weekly) and manual dispatch
+  * Extracts dependency names from `pyproject.toml` and installs latest available versions
+  * Provides early warning system for upcoming dependency compatibility issues
+  * Enhanced workflow dispatch with configurable job selection for flexible testing scenarios
+
 ## Sigima Version 1.0.5 (2025-12-19) ##
 
 > ℹ️ This is a hotfix release addressing a packaging issue where French translations were missing from the previous release package. This release contains no functional changes compared to version 1.0.4 - it only ensures that the compiled translation files (.mo) are properly included in the distribution package.
