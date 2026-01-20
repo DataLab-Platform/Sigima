@@ -7,6 +7,7 @@ This module contains utility functions for preprocessing and transforming image 
 - Binning and scaling operations
 - Zero padding for Fourier analysis
 - Utility functions for data transformation
+- Compatibility helpers for scikit-image API changes
 
 .. note::
     All functions in this module are also available directly in the parent
@@ -20,9 +21,66 @@ from typing import Literal
 import numpy as np
 import scipy.spatial as spt
 from numpy import ma
+from packaging.version import Version
+from skimage import __version__, measure
 
 from sigima.enums import BinningOperation
 from sigima.tools.checks import check_2d_array
+
+# Check scikit-image version for API compatibility
+# Version 0.26.0 introduced breaking changes to CircleModel and EllipseModel:
+# - Old API: model.estimate(contour) + model.params
+# - New API: model.from_estimate(contour) + model.center/radius/axis_lengths properties
+# Reference: https://github.com/scikit-image/scikit-image/commit/6d6e7924cca105320690f716a14c5bd11055bf43
+_SKIMAGE_VERSION = Version(__version__)
+_USE_NEW_SHAPE_API = _SKIMAGE_VERSION >= Version("0.26.0")
+
+
+def fit_circle_model(contour: np.ndarray) -> tuple[float, float, float] | None:
+    """Fit circle model to contour with version compatibility.
+
+    Args:
+        contour: Contour coordinates array (N, 2)
+
+    Returns:
+        Tuple (xc, yc, radius) or None if fitting fails
+    """
+    if _USE_NEW_SHAPE_API:
+        model = measure.CircleModel.from_estimate(contour)
+        if model:
+            return model.center[0], model.center[1], model.radius
+    else:
+        model = measure.CircleModel()
+        if model.estimate(contour):
+            yc, xc, radius = model.params
+            return xc, yc, radius
+    return None
+
+
+def fit_ellipse_model(
+    contour: np.ndarray,
+) -> tuple[float, float, float, float, float] | None:
+    """Fit ellipse model to contour with version compatibility.
+
+    Args:
+        contour: Contour coordinates array (N, 2)
+
+    Returns:
+        Tuple (xc, yc, a, b, theta) or None if fitting fails,
+        where a and b are semi-major and semi-minor axes
+    """
+    if _USE_NEW_SHAPE_API:
+        model = measure.EllipseModel.from_estimate(contour)
+        if model:
+            xc, yc = model.center[0], model.center[1]
+            a, b = model.axis_lengths[0], model.axis_lengths[1]
+            return xc, yc, a, b, model.theta
+    else:
+        model = measure.EllipseModel()
+        if model.estimate(contour):
+            yc, xc, b, a, theta = model.params
+            return xc, yc, a, b, theta
+    return None
 
 
 def get_absolute_level(data: np.ndarray, level: float) -> float:

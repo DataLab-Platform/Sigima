@@ -410,9 +410,8 @@ msgstr "Pour commencer à utiliser Sigima, consultez :"
 msgid ":doc:`installation` - Set up Sigima in your environment"
 msgstr ":doc:`installation` - Installez Sigima dans votre environnement"
 
-#, fuzzy
 msgid ":doc:`features` - Explore Sigima's key features and capabilities"
-msgstr ":doc:`../features` - Explorez les principales fonctionnalités et capacités de Sigima"
+msgstr ":doc:`features` - Explorez les principales fonctionnalités et capacités de Sigima"
 
 msgid ":doc:`../auto_examples/index` - Practical examples showing signals and images in action"
 msgstr ":doc:`../auto_examples/index` - Exemples pratiques montrant les signaux et images en action"
