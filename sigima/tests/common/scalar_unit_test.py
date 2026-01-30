@@ -255,6 +255,22 @@ class TestTableResultSerialization:
         assert "col1" in html
         assert "col2" in html
 
+    def test_repr_html(self) -> None:
+        """Test TableResult._repr_html_ for Jupyter notebook display."""
+        table = TableResult(
+            title="Test Table",
+            headers=["col1", "col2"],
+            data=[[1.0, 2.0], [3.0, 4.0]],
+        )
+        html = table._repr_html_()
+        # Check that CSS styling is included
+        assert "<style>" in html
+        assert "sigima-result-table" in html
+        # Check that table content is included
+        assert "<table" in html
+        assert "col1" in html
+        assert "col2" in html
+
 
 class TestTableResultDataAccess:
     """Test class for TableResult data access methods."""
@@ -677,6 +693,18 @@ class TestGeometryResultShapeSpecific:
         assert "x1" not in html_visible_true
         assert "y1" not in html_visible_true
         assert "length" in html_visible_true
+
+    def test_segments_repr_html(self) -> None:
+        """Test GeometryResult._repr_html_ for Jupyter notebook display."""
+        coords = np.array([[0.0, 0.0, 3.0, 4.0], [1.0, 1.0, 4.0, 5.0]])
+        geom = GeometryResult("Test", KindShape.SEGMENT, coords)
+        html = geom._repr_html_()  # pylint: disable=protected-access
+        # Check that CSS styling is included
+        assert "<style>" in html
+        assert "sigima-result-table" in html
+        # Check that table content is included
+        assert "<table" in html
+        assert "length" in html
 
     def test_segments_lengths(self) -> None:
         """Test GeometryResult.segments_lengths method."""

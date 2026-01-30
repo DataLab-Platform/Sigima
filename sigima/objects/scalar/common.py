@@ -20,6 +20,37 @@ if TYPE_CHECKING:
 # Sentinel value for "full signal/image / no ROI" rows in result tables
 NO_ROI: int = -1
 
+# CSS styling for HTML tables in Jupyter notebooks
+RESULT_TABLE_CSS = """
+<style>
+    .sigima-result-table {
+        border-collapse: collapse;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                     'Helvetica Neue', Arial, sans-serif;
+        font-size: 13px;
+        margin: 10px 0;
+    }
+    .sigima-result-table th {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+    .sigima-result-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+        text-align: right;
+    }
+    .sigima-result-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    .sigima-result-table tr:hover {
+        background-color: #e9ecef;
+    }
+</style>
+"""
+
 
 class DisplayPreferencesManager:
     """Manages display preferences for result objects."""

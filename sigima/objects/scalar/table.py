@@ -47,6 +47,7 @@ import pandas as pd
 
 from sigima.objects.scalar.common import (
     NO_ROI,
+    RESULT_TABLE_CSS,
     DataFrameManager,
     DisplayPreferencesManager,
     ResultHtmlGenerator,
@@ -434,6 +435,17 @@ class TableResult:
         return ResultHtmlGenerator.generate_html(
             self, obj, visible_only, transpose_single_row, **kwargs
         )
+
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebook display.
+
+        This method is automatically called by Jupyter when displaying the object
+        as a cell output, providing a rich HTML rendering of the table result.
+
+        Returns:
+            HTML representation of the table result with styling.
+        """
+        return RESULT_TABLE_CSS + self.to_html()
 
     # -------- Convenience methods for table type identification --------
 
