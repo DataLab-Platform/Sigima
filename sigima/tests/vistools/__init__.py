@@ -36,11 +36,8 @@ warnings.warn(
 
 # Re-export everything from sigima.viz
 from sigima.viz import *  # noqa: F401, F403, E402
-from sigima.viz import (  # noqa: E402
-    BACKEND_NAME,  # noqa: F401
-    BACKEND_SOURCE,  # noqa: F401
-    __all__,
-)
 
-# Make sure __all__ is properly exported for star imports
-__all__ = __all__
+# Note: BACKEND_NAME and BACKEND_SOURCE are included via star import from __all__
+# They are lazy-loaded attributes that will be available when accessed, but we
+# don't import them explicitly to avoid triggering backend initialization during
+# module import (which would fail in environments without visualization backends)

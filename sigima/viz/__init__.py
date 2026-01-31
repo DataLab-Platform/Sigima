@@ -304,11 +304,17 @@ _BACKEND_NAME = None
 _BACKEND_SOURCE = None
 _INITIALIZING = False  # Flag to prevent recursion
 
+# Public API: Set default values for BACKEND_NAME and BACKEND_SOURCE
+# These will be updated when the backend is initialized
+BACKEND_NAME = None  # Will be "plotpy" or "matplotlib" after initialization
+BACKEND_SOURCE = None  # Will be "env", "config", or "auto" after initialization
+
 
 def _initialize_backend():
     """Initialize backend on first use (lazy loading)."""
     # pylint: disable=global-statement
     global _BACKEND_MODULE, _BACKEND_NAME, _BACKEND_SOURCE, _INITIALIZING
+    global BACKEND_NAME, BACKEND_SOURCE
 
     if _BACKEND_MODULE is not None:
         return  # Already initialized
@@ -319,6 +325,10 @@ def _initialize_backend():
     _INITIALIZING = True
     try:
         _BACKEND_NAME, _BACKEND_SOURCE = _select_backend()
+
+        # Update public API variables
+        BACKEND_NAME = _BACKEND_NAME
+        BACKEND_SOURCE = _BACKEND_SOURCE
 
         # Import selected backend using importlib to avoid triggering __getattr__
         if _BACKEND_NAME == "plotpy":
@@ -336,30 +346,28 @@ def __getattr__(name: str):
     if name.startswith("__") and name.endswith("__"):
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-    if name in ("BACKEND_NAME", "BACKEND_SOURCE", "_BACKEND_MODULE"):
+    # For functions in __all__, try to initialize backend and forward to backend module
+    # If backend is not available, return a placeholder function
+    if name in __all__:
         try:
             _initialize_backend()
+            if _BACKEND_MODULE is not None:
+                return getattr(_BACKEND_MODULE, name)
         except ImportError:
-            # During pytest collection or in environments without backends
-            raise AttributeError(
-                f"module '{__name__}' has no attribute '{name}'"
-            ) from None
-        if name == "BACKEND_NAME":
-            return _BACKEND_NAME
-        if name == "BACKEND_SOURCE":
-            return _BACKEND_SOURCE
-        if name == "_backend_module":
-            return _BACKEND_MODULE
+            pass  # Fall through to placeholder
 
-    # For any other attribute, initialize backend and forward to backend module
-    try:
-        _initialize_backend()
-        return getattr(_BACKEND_MODULE, name)
-    except ImportError:
-        # Backend not available - raise AttributeError for clean failure
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'") from None
-    except AttributeError:
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'") from None
+        # Return a placeholder function that will raise an error when called
+        def _placeholder(*args, **kwargs):
+            raise ImportError(
+                f"Function '{name}' requires a visualization backend. "
+                "Please install either PlotPy or Matplotlib."
+            )
+        _placeholder.__name__ = name
+        _placeholder.__doc__ = f"Placeholder for {name} (backend not available)"
+        return _placeholder
+
+    # For other attributes, raise AttributeError
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
 def __dir__():
