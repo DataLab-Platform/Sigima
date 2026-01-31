@@ -45,9 +45,9 @@ from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Sequence
 import numpy as np
 import pandas as pd
 
+from sigima.objects.base import HTML_TABLE_CSS
 from sigima.objects.scalar.common import (
     NO_ROI,
-    RESULT_TABLE_CSS,
     DataFrameManager,
     DisplayPreferencesManager,
     ResultHtmlGenerator,
@@ -445,7 +445,7 @@ class TableResult:
         Returns:
             HTML representation of the table result with styling.
         """
-        return RESULT_TABLE_CSS + self.to_html()
+        return HTML_TABLE_CSS + self.to_html()
 
     # -------- Convenience methods for table type identification --------
 

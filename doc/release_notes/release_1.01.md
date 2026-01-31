@@ -21,3 +21,11 @@
   * Backend information exposed via `sigima.tests.vistools.BACKEND_NAME` and `BACKEND_SOURCE`
   * Matplotlib backend provides stubs for unsupported functions (raises `NotImplementedError`)
   * Unit test ensures API compatibility between backends
+
+* **Jupyter notebook HTML representation**: Added rich HTML display for Sigima objects in Jupyter notebooks
+  * `SignalObj` displays shape, dtype, X/Y ranges, axis labels, and title in a formatted table
+  * `ImageObj` displays shape, dtype, value range, origin, pixel spacing, extent, axis labels, and title
+  * ROI objects (`BaseSingleROI`, `BaseROI`) display their geometric properties
+  * `BaseCoordinates` and derived classes display point coordinates
+  * `TableResult` and `GeometryResult` display result data with source object information
+  * Centralized CSS styling in `HTML_TABLE_CSS` constant for consistent appearance

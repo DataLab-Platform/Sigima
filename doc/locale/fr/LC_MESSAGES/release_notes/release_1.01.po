@@ -71,3 +71,23 @@ msgstr "Le backend Matplotlib fournit des stubs pour les fonctions non prises en
 msgid "Unit test ensures API compatibility between backends"
 msgstr "Test unitaire garantissant la compatibilité de l'API entre les backends"
 
+msgid "**Jupyter notebook HTML representation**: Added rich HTML display for Sigima objects in Jupyter notebooks"
+msgstr "**Représentation HTML pour les notebooks Jupyter** : Ajout d'un affichage HTML enrichi pour les objets Sigima dans les notebooks Jupyter"
+
+msgid "`SignalObj` displays shape, dtype, X/Y ranges, axis labels, and title in a formatted table"
+msgstr "`SignalObj` affiche la forme, le dtype, les plages X/Y, les labels des axes et le titre dans un tableau formaté"
+
+msgid "`ImageObj` displays shape, dtype, value range, origin, pixel spacing, extent, axis labels, and title"
+msgstr "`ImageObj` affiche la forme, le dtype, la plage de valeurs, l'origine, l'espacement des pixels, l'étendue, les labels des axes et le titre"
+
+msgid "ROI objects (`BaseSingleROI`, `BaseROI`) display their geometric properties"
+msgstr "Les objets ROI (`BaseSingleROI`, `BaseROI`) affichent leurs propriétés géométriques"
+
+msgid "`BaseCoordinates` and derived classes display point coordinates"
+msgstr "`BaseCoordinates` et les classes dérivées affichent les coordonnées des points"
+
+msgid "`TableResult` and `GeometryResult` display result data with source object information"
+msgstr "`TableResult` et `GeometryResult` affichent les données de résultat avec les informations de l'objet source"
+
+msgid "Centralized CSS styling in `HTML_TABLE_CSS` constant for consistent appearance"
+msgstr "Centralisation du style CSS dans la constante `HTML_TABLE_CSS` pour une apparence cohérente"

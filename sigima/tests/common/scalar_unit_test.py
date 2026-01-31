@@ -262,10 +262,10 @@ class TestTableResultSerialization:
             headers=["col1", "col2"],
             data=[[1.0, 2.0], [3.0, 4.0]],
         )
-        html = table._repr_html_()
+        html = table._repr_html_()  # pylint: disable=protected-access
         # Check that CSS styling is included
         assert "<style>" in html
-        assert "sigima-result-table" in html
+        assert "sigima-html-table" in html
         # Check that table content is included
         assert "<table" in html
         assert "col1" in html
@@ -701,7 +701,7 @@ class TestGeometryResultShapeSpecific:
         html = geom._repr_html_()  # pylint: disable=protected-access
         # Check that CSS styling is included
         assert "<style>" in html
-        assert "sigima-result-table" in html
+        assert "sigima-html-table" in html
         # Check that table content is included
         assert "<table" in html
         assert "length" in html

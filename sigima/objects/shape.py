@@ -56,6 +56,8 @@ import abc
 
 import numpy as np
 
+from sigima.objects.base import HTML_TABLE_CSS
+
 
 class BaseCoordinates(abc.ABC):
     """Base class for 2D coordinates representation of shapes.
@@ -181,6 +183,31 @@ class BaseCoordinates(abc.ABC):
         t2 = np.array([[1, 0, cx], [0, 1, cy], [0, 0, 1]], float)
         matrix = t2 @ s @ t1
         self.transform_affine(matrix)
+
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebooks."""
+        coord_type = type(self).__name__
+
+        # Format the data array nicely
+        if self.data.size <= 10:
+            data_str = ", ".join(f"{v:.4g}" for v in self.data)
+        else:
+            first = ", ".join(f"{v:.4g}" for v in self.data[:5])
+            last = ", ".join(f"{v:.4g}" for v in self.data[-5:])
+            data_str = f"{first}, ..., {last}"
+
+        html = f"""
+        {HTML_TABLE_CSS}
+        <div class="sigima-html-container">
+            <div class="sigima-html-title">{coord_type}</div>
+            <table class="sigima-html-table">
+                <tr><th>Property</th><th>Value</th></tr>
+                <tr><td>Size</td><td>{self.data.size} values</td></tr>
+                <tr><td>Data</td><td>[{data_str}]</td></tr>
+            </table>
+        </div>
+        """
+        return html
 
 
 class PointCoordinates(BaseCoordinates):
