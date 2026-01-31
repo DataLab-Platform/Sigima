@@ -37,8 +37,8 @@ warnings.warn(
 # Re-export everything from sigima.viz
 from sigima.viz import *  # noqa: F401, F403, E402
 from sigima.viz import (  # noqa: E402
-    BACKEND_NAME,
-    BACKEND_SOURCE,
+    BACKEND_NAME,  # noqa: F401
+    BACKEND_SOURCE,  # noqa: F401
     __all__,
 )
 
