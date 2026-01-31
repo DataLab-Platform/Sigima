@@ -91,7 +91,10 @@ def test_backend_selection_env_var(monkeypatch):
     if "sigima.viz" in sys.modules:
         importlib.reload(sys.modules["sigima.viz"])
 
-    from sigima import viz
+    # Access the reloaded module directly from sys.modules
+    viz = sys.modules["sigima.viz"]
+    # Trigger lazy initialization by accessing a function from __all__
+    _ = viz.view_images
 
     assert viz.BACKEND_NAME == "matplotlib"
     assert viz.BACKEND_SOURCE == "env"
@@ -118,7 +121,10 @@ def test_backend_selection_option(monkeypatch):
     if "sigima.viz" in sys.modules:
         importlib.reload(sys.modules["sigima.viz"])
 
-    from sigima import viz
+    # Access the reloaded module directly from sys.modules
+    viz = sys.modules["sigima.viz"]
+    # Trigger lazy initialization by accessing a function from __all__
+    _ = viz.view_images
 
     assert viz.BACKEND_NAME == "matplotlib"
     assert viz.BACKEND_SOURCE == "config"
@@ -143,6 +149,9 @@ def test_backend_info_available():
         pytest.skip("No visualization backend available")
 
     from sigima import viz
+
+    # Trigger lazy initialization by accessing a function from __all__
+    _ = viz.view_images
 
     assert hasattr(viz, "BACKEND_NAME")
     assert hasattr(viz, "BACKEND_SOURCE")
