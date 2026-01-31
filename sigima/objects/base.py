@@ -29,6 +29,37 @@ else:
     # Use Self from typing_extensions module in Python < 3.11
     from typing_extensions import Self
 
+# CSS styling for HTML tables in Jupyter notebooks
+HTML_TABLE_CSS = """
+<style>
+    .sigima-html-table {
+        border-collapse: collapse;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                     'Helvetica Neue', Arial, sans-serif;
+        font-size: 13px;
+        margin: 10px 0;
+    }
+    .sigima-html-table th {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+    .sigima-html-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+        text-align: right;
+    }
+    .sigima-html-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    .sigima-html-table tr:hover {
+        background-color: #e9ecef;
+    }
+</style>
+"""
+
 ROI_KEY = "_roi_"
 
 
@@ -817,6 +848,27 @@ class BaseSingleROI(Generic[TypeObj, TypeROIParam], abc.ABC):  # type: ignore
         """
         return cls(dictdata["coords"], dictdata["indices"], dictdata["title"])
 
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebook display.
+
+        This method is automatically called by Jupyter when displaying the object
+        as a cell output, providing a rich HTML rendering of the ROI.
+
+        Returns:
+            HTML representation of the ROI with coordinates.
+        """
+        roi_type = type(self).__name__
+        coord_type = "indices" if self.indices else "physical"
+        coords_str = ", ".join(f"{c:.4g}" for c in self.coords)
+        html = f'<u><b style="color: #5294e2">{roi_type}: {self.title}</b></u>:'
+        html += '<table border="0">'
+        html += (
+            f"<tr><td style='text-align:right'>Coordinates ({coord_type}):</td>"
+            f"<td>[{coords_str}]</td></tr>"
+        )
+        html += "</table>"
+        return html
+
 
 class BaseROI(Generic[TypeObj, TypeSingleROI, TypeROIParam], abc.ABC):  # type: ignore
     """Abstract base class for ROIs (Regions of Interest)
@@ -992,6 +1044,34 @@ class BaseROI(Generic[TypeObj, TypeSingleROI, TypeROIParam], abc.ABC):  # type: 
             assert isinstance(param, BaseROIParam), "Invalid ROI parameter type"
             roi.add_roi(param.to_single_roi(obj))
         return roi
+
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebooks."""
+        roi_type = type(self).__name__
+        count = len(self.single_rois)
+
+        rows = []
+        for idx, single_roi in enumerate(self.single_rois):
+            title = single_roi.title or get_generic_roi_title(idx)
+            stype = type(single_roi).__name__
+            rows.append(f"<tr><td>{idx}</td><td>{title}</td><td>{stype}</td></tr>")
+
+        table_rows = (
+            "\n".join(rows) if rows else "<tr><td colspan='3'>No ROIs</td></tr>"
+        )
+
+        html = f"""
+        {HTML_TABLE_CSS}
+        <div class="sigima-html-container">
+            <div class="sigima-html-title">{roi_type}</div>
+            <table class="sigima-html-table">
+                <tr><th>Index</th><th>Title</th><th>Type</th></tr>
+                {table_rows}
+            </table>
+            <div class="sigima-html-footer">{count} ROI(s)</div>
+        </div>
+        """
+        return html
 
     def to_dict(self) -> dict:
         """Convert ROIs to dictionary

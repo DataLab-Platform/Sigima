@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING, Iterable
 import numpy as np
 import pandas as pd
 
+from sigima.objects.base import HTML_TABLE_CSS
 from sigima.objects.scalar.common import (
     NO_ROI,
     DataFrameManager,
@@ -521,6 +522,17 @@ class GeometryResult:
         return ResultHtmlGenerator.generate_html(
             self, obj, visible_only, transpose_single_row, **kwargs
         )
+
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebook display.
+
+        This method is automatically called by Jupyter when displaying the object
+        as a cell output, providing a rich HTML rendering of the geometry result.
+
+        Returns:
+            HTML representation of the geometry result with styling.
+        """
+        return HTML_TABLE_CSS + self.to_html()
 
 
 # ===========================

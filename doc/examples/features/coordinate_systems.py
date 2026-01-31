@@ -29,7 +29,7 @@ that allow you to explore the coordinate system effects in detail.
 import numpy as np
 
 from sigima.objects import create_image
-from sigima.tests.vistools import view_images_side_by_side
+from sigima.viz import view_images_side_by_side
 
 # %%
 # Creating test images with uniform coordinates

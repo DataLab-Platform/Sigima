@@ -13,7 +13,6 @@ import time
 import numpy as np
 import pytest
 
-import sigima.enums
 import sigima.objects
 import sigima.params
 import sigima.proc.image
@@ -25,42 +24,7 @@ from sigima.tests.helpers import (
     check_array_result,
     check_scalar_result,
 )
-from sigima.tools import coordinates
 from sigima.tools.image import get_2d_peaks_coords, get_contour_shapes
-
-
-def create_contour_shape_items(data, shape):
-    """Create plotpy items for a specific contour shape.
-
-    Args:
-        data: Input data array
-        shape: ContourShape enum value
-
-    Returns:
-        List of plotpy items representing the detected contours
-    """
-    # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
-    items = []
-    coords = get_contour_shapes(data, shape=shape)
-    execenv.print(f"Coordinates ({shape}s): {coords}")
-    for shapeargs in coords:
-        if shape == ContourShape.CIRCLE:
-            xc, yc, r = shapeargs
-            x0, y0, x1, y1 = coordinates.circle_to_diameter(xc, yc, r)
-            item = make.circle(x0, y0, x1, y1)
-        elif shape == ContourShape.ELLIPSE:
-            xc, yc, a, b, theta = shapeargs
-            coords_ellipse = coordinates.ellipse_to_diameters(xc, yc, a, b, theta)
-            x0, y0, x1, y1, x2, y2, x3, y3 = coords_ellipse
-            item = make.ellipse(x0, y0, x1, y1, x2, y2, x3, y3)
-        else:  # ContourShape.POLYGON
-            # `shapeargs` is a flattened array of x, y coordinates
-            x, y = shapeargs[::2], shapeargs[1::2]
-            item = make.polygon(x, y, closed=False)
-        items.append(item)
-    return items
 
 
 @pytest.mark.gui
@@ -69,24 +33,23 @@ def test_contour_interactive():
     data, _coords = get_peak2d_data()
     with guiutils.lazy_qt_app_context(force=True):
         # pylint: disable=import-outside-toplevel
-        from plotpy.builder import make
+        from sigima import viz
 
-        from sigima.tests import vistools
-
-        items = [make.image(data, interpolation="linear", colormap="hsv")]
+        items = [viz.create_image(data, colormap="hsv")]
         t0 = time.time()
         peak_coords = get_2d_peaks_coords(data)
         dt = time.time() - t0
         for x, y in peak_coords:
-            items.append(make.marker((x, y)))
+            items.append(viz.create_marker(x, y))
         execenv.print(f"Calculation time: {int(dt * 1e3):d} ms\n", file=sys.stderr)
         execenv.print(f"Peak coordinates: {peak_coords}")
 
         # Add contour shapes for all shape types
         for shape in ContourShape:
-            items.extend(create_contour_shape_items(data, shape))
+            coords = get_contour_shapes(data, shape=shape)
+            items.extend(viz.create_contour_shapes(coords, shape))
 
-        vistools.view_image_items(items)
+        viz.view_image_items(items)
 
 
 @pytest.mark.validation

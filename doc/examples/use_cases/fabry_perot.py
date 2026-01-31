@@ -26,7 +26,7 @@ interferometry, optical metrology, and precision measurements.
 import sigima.enums
 import sigima.objects
 import sigima.proc.image
-from sigima.tests import vistools
+from sigima import viz
 from sigima.tests.data import get_test_image
 
 # %%
@@ -44,7 +44,7 @@ print(f"Data type: {img1.data.dtype}")
 print(f"Intensity range: {img1.data.min()} - {img1.data.max()}")
 
 # Visualize the original interference pattern
-vistools.view_images(img1, title="Fabry-Perot Interference Pattern #1")
+viz.view_images(img1, title="Fabry-Perot Interference Pattern #1")
 
 # %%
 # Define circular ROI for fringe analysis
@@ -69,7 +69,7 @@ img1.roi = sigima.objects.create_image_roi("circle", roi_coords, indices=True)
 print("✓ Circular ROI applied to image")
 
 # Visualize image with ROI
-vistools.view_images(img1, title="Fabry-Perot with Circular ROI")
+viz.view_images(img1, title="Fabry-Perot with Circular ROI")
 
 # %%
 # Configure contour detection for circular fringes
@@ -129,7 +129,7 @@ print(f"✓ Profile extracted: {len(profile_signal1.y)} data points")
 print(f"Intensity range: {profile_signal1.y.min():.1f} - {profile_signal1.y.max():.1f}")
 
 # Visualize the intensity profile
-vistools.view_curves(
+viz.view_curves(
     [profile_signal1],
     title="Horizontal Intensity Profile - Image 1",
     xlabel="Position (pixels)",
@@ -151,7 +151,7 @@ try:
     img2.metadata = img1.metadata  # This includes the ROI information
 
     # Visualize second image
-    vistools.view_images([img2], title="Fabry-Perot Interference Pattern #2")
+    viz.view_images([img2], title="Fabry-Perot Interference Pattern #2")
 
 except Exception as exc:
     raise RuntimeError("Failed to load second Fabry-Perot test image.") from exc
@@ -186,7 +186,7 @@ print(f"\n✓ Profile extracted from second image: {len(profile_signal2.y)} poin
 print(f"Intensity range: {profile_signal2.y.min():.1f} - {profile_signal2.y.max():.1f}")
 
 # Compare profiles from both images
-vistools.view_curves(
+viz.view_curves(
     [profile_signal1, profile_signal2],
     title="Intensity Profile Comparison",
     xlabel="Position (pixels)",

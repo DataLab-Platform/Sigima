@@ -373,6 +373,120 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
         """Return image center Y-axis coordinate"""
         return self.y0 + 0.5 * self.height
 
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebook display.
+
+        This method is automatically called by Jupyter when displaying the object
+        as a cell output, providing a rich HTML rendering of the image object.
+
+        Returns:
+            HTML representation of the image with summary statistics.
+        """
+        shape = self.data.shape if self.data is not None else (0, 0)
+        dtype_str = str(self.data.dtype) if self.data is not None else "N/A"
+        z_min = f"{self.data.min():.4g}" if self.data is not None else "N/A"
+        z_max = f"{self.data.max():.4g}" if self.data is not None else "N/A"
+
+        # Build axis labels with optional title
+        x_label = "X"
+        if self.xlabel:
+            x_label = f"X ({self.xlabel})"
+        y_label = "Y"
+        if self.ylabel:
+            y_label = f"Y ({self.ylabel})"
+        z_label = "Z"
+        if self.zlabel:
+            z_label = f"Z ({self.zlabel})"
+
+        html = f'<u><b style="color: #5294e2">ImageObj: {self.title}</b></u>:'
+        html += '<table border="0">'
+        html += (
+            f"<tr><td style='text-align:right'>Shape:</td>"
+            f"<td>{shape[1]} × {shape[0]} (W×H)</td></tr>"
+        )
+        html += (
+            f"<tr><td style='text-align:right'>Data type:</td><td>{dtype_str}</td></tr>"
+        )
+        html += (
+            f"<tr><td style='text-align:right'>{z_label} range:</td>"
+            f"<td>[{z_min}, {z_max}]"
+        )
+        if self.zunit:
+            html += f" {self.zunit}"
+        html += "</td></tr>"
+
+        # Origin and pixel spacing (for uniform coordinates)
+        if self.is_uniform_coords:
+            html += (
+                f"<tr><td style='text-align:right'>Origin ({x_label}, {y_label}):</td>"
+                f"<td>({self.x0:.4g}, {self.y0:.4g})"
+            )
+            if self.xunit:
+                html += f" {self.xunit}"
+            html += "</td></tr>"
+            html += (
+                f"<tr><td style='text-align:right'>Pixel spacing (Δx, Δy):</td>"
+                f"<td>({self.dx:.4g}, {self.dy:.4g})"
+            )
+            if self.xunit:
+                html += f" {self.xunit}"
+            html += "</td></tr>"
+        else:
+            # Non-uniform coordinates: show coordinate array info
+            x_coords_info = "N/A"
+            y_coords_info = "N/A"
+            if self.xcoords is not None and self.xcoords.size > 0:
+                x_coords_info = f"[{self.xcoords[0]:.4g}, {self.xcoords[-1]:.4g}]"
+            if self.ycoords is not None and self.ycoords.size > 0:
+                y_coords_info = f"[{self.ycoords[0]:.4g}, {self.ycoords[-1]:.4g}]"
+            html += (
+                f"<tr><td style='text-align:right'>{x_label} coords:</td>"
+                f"<td>{x_coords_info}"
+            )
+            if self.xunit:
+                html += f" {self.xunit}"
+            html += "</td></tr>"
+            html += (
+                f"<tr><td style='text-align:right'>{y_label} coords:</td>"
+                f"<td>{y_coords_info}"
+            )
+            if self.yunit:
+                html += f" {self.yunit}"
+            html += "</td></tr>"
+
+        # Extent (physical bounds)
+        html += (
+            f"<tr><td style='text-align:right'>Extent ({x_label}):</td>"
+            f"<td>[{self._compute_xmin():.4g}, {self._compute_xmax():.4g}]"
+        )
+        if self.xunit:
+            html += f" {self.xunit}"
+        html += "</td></tr>"
+        html += (
+            f"<tr><td style='text-align:right'>Extent ({y_label}):</td>"
+            f"<td>[{self._compute_ymin():.4g}, {self._compute_ymax():.4g}]"
+        )
+        if self.yunit:
+            html += f" {self.yunit}"
+        html += "</td></tr>"
+
+        # Physical size
+        html += (
+            f"<tr><td style='text-align:right'>Physical size:</td>"
+            f"<td>{self.width:.4g} × {self.height:.4g}"
+        )
+        if self.xunit:
+            html += f" {self.xunit}"
+        html += "</td></tr>"
+
+        if self.roi is not None:
+            html += (
+                f"<tr><td style='text-align:right'>ROIs:</td>"
+                f"<td>{len(self.roi)}</td></tr>"
+            )
+        html += "</table>"
+        return html
+
     def get_data(self, roi_index: int | None = None) -> np.ndarray:
         """
         Return original data (if ROI is not defined or `roi_index` is None),

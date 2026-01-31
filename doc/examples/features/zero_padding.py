@@ -25,8 +25,8 @@ import numpy as np
 
 import sigima.params
 import sigima.proc.signal as sips
+from sigima import viz
 from sigima.objects import create_signal
-from sigima.tests import vistools
 
 # %%
 # Create a test signal
@@ -49,7 +49,7 @@ signal = create_signal(
 
 print(f"Original signal: {n_points} points")
 
-vistools.view_curves(signal, title="Original Signal")
+viz.view_curves(signal, title="Original Signal")
 
 # %%
 # Zero-padding with "next_pow2" strategy
@@ -91,7 +91,7 @@ print(f"Padded signal: {padded_size} points (power of 2: {power_of_2})")
 # -----------------------------------
 # The padded signal has zeros appended at the end.
 
-vistools.view_curves([signal, padded_signal], title="Original vs Zero-Padded Signal")
+viz.view_curves([signal, padded_signal], title="Original vs Zero-Padded Signal")
 
 # %%
 # FFT comparison: improved frequency resolution
@@ -110,7 +110,7 @@ fft_padded.title = f"FFT Zero-Padded ({fft_padded.y.size} bins)"
 print(f"Original FFT: {fft_original.y.size} frequency bins")
 print(f"Padded FFT: {fft_padded.y.size} frequency bins")
 
-vistools.view_curves([fft_original, fft_padded], title="FFT: Original vs Zero-Padded")
+viz.view_curves([fft_original, fft_padded], title="FFT: Original vs Zero-Padded")
 
 # %%
 # Using different strategies
@@ -160,4 +160,4 @@ for location in PadLocation1D:
     results.append(result)
     print(f"Location '{location.value}': x=[{result.x[0]:.4f}, {result.x[-1]:.4f}]")
 
-vistools.view_curves(results, title="Padding Location Comparison")
+viz.view_curves(results, title="Padding Location Comparison")

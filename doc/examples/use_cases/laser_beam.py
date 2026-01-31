@@ -28,7 +28,8 @@ import sigima.objects
 import sigima.params
 import sigima.proc.image
 import sigima.proc.signal
-from sigima.tests import helpers, vistools
+from sigima import viz
+from sigima.tests import helpers
 
 # %%
 # Load all laser beam images
@@ -75,7 +76,7 @@ for i, img in enumerate(images):
 # %%
 # Visualize the first few images
 print("\n✓ Visualizing sample images...")
-vistools.view_images_side_by_side(images[:3], title="Sample Laser Beam Images")
+viz.view_images_side_by_side(images[:3], title="Sample Laser Beam Images")
 
 # %%
 # Background noise analysis with histogram
@@ -99,7 +100,7 @@ print(f"Histogram range: {hist_param.range[0]} - {hist_param.range[1]}")
 print("The histogram shows background noise distribution")
 
 # Visualize histogram
-vistools.view_curves([hist], title="Pixel Value Histogram - Background Analysis")
+viz.view_curves([hist], title="Pixel Value Histogram - Background Analysis")
 
 # %%
 # Based on the histogram analysis, we determine a clipping threshold around 30-35 LSB to
@@ -133,7 +134,7 @@ print("Background noise below threshold has been removed")
 
 # %%
 # We can now visualize some clipped images:
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     images[:3] + clipped_images[:3],
     rows=2,
     title="Original and Clipped Images (First 3)",
@@ -180,9 +181,7 @@ for i, (img, centroid_coords) in enumerate(zip(clipped_images, centroids)):
 print(f"\n✓ Generated {len(line_profiles)} line profiles")
 
 # Visualize some line profiles
-vistools.view_curves(
-    line_profiles[:3], title="Horizontal Line Profiles (First 3 Images)"
-)
+viz.view_curves(line_profiles[:3], title="Horizontal Line Profiles (First 3 Images)")
 
 # %%
 # Extract radial profiles around beam centers
@@ -208,7 +207,7 @@ print(f"\n✓ Generated {len(radial_profiles)} radial profiles")
 
 # %%
 # We can now visualize some radial profiles
-vistools.view_curves(radial_profiles[:3], title="Radial Profiles (First 3 Images)")
+viz.view_curves(radial_profiles[:3], title="Radial Profiles (First 3 Images)")
 
 # %%
 # Compute FWHM for radial profiles
@@ -257,7 +256,7 @@ beam_evolution = sigima.objects.create_signal(
 print(f"✓ Created beam evolution signal with {len(z_positions)} data points")
 
 # Visualize beam size evolution
-vistools.view_curves(
+viz.view_curves(
     [beam_evolution], title="Beam Size Evolution vs Z-Position (uncalibrated)"
 )
 
@@ -289,7 +288,7 @@ print(f"✓ Applied calibration: z' = {calib_param.a}*z + {calib_param.b}")
 print("Z-axis now represents physical distance in mm")
 
 # Visualize calibrated beam evolution
-vistools.view_curves(
+viz.view_curves(
     [beam_evolution_calibrated],
     title="Beam Size Evolution vs Z-Position (calibrated)",
     xlabel="Z Position (mm)",

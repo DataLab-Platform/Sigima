@@ -198,12 +198,12 @@ class ResultHtmlGenerator:
 
         .. note::
 
-           Handles gracefully the case where `roi_indices` reference ROIs that
-           no longer exist in `obj.roi` (e.g., if HTML rendering happens before
-           result recomputation after ROI deletion).
+           Handles gracefully the case where:
+           - `obj` is None: uses generic "ROI N" headers instead of ROI titles
+           - `roi_indices` reference ROIs that no longer exist in `obj.roi`
+             (e.g., if HTML rendering happens before result recomputation after
+             ROI deletion)
         """
-        if roi_indices is not None:
-            assert obj is not None, "obj must be provided if roi_indices is given"
         row_headers = []
         if roi_indices is not None:
             for roi_idx in roi_indices:
@@ -212,7 +212,7 @@ class ResultHtmlGenerator:
                 else:
                     header = f"ROI {roi_idx}"
                     # Try to get ROI title from object if available
-                    if obj.roi is not None:
+                    if obj is not None and obj.roi is not None:
                         # Check if roi_idx is valid (defensive against stale indices)
                         if 0 <= roi_idx < len(obj.roi.single_rois):
                             header = obj.roi.get_single_roi_title(roi_idx)

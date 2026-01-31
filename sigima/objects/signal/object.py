@@ -320,6 +320,58 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
     dx = property(__get_dx, __set_dx)
     dy = property(__get_dy, __set_dy)
 
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebook display.
+
+        This method is automatically called by Jupyter when displaying the object
+        as a cell output, providing a rich HTML rendering of the signal object.
+
+        Returns:
+            HTML representation of the signal with summary statistics.
+        """
+        n_points = len(self.x) if self.x is not None else 0
+        x_min = f"{self.x.min():.4g}" if n_points > 0 else "N/A"
+        x_max = f"{self.x.max():.4g}" if n_points > 0 else "N/A"
+        y_min = f"{self.y.min():.4g}" if n_points > 0 else "N/A"
+        y_max = f"{self.y.max():.4g}" if n_points > 0 else "N/A"
+        dtype_str = str(self.y.dtype) if self.y is not None else "N/A"
+
+        # Build axis labels with optional title
+        x_label = "X"
+        if self.xlabel:
+            x_label = f"X ({self.xlabel})"
+        y_label = "Y"
+        if self.ylabel:
+            y_label = f"Y ({self.ylabel})"
+
+        html = f'<u><b style="color: #5294e2">SignalObj: {self.title}</b></u>:'
+        html += '<table border="0">'
+        html += f"<tr><td style='text-align:right'>Points:</td><td>{n_points}</td></tr>"
+        html += (
+            f"<tr><td style='text-align:right'>{x_label} range:</td>"
+            f"<td>[{x_min}, {x_max}]"
+        )
+        if self.xunit:
+            html += f" {self.xunit}"
+        html += "</td></tr>"
+        html += (
+            f"<tr><td style='text-align:right'>{y_label} range:</td>"
+            f"<td>[{y_min}, {y_max}]"
+        )
+        if self.yunit:
+            html += f" {self.yunit}"
+        html += "</td></tr>"
+        html += (
+            f"<tr><td style='text-align:right'>Data type:</td><td>{dtype_str}</td></tr>"
+        )
+        if self.roi is not None:
+            html += (
+                f"<tr><td style='text-align:right'>ROIs:</td>"
+                f"<td>{len(self.roi)}</td></tr>"
+            )
+        html += "</table>"
+        return html
+
     def get_data(self, roi_index: int | None = None) -> tuple[np.ndarray, np.ndarray]:
         """
         Return original data (if ROI is not defined or `roi_index` is None),

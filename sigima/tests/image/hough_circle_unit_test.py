@@ -41,27 +41,20 @@ def __compute_hough_circle_peaks(data):
 def __exec_hough_circle_test(data):
     """Peak detection using circle Hough transform with visualization"""
     # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
-    from sigima.tests import vistools
+    from sigima import viz
 
     edges, coords = __compute_hough_circle_peaks(data)
     items = [
-        make.image(
-            data, interpolation="linear", colormap="gray", eliminate_outliers=2.0
-        ),
-        make.image(
-            np.array(edges, dtype=np.uint8),
-            interpolation="linear",
-            colormap="hsv",
-            alpha_function="tanh",
+        viz.create_image(data, colormap="gray"),
+        viz.create_image(
+            np.array(edges, dtype=np.uint8), colormap="hsv", alpha_function="tanh"
         ),
     ]
     for shapeargs in coords:
         xc, yc, r = shapeargs
-        item = make.circle(xc - r, yc, xc + r, yc)
+        item = viz.create_circle(xc, yc, r)
         items.append(item)
-    vistools.view_image_items(items)
+    viz.view_image_items(items)
 
 
 @pytest.mark.validation

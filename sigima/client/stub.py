@@ -144,6 +144,7 @@ class DataLabStubServer:
 
         # Application control
         self.server.register_function(self.reset_all, "reset_all")
+        self.server.register_function(self.remove_object, "remove_object")
         self.server.register_function(self.toggle_auto_refresh, "toggle_auto_refresh")
         self.server.register_function(self.toggle_show_titles, "toggle_show_titles")
 
@@ -183,6 +184,9 @@ class DataLabStubServer:
         )
         self.server.register_function(self.add_label_with_title, "add_label_with_title")
 
+        # Generic method calling
+        self.server.register_function(self.call_method, "call_method")
+
     # Basic server methods
     def get_version(self) -> str:
         """Get DataLab version.
@@ -218,6 +222,29 @@ class DataLabStubServer:
         self.images.clear()
         self.selected_objects.clear()
         self.selected_groups.clear()
+
+    def remove_object(self, force: bool = False) -> None:
+        """Remove current object from current panel.
+
+        Args:
+            force: if True, remove object without confirmation. Defaults to False.
+        """
+        # In stub mode, remove the first selected object if any
+        if self.selected_objects:
+            uuid_to_remove = self.selected_objects[0]
+            execenv.print(f"[STUB] Removing object: force={force}")
+            if uuid_to_remove in self.signals:
+                del self.signals[uuid_to_remove]
+                self.selected_objects.remove(uuid_to_remove)
+                if self.verbose:
+                    execenv.print(f"[STUB] Removed signal: {uuid_to_remove}")
+            elif uuid_to_remove in self.images:
+                del self.images[uuid_to_remove]
+                self.selected_objects.remove(uuid_to_remove)
+                if self.verbose:
+                    execenv.print(f"[STUB] Removed image: {uuid_to_remove}")
+        elif self.verbose:
+            execenv.print("[STUB] No object selected to remove")
 
     def toggle_auto_refresh(self, state: bool) -> None:
         """Toggle auto refresh mode."""
@@ -702,6 +729,53 @@ class DataLabStubServer:
 
         if self.verbose:
             execenv.print("[STUB] Unsupported object type for calculation")
+        return None
+
+    # Generic method calling
+    def call_method(self, method_name: str, call_params: dict):
+        """Call a public method on a panel or main window.
+
+        Args:
+            method_name: Name of the method to call
+            call_params: Dictionary with keys 'args' (list), 'panel' (str|None),
+             'kwargs' (dict). Defaults to empty for missing keys.
+
+        Returns:
+            The return value of the called method (stub returns None)
+
+        Raises:
+            AttributeError: If the method does not exist or is not public
+        """
+        args = call_params.get("args", [])
+        panel = call_params.get("panel")
+        kwargs = call_params.get("kwargs", {})
+
+        if self.verbose:
+            execenv.print(
+                f"[STUB] Calling method '{method_name}' with args={args}, "
+                f"panel={panel}, kwargs={kwargs}"
+            )
+
+        # Check if the method exists on the stub server itself
+        if hasattr(self, method_name) and not method_name.startswith("_"):
+            method = getattr(self, method_name)
+            if callable(method):
+                try:
+                    return method(*args, **kwargs)
+                except TypeError as exc:
+                    if self.verbose:
+                        execenv.print(
+                            f"[STUB] Method '{method_name}' exists but failed: {exc}"
+                        )
+                    raise AttributeError(
+                        f"Method '{method_name}' has incompatible signature"
+                    ) from exc
+
+        # For methods that don't exist, just log and return None
+        if self.verbose:
+            execenv.print(
+                f"[STUB] Method '{method_name}' not implemented in stub server"
+            )
         return None
 
     # Annotation operations

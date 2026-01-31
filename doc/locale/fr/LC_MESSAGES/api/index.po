@@ -67,3 +67,9 @@ msgstr ""
 
 msgid "Client interface for connecting to DataLab application through XML-RPC protocol, providing remote control capabilities for signal and image processing workflows."
 msgstr "Interface client pour se connecter à l'application DataLab via le protocole XML-RPC, offrant des capacités de contrôle à distance pour les flux de travail de traitement de signaux et d'images."
+
+msgid ":mod:`sigima.viz`"
+msgstr ""
+
+msgid "Visualization tools for interactive display of signal and image objects, supporting PlotPy and Matplotlib backends for testing, debugging, and Jupyter notebook analysis."
+msgstr "Outils de visualisation pour l'affichage interactif des objets signal et image, prenant en charge les backends PlotPy et Matplotlib pour les tests, le débogage et l'analyse dans les notebooks Jupyter."

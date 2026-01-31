@@ -31,7 +31,6 @@ from sigima.tools.checks import check_2d_array
 # Version 0.26.0 introduced breaking changes to CircleModel and EllipseModel:
 # - Old API: model.estimate(contour) + model.params
 # - New API: model.from_estimate(contour) + model.center/radius/axis_lengths properties
-# Reference: https://github.com/scikit-image/scikit-image/commit/6d6e7924cca105320690f716a14c5bd11055bf43
 _SKIMAGE_VERSION = Version(__version__)
 _USE_NEW_SHAPE_API = _SKIMAGE_VERSION >= Version("0.26.0")
 

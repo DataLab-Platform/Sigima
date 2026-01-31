@@ -1,0 +1,108 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Sigima \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid "Getting Started"
+msgstr "Premiers pas"
+
+msgid "This page provides a quick introduction to get you started with Sigima through practical examples."
+msgstr "Cette page fournit une introduction rapide pour vous aider à démarrer avec Sigima à travers des exemples pratiques."
+
+msgid "Interactive Notebook"
+msgstr "Notebook interactif"
+
+msgid "The best way to start learning Sigima is through an interactive Jupyter notebook. This example demonstrates image processing with Regions of Interest (ROI) and uses the matplotlib backend for web-friendly visualization."
+msgstr "La meilleure façon de commencer à apprendre Sigima est à travers un notebook Jupyter interactif. Cet exemple démontre le traitement d'images avec des régions d'intérêt (ROI) et utilise le backend matplotlib pour une visualisation adaptée au web."
+
+msgid ":download:`Download simple_example.ipynb <../simple_example.ipynb>`"
+msgstr ""
+
+msgid "What This Example Shows"
+msgstr "Ce que cet exemple montre"
+
+msgid "The notebook demonstrates:"
+msgstr "Le notebook démontre :"
+
+msgid "Creating image objects from NumPy arrays"
+msgstr "Créer des objets image à partir de tableaux NumPy"
+
+msgid "Defining Regions of Interest (ROI) for selective processing"
+msgstr "Définir des régions d'intérêt (ROI) pour un traitement sélectif"
+
+msgid "Applying Gaussian filtering to images"
+msgstr "Appliquer un filtrage gaussien aux images"
+
+msgid "Visualizing results with matplotlib backend (web-friendly, no Qt required)"
+msgstr "Visualiser les résultats avec le backend matplotlib (adapté au web, pas de Qt requis)"
+
+msgid "Using the new visualization backend selection feature introduced in Sigima V1.1"
+msgstr "Utiliser la nouvelle fonctionnalité de sélection du backend de visualisation introduite dans Sigima V1.1"
+
+msgid "Key Concepts"
+msgstr "Concepts clés"
+
+msgid "**Object-Oriented Approach**"
+msgstr "**Approche orientée objet**"
+
+msgid "Sigima wraps NumPy arrays in rich objects (``SignalObj``, ``ImageObj``) that carry metadata, units, and ROI information."
+msgstr "Sigima enveloppe les tableaux NumPy dans des objets riches (``SignalObj``, ``ImageObj``) qui portent des métadonnées, des unités et des informations ROI."
+
+msgid "**Region of Interest (ROI)**"
+msgstr "**Région d'intérêt (ROI)**"
+
+msgid "Process only specific areas of your data by defining ROIs. The example shows a circular ROI applied to an image."
+msgstr "Traitez uniquement des zones spécifiques de vos données en définissant des ROI. L'exemple montre une ROI circulaire appliquée à une image."
+
+msgid "**Backend Flexibility**"
+msgstr "**Flexibilité du backend**"
+
+msgid "Choose between PlotPy (Qt-based, interactive) or Matplotlib (web-friendly) backends for visualization, making Sigima suitable for both desktop applications and web-based workflows."
+msgstr "Choisissez entre les backends PlotPy (basé sur Qt, interactif) ou Matplotlib (adapté au web) pour la visualisation, rendant Sigima adapté à la fois aux applications de bureau et aux flux de travail basés sur le web."
+
+msgid "Remote Control Example"
+msgstr "Exemple de contrôle à distance"
+
+msgid "Sigima also enables remote control of DataLab sessions from external scripts or notebooks. This is useful for automation, batch processing, or integrating DataLab into larger workflows."
+msgstr "Sigima permet également le contrôle à distance des sessions DataLab à partir de scripts ou de notebooks externes. Cela est utile pour l'automatisation, le traitement par lots ou l'intégration de DataLab dans des flux de travail plus larges."
+
+msgid ":download:`Download remote_example.ipynb <../remote_example.ipynb>`"
+msgstr ""
+
+msgid "This notebook demonstrates:"
+msgstr "Ce notebook démontre :"
+
+msgid "Connecting to a running DataLab instance using ``SimpleRemoteProxy``"
+msgstr "Se connecter à une instance DataLab en cours d'exécution en utilisant ``SimpleRemoteProxy``"
+
+msgid "Adding signals and images to DataLab from external Python code"
+msgstr "Ajouter des signaux et des images à DataLab à partir de code Python externe"
+
+msgid "Controlling DataLab programmatically without GUI interaction"
+msgstr "Contrôler DataLab de manière programmatique sans interaction avec l'interface graphique"
+
+msgid "Next Steps"
+msgstr "Prochaines étapes"
+
+msgid "Explore the :ref:`features` page for a complete overview of available operations"
+msgstr "Explorez la page :ref:`features` pour un aperçu complet des opérations disponibles"
+
+msgid "Check out the :ref:`API documentation <api>` for detailed function references"
+msgstr "Consultez la :ref:`documentation API <api>` pour des références détaillées des fonctions"
+
+msgid "Browse the :doc:`gallery of examples </auto_examples/index>` for more use cases"
+msgstr "Parcourez la :doc:`galerie d'exemples </auto_examples/index>` pour plus de cas d'utilisation"

@@ -30,6 +30,7 @@ that allow you to explore the ROI grid placement in detail.
 
 from copy import deepcopy
 
+from sigima import viz
 from sigima.io import read_image
 from sigima.objects import RectangularROI
 from sigima.proc.image.extraction import (
@@ -38,7 +39,7 @@ from sigima.proc.image.extraction import (
     extract_roi,
     generate_image_grid_roi,
 )
-from sigima.tests import helpers, vistools
+from sigima.tests import helpers
 
 # %%
 # Loading a real laser spot array image
@@ -83,7 +84,7 @@ print(
 )
 
 # Display both images
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [full_image, laser_image],
     ["Full 6×6 Array", "Extracted 2×2 Sub-region"],
     title="Extracting a Sub-region for Analysis",
@@ -118,7 +119,7 @@ print(f"\n✓ Generated {len(list(roi_grid))} rectangular ROIs!")
 print("ROI titles:", [r.title for r in list(roi_grid)])
 
 # Display image with ROI overlay
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [laser_image, image_with_roi],
     ["2×2 Spot Array", "With ROI Grid"],
     title="Basic ROI Grid (2×2, Centered)",
@@ -145,7 +146,7 @@ for spot in extracted_spots:
     print(f"  - {spot.title}: {spot.width}×{spot.height} pixels")
 
 # Display extracted spots
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     extracted_spots,
     [spot.title for spot in extracted_spots],
     title="Extracted Individual Spots",
@@ -190,7 +191,7 @@ print("  - Small ROIs: 40% of cell size")
 print("  - Shifted ROIs: offset by 10% in X and Y")
 
 # Display the different configurations
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [image_with_roi, image_large, image_small, image_shifted],
     ["Default (75%)", "Large (90%)", "Small (40%)", "Shifted (+10%)"],
     title="ROI Size and Position Variations",
@@ -227,7 +228,7 @@ print("Increasing direction (first 4 ROIs):", [r.title for r in list(roi_inc)[:4
 print("Decreasing direction (first 4 ROIs):", [r.title for r in list(roi_dec)[:4]])
 
 # Display direction variations
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [image_inc, image_dec],
     ["Increasing Direction", "Decreasing Direction"],
     title="ROI Direction Labels",

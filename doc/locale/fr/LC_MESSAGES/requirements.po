@@ -203,6 +203,12 @@ msgstr ""
 msgid "An extended [CommonMark](https://spec.commonmark.org/) compliant parser,"
 msgstr "Un analyseur conforme à [CommonMark](https://spec.commonmark.org/) étendu,"
 
+msgid "myst-nb"
+msgstr ""
+
+msgid "A Jupyter Notebook Sphinx reader built on top of the MyST markdown parser."
+msgstr ""
+
 msgid "sphinx_design"
 msgstr ""
 
@@ -220,6 +226,13 @@ msgstr ""
 
 msgid "Bootstrap-based Sphinx theme from the PyData community"
 msgstr "Thème Sphinx basé sur Bootstrap de la communauté PyData"
+
+msgid "matplotlib"
+msgstr ""
+
+#, fuzzy
+msgid "Python plotting package"
+msgstr "Langage de programmation Python"
 
 msgid "opencv-python-headless"
 msgstr ""

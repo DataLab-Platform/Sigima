@@ -24,18 +24,16 @@ from sigima.tests.env import execenv
 def __test_fwhm_interactive(obj: sigima.objects.SignalObj, method: str) -> None:
     """Interactive test for the full width at half maximum computation."""
     # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
-    from sigima.tests import vistools
+    from sigima import viz
 
     param = sigima.params.FWHMParam.create(method=method)
     geometry = sigima.proc.signal.fwhm(obj, param)
     x0, y0, x1, y1 = geometry.coords[0]
     x, y = obj.xydata
-    vistools.view_curve_items(
+    viz.view_curve_items(
         [
-            make.mcurve(x.real, y.real, label=obj.title),
-            vistools.create_signal_segment(x0, y0, x1, y1, "FWHM"),
+            viz.create_curve(x.real, y.real, title=obj.title),
+            viz.create_segment(x0, y0, x1, y1, "FWHM"),
         ],
         title=f"FWHM [{method}]",
     )

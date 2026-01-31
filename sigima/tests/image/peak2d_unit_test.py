@@ -50,15 +50,13 @@ def view_image_peak_detection(data: np.ndarray, coords: np.ndarray) -> None:
         coords: Coordinates of detected peaks (shape: (n, 2))
     """
     # pylint: disable=import-outside-toplevel
-    from plotpy.builder import make
-
-    from sigima.tests.vistools import view_image_items
+    from sigima import viz
 
     execenv.print("Peak detection results:")
-    items = [make.image(data, interpolation="linear", colormap="hsv")]
+    items = [viz.create_image(data, colormap="hsv")]
     for x, y in coords:
-        items.append(make.marker((x, y)))
-    view_image_items(
+        items.append(viz.create_marker(x, y))
+    viz.view_image_items(
         items, name=view_image_peak_detection.__name__, title="Peak Detection"
     )
 

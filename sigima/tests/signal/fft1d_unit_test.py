@@ -304,7 +304,7 @@ def test_signal_spectrum() -> None:
     """Test several FFT-related functions on `dynamic_parameters.txt`."""
     with guiutils.lazy_qt_app_context(force=True):
         # pylint: disable=import-outside-toplevel
-        from sigima.tests.vistools import view_curves
+        from sigima.viz import view_curves
 
         sig = get_test_signal("dynamic_parameters.txt")
         view_curves([sig])

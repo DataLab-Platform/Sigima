@@ -823,7 +823,7 @@ def _test_rise_time_case(
     with guiutils.lazy_qt_app_context() as qt_app:
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
             ct1 = pulse.find_crossing_at_ratio(
                 x, y_noisy, start_ratio, start_range, end_range
@@ -831,7 +831,7 @@ def _test_rise_time_case(
             ct2 = pulse.find_crossing_at_ratio(
                 x, y_noisy, stop_ratio, start_range, end_range
             )
-            item = vistools.create_range(
+            item = viz.create_range(
                 "h",
                 ct1,
                 ct2,
@@ -962,13 +962,13 @@ def _test_rise_time_with_data(
     with guiutils.lazy_qt_app_context() as qt_app:
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
             sr = start_range or pulse.get_start_range(x)
             er = end_range or pulse.get_end_range(x)
             ct1 = pulse.find_crossing_at_ratio(x, y, start_ratio, sr, er)
             ct2 = pulse.find_crossing_at_ratio(x, y, stop_ratio, sr, er)
-            item = vistools.create_range(
+            item = viz.create_range(
                 "h",
                 ct1,
                 ct2,
@@ -1053,7 +1053,7 @@ def _test_fall_time_case(
     with guiutils.lazy_qt_app_context() as qt_app:
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
             ct1 = pulse.find_crossing_at_ratio(
                 x, y_noisy[::-1], start_ratio, start_range, end_range
@@ -1063,7 +1063,7 @@ def _test_fall_time_case(
                 x, y_noisy[::-1], stop_ratio, start_range, end_range
             )
             ct2 = x[-1] - ct2  # Adjust for reversed x
-            item = vistools.create_range(
+            item = viz.create_range(
                 "h",
                 ct1,
                 ct2,
@@ -1226,7 +1226,7 @@ def _test_fall_time_with_data(
     with guiutils.lazy_qt_app_context() as qt_app:
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
             sr = start_range or pulse.get_start_range(x)
             er = end_range or pulse.get_end_range(x)
@@ -1238,7 +1238,7 @@ def _test_fall_time_with_data(
             ct2 = pulse.find_crossing_at_ratio(x, y[::-1], stop_ratio, sr, er)
             ct2 = x[-1] - ct2
 
-            item = vistools.create_range(
+            item = viz.create_range(
                 "h",
                 ct1,
                 ct2,

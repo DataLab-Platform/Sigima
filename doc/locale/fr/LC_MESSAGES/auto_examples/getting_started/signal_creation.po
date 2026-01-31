@@ -44,8 +44,8 @@ msgstr "**Depuis des tableaux NumPy** : création d'objets directement depuis de
 msgid "Each method has its use cases, and Sigima provides a consistent interface for working with data regardless of its origin."
 msgstr "Chaque méthode a ses cas d'usage, et Sigima fournit une interface cohérente pour travailler avec les données quelle que soit leur origine."
 
-msgid "For visualization, we use helper functions from the ``sigima.tests.vistools`` module. This allows us to focus on Sigima's functionality rather than visualization details."
-msgstr "Pour la visualisation, nous utilisons des fonctions auxiliaires du module ``sigima.tests.vistools``. Cela nous permet de nous concentrer sur les fonctionnalités de Sigima plutôt que sur les détails de visualisation."
+msgid "For visualization, we use helper functions from the ``sigima.viz`` module. This allows us to focus on Sigima's functionality rather than visualization details."
+msgstr "Pour la visualisation, nous utilisons des fonctions auxiliaires du module ``sigima.viz``. Cela nous permet de nous concentrer sur les fonctionnalités de Sigima plutôt que sur les détails de visualisation."
 
 msgid "Importing necessary modules"
 msgstr "Import des modules nécessaires"

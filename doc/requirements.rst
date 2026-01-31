@@ -24,7 +24,7 @@ The `sigima` package requires the following Python modules:
       - Image processing in Python
     * - pandas
       - >= 1.4, < 3.0
-      - 
+      - Powerful data structures for data analysis, time series, and statistics
     * - PyWavelets
       - >= 1.2, < 2.0
       - PyWavelets, wavelet transform module
@@ -106,6 +106,9 @@ Optional modules for building the documentation:
     * - myst_parser
       - 
       - An extended [CommonMark](https://spec.commonmark.org/) compliant parser,
+    * - myst-nb
+      - 
+      - A Jupyter Notebook Sphinx reader built on top of the MyST markdown parser.
     * - sphinx_design
       - 
       - A sphinx extension for designing beautiful, view size responsive web components.
@@ -124,6 +127,9 @@ Optional modules for building the documentation:
     * - plotpy
       - 
       - Curve and image plotting tools for Python/Qt applications
+    * - matplotlib
+      - 
+      - Python plotting package
     * - opencv-python-headless
       - >= 4.8.1.78
       - Wrapper package for OpenCV python bindings.

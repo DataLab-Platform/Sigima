@@ -1,12 +1,18 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Visualization tools for `sigima` interactive tests (based on PlotPy)
+Visualization tools for Sigima (PlotPy backend)
+===============================================
+
+This module provides PlotPy-based visualization utilities for Sigima objects.
+It offers interactive plotting with Qt dialogs, supporting curve and image display,
+ROI visualization, and geometry result overlays.
 """
 
 from __future__ import annotations
 
 import os
+import sys
 from typing import Generator, Literal
 
 import numpy as np
@@ -42,6 +48,7 @@ from plotpy.styles import LINESTYLES, ShapeParam
 from qtpy import QtWidgets as QW
 
 from sigima.config import _
+from sigima.enums import ContourShape
 from sigima.objects import (
     CircularROI,
     GeometryResult,
@@ -52,8 +59,40 @@ from sigima.objects import (
     SegmentROI,
     SignalObj,
 )
-from sigima.tests.helpers import get_default_test_name
 from sigima.tools import coordinates
+
+
+# Optional imports for test environment integration
+def _get_default_name(suffix: str | None = None) -> str:
+    """Return default name based on script name.
+
+    Fallback if sigima.tests not available.
+    """
+    name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+    if suffix is not None:
+        name += "_" + suffix
+    return name
+
+
+def _debug_print(message: str) -> None:
+    """Debug print (fallback if sigima.tests.env not available)."""
+    if os.environ.get("SIGIMA_DEBUG", "").lower() in ("1", "true"):
+        print(message)
+
+
+# Try to import from sigima.tests for full functionality in test environment
+try:
+    from sigima.tests.env import execenv
+
+    debug_print = execenv.print
+except ImportError:
+    debug_print = _debug_print
+
+try:
+    from sigima.tests.helpers import get_default_test_name
+except ImportError:
+    get_default_test_name = _get_default_name
+
 
 QAPP: QW.QApplication | None = None
 
@@ -62,7 +101,7 @@ WIDGETS: list[QW.QWidget] = []
 CONF.set("plot", "title/font/size", 11)
 
 
-def ensure_qapp() -> QW.QApplication:
+def __ensure_qapp() -> QW.QApplication:
     """Ensure that a QApplication instance exists."""
     global QAPP  # pylint: disable=global-statement
     if QAPP is None:
@@ -72,7 +111,7 @@ def ensure_qapp() -> QW.QApplication:
     return QAPP
 
 
-def exec_dialog(dlg: QW.QDialog) -> None:
+def __exec_dialog(dlg: QW.QDialog) -> None:
     """Execute a dialog, supporting Sphinx-Gallery scraping."""
     global WIDGETS  # pylint: disable=global-statement,global-variable-not-assigned
     gallery_building = os.getenv("SPHINX_GALLERY_BUILDING")
@@ -107,7 +146,7 @@ COLORS = (
 )
 
 
-def style_generator() -> Generator[tuple[str, str], None, None]:
+def __style_generator() -> Generator[tuple[str, str], None, None]:
     """Cycling through curve styles"""
     while True:
         for linestyle in LINESTYLES:
@@ -115,10 +154,12 @@ def style_generator() -> Generator[tuple[str, str], None, None]:
                 yield (color, linestyle)
 
 
-make.style = style_generator()
+make.style = __style_generator()
 
 
-def get_name_title(name: str | None, title: str | None) -> tuple[str, str]:
+def __generate_widget_name_title(
+    name: str | None, title: str | None
+) -> tuple[str, str]:
     """Return (default) widget name and title
 
     Args:
@@ -134,11 +175,11 @@ def get_name_title(name: str | None, title: str | None) -> tuple[str, str]:
         TEST_NB[name] = TEST_NB.setdefault(name, 0) + 1
         name = get_default_test_name(f"{TEST_NB[name]:02d}")
     if title is None:
-        title = f"{_('Test dialog')} `{name}`"
+        title = f"{_('Plot dialog')} `{name}`"
     return name, title
 
 
-def create_curve_dialog(
+def __create_curve_dialog(
     name: str | None = None,
     title: str | None = None,
     xlabel: str | None = None,
@@ -161,7 +202,7 @@ def create_curve_dialog(
     Returns:
         A `PlotDialog` instance configured for curve plotting
     """
-    name, title = get_name_title(name, title)
+    name, title = __generate_widget_name_title(name, title)
     win = PlotDialog(
         edit=False,
         toolbar=True,
@@ -181,14 +222,130 @@ def create_curve_dialog(
     return win
 
 
-def create_signal_segment(
+def create_curve(x: np.ndarray, y: np.ndarray, title: str | None = None) -> CurveItem:
+    """Create a curve item from x and y data
+
+    Args:
+        x: X data array
+        y: Y data array
+        title: Label for the curve, or None for no label
+
+    Returns:
+        A `CurveItem` representing the curve
+    """
+    item = make.mcurve(x, y, label=title)
+    return item
+
+
+def create_image(
+    data: np.ndarray,
+    title: str | None = None,
+    interpolation: str = "linear",
+    colormap: str | None = None,
+    alpha_function: str | None = None,
+    xdata: list[float] | None = None,
+    ydata: list[float] | None = None,
+) -> ImageItem:
+    """Create an image item from data
+
+    Args:
+        data: 2D array of image data
+        title: Title for the image
+        interpolation: Interpolation method for image display
+        colormap: Colormap for the image, or None for default
+        alpha_function: Alpha function for the image, or None for default
+        xdata: X coordinates for the image (optional)
+        ydata: Y coordinates for the image (optional)
+    """
+    item = make.image(
+        data,
+        title=title,
+        interpolation=interpolation,
+        colormap=colormap,
+        xdata=[None, None] if xdata is None else xdata,
+        ydata=[None, None] if ydata is None else ydata,
+        eliminate_outliers=2.0,
+        alpha_function=alpha_function,
+    )
+    return item
+
+
+def create_contour_shapes(
+    coords: np.ndarray, shape: ContourShape
+) -> list[AnnotatedShape]:
+    """Create plotpy items for a specific contour shape.
+
+    Args:
+        coords: Coordinates of the contours
+        shape: ContourShape enum value
+
+    Returns:
+        List of plotpy items representing the detected contours
+    """
+    items = []
+    debug_print(f"Coordinates ({shape}s): {coords}")
+    for shapeargs in coords:
+        if shape == ContourShape.CIRCLE:
+            xc, yc, r = shapeargs
+            x0, y0, x1, y1 = coordinates.circle_to_diameter(xc, yc, r)
+            item = make.circle(x0, y0, x1, y1)
+        elif shape == ContourShape.ELLIPSE:
+            xc, yc, a, b, theta = shapeargs
+            coords_ellipse = coordinates.ellipse_to_diameters(xc, yc, a, b, theta)
+            x0, y0, x1, y1, x2, y2, x3, y3 = coords_ellipse
+            item = make.ellipse(x0, y0, x1, y1, x2, y2, x3, y3)
+        else:  # ContourShape.POLYGON
+            # `shapeargs` is a flattened array of x, y coordinates
+            x, y = shapeargs[::2], shapeargs[1::2]
+            item = make.polygon(x, y, closed=False)
+        items.append(item)
+    return items
+
+
+def create_circle(
+    xc: float,
+    yc: float,
+    r: float,
+    label: str | None = None,
+) -> AnnotatedCircle:
+    """Create an annotated circle item
+
+    Args:
+        xc: X-coordinate of the circle center
+        yc: Y-coordinate of the circle center
+        r: Radius of the circle
+        label: Label for the circle, or None for no label
+
+    Returns:
+        An `AnnotatedCircle` object representing the circle
+    """
+    item = make.annotated_circle(xc - r, yc, xc + r, yc, label, show_computations=False)
+    item.label.labelparam.bgalpha = 0.5
+    item.label.labelparam.anchor = "T"
+    item.label.labelparam.yc = 10
+    item.label.labelparam.update_item(item.label)
+    p: ShapeParam = item.shape.shapeparam
+    p.line.color = "#ff9933"
+    p.line.width = 2
+    p.symbol.facecolor = "#ffb366"
+    p.symbol.edgecolor = "#ff9933"
+    p.symbol.marker = "Ellipse"
+    p.symbol.size = 5
+    p.update_item(item.shape)
+    item.set_movable(False)
+    item.set_resizable(False)
+    item.set_selectable(False)
+    return item
+
+
+def create_segment(
     x0: float,
     y0: float,
     x1: float,
     y1: float,
     label: str | None = None,
-) -> CurveItem:
-    """Create a signal segment item
+) -> AnnotatedSegment:
+    """Create an annotated segment item
 
     Args:
         x0: X-coordinate of the start point
@@ -198,7 +355,7 @@ def create_signal_segment(
         label: Label for the segment, or None for no label
 
     Returns:
-        A `CurveItem` representing the signal segment
+        An `AnnotatedSegment` object representing the segment
     """
     item = make.annotated_segment(x0, y0, x1, y1, label, show_computations=False)
     item.label.labelparam.bgalpha = 0.5
@@ -220,13 +377,17 @@ def create_signal_segment(
 
 
 def create_cursor(
-    orientation: Literal["h", "v"], position: float, label: str
+    orientation: Literal["h", "v", "x"],
+    position: float | tuple[float, float],
+    label: str,
 ) -> Marker:
     """Create a horizontal or vertical cursor item
 
     Args:
-        orientation: 'h' for horizontal cursor, 'v' for vertical cursor
-        position: Position of the cursor along the relevant axis
+        orientation: 'h' for horizontal cursor, 'v' for vertical cursor,
+         'x' for crosshair
+        position: Position of the cursor along the relevant axis,
+         or (x, y) tuple for crosshair
         label: Label format string for the cursor
 
     Returns:
@@ -236,12 +397,16 @@ def create_cursor(
         cursor = make.hcursor(position, label=label)
     elif orientation == "v":
         cursor = make.vcursor(position, label=label)
+    elif orientation == "x":
+        assert isinstance(position, tuple) and len(position) == 2
+        cursor = make.xcursor(position[0], position[1], label=label)
     else:
         raise ValueError("Orientation must be 'h' or 'v'")
+    cursor.set_resizable(False)
     cursor.set_movable(False)
     cursor.set_selectable(False)
     cursor.markerparam.line.color = "#a7ff33"
-    cursor.markerparam.line.width = 3
+    cursor.markerparam.line.width = 2
     cursor.markerparam.symbol.marker = "NoSymbol"
     cursor.markerparam.text.textcolor = "#ffffff"
     cursor.markerparam.text.background_color = "#000000"
@@ -298,6 +463,22 @@ def create_label(text: str) -> LabelItem:
     return item
 
 
+def create_marker(x: float, y: float, title: str | None = None) -> Marker:
+    """Create a marker item
+
+    Args:
+        x: x coordinate
+        y: y coordinate
+        title: title of the marker
+
+    Returns:
+        A `Marker` representing the marker
+    """
+    if title is None:
+        return make.marker((x, y))
+    return make.marker((x, y), "%.3f", title)
+
+
 def __make_marker_item(x0: float, y0: float, fmt: str, title: str) -> Marker:
     """Make marker item
 
@@ -335,7 +516,7 @@ def __make_marker_item(x0: float, y0: float, fmt: str, title: str) -> Marker:
     )
 
 
-def create_curve_item(
+def __create_curve_item(
     obj: SignalObj | tuple[np.ndarray, np.ndarray], title: str | None = None
 ) -> CurveItem:
     """Create a curve item from a SignalObj or (xdata, ydata) tuple
@@ -355,14 +536,13 @@ def create_curve_item(
         xdata, ydata = obj.xydata
         title = obj.title or title or ""
     # Only display the real part for signals (for simplicity):
-    item = make.mcurve(xdata.real, ydata.real)
+    item = create_curve(xdata.real, ydata.real, title=title)
     item.param.line.width = 1.25
     item.param.update_item(item)
-    item.setTitle(title)
     return item
 
 
-def create_curve_roi_items(obj: SignalObj) -> list[AnnotatedXRange]:
+def __create_curve_roi_items(obj: SignalObj) -> list[AnnotatedXRange]:
     """Create signal ROI items from a SignalObj
 
     Args:
@@ -388,7 +568,7 @@ def create_curve_roi_items(obj: SignalObj) -> list[AnnotatedXRange]:
     return items
 
 
-def create_image_item(
+def __create_image_item(
     obj: ImageObj | np.ndarray, title: str | None = None, **kwargs
 ) -> MaskedImageItem | MaskedXYImageItem:
     """Create an image item from an ImageObj
@@ -429,7 +609,7 @@ def create_image_item(
     return item
 
 
-def create_image_roi_items(obj: ImageObj) -> list[AnnotatedShape]:
+def __create_image_roi_items(obj: ImageObj) -> list[AnnotatedShape]:
     """Create image ROI items from an ImageObj
 
     Args:
@@ -459,7 +639,7 @@ def create_image_roi_items(obj: ImageObj) -> list[AnnotatedShape]:
     return items
 
 
-def create_plot_items_from_geometry(
+def __create_plot_items_from_geometry(
     result: GeometryResult,
 ) -> list[
     AnnotatedPoint
@@ -536,7 +716,7 @@ def create_plot_items_from_geometry(
     return items
 
 
-def get_object_name_from_title(title: str, fallback: str) -> str:
+def __generate_object_name(title: str, fallback: str) -> str:
     """Generate a valid object name from a title string
 
     Args:
@@ -579,11 +759,11 @@ def view_curve_items(
         datetime_format: Datetime format for x-axis if x data is datetime, or None
         object_name: Object name for the dialog (for screenshot functionality)
     """
-    ensure_qapp()
-    win = create_curve_dialog(
+    __ensure_qapp()
+    win = __create_curve_dialog(
         name=name, title=title, xlabel=xlabel, ylabel=ylabel, xunit=xunit, yunit=yunit
     )
-    win.setObjectName(object_name or get_object_name_from_title(title, "curve_dialog"))
+    win.setObjectName(object_name or __generate_object_name(title, "curve_dialog"))
     plot = win.get_plot()
     for item in items:
         plot.add_item(item)
@@ -591,8 +771,8 @@ def view_curve_items(
         plot.add_item(make.legend())
     if datetime_format is not None:
         plot.set_axis_datetime("bottom", format=datetime_format)
-    exec_dialog(win)
-    make.style = style_generator()  # Reset style generator for next call
+    __exec_dialog(win)
+    make.style = __style_generator()  # Reset style generator for next call
 
 
 def view_curves(
@@ -624,7 +804,7 @@ def view_curves(
          (ignored if `data_or_objs` is not a `SignalObj`)
         object_name: Object name for the dialog (for screenshot functionality)
     """
-    ensure_qapp()
+    __ensure_qapp()
     if isinstance(data_or_objs, (tuple, list)):
         datalist = data_or_objs
     else:
@@ -645,9 +825,9 @@ def view_curves(
                         datetime_format = "%H:%M:%S.%f"
                     else:
                         datetime_format = "%H:%M:%S"
-        item = create_curve_item(data_or_obj)
+        item = __create_curve_item(data_or_obj)
         if isinstance(data_or_obj, SignalObj) and show_roi:
-            items.extend(create_curve_roi_items(data_or_obj))
+            items.extend(__create_curve_roi_items(data_or_obj))
         items.append(item)
     view_curve_items(
         items,
@@ -660,10 +840,10 @@ def view_curves(
         datetime_format=datetime_format,
         object_name=object_name,
     )
-    make.style = style_generator()  # Reset style generator for next call
+    make.style = __style_generator()  # Reset style generator for next call
 
 
-def create_image_dialog(
+def __create_image_dialog(
     name: str | None = None,
     title: str | None = None,
     xlabel: str | None = None,
@@ -692,8 +872,8 @@ def create_image_dialog(
     Returns:
         A `PlotDialog` instance configured for image plotting
     """
-    ensure_qapp()
-    name, title = get_name_title(name, title)
+    __ensure_qapp()
+    name, title = __generate_widget_name_title(name, title)
     win = PlotDialog(
         edit=False,
         toolbar=True,
@@ -755,8 +935,8 @@ def view_image_items(
          default is False
         object_name: Object name for the dialog (for screenshot functionality)
     """
-    ensure_qapp()
-    win = create_image_dialog(
+    __ensure_qapp()
+    win = __create_image_dialog(
         name=name,
         title=title,
         xlabel=xlabel,
@@ -772,7 +952,7 @@ def view_image_items(
     plot = win.get_plot()
     for item in items:
         plot.add_item(item)
-    exec_dialog(win)
+    __exec_dialog(win)
 
 
 # pylint: disable=too-many-positional-arguments
@@ -810,7 +990,7 @@ def view_images(
         object_name: Object name for the dialog (for screenshot functionality)
         **kwargs: Additional keyword arguments to pass to `make.maskedimage()`
     """
-    ensure_qapp()
+    __ensure_qapp()
     if isinstance(data_or_objs, (tuple, list)):
         datalist = data_or_objs
     else:
@@ -845,21 +1025,21 @@ def view_images(
         if np.issubdtype(data.dtype, np.complexfloating):
             re_title = f"Re({image_title})" if image_title is not None else "Real"
             im_title = f"Im({image_title})" if image_title is not None else "Imaginary"
-            items.append(create_image_item(data.real, title=re_title, **imparameters))
-            items.append(create_image_item(data.imag, title=im_title, **imparameters))
+            items.append(__create_image_item(data.real, title=re_title, **imparameters))
+            items.append(__create_image_item(data.imag, title=im_title, **imparameters))
         else:
             items.append(
-                create_image_item(data_or_obj, title=image_title, **imparameters)
+                __create_image_item(data_or_obj, title=image_title, **imparameters)
             )
         if isinstance(data_or_obj, ImageObj) and show_roi:
-            items.extend(create_image_roi_items(data_or_obj))
+            items.extend(__create_image_roi_items(data_or_obj))
     if results is not None:
         if isinstance(results, GeometryResult):
             results = [results]
         if not isinstance(results, (list, tuple)):
             raise TypeError(f"Unsupported results type: {type(results)}")
         for res in results:
-            items.extend(create_plot_items_from_geometry(res))
+            items.extend(__create_plot_items_from_geometry(res))
     view_image_items(
         items,
         name=name,
@@ -900,7 +1080,7 @@ def view_curves_and_images(
         zunit: Unit for the z-axis (color scale), or None for no unit
         object_name: Object name for the dialog (for screenshot functionality)
     """
-    ensure_qapp()
+    __ensure_qapp()
     if isinstance(data_or_objs, (tuple, list)):
         objs = data_or_objs
     else:
@@ -983,12 +1163,12 @@ def view_images_side_by_side(
         object_name: Object name for the dialog widget (used for screenshot filename)
         **kwargs: Additional keyword arguments to pass to `make.maskedimage()`
     """
-    ensure_qapp()
+    __ensure_qapp()
     # pylint: disable=too-many-nested-blocks
     rows, cols = __compute_grid(len(images), fixed_num_rows=rows, max_cols=4)
     dlg = SyncPlotDialog(title=title)
     dlg.setObjectName(
-        object_name or get_object_name_from_title(title, "images_side_by_side")
+        object_name or __generate_object_name(title, "images_side_by_side")
     )
     imparameters = IMAGE_PARAMETERS.copy()
     imparameters.update(kwargs)
@@ -1009,16 +1189,16 @@ def view_images_side_by_side(
         if isinstance(img, (MaskedImageItem, ImageItem)):
             item = img
         else:
-            item = create_image_item(img, title=imtitle, **imparameters)
+            item = __create_image_item(img, title=imtitle, **imparameters)
             if isinstance(img, ImageObj) and show_roi:
-                other_items.extend(create_image_roi_items(img))
+                other_items.extend(__create_image_roi_items(img))
         plot.add_item(item)
         for other_item in other_items:
             plot.add_item(other_item)
         if result is not None:
             if not isinstance(result, GeometryResult):
                 raise TypeError(f"Unsupported results type: {type(result)}")
-            overlay_items = create_plot_items_from_geometry(result)
+            overlay_items = __create_plot_items_from_geometry(result)
             for overlay_item in overlay_items:
                 plot.add_item(overlay_item)
         dlg.add_plot(row, col, plot, sync=share_axes)
@@ -1029,4 +1209,4 @@ def view_images_side_by_side(
         # Set explicit size for proper rendering in headless mode
         # Qt size hints don't work reliably without a display
         dlg.resize(20 + 440 * cols, 20 + 400 * rows)
-    exec_dialog(dlg)
+    __exec_dialog(dlg)

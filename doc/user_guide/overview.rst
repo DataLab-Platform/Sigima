@@ -10,6 +10,13 @@ What is Sigima?
 
 Sigima was created from the externalization of `DataLab <https://datalab-platform.com/>`_'s computing engine and is now an essential building block of the DataLab ecosystem, but is designed to be GUI-independent (and independent of DataLab itself) and can be used in a variety of scientific computing contexts.
 
+Quick Start Example
+-------------------
+
+Here's a simple example demonstrating image processing with Regions of Interest (ROIs) using Sigima. This example uses the matplotlib backend for visualization, making it web-friendly and easy to run in Jupyter notebooks.
+
+See the complete interactive notebook in the :ref:`getting_started` section.
+
 Why Sigima?
 -----------
 

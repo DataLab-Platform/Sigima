@@ -33,7 +33,7 @@ import numpy as np
 from sigima.io.signal.formats import CSVSignalFormat
 from sigima.objects import SignalObj, create_signal
 from sigima.objects.signal.constants import TIME_UNIT_FACTORS, VALID_TIME_UNITS
-from sigima.tests.vistools import view_curves
+from sigima.viz import view_curves
 
 # %%
 # Creating datetime signals from datetime objects
