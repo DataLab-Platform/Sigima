@@ -41,6 +41,54 @@ LINESTYLES = ["-", "--", "-.", ":"]
 MASK_OPACITY = 0.35  # Opacity for mask overlay
 
 
+def _get_image_extent_and_aspect(obj: ImageObj) -> tuple[list[float], float]:
+    """Compute matplotlib extent and aspect ratio from image physical coordinates.
+
+    ImageObj uses physical coordinates defined by:
+    - x0, y0: Origin (center of top-left pixel)
+    - dx, dy: Pixel spacing
+
+    For matplotlib's imshow:
+    - extent defines pixel edges: [left, right, bottom, top]
+    - aspect ratio is dx/dy to preserve physical proportions
+
+    With origin="upper", matplotlib expects:
+    - extent = [xmin - dx/2, xmax + dx/2, ymax + dy/2, ymin - dy/2]
+
+    Args:
+        obj: ImageObj with physical coordinate attributes
+
+    Returns:
+        Tuple of (extent, aspect_ratio) where:
+        - extent: [left, right, bottom, top] for imshow
+        - aspect_ratio: dx/dy for proper physical display
+    """
+    nrows, ncols = obj.data.shape[:2]
+    x0, y0 = obj.x0, obj.y0
+    dx, dy = obj.dx, obj.dy
+
+    # Compute pixel centers range (as in Sigima)
+    xmin = x0  # Center of leftmost column
+    xmax = x0 + (ncols - 1) * dx  # Center of rightmost column
+    ymin = y0  # Center of topmost row
+    ymax = y0 + (nrows - 1) * dy  # Center of bottommost row
+
+    # Convert to pixel edges for matplotlib extent
+    # extent = [left, right, bottom, top]
+    # For origin="upper", bottom is ymax and top is ymin
+    left = xmin - dx / 2
+    right = xmax + dx / 2
+    bottom = ymax + dy / 2  # Lower edge of bottom-most pixel
+    top = ymin - dy / 2  # Upper edge of top-most pixel
+
+    extent = [left, right, bottom, top]
+
+    # Aspect ratio preserves physical pixel proportions
+    aspect_ratio = dx / dy
+
+    return extent, aspect_ratio
+
+
 def _get_next_style(index: int) -> tuple[str, str]:
     """Get color and linestyle for the next plot item.
 
@@ -260,8 +308,22 @@ def view_images(
         else:
             raise TypeError(f"Unsupported data type: {type(data_or_obj)}")
 
+        # Compute extent and aspect ratio for ImageObj, use defaults for arrays
+        if isinstance(data_or_obj, ImageObj):
+            extent, aspect_ratio = _get_image_extent_and_aspect(data_or_obj)
+        else:
+            nrows_img, ncols_img = data.shape[:2]
+            extent = [-0.5, ncols_img - 0.5, nrows_img - 0.5, -0.5]
+            aspect_ratio = 1.0
+
         # Display image
-        im = ax.imshow(data, cmap=kwargs.get("colormap", "viridis"), origin="upper")
+        im = ax.imshow(
+            data,
+            cmap=kwargs.get("colormap", "viridis"),
+            origin="upper",
+            extent=extent,
+            aspect=aspect_ratio,
+        )
         ax.set_title(img_title)
 
         # Overlay mask if ImageObj has maskdata
@@ -270,7 +332,7 @@ def view_images(
             mask = data_or_obj.maskdata
             mask_rgba = np.zeros((*mask.shape, 4))
             mask_rgba[mask, :] = [1, 0, 0, MASK_OPACITY]
-            ax.imshow(mask_rgba, origin="upper")
+            ax.imshow(mask_rgba, origin="upper", extent=extent)
 
         # Add colorbar
         cbar = plt.colorbar(im, ax=ax)
@@ -348,55 +410,84 @@ def _add_single_roi_to_axes(
 def _add_geometry_to_axes(ax: plt.Axes, result: GeometryResult) -> None:
     """Add geometry result overlay to matplotlib axes.
 
+    Iterates over all rows in result.coords to draw each geometric shape.
+    Supports POINT, MARKER, RECTANGLE, CIRCLE, SEGMENT, ELLIPSE, and POLYGON.
+
     Args:
         ax: Matplotlib axes object
-        result: GeometryResult object with shape information
+        result: GeometryResult object with shape information (coords is 2D array)
     """
-    if result.kind == KindShape.RECTANGLE:
-        x0, y0, dx, dy = result.coords
-        rect = patches.Rectangle(
-            (x0, y0),
-            dx,
-            dy,
-            linewidth=2,
-            edgecolor="yellow",
-            facecolor="none",
-            linestyle="--",
-        )
-        ax.add_patch(rect)
-    elif result.kind == KindShape.CIRCLE:
-        xc, yc, r = result.coords
-        circle = patches.Circle(
-            (xc, yc),
-            r,
-            linewidth=2,
-            edgecolor="yellow",
-            facecolor="none",
-            linestyle="--",
-        )
-        ax.add_patch(circle)
-    elif result.kind == KindShape.SEGMENT:
-        x0, y0, x1, y1 = result.coords
-        ax.plot([x0, x1], [y0, y1], "y--", linewidth=2)
-    elif result.kind == KindShape.ELLIPSE:
-        # For ellipse, coords are (xc, yc, a, b, theta)
-        # Matplotlib Ellipse uses (center_x, center_y), width, height, angle_degrees
-        xc, yc, a, b, theta = result.coords
-        ellipse = patches.Ellipse(
-            (xc, yc),
-            2 * a,
-            2 * b,
-            angle=np.degrees(theta),
-            linewidth=2,
-            edgecolor="yellow",
-            facecolor="none",
-            linestyle="--",
-        )
-        ax.add_patch(ellipse)
-    elif result.kind == KindShape.POLYGON:
-        x = result.coords[::2]
-        y = result.coords[1::2]
-        ax.plot(x, y, "y--", linewidth=2, marker="o", markersize=4)
+    # Iterate over all rows in coords (each row is one shape)
+    for coords in result.coords:
+        if result.kind == KindShape.POINT:
+            x0, y0 = coords
+            ax.plot(
+                x0,
+                y0,
+                marker="o",
+                markersize=6,
+                color="yellow",
+                markeredgecolor="black",
+                markeredgewidth=1,
+            )
+        elif result.kind == KindShape.MARKER:
+            x0, y0 = coords
+            # Marker with crosshair style (matching PlotPy behavior)
+            ax.axhline(y0, color="yellow", linestyle="--", linewidth=1, alpha=0.7)
+            ax.axvline(x0, color="yellow", linestyle="--", linewidth=1, alpha=0.7)
+            ax.plot(
+                x0,
+                y0,
+                marker="+",
+                markersize=10,
+                color="yellow",
+                markeredgewidth=2,
+            )
+        elif result.kind == KindShape.RECTANGLE:
+            x0, y0, dx, dy = coords
+            rect = patches.Rectangle(
+                (x0, y0),
+                dx,
+                dy,
+                linewidth=2,
+                edgecolor="yellow",
+                facecolor="none",
+                linestyle="--",
+            )
+            ax.add_patch(rect)
+        elif result.kind == KindShape.CIRCLE:
+            xc, yc, r = coords
+            circle = patches.Circle(
+                (xc, yc),
+                r,
+                linewidth=2,
+                edgecolor="yellow",
+                facecolor="none",
+                linestyle="--",
+            )
+            ax.add_patch(circle)
+        elif result.kind == KindShape.SEGMENT:
+            x0, y0, x1, y1 = coords
+            ax.plot([x0, x1], [y0, y1], "y--", linewidth=2)
+        elif result.kind == KindShape.ELLIPSE:
+            # For ellipse, coords are (xc, yc, a, b, theta)
+            # Matplotlib Ellipse uses (center_x, center_y), width, height, angle_degrees
+            xc, yc, a, b, theta = coords
+            ellipse = patches.Ellipse(
+                (xc, yc),
+                2 * a,
+                2 * b,
+                angle=np.degrees(theta),
+                linewidth=2,
+                edgecolor="yellow",
+                facecolor="none",
+                linestyle="--",
+            )
+            ax.add_patch(ellipse)
+        elif result.kind == KindShape.POLYGON:
+            x = coords[::2]
+            y = coords[1::2]
+            ax.plot(x, y, "y--", linewidth=2, marker="o", markersize=4)
 
 
 def view_images_side_by_side(
@@ -488,8 +579,22 @@ def view_images_side_by_side(
         else:
             raise TypeError(f"Unsupported image type: {type(img)}")
 
+        # Compute extent and aspect ratio for ImageObj, use defaults for arrays
+        if is_image_obj:
+            extent, aspect_ratio = _get_image_extent_and_aspect(img)
+        else:
+            nrows_img, ncols_img = data.shape[:2]
+            extent = [-0.5, ncols_img - 0.5, nrows_img - 0.5, -0.5]
+            aspect_ratio = 1.0
+
         # Display image
-        im = ax.imshow(data, cmap=kwargs.get("colormap", "viridis"), origin="upper")
+        im = ax.imshow(
+            data,
+            cmap=kwargs.get("colormap", "viridis"),
+            origin="upper",
+            extent=extent,
+            aspect=aspect_ratio,
+        )
         ax.set_title(img_title)
 
         # Overlay mask if ImageObj has maskdata
@@ -498,7 +603,7 @@ def view_images_side_by_side(
             mask = img.maskdata
             mask_rgba = np.zeros((*mask.shape, 4))
             mask_rgba[mask, :] = [1, 0, 0, MASK_OPACITY]
-            ax.imshow(mask_rgba, origin="upper")
+            ax.imshow(mask_rgba, origin="upper", extent=extent)
 
         # Add colorbar
         plt.colorbar(im, ax=ax)
