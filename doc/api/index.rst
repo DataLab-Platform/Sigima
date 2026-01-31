@@ -30,6 +30,9 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
     * - :mod:`sigima.client`
       - Client interface for connecting to DataLab application through XML-RPC protocol, providing remote control capabilities for signal and image processing workflows.
 
+    * - :mod:`sigima.viz`
+      - Visualization tools for interactive display of signal and image objects, supporting PlotPy and Matplotlib backends for testing, debugging, and Jupyter notebook analysis.
+
 
 .. toctree::
    :maxdepth: 2
@@ -41,3 +44,4 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
    proc
    config
    client
+   viz
