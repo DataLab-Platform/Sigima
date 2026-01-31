@@ -19,9 +19,10 @@ Key differences from vistools_plotpy.py:
 
 from __future__ import annotations
 
-import matplotlib.pyplot as plt
+# pylint: disable=import-error
+import matplotlib.pyplot as plt  # pyright: ignore[reportMissingModuleSource]
 import numpy as np
-from matplotlib import patches
+from matplotlib import patches  # pyright: ignore[reportMissingModuleSource]
 
 from sigima.objects import (
     CircularROI,
