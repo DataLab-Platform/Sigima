@@ -26,8 +26,8 @@ msgstr "Démonstration de l'utilisation des régions d'intérêt (ROI) dans le t
 msgid "Display results"
 msgstr "Afficher les résultats"
 
-msgid "ℹ️ The following code use `vistools` Matplotlib backend which has been introduced in Sigima V1.1"
-msgstr "ℹ️ Le code suivant utilise le backend Matplotlib de `vistools` qui a été introduit dans Sigima V1.1"
+msgid "ℹ️ The following code use `viz` Matplotlib backend which has been introduced in Sigima V1.1"
+msgstr "ℹ️ Le code suivant utilise le backend Matplotlib de `viz` qui a été introduit dans Sigima V1.1"
 
-msgid "Sigima V1.0 uses an internal version of `vistools` for image display based on PlotPy"
-msgstr "Sigima V1.0 utilise une version interne de `vistools` pour l'affichage des images basée sur PlotPy"
+msgid "Sigima V1.0 uses an internal version of `viz` for image display based on PlotPy"
+msgstr "Sigima V1.0 utilise une version interne de `viz` pour l'affichage des images basée sur PlotPy"

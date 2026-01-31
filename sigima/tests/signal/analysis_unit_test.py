@@ -34,14 +34,14 @@ def test_signal_bandwidth_3db() -> None:
     with guiutils.lazy_qt_app_context() as qt_app:
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
             x0, y0, x1, y1 = geometry.coords[0]
             x, y = obj.xydata
-            vistools.view_curve_items(
+            viz.view_curve_items(
                 [
-                    vistools.create_curve(x.real, y.real, title=obj.title),
-                    vistools.create_segment(x0, y0, x1, y1, "Bandwidth@-3dB"),
+                    viz.create_curve(x.real, y.real, title=obj.title),
+                    viz.create_segment(x0, y0, x1, y1, "Bandwidth@-3dB"),
                 ],
                 title="Bandwidth@-3dB",
             )

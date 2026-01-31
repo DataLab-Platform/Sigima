@@ -1,12 +1,18 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Visualization tools for `sigima` interactive tests (based on PlotPy)
+Visualization tools for Sigima (PlotPy backend)
+===============================================
+
+This module provides PlotPy-based visualization utilities for Sigima objects.
+It offers interactive plotting with Qt dialogs, supporting curve and image display,
+ROI visualization, and geometry result overlays.
 """
 
 from __future__ import annotations
 
 import os
+import sys
 from typing import Generator, Literal
 
 import numpy as np
@@ -53,9 +59,40 @@ from sigima.objects import (
     SegmentROI,
     SignalObj,
 )
-from sigima.tests.env import execenv
-from sigima.tests.helpers import get_default_test_name
 from sigima.tools import coordinates
+
+
+# Optional imports for test environment integration
+def _get_default_name(suffix: str | None = None) -> str:
+    """Return default name based on script name.
+
+    Fallback if sigima.tests not available.
+    """
+    name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+    if suffix is not None:
+        name += "_" + suffix
+    return name
+
+
+def _debug_print(message: str) -> None:
+    """Debug print (fallback if sigima.tests.env not available)."""
+    if os.environ.get("SIGIMA_DEBUG", "").lower() in ("1", "true"):
+        print(message)
+
+
+# Try to import from sigima.tests for full functionality in test environment
+try:
+    from sigima.tests.env import execenv
+
+    debug_print = execenv.print
+except ImportError:
+    debug_print = _debug_print
+
+try:
+    from sigima.tests.helpers import get_default_test_name
+except ImportError:
+    get_default_test_name = _get_default_name
+
 
 QAPP: QW.QApplication | None = None
 
@@ -138,7 +175,7 @@ def __generate_widget_name_title(
         TEST_NB[name] = TEST_NB.setdefault(name, 0) + 1
         name = get_default_test_name(f"{TEST_NB[name]:02d}")
     if title is None:
-        title = f"{_('Test dialog')} `{name}`"
+        title = f"{_('Plot dialog')} `{name}`"
     return name, title
 
 
@@ -246,7 +283,7 @@ def create_contour_shapes(
         List of plotpy items representing the detected contours
     """
     items = []
-    execenv.print(f"Coordinates ({shape}s): {coords}")
+    debug_print(f"Coordinates ({shape}s): {coords}")
     for shapeargs in coords:
         if shape == ContourShape.CIRCLE:
             xc, yc, r = shapeargs

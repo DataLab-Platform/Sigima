@@ -33,7 +33,7 @@ import scipy.signal
 import sigima.objects
 import sigima.params
 import sigima.proc.image
-from sigima.tests import vistools
+from sigima import viz
 
 # %%
 # Creating test images and kernels
@@ -70,7 +70,7 @@ print(f"Gaussian kernel shape: {gaussian_kernel.data.shape}")
 print(f"Identity kernel shape: {identity_kernel.data.shape}")
 
 # Display the original image and kernels
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [original_image, gaussian_kernel, identity_kernel],
     ["Original Image", "Gaussian Kernel (σ=2.0)", "Identity Kernel"],
     title="Test Images and Kernels",
@@ -95,7 +95,7 @@ max_diff = np.max(np.abs(convolved_gauss.data - expected_result))
 print(f"Max difference from scipy: {max_diff:.2e}")
 
 # Visualize the convolution process
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [original_image, gaussian_kernel, convolved_gauss],
     ["Original Image", "Gaussian Kernel (σ=2.0)", "Convolved Result"],
     title="Gaussian Convolution Example",
@@ -117,7 +117,7 @@ print("\n✓ Identity convolution completed!")
 print(f"Max difference from original: {difference:.2e}")
 
 # Visualize the identity convolution
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [original_image, identity_kernel, convolved_identity],
     ["Original Image", "Identity Kernel", "Convolved with Identity"],
     "Identity Convolution Example",
@@ -141,7 +141,7 @@ print("\n✓ Identity deconvolution completed!")
 print(f"Recovery error: {recovery_error:.2e}")
 
 # Visualize the deconvolution process
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [original_image, convolved_identity, deconvolved_identity],
     ["Original", "Convolved", "Deconvolved"],
     title="Identity Deconvolution Example",
@@ -175,7 +175,7 @@ print(f"Original image range: [{orig_min:.3f}, {orig_max:.3f}]")
 print(f"Deconvolved image range: [{deconv_min:.3f}, {deconv_max:.3f}]")
 
 # Visualize the full deconvolution process
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [original_image, deconv_gaussian, large_convolved, large_deconvolved],
     ["Original", "Gaussian Kernel", "Convolved", "Deconvolved"],
     title="Gaussian Deconvolution Example",
@@ -209,14 +209,14 @@ conv_large = sigima.proc.image.convolution(original_image, large_sigma)
 print("\n✓ Multiple kernel comparison completed!")
 
 # Show the effect of different sigma values on kernels
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [small_sigma, medium_sigma, large_sigma],
     ["Kernel σ=0.8", "Kernel σ=2.0", "Kernel σ=4.0"],
     title="Gaussian Kernels with Different Sigma Values",
 )
 
 # Show the effect of different sigma values on convolution results
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [conv_small, conv_medium, conv_large],
     ["Convolved σ=0.8", "Convolved σ=2.0", "Convolved σ=4.0"],
     title="Convolution Results with Different Sigma Values",
@@ -246,14 +246,14 @@ sharpen_result.title = "Sharpened"
 print("\n✓ Custom kernel convolutions completed!")
 
 # Visualize custom kernels
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [edge_kernel, sharpen_kernel],
     ["Edge Detection Kernel", "Sharpening Kernel"],
     title="Custom Convolution Kernels",
 )
 
 # Visualize custom kernel results
-vistools.view_images_side_by_side(
+viz.view_images_side_by_side(
     [original_image, edge_result, sharpen_result],
     ["Original", "Edge Detection", "Sharpened"],
     title="Custom Kernel Convolution Results",
@@ -281,7 +281,7 @@ print("• Deconvolution can recover original features (with limitations)")
 print("• Custom kernels enable specialized image processing effects")
 
 # Final comparison showing the complete pipeline
-dialog10 = vistools.view_images_side_by_side(
+dialog10 = viz.view_images_side_by_side(
     [original_image, gaussian_kernel, convolved_gauss, large_deconvolved],
     ["Original", "Gaussian Kernel", "Convolved", "Deconvolved"],
     title="Complete Convolution-Deconvolution Pipeline",

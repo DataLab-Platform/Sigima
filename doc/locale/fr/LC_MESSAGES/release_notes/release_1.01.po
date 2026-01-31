@@ -38,8 +38,8 @@ msgstr "Ajout de la méthode `call_method()` (simule l'appel d'une méthode sur 
 msgid "**Test infrastructure**: Refactored visualization code in test suite for better maintainability"
 msgstr "**Infrastructure de test** : Refactorisation du code de visualisation dans la suite de tests pour une meilleure maintenabilité"
 
-msgid "Centralized PlotPy visualization utilities in `sigima.tests.vistools` module"
-msgstr "Centralisation des utilitaires de visualisation PlotPy dans le module `sigima.tests.vistools`"
+msgid "Centralized PlotPy visualization utilities in `sigima.viz` module"
+msgstr "Centralisation des utilitaires de visualisation PlotPy dans le module `sigima.viz`"
 
 msgid "Added standardized helper functions: `create_curve()`, `create_image()`, `create_circle()`, `create_segment()`, `create_cursor()`, `create_marker()`, and `create_contour_shapes()`"
 msgstr "Ajout de fonctions d'aide standardisées : `create_curve()`, `create_image()`, `create_circle()`, `create_segment()`, `create_cursor()`, `create_marker()` et `create_contour_shapes()`"
@@ -53,17 +53,17 @@ msgstr "Amélioration de la cohérence du code entre les modules de test de sign
 msgid "**Visualization backend flexibility**: Added support for Matplotlib as an alternative to PlotPy for test visualizations"
 msgstr "**Flexibilité du backend de visualisation** : Ajout de la prise en charge de Matplotlib comme alternative à PlotPy pour les visualisations de test"
 
-msgid "New configuration option `vistools_backend` to select visualization library (\"auto\", \"plotpy\", or \"matplotlib\")"
-msgstr "Nouvelle option de configuration `vistools_backend` pour sélectionner la bibliothèque de visualisation (\"auto\", \"plotpy\" ou \"matplotlib\")"
+msgid "New configuration option `viz_backend` to select visualization library (\"auto\", \"plotpy\", or \"matplotlib\")"
+msgstr "Nouvelle option de configuration `viz_backend` pour sélectionner la bibliothèque de visualisation (\"auto\", \"plotpy\" ou \"matplotlib\")"
 
-msgid "Environment variable `SIGIMA_VISTOOLS_BACKEND` can override configuration"
-msgstr "La variable d'environnement `SIGIMA_VISTOOLS_BACKEND` peut remplacer la configuration"
+msgid "Environment variable `SIGIMA_VIZ_BACKEND` can override configuration"
+msgstr "La variable d'environnement `SIGIMA_VIZ_BACKEND` peut remplacer la configuration"
 
 msgid "Automatic fallback from PlotPy to Matplotlib when PlotPy is not available"
 msgstr "Basculement automatique de PlotPy à Matplotlib lorsque PlotPy n'est pas disponible"
 
-msgid "Backend information exposed via `sigima.tests.vistools.BACKEND_NAME` and `BACKEND_SOURCE`"
-msgstr "Informations sur le backend exposées via `sigima.tests.vistools.BACKEND_NAME` et `BACKEND_SOURCE`"
+msgid "Backend information exposed via `sigima.viz.BACKEND_NAME` and `BACKEND_SOURCE`"
+msgstr "Informations sur le backend exposées via `sigima.viz.BACKEND_NAME` et `BACKEND_SOURCE`"
 
 msgid "Matplotlib backend provides stubs for unsupported functions (raises `NotImplementedError`)"
 msgstr "Le backend Matplotlib fournit des stubs pour les fonctions non prises en charge (lève `NotImplementedError`)"

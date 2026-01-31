@@ -76,16 +76,16 @@ def test_crossing_times(
         )
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
             # Create vertical markers for crossing times
             items = []
-            items.append(vistools.create_cursor("v", x0, "x0 (detected)"))
-            items.append(vistools.create_cursor("v", exp_x0, "x0 (expected)"))
-            items.append(vistools.create_cursor("v", x50, "x50 (detected)"))
-            items.append(vistools.create_cursor("v", exp_x50, "x50 (expected)"))
-            items.append(vistools.create_cursor("v", x100, "x100 (detected)"))
-            items.append(vistools.create_cursor("v", exp_x100, "x100 (expected)"))
+            items.append(viz.create_cursor("v", x0, "x0 (detected)"))
+            items.append(viz.create_cursor("v", exp_x0, "x0 (expected)"))
+            items.append(viz.create_cursor("v", x50, "x50 (detected)"))
+            items.append(viz.create_cursor("v", exp_x50, "x50 (expected)"))
+            items.append(viz.create_cursor("v", x100, "x100 (detected)"))
+            items.append(viz.create_cursor("v", exp_x100, "x100 (expected)"))
 
             view_baseline_plateau_and_curve(
                 x,

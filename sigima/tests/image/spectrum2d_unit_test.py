@@ -19,7 +19,7 @@ def test_image_spectrum_interactive():
     """Interactive test of the magnitude/phase/power spectrum of an image."""
     with guiutils.lazy_qt_app_context(force=True):
         # pylint: disable=import-outside-toplevel
-        from sigima.tests.vistools import view_images_side_by_side
+        from sigima.viz import view_images_side_by_side
 
         obj = get_test_image("NF 180338201.scor-data")
         data = obj.data

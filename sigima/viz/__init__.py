@@ -1,15 +1,20 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Visualization tools dispatcher for Sigima tests
-===============================================
+Visualization tools for Sigima
+==============================
 
-This module automatically selects between PlotPy and Matplotlib backends based on
+This module provides visualization utilities for Sigima objects, useful for:
+- Interactive testing and debugging
+- Data analysis in Jupyter notebooks
+- Quick visual inspection of processing results
+
+The module automatically selects between PlotPy and Matplotlib backends based on
 availability and configuration settings.
 
 The backend selection follows this priority:
-1. Environment variable SIGIMA_VISTOOLS_BACKEND (if set)
-2. Configuration option sigima.config.options.vistools_backend
+1. Environment variable SIGIMA_VIZ_BACKEND (if set)
+2. Configuration option sigima.config.options.viz_backend
 3. Auto-detection (PlotPy preferred, Matplotlib as fallback)
 
 Backend selection logic:
@@ -21,6 +26,19 @@ Module exports:
 - BACKEND_NAME: Name of the selected backend ("plotpy" or "matplotlib")
 - BACKEND_SOURCE: How the backend was selected ("env", "config", or "auto")
 - All public functions from the selected backend module
+
+Example usage::
+
+    from sigima import viz
+
+    # View signal objects
+    viz.view_curves([signal1, signal2], title="My signals")
+
+    # View image objects with ROIs
+    viz.view_images([image], show_roi=True)
+
+    # Compare images side by side
+    viz.view_images_side_by_side([img1, img2], titles=["Before", "After"])
 """
 
 from __future__ import annotations
@@ -217,7 +235,7 @@ def _select_backend() -> tuple[str, str]:
     # pylint: disable=unused-import
 
     # Priority 1: Environment variable
-    env_backend = os.environ.get("SIGIMA_VISTOOLS_BACKEND", "").lower()
+    env_backend = os.environ.get("SIGIMA_VIZ_BACKEND", "").lower()
     if env_backend in ("plotpy", "matplotlib", "auto"):
         requested = env_backend
         source = "env"
@@ -226,7 +244,7 @@ def _select_backend() -> tuple[str, str]:
         try:
             from sigima.config import options
 
-            requested = options.vistools_backend.get(sync_env=False).lower()
+            requested = options.viz_backend.get(sync_env=False).lower()
             source = "config"
         except Exception:  # pylint: disable=broad-exception-caught
             requested = "auto"
@@ -304,11 +322,9 @@ def _initialize_backend():
 
         # Import selected backend using importlib to avoid triggering __getattr__
         if _BACKEND_NAME == "plotpy":
-            _BACKEND_MODULE = importlib.import_module(
-                ".vistools_plotpy", package=__name__
-            )
+            _BACKEND_MODULE = importlib.import_module(".viz_plotpy", package=__name__)
         elif _BACKEND_NAME == "matplotlib":
-            _BACKEND_MODULE = importlib.import_module(".vistools_mpl", package=__name__)
+            _BACKEND_MODULE = importlib.import_module(".viz_mpl", package=__name__)
     finally:
         _INITIALIZING = False
 

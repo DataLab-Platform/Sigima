@@ -23,25 +23,25 @@ from sigima.tests.helpers import check_scalar_result
 def __enclosingcircle_test(data):
     """Enclosing circle test function"""
     # pylint: disable=import-outside-toplevel
-    from sigima.tests import vistools
+    from sigima import viz
 
     items = []
-    items += [vistools.create_image(data, interpolation="nearest")]
+    items += [viz.create_image(data, interpolation="nearest")]
 
     # Computing centroid coordinates
     row, col = sigima.tools.image.get_centroid_auto(data)
     label = _("Centroid") + " (%d, %d)"
     execenv.print(label % (row, col))
-    cursor = vistools.create_cursor("x", (col, row), label=label)
+    cursor = viz.create_cursor("x", (col, row), label=label)
     items.append(cursor)
 
     x, y, radius = sigima.tools.image.get_enclosing_circle(data)
-    circle = vistools.create_circle(x, y, radius)
+    circle = viz.create_circle(x, y, radius)
     items.append(circle)
     execenv.print(x, y, radius)
     execenv.print("")
 
-    vistools.view_image_items(items)
+    viz.view_image_items(items)
 
 
 @pytest.mark.gui

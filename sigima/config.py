@@ -326,13 +326,13 @@ additional formats. Each entry should be a tuple of (file extension, description
 """
             ),
         )
-        self.vistools_backend = TypedOptionField(
+        self.viz_backend = TypedOptionField(
             self,
-            "vistools_backend",
+            "viz_backend",
             default="auto",
             expected_type=str,
             description=_(
-                """Backend library for test visualization (interactive tests only).
+                """Backend library for visualization (sigima.viz module).
 
 Valid values: ``"auto"``, ``"plotpy"``, ``"matplotlib"``.
 
@@ -340,7 +340,7 @@ Valid values: ``"auto"``, ``"plotpy"``, ``"matplotlib"``.
 - ``"plotpy"``: Use PlotPy for interactive visualizations (requires PlotPy and Qt)
 - ``"matplotlib"``: Use Matplotlib for visualizations (simpler, view-only)
 
-This setting can also be overridden using the ``SIGIMA_VISTOOLS_BACKEND`` environment
+This setting can also be overridden using the ``SIGIMA_VIZ_BACKEND`` environment
 variable. Note that Matplotlib backend does not support all features of PlotPy
 (e.g., ``create_segment()``, ``create_cursor()``, etc. will raise NotImplementedError).
 """

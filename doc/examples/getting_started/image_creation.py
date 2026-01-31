@@ -16,7 +16,7 @@ There are three primary methods to create images in Sigima:
 Each method has its use cases, and Sigima provides a consistent interface for working
 with data regardless of its origin.
 
-For visualization, we use helper functions from the ``sigima.tests.vistools`` module.
+For visualization, we use helper functions from the ``sigima.viz`` module.
 This allows us to focus on Sigima's functionality rather than visualization details.
 """
 
@@ -28,7 +28,8 @@ This allows us to focus on Sigima's functionality rather than visualization deta
 import numpy as np
 
 import sigima
-from sigima.tests import helpers, vistools
+from sigima import viz
+from sigima.tests import helpers
 
 # %%
 # Method 1: Creating images from synthetic parameters
@@ -87,7 +88,7 @@ print(f"  - {gaussian_img.title}: {gaussian_img.data.shape}")
 print(f"  - {ramp_img.title}: {ramp_img.data.shape}")
 
 # Visualize synthetic images
-vistools.view_images_side_by_side([gaussian_img, ramp_img], title="Synthetic Images")
+viz.view_images_side_by_side([gaussian_img, ramp_img], title="Synthetic Images")
 
 # %%
 # Method 2: Loading images from files
@@ -117,7 +118,7 @@ print(f"  - {img_jpeg.title}: {img_jpeg.data.shape}")
 print(f"  - {img_npy.title}: {img_npy.data.shape}")
 
 # Visualize images loaded from files
-vistools.view_images_side_by_side([img_jpeg, img_npy], title="Images from Files")
+viz.view_images_side_by_side([img_jpeg, img_npy], title="Images from Files")
 
 # %%
 # Method 3: Creating images from NumPy arrays
@@ -161,7 +162,7 @@ print(f"  - {img_interf.title}: {img_interf.data.shape}")
 print(f"  - {img_radial.title}: {img_radial.data.shape}")
 
 # Visualize images created from NumPy arrays
-vistools.view_images_side_by_side([img_interf, img_radial], title="Images from Arrays")
+viz.view_images_side_by_side([img_interf, img_radial], title="Images from Arrays")
 
 # %%
 # Summary

@@ -56,9 +56,9 @@ def test_plateau_detection(
         )
         if qt_app is not None:
             # pylint: disable=import-outside-toplevel
-            from sigima.tests import vistools
+            from sigima import viz
 
-            item = vistools.create_range(
+            item = viz.create_range(
                 "h",
                 expected_min,
                 expected_max,

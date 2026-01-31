@@ -1,7 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Test vistools API compatibility between backends
+Test viz API compatibility between backends
 """
 
 # pylint: disable=import-outside-toplevel
@@ -54,10 +54,10 @@ def test_matplotlib_backend_has_all_plotpy_functions():
     present in the Matplotlib backend (even if they raise NotImplementedError).
     """
     # Import both backend modules directly
-    from . import vistools_mpl, vistools_plotpy
+    from sigima.viz import viz_mpl, viz_plotpy
 
-    plotpy_funcs = get_public_functions(vistools_plotpy)
-    mpl_funcs = get_public_functions(vistools_mpl)
+    plotpy_funcs = get_public_functions(viz_plotpy)
+    mpl_funcs = get_public_functions(viz_mpl)
 
     # Functions that are expected to be missing in matplotlib
     # (internal helpers that don't need to be exposed)
@@ -76,7 +76,7 @@ def test_matplotlib_backend_has_all_plotpy_functions():
 
 
 def test_backend_selection_env_var(monkeypatch):
-    """Test that SIGIMA_VISTOOLS_BACKEND environment variable works."""
+    """Test that SIGIMA_VIZ_BACKEND environment variable works."""
     import importlib
 
     # Check if matplotlib is available
@@ -86,19 +86,19 @@ def test_backend_selection_env_var(monkeypatch):
         pytest.skip("matplotlib not available")
 
     # Test with matplotlib
-    monkeypatch.setenv("SIGIMA_VISTOOLS_BACKEND", "matplotlib")
+    monkeypatch.setenv("SIGIMA_VIZ_BACKEND", "matplotlib")
     # Reload the module to pick up new env var
-    if "sigima.tests.vistools" in sys.modules:
-        importlib.reload(sys.modules["sigima.tests.vistools"])
+    if "sigima.viz" in sys.modules:
+        importlib.reload(sys.modules["sigima.viz"])
 
-    from sigima.tests import vistools
+    from sigima import viz
 
-    assert vistools.BACKEND_NAME == "matplotlib"
-    assert vistools.BACKEND_SOURCE == "env"
+    assert viz.BACKEND_NAME == "matplotlib"
+    assert viz.BACKEND_SOURCE == "env"
 
 
 def test_backend_selection_option(monkeypatch):
-    """Test that configuration option vistools_backend works."""
+    """Test that configuration option viz_backend works."""
     import importlib
 
     # Check if matplotlib is available
@@ -110,18 +110,18 @@ def test_backend_selection_option(monkeypatch):
     from sigima.config import options
 
     # Clear env var to test config option
-    monkeypatch.delenv("SIGIMA_VISTOOLS_BACKEND", raising=False)
+    monkeypatch.delenv("SIGIMA_VIZ_BACKEND", raising=False)
 
     # Test with matplotlib - use .set() method
-    options.vistools_backend.set("matplotlib")
+    options.viz_backend.set("matplotlib")
     # Reload the module to pick up new config option
-    if "sigima.tests.vistools" in sys.modules:
-        importlib.reload(sys.modules["sigima.tests.vistools"])
+    if "sigima.viz" in sys.modules:
+        importlib.reload(sys.modules["sigima.viz"])
 
-    from sigima.tests import vistools
+    from sigima import viz
 
-    assert vistools.BACKEND_NAME == "matplotlib"
-    assert vistools.BACKEND_SOURCE == "config"
+    assert viz.BACKEND_NAME == "matplotlib"
+    assert viz.BACKEND_SOURCE == "config"
 
 
 def test_backend_info_available():
@@ -142,12 +142,12 @@ def test_backend_info_available():
     if not backend_available:
         pytest.skip("No visualization backend available")
 
-    from sigima.tests import vistools
+    from sigima import viz
 
-    assert hasattr(vistools, "BACKEND_NAME")
-    assert hasattr(vistools, "BACKEND_SOURCE")
-    assert vistools.BACKEND_NAME in ("plotpy", "matplotlib")
-    assert vistools.BACKEND_SOURCE in ("env", "config", "auto")
+    assert hasattr(viz, "BACKEND_NAME")
+    assert hasattr(viz, "BACKEND_SOURCE")
+    assert viz.BACKEND_NAME in ("plotpy", "matplotlib")
+    assert viz.BACKEND_SOURCE in ("env", "config", "auto")
 
 
 if __name__ == "__main__":

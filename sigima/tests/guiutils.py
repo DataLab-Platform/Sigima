@@ -94,8 +94,8 @@ def lazy_qt_app_context(
         yield qt_app
 
 
-def _vistools_call_if_gui(func_name: str, *args, **kwargs) -> bool:
-    """Call sigima.tests.vistools.<func_name>(...) only if GUI is enabled.
+def _viz_call_if_gui(func_name: str, *args, **kwargs) -> bool:
+    """Call sigima.viz.<func_name>(...) only if GUI is enabled.
 
     Returns:
         True if the call executed (GUI enabled or forced), else False.
@@ -103,9 +103,9 @@ def _vistools_call_if_gui(func_name: str, *args, **kwargs) -> bool:
     with lazy_qt_app_context() as app:
         if app is None:
             return False
-        from sigima.tests import vistools  # pylint: disable=import-outside-toplevel
+        from sigima import viz  # pylint: disable=import-outside-toplevel
 
-        getattr(vistools, func_name)(*args, **kwargs)
+        getattr(viz, func_name)(*args, **kwargs)
         return True
 
 
@@ -120,7 +120,7 @@ def view_curves_if_gui(*args, **kwargs) -> None:
         xlabel: Label for the x-axis, or None for no label
         ylabel: Label for the y-axis, or None for no label
     """
-    return _vistools_call_if_gui("view_curves", *args, **kwargs)
+    return _viz_call_if_gui("view_curves", *args, **kwargs)
 
 
 def view_images_if_gui(*args, **kwargs) -> None:
@@ -133,7 +133,7 @@ def view_images_if_gui(*args, **kwargs) -> None:
         xlabel: Label for the x-axis, or None for no label
         ylabel: Label for the y-axis, or None for no label
     """
-    return _vistools_call_if_gui("view_images", *args, **kwargs)
+    return _viz_call_if_gui("view_images", *args, **kwargs)
 
 
 def view_curves_and_images_if_gui(*args, **kwargs) -> None:
@@ -146,7 +146,7 @@ def view_curves_and_images_if_gui(*args, **kwargs) -> None:
         xlabel: Label for the x-axis, or None for no label
         ylabel: Label for the y-axis, or None for no label
     """
-    return _vistools_call_if_gui("view_curves_and_images", *args, **kwargs)
+    return _viz_call_if_gui("view_curves_and_images", *args, **kwargs)
 
 
 def view_images_side_by_side_if_gui(*args, **kwargs) -> None:
@@ -160,4 +160,4 @@ def view_images_side_by_side_if_gui(*args, **kwargs) -> None:
         maximized: Whether to show the dialog maximized, default is False
         title: Title of the dialog, or None for a default title
     """
-    return _vistools_call_if_gui("view_images_side_by_side", *args, **kwargs)
+    return _viz_call_if_gui("view_images_side_by_side", *args, **kwargs)

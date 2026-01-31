@@ -28,13 +28,13 @@ def test_image_offset_correction_interactive() -> None:
         from plotpy.tools import RectangleTool
         from plotpy.widgets.selectdialog import SelectDialog, select_with_shape_tool
 
-        from sigima.tests import vistools
+        from sigima import viz
 
         i1 = create_noisy_gaussian_image()
         shape: RectangleShape = select_with_shape_tool(
             None,
             RectangleTool,
-            vistools.create_image(i1.data, interpolation="nearest"),
+            viz.create_image(i1.data, interpolation="nearest"),
             "Select background area",
             tooldialogclass=SelectDialog,
         )
@@ -45,7 +45,7 @@ def test_image_offset_correction_interactive() -> None:
             param.x0, param.y0, param.dx, param.dy = ix0, iy0, ix1 - ix0, iy1 - iy0
             i2 = sigima.proc.image.offset_correction(i1, param)
             i3 = sigima.proc.image.clip(i2, sigima.params.ClipParam.create(lower=0))
-            vistools.view_images_side_by_side(
+            viz.view_images_side_by_side(
                 [i1, i3],
                 titles=["Original image", "Corrected image"],
                 title="Image offset correction and thresholding",

@@ -33,23 +33,23 @@ def test_contour_interactive():
     data, _coords = get_peak2d_data()
     with guiutils.lazy_qt_app_context(force=True):
         # pylint: disable=import-outside-toplevel
-        from sigima.tests import vistools
+        from sigima import viz
 
-        items = [vistools.create_image(data, colormap="hsv")]
+        items = [viz.create_image(data, colormap="hsv")]
         t0 = time.time()
         peak_coords = get_2d_peaks_coords(data)
         dt = time.time() - t0
         for x, y in peak_coords:
-            items.append(vistools.create_marker(x, y))
+            items.append(viz.create_marker(x, y))
         execenv.print(f"Calculation time: {int(dt * 1e3):d} ms\n", file=sys.stderr)
         execenv.print(f"Peak coordinates: {peak_coords}")
 
         # Add contour shapes for all shape types
         for shape in ContourShape:
             coords = get_contour_shapes(data, shape=shape)
-            items.extend(vistools.create_contour_shapes(coords, shape))
+            items.extend(viz.create_contour_shapes(coords, shape))
 
-        vistools.view_image_items(items)
+        viz.view_image_items(items)
 
 
 @pytest.mark.validation

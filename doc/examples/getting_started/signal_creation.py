@@ -16,7 +16,7 @@ There are three primary methods to create signals in Sigima:
 Each method has its use cases, and Sigima provides a consistent interface for working
 with data regardless of its origin.
 
-For visualization, we use helper functions from the ``sigima.tests.vistools`` module.
+For visualization, we use helper functions from the ``sigima.viz`` module.
 This allows us to focus on Sigima's functionality rather than visualization details.
 """
 
@@ -30,7 +30,8 @@ from pprint import pprint  # For pretty-printing metadata
 import numpy as np
 
 import sigima
-from sigima.tests import helpers, vistools
+from sigima import viz
+from sigima.tests import helpers
 
 # %%
 # Method 1: Creating signals from synthetic parameters
@@ -90,7 +91,7 @@ print(f"  - {signal_synthetic.title}: {signal_synthetic.y.shape[0]} points")
 print(f"  - {signal_lorentzian.title}: {signal_lorentzian.y.shape[0]} points")
 
 # Visualize synthetic signals
-vistools.view_curves(
+viz.view_curves(
     [signal_synthetic, signal_lorentzian], title="Method 1: Synthetic Signals"
 )
 
@@ -113,7 +114,7 @@ filename = helpers.get_test_fnames("paracetamol.txt")[0]
 signal_from_file = sigima.read_signal(filename)
 
 # Visualize signal loaded from text file
-vistools.view_curves(signal_from_file, title="Signal from Text File")
+viz.view_curves(signal_from_file, title="Signal from Text File")
 
 # Load another signal from a CSV file with multiple curves
 csv_file = helpers.get_test_fnames("oscilloscope.csv")[0]
@@ -122,7 +123,7 @@ signals_from_csv = sigima.read_signals(csv_file)
 signal_from_csv = signals_from_csv[1]
 
 # Visualize signal loaded from csv file
-vistools.view_curves(signal_from_csv, title="Signal from CSV File")
+viz.view_curves(signal_from_csv, title="Signal from CSV File")
 
 print("\n✓ Signals loaded from files")
 print(f"  - {signal_from_file.title}: {signal_from_file.y.shape[0]} points")
@@ -185,7 +186,7 @@ print(f"  - {signal_from_array.title}: {signal_from_array.y.shape[0]} points")
 print(f"  - {signal_envelope.title}: {signal_envelope.y.shape[0]} points")
 
 # Visualize signals created from NumPy arrays
-vistools.view_curves(
+viz.view_curves(
     [signal_from_array, signal_envelope],
     title="Method 3: Signals from NumPy Arrays",
     object_name="signals_from_arrays",

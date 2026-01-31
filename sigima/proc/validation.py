@@ -94,8 +94,8 @@ def get_validation_tests(package: str) -> list:
         try:
             module = importlib.import_module(module_name)
         except ImportError as exc:
-            if "vistools" in module_name:
-                # This is expected as vistools requires a GUI
+            if "viz" in module_name:
+                # This is expected as viz requires a GUI
                 continue
             raise ImportError(
                 f"Failed to import module {module_name}. "

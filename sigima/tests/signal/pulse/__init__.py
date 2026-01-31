@@ -38,16 +38,16 @@ def view_baseline_plateau_and_curve(
         other_items: Additional items to display (optional).
     """
     # pylint: disable=import-outside-toplevel
-    from sigima.tests import vistools
+    from sigima import viz
 
     ys = pulse.get_range_mean_y(x, y, start_range)
     ye = pulse.get_range_mean_y(x, y, end_range)
     xs0, xs1 = start_range
     xe0, xe1 = end_range
     items = [
-        vistools.create_curve(x, y, title="Noisy signal"),
-        vistools.create_segment(xs0, ys, xs1, ys, "Start baseline"),
-        vistools.create_segment(xe0, ye, xe1, ye, "End baseline"),
+        viz.create_curve(x, y, title="Noisy signal"),
+        viz.create_segment(xs0, ys, xs1, ys, "Start baseline"),
+        viz.create_segment(xe0, ye, xe1, ye, "End baseline"),
     ]
     if signal_type == "square":
         if plateau_range is None:
@@ -55,14 +55,14 @@ def view_baseline_plateau_and_curve(
             plateau_range = pulse.get_plateau_range(x, y, polarity)
         xp0, xp1 = plateau_range
         yp = pulse.get_range_mean_y(x, y, plateau_range)
-        items.append(vistools.create_segment(xp0, yp, xp1, yp, "Plateau"))
+        items.append(viz.create_segment(xp0, yp, xp1, yp, "Plateau"))
     if vcursors is not None:
         for label, xt in vcursors.items():
-            items.append(vistools.create_cursor("v", xt, label))
+            items.append(viz.create_cursor("v", xt, label))
     if other_items is not None:
         items.extend(other_items)
 
-    vistools.view_curve_items(items, title=title)
+    viz.view_curve_items(items, title=title)
 
 
 def view_pulse_features(
@@ -82,7 +82,7 @@ def view_pulse_features(
         features: Extracted pulse features.
     """
     # pylint: disable=import-outside-toplevel
-    from sigima.tests import vistools
+    from sigima import viz
 
     params_text = "<br>".join(
         [
@@ -106,5 +106,5 @@ def view_pulse_features(
         [features.xstartmin, features.xstartmax],
         [features.xendmin, features.xendmax],
         plateau_range=None,
-        other_items=[vistools.create_label(params_text)],
+        other_items=[viz.create_label(params_text)],
     )

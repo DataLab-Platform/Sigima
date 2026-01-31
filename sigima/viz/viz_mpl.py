@@ -1,14 +1,14 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Visualization tools for Sigima tests using Matplotlib
-=====================================================
+Visualization tools for Sigima (Matplotlib backend)
+====================================================
 
-This module provides matplotlib-based visualization utilities for Sigima interactive
-tests, as an alternative to the PlotPy-based vistools.py. It maintains API
-compatibility with the original module while using matplotlib for rendering.
+This module provides matplotlib-based visualization utilities for Sigima objects,
+as an alternative to the PlotPy-based viz_plotpy.py. It maintains API
+compatibility with the PlotPy backend while using matplotlib for rendering.
 
-Key differences from vistools_plotpy.py:
+Key differences from viz_plotpy.py:
 - Uses matplotlib figures instead of Qt PlotDialog
 - No interactive editing tools (view-only mode)
 - Simpler, more lightweight implementation
@@ -175,6 +175,7 @@ def view_images(
     zunit: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
+    object_name: str = "",  # Qt-specific  # pylint: disable=unused-argument
     **kwargs,
 ) -> None:
     """Create a matplotlib figure and show images.
