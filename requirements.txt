@@ -1,8 +1,8 @@
 Coverage
-NumPy >= 1.22
+NumPy >= 1.22, < 2.5
 PyQt5
-PyWavelets >= 1.2
-SciPy >= 1.10.1
+PyWavelets >= 1.2, < 2.0
+SciPy >= 1.10.1, < 1.17
 babel
 build
 guidata >= 3.13
@@ -10,7 +10,7 @@ makefun >= 1.13.1
 myst_parser
 opencv-python-headless >= 4.8.1.78
 packaging >= 21.3
-pandas >= 1.4
+pandas >= 1.4, < 3.0
 plotpy
 pre-commit
 pydata-sphinx-theme
@@ -19,7 +19,7 @@ pytest
 pytest-xvfb
 qtpy
 ruff
-scikit-image >= 0.19.2
+scikit-image >= 0.19.2, < 0.27
 sphinx
 sphinx-copybutton
 sphinx-gallery
