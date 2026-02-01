@@ -6,6 +6,7 @@
 [![pypi version](https://img.shields.io/pypi/v/sigima.svg)](https://pypi.org/project/sigima/)
 [![PyPI status](https://img.shields.io/pypi/status/sigima.svg)](https://github.com/DataLab-Platform/Sigima)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/sigima.svg)](https://pypi.org/project/sigima/)
+[![Sigima demo](https://img.shields.io/badge/notebook-link-e2d610?logo=jupyter&logoColor=white)](https://notebook.link/github/DataLab-Platform/Sigima/tree/main/notebooks/?path=notebooks/sigima_basic_example.ipynb)
 
 **Sigima** is an **open-source Python library for scientific image and signal processing**,
 designed as a modular and testable foundation for building advanced analysis pipelines.
@@ -16,7 +17,7 @@ designed as a modular and testable foundation for building advanced analysis pip
 
 **Experience Sigima instantly in your browser** — no installation required!
 
-[![Try it online](https://img.shields.io/badge/Try_it-online-blue?logo=jupyter)](https://notebook.link/github/DataLab-Platform/Sigima/tree/main/notebooks/?path=notebooks/sigima_basic_example.ipynb)
+[![Sigima demo](https://img.shields.io/badge/notebook-link-e2d610?logo=jupyter&logoColor=white)](https://notebook.link/github/DataLab-Platform/Sigima/tree/main/notebooks/?path=notebooks/sigima_basic_example.ipynb)
 
 Click the badge above to open a basic example notebook in a live JupyterLite environment powered by [**notebook.link**](https://notebook.link/). This service, developed by [**QuantStack**](https://quantstack.net/), enables sharing and running Jupyter notebooks directly in the browser with zero setup.
 
