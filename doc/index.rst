@@ -54,6 +54,28 @@ With Sigima, do in 3 lines of code what would normally take dozens of lines:
 
             Getting involved in the project
 
+
+Try it Online
+-------------
+
+**Experience Sigima instantly in your browser** — no installation required!
+
+.. image:: https://img.shields.io/badge/Try_it-online-blue?logo=jupyter
+   :target: https://notebook.link/github/DataLab-Platform/Sigima/tree/main/notebooks/?path=notebooks/sigima_basic_example.ipynb
+   :alt: Try it online
+
+Click the badge above to open a basic example notebook in a live JupyterLite
+environment powered by `notebook.link <https://notebook.link/>`_. This service,
+developed by `QuantStack <https://quantstack.net/>`_, enables sharing and running
+Jupyter notebooks directly in the browser with zero setup.
+
+Simply run the cells to explore:
+
+- Creating signal and image objects
+- Applying processing functions
+- Visualizing results inline
+
+
 Sigima has been funded by the following stakeholders:
 
 .. list-table::

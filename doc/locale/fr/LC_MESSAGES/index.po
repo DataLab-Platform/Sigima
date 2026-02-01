@@ -56,6 +56,30 @@ msgstr "Contribuer"
 msgid "Getting involved in the project"
 msgstr "S'impliquer dans le projet"
 
+msgid "Try it Online"
+msgstr "Essayer en ligne"
+
+msgid "**Experience Sigima instantly in your browser** — no installation required!"
+msgstr "**Découvrez Sigima instantanément dans votre navigateur** — aucune installation requise !"
+
+msgid "Try it online"
+msgstr "Essayez en ligne"
+
+msgid "Click the badge above to open a basic example notebook in a live JupyterLite environment powered by `notebook.link <https://notebook.link/>`_. This service, developed by `QuantStack <https://quantstack.net/>`_, enables sharing and running Jupyter notebooks directly in the browser with zero setup."
+msgstr "Cliquez sur le badge ci-dessus pour ouvrir un notebook d'exemple basique dans un environnement JupyterLite interactif propulsé par `notebook.link <https://notebook.link/>`_. Ce service, développé par `QuantStack <https://quantstack.net/>`_, permet de partager et d'exécuter des notebooks Jupyter directement dans le navigateur sans aucune configuration."
+
+msgid "Simply run the cells to explore:"
+msgstr "Exécutez simplement les cellules pour explorer :"
+
+msgid "Creating signal and image objects"
+msgstr "Création d'objets signal et image"
+
+msgid "Applying processing functions"
+msgstr "Application de fonctions de traitement"
+
+msgid "Visualizing results inline"
+msgstr "Visualisation des résultats en ligne"
+
 msgid "Sigima has been funded by the following stakeholders:"
 msgstr "Sigima a été financée par les parties prenantes suivantes:"
 

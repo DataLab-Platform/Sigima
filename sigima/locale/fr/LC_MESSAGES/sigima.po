@@ -263,17 +263,17 @@ msgstr "Image sans titre"
 msgid "Title"
 msgstr "Titre"
 
-msgid "Image height: number of rows"
-msgstr "Hauteur de l'image : nombre de lignes"
-
 msgid "Height"
 msgstr "Hauteur"
 
-msgid "Image width: number of columns"
-msgstr "Largeur de l'image : nombre de colonnes"
+msgid "Image height: number of rows"
+msgstr "Hauteur de l'image : nombre de lignes"
 
 msgid "Width"
 msgstr "Largeur"
+
+msgid "Image width: number of columns"
+msgstr "Largeur de l'image : nombre de colonnes"
 
 msgid "Type"
 msgstr "Type"
@@ -320,17 +320,17 @@ msgstr "Décalage X"
 msgid "Y offset"
 msgstr "Décalage Y"
 
-msgid "Value for dark squares"
-msgstr "Valeur des carrés foncés"
-
 msgid "Minimum value"
 msgstr "Minimum"
 
-msgid "Value for light squares"
-msgstr "Valeur des carrés clairs"
+msgid "Value for dark squares"
+msgstr "Valeur des carrés foncés"
 
 msgid "Maximum value"
 msgstr "Maximum"
+
+msgid "Value for light squares"
+msgstr "Valeur des carrés clairs"
 
 msgid "Amplitude and offset"
 msgstr "Amplitude et décalage"
@@ -437,11 +437,11 @@ msgstr "Coordonnées Y"
 msgid "Titles / Units"
 msgstr "Titres / Unités"
 
-msgid "Image title"
-msgstr "Titre de l'image"
-
 msgid "Untitled"
 msgstr "Sans titre"
+
+msgid "Image title"
+msgstr "Titre de l'image"
 
 msgid "X-axis"
 msgstr "Axe des X"

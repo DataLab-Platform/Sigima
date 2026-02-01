@@ -164,6 +164,9 @@ msgstr ""
 msgid ">= 1.4, < 3.0"
 msgstr ""
 
+msgid "Powerful data structures for data analysis, time series, and statistics"
+msgstr ""
+
 msgid "PyWavelets"
 msgstr ""
 
