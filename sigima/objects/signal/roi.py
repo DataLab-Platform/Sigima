@@ -90,6 +90,20 @@ class SegmentROI(base.BaseSingleROI["SignalObj", ROI1DParam]):
         if self.coords[0] >= self.coords[1]:
             raise ValueError("Invalid ROI segment coords (xmin >= xmax)")
 
+    def get_coords_html_rows(self) -> list[tuple[str, str]]:
+        """Return HTML table rows describing the segment coordinates."""
+        xmin, xmax = self.coords
+        coord_type = "indices" if self.indices else "physical"
+        return [
+            (f"X min ({coord_type})", f"{xmin:.4g}"),
+            (f"X max ({coord_type})", f"{xmax:.4g}"),
+        ]
+
+    def get_coords_summary(self) -> str:
+        """Return a short summary of the segment coordinates."""
+        xmin, xmax = self.coords
+        return f"X: [{xmin:.4g}, {xmax:.4g}]"
+
     def get_data(self, obj: SignalObj) -> tuple[np.ndarray, np.ndarray]:
         """Get signal data in ROI
 
