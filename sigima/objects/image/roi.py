@@ -450,7 +450,7 @@ class RectangularROI(BaseSingleImageROI):
         coord_type = "indices" if self.indices else "physical"
         return [
             (f"Origin ({coord_type})", f"({x0:.4g}, {y0:.4g})"),
-            ("Size", f"{dx:.4g} × {dy:.4g}"),
+            (f"Size ({coord_type})", f"{dx:.4g} × {dy:.4g}"),
         ]
 
     def get_coords_summary(self) -> str:
@@ -650,7 +650,7 @@ class CircularROI(BaseSingleImageROI):
         coord_type = "indices" if self.indices else "physical"
         return [
             (f"Center ({coord_type})", f"({xc:.4g}, {yc:.4g})"),
-            ("Radius", f"{r:.4g}"),
+            (f"Radius ({coord_type})", f"{r:.4g}"),
         ]
 
     def get_coords_summary(self) -> str:
