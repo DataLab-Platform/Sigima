@@ -137,18 +137,6 @@
             "channel": "emscripten-forge",
             "version": "2020.2"
         },
-        "sigima-1.1.0-pyhd8ed1ab_0.conda": {
-            "hash": {
-                "md5": "1c995b01544f58d2759d9bd674eb94f8",
-                "sha256": "308f0e087e36aa6b8008dacdf9e7df7c15d8989cdd0ec6164b883718c5ddd466"
-            },
-            "name": "sigima",
-            "size": 8818603,
-            "build": "pyhd8ed1ab_0",
-            "subdir": "noarch",
-            "channel": "conda-forge",
-            "version": "1.1.0"
-        },
         "cycler-0.12.1-pyhcf101f3_2.conda": {
             "hash": {
                 "md5": "4c2a8fef270f6c69591889b93f9f55c1",
