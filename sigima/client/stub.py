@@ -796,6 +796,49 @@ class DataLabStubServer:
             execenv.print(f"[STUB] Simulating add label with title: {title}")
         # In stub mode, just acknowledge the label
 
+    # =========================================================================
+    # Web API control methods (stub implementations)
+    # =========================================================================
+
+    # pylint: disable=unused-argument
+    def start_webapi_server(
+        self,
+        host: str | None = None,
+        port: int | None = None,
+    ) -> dict:
+        """Start the Web API server (stub implementation).
+
+        Args:
+            host: Host address to bind to. Defaults to "127.0.0.1".
+            port: Port number. Defaults to auto-detect available port.
+
+        Returns:
+            Dictionary with "url" and "token" keys.
+        """
+        if self.verbose:
+            execenv.print(
+                f"[STUB] Simulating start_webapi_server(host={host}, port={port})"
+            )
+        # Return a dummy response
+        return {"url": "http://127.0.0.1:8000", "token": "stub-token"}
+
+    def stop_webapi_server(self) -> None:
+        """Stop the Web API server (stub implementation)."""
+        if self.verbose:
+            execenv.print("[STUB] Simulating stop_webapi_server()")
+        # Nothing to do in stub mode
+
+    def get_webapi_status(self) -> dict:
+        """Get Web API server status (stub implementation).
+
+        Returns:
+            Dictionary with "running", "url", and "token" keys.
+        """
+        if self.verbose:
+            execenv.print("[STUB] Simulating get_webapi_status()")
+        # Return a dummy status (server not running in stub mode)
+        return {"running": False, "url": None, "token": None}
+
 
 @contextmanager
 def datalab_stub_server(
