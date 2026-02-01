@@ -137,6 +137,11 @@
             "channel": "emscripten-forge",
             "version": "2020.2"
         },
+        "sigima": {
+            "name": "sigima",
+            "subdir": "noarch",
+            "channel": "conda-forge"
+        },
         "cycler-0.12.1-pyhcf101f3_2.conda": {
             "hash": {
                 "md5": "4c2a8fef270f6c69591889b93f9f55c1",
