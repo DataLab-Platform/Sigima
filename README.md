@@ -12,6 +12,22 @@ designed as a modular and testable foundation for building advanced analysis pip
 
 🔬 Developed by the [DataLab Platform Developers](https://github.com/DataLab-Platform), Sigima powers the computation backend of [DataLab](https://datalab-platform.com/).
 
+## 🚀 Try it Online
+
+**Experience Sigima instantly in your browser** — no installation required!
+
+[![Try it online](https://img.shields.io/badge/Try_it-online-blue?logo=jupyter)](https://notebook.link/github/DataLab-Platform/Sigima/tree/main/notebooks/?path=notebooks/sigima_basic_example.ipynb)
+
+Click the badge above to open a basic example notebook in a live JupyterLite environment powered by [**notebook.link**](https://notebook.link/). This service, developed by [**QuantStack**](https://quantstack.net/), enables sharing and running Jupyter notebooks directly in the browser with zero setup.
+
+Simply run the cells to explore:
+
+- Creating signal and image objects
+- Applying processing functions
+- Visualizing results inline
+
+---
+
 ## 🌟 Project & Sponsors
 
 | Project/Sponsor     | Description |
@@ -89,23 +105,7 @@ pip install -e .
 
 ---
 
-## � Try it Online
-
-**Experience Sigima instantly in your browser** — no installation required!
-
-[![Try it online](https://img.shields.io/badge/Try_it-online-blue?logo=jupyter)](https://notebook.link/github/DataLab-Platform/Sigima/tree/main/notebooks/?path=notebooks/sigima_basic_example.ipynb)
-
-Click the badge above to open a basic example notebook in a live JupyterLite environment powered by [**notebook.link**](https://notebook.link/). This service, developed by [**QuantStack**](https://quantstack.net/), enables sharing and running Jupyter notebooks directly in the browser with zero setup.
-
-Simply run the cells to explore:
-
-- Creating signal and image objects
-- Applying processing functions
-- Visualizing results inline
-
----
-
-## �📚 Documentation
+## 📚 Documentation
 
 📖 Full documentation (in progress) is available at:
 👉 <https://sigima.readthedocs.io/>
