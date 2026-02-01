@@ -932,6 +932,26 @@ class BaseROI(Generic[TypeObj, TypeSingleROI, TypeROIParam], abc.ABC):  # type: 
             raise TypeError(f"Cannot compare {type(self)} with {type(other)}")
         return self.single_rois == other.single_rois
 
+    def __getitem__(self, index: int) -> TypeSingleROI:
+        """Return single ROI at index (subscript access)
+
+        Args:
+            index: ROI index
+
+        Returns:
+            Single ROI at index
+        """
+        return self.single_rois[index]
+
+    def __setitem__(self, index: int, roi: TypeSingleROI) -> None:
+        """Set single ROI at index (subscript assignment)
+
+        Args:
+            index: ROI index
+            roi: ROI to set
+        """
+        self.single_rois[index] = roi
+
     def get_single_roi(self, index: int) -> TypeSingleROI:
         """Return single ROI at index
 
