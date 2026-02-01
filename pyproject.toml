@@ -10,7 +10,7 @@ description = "Scientific computing engine for 1D signals and 2D images, part of
 readme = "README.md"
 license = { file = "LICENSE" }
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
