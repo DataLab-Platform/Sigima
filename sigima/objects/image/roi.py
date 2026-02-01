@@ -339,6 +339,25 @@ class PolygonalROI(BaseSingleImageROI):
         if len(self.coords) % 2 != 0:
             raise ValueError("Edge indices must be pairs of X, Y values")
 
+    def get_coords_html_rows(self) -> list[tuple[str, str]]:
+        """Return HTML table rows describing the polygon coordinates."""
+        n_vertices = len(self.coords) // 2
+        coord_type = "indices" if self.indices else "physical"
+        # Show first few vertices if there are many
+        if n_vertices <= 4:
+            vertices_str = ", ".join(
+                f"({self.coords[i * 2]:.4g}, {self.coords[i * 2 + 1]:.4g})"
+                for i in range(n_vertices)
+            )
+            return [(f"Vertices ({coord_type})", vertices_str)]
+        else:
+            return [(f"Vertices ({coord_type})", f"{n_vertices} points")]
+
+    def get_coords_summary(self) -> str:
+        """Return a short summary of the polygon coordinates."""
+        n_vertices = len(self.coords) // 2
+        return f"{n_vertices} vertices"
+
     # pylint: disable=unused-argument
     @classmethod
     def from_param(cls: PolygonalROI, obj: ImageObj, param: ROI2DParam) -> PolygonalROI:
@@ -424,6 +443,20 @@ class RectangularROI(BaseSingleImageROI):
         """
         if len(self.coords) != 4:
             raise ValueError("Rectangle ROI requires 4 coordinates")
+
+    def get_coords_html_rows(self) -> list[tuple[str, str]]:
+        """Return HTML table rows describing the rectangle coordinates."""
+        x0, y0, dx, dy = self.coords
+        coord_type = "indices" if self.indices else "physical"
+        return [
+            (f"Origin ({coord_type})", f"({x0:.4g}, {y0:.4g})"),
+            ("Size", f"{dx:.4g} × {dy:.4g}"),
+        ]
+
+    def get_coords_summary(self) -> str:
+        """Return a short summary of the rectangle coordinates."""
+        x0, y0, dx, dy = self.coords
+        return f"Origin: ({x0:.4g}, {y0:.4g}), Size: {dx:.4g}×{dy:.4g}"
 
     # pylint: disable=unused-argument
     @classmethod
@@ -610,6 +643,20 @@ class CircularROI(BaseSingleImageROI):
         """
         if len(self.coords) != 3:
             raise ValueError("Circle ROI requires 3 coordinates")
+
+    def get_coords_html_rows(self) -> list[tuple[str, str]]:
+        """Return HTML table rows describing the circle coordinates."""
+        xc, yc, r = self.coords
+        coord_type = "indices" if self.indices else "physical"
+        return [
+            (f"Center ({coord_type})", f"({xc:.4g}, {yc:.4g})"),
+            ("Radius", f"{r:.4g}"),
+        ]
+
+    def get_coords_summary(self) -> str:
+        """Return a short summary of the circle coordinates."""
+        xc, yc, r = self.coords
+        return f"Center: ({xc:.4g}, {yc:.4g}), R: {r:.4g}"
 
     def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
         """Get bounding box (physical coordinates)

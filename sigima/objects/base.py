@@ -848,6 +848,30 @@ class BaseSingleROI(Generic[TypeObj, TypeROIParam], abc.ABC):  # type: ignore
         """
         return cls(dictdata["coords"], dictdata["indices"], dictdata["title"])
 
+    def get_coords_html_rows(self) -> list[tuple[str, str]]:
+        """Return HTML table rows describing the ROI coordinates.
+
+        Override this method in subclasses to provide more detailed
+        coordinate descriptions (e.g., "Center", "Radius" for circular ROIs).
+
+        Returns:
+            List of (label, value) tuples for HTML table rows.
+        """
+        coord_type = "indices" if self.indices else "physical"
+        coords_str = ", ".join(f"{c:.4g}" for c in self.coords)
+        return [(f"Coordinates ({coord_type})", f"[{coords_str}]")]
+
+    def get_coords_summary(self) -> str:
+        """Return a short summary of the ROI coordinates for table display.
+
+        Override this method in subclasses to provide a more meaningful summary.
+
+        Returns:
+            Short string summarizing the ROI coordinates.
+        """
+        coords_str = ", ".join(f"{c:.4g}" for c in self.coords)
+        return f"[{coords_str}]"
+
     def _repr_html_(self) -> str:
         """Return HTML representation for Jupyter notebook display.
 
@@ -858,14 +882,15 @@ class BaseSingleROI(Generic[TypeObj, TypeROIParam], abc.ABC):  # type: ignore
             HTML representation of the ROI with coordinates.
         """
         roi_type = type(self).__name__
-        coord_type = "indices" if self.indices else "physical"
-        coords_str = ", ".join(f"{c:.4g}" for c in self.coords)
-        html = f'<u><b style="color: #5294e2">{roi_type}: {self.title}</b></u>:'
+        html = f'<u><b style="color: #5294e2">{roi_type}:</b></u>'
+        if self.title:
+            html += f" <b>{self.title}</b>"
         html += '<table border="0">'
-        html += (
-            f"<tr><td style='text-align:right'>Coordinates ({coord_type}):</td>"
-            f"<td>[{coords_str}]</td></tr>"
-        )
+        for label, value in self.get_coords_html_rows():
+            html += (
+                f"<tr><td style='text-align:right; padding-right:10px;'>{label}:</td>"
+                f"<td>{value}</td></tr>"
+            )
         html += "</table>"
         return html
 
@@ -1054,10 +1079,14 @@ class BaseROI(Generic[TypeObj, TypeSingleROI, TypeROIParam], abc.ABC):  # type: 
         for idx, single_roi in enumerate(self.single_rois):
             title = single_roi.title or get_generic_roi_title(idx)
             stype = type(single_roi).__name__
-            rows.append(f"<tr><td>{idx}</td><td>{title}</td><td>{stype}</td></tr>")
+            coords_summary = single_roi.get_coords_summary()
+            rows.append(
+                f"<tr><td>{idx}</td><td>{title}</td><td>{stype}</td>"
+                f"<td>{coords_summary}</td></tr>"
+            )
 
         table_rows = (
-            "\n".join(rows) if rows else "<tr><td colspan='3'>No ROIs</td></tr>"
+            "\n".join(rows) if rows else "<tr><td colspan='4'>No ROIs</td></tr>"
         )
 
         html = f"""
@@ -1065,7 +1094,7 @@ class BaseROI(Generic[TypeObj, TypeSingleROI, TypeROIParam], abc.ABC):  # type: 
         <div class="sigima-html-container">
             <div class="sigima-html-title">{roi_type}</div>
             <table class="sigima-html-table">
-                <tr><th>Index</th><th>Title</th><th>Type</th></tr>
+                <tr><th>Index</th><th>Title</th><th>Type</th><th>Coordinates</th></tr>
                 {table_rows}
             </table>
             <div class="sigima-html-footer">{count} ROI(s)</div>
