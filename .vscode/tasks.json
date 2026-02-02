@@ -277,6 +277,8 @@
                 "-m",
                 "sphinx_intl",
                 "build",
+                "-d",
+                "doc/locale",
             ],
             "options": {
                 "cwd": "${workspaceFolder}",
