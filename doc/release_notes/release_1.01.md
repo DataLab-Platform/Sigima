@@ -1,6 +1,20 @@
 # Version 1.1 #
 
-## Sigima Version 1.1.0 ##
+## Sigima Version 1.1.1 (2026-02-02) ##
+
+### 🛠️ Bug Fixes since version 1.1.0 ###
+
+* **Stub server**: Added missing Web API control methods to `DataLabStubServer` for testing DataLab's REST API integration
+  * Added `start_webapi_server()` stub (returns dummy URL and token)
+  * Added `stop_webapi_server()` stub
+  * Added `get_webapi_status()` stub (returns server status dictionary)
+
+### 🔧 Other changes ###
+
+* Updated development status classifier to "Production/Stable"
+* Added "Try it Online" section with [notebook.link](https://notebook.link/) integration in documentation
+
+## Sigima Version 1.1.0 (2026-01-31) ##
 
 ✨ New features and enhancements:
 
