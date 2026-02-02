@@ -211,6 +211,7 @@ def view_curves(
     plt.show()
 
 
+# pylint: disable=too-many-positional-arguments
 def view_images(
     data_or_objs: list[ImageObj | np.ndarray] | ImageObj | np.ndarray,
     name: str | None = None,  # Qt-specific  # pylint: disable=unused-argument

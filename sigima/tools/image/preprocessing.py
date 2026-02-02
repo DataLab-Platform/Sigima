@@ -44,6 +44,7 @@ def fit_circle_model(contour: np.ndarray) -> tuple[float, float, float] | None:
     Returns:
         Tuple (xc, yc, radius) or None if fitting fails
     """
+    # pylint: disable=no-member
     if _USE_NEW_SHAPE_API:
         model = measure.CircleModel.from_estimate(contour)
         if model:
@@ -68,6 +69,7 @@ def fit_ellipse_model(
         Tuple (xc, yc, a, b, theta) or None if fitting fails,
         where a and b are semi-major and semi-minor axes
     """
+    # pylint: disable=no-member
     if _USE_NEW_SHAPE_API:
         model = measure.EllipseModel.from_estimate(contour)
         if model:

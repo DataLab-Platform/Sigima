@@ -11,6 +11,11 @@ These tests verify the matplotlib-specific implementation of visualization featu
 Tests are designed to run headlessly (no plt.show()) unless --gui flag is passed.
 """
 
+#  pylint: disable=import-outside-toplevel
+
+# Fixture name matches test function arg:
+#  pylint: disable=redefined-outer-name
+
 from __future__ import annotations
 
 import sys
@@ -133,7 +138,7 @@ class TestGetImageExtentAndAspect:
         image = create_image("Anisotropic", data=data)
         image.set_uniform_coords(dx=2.0, dy=0.5, x0=0, y0=0)
 
-        extent, aspect = _get_image_extent_and_aspect(image)
+        _extent, aspect = _get_image_extent_and_aspect(image)
 
         # dx=2, dy=0.5 -> aspect = 4.0
         assert aspect == pytest.approx(4.0)

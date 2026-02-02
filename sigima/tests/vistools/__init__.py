@@ -35,7 +35,7 @@ warnings.warn(
 )
 
 # Re-export everything from sigima.viz
-from sigima.viz import *  # noqa: F401, F403, E402
+from sigima.viz import *  # noqa: F401, F403, E402  # pylint: disable=C0413
 
 # Note: BACKEND_NAME and BACKEND_SOURCE are included via star import from __all__
 # They are lazy-loaded attributes that will be available when accessed, but we
