@@ -362,6 +362,7 @@ def __getattr__(name: str):
                 f"Function '{name}' requires a visualization backend. "
                 "Please install either PlotPy or Matplotlib."
             )
+
         _placeholder.__name__ = name
         _placeholder.__doc__ = f"Placeholder for {name} (backend not available)"
         return _placeholder

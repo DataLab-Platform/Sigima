@@ -350,8 +350,7 @@ class PolygonalROI(BaseSingleImageROI):
                 for i in range(n_vertices)
             )
             return [(f"Vertices ({coord_type})", vertices_str)]
-        else:
-            return [(f"Vertices ({coord_type})", f"{n_vertices} points")]
+        return [(f"Vertices ({coord_type})", f"{n_vertices} points")]
 
     def get_coords_summary(self) -> str:
         """Return a short summary of the polygon coordinates."""
