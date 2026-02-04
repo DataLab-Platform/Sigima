@@ -356,7 +356,12 @@ def _detect_datetime_col(df: pd.DataFrame) -> tuple[pd.DataFrame, dict | None]:
                 pass
 
         # Replace datetime column with float timestamps
-        df.iloc[:, datetime_col_idx] = x_float
+        # For pandas 3.0+ compatibility: drop the string column and insert a new
+        # float column at the same position, since pandas 3.0's StringArray type
+        # doesn't allow assignment of non-string values
+        col_name = df.columns[datetime_col_idx]
+        df = df.drop(columns=[col_name])
+        df.insert(datetime_col_idx, col_name, x_float.values)
 
     return df, datetime_metadata
 

@@ -1,5 +1,16 @@
 # Version 1.1 #
 
+## Sigima Version 1.1.2 (not released yet) ##
+
+### 🛠️ Bug Fixes since version 1.1.1 ###
+
+* **Pandas 3.0 compatibility**: Fixed datetime CSV parsing issue with pandas 3.0+
+  * Replaced `iloc` assignment with column name assignment to handle dtype conversion correctly
+  * Ensures compatibility with both pandas < 3.0 and pandas 3.0+ versions
+  * Affected functionality: CSV file reading with datetime columns and signal data import from CSV files
+  * All related tests pass after the fix
+  * This closes [Issue #12](https://github.com/DataLab-Platform/Sigima/issues/12) - Fix pandas 3.0 compatibility issue in datetime CSV parsing
+
 ## Sigima Version 1.1.1 (2026-02-02) ##
 
 ### 🛠️ Bug Fixes since version 1.1.0 ###
