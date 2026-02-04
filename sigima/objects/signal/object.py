@@ -469,13 +469,12 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         # Convert to pandas datetime (handles strings, datetime objects, etc.)
         dt_series = pd.to_datetime(dt_array)
 
-        # Convert to float timestamp in seconds (pandas epoch is in nanoseconds)
-        # Note: We always store as Unix timestamps (seconds since 1970-01-01)
-        # regardless of the 'unit' parameter, which is only for display purposes
-        timestamp_seconds = dt_series.astype(np.int64) / 1e9
+        # Convert to float timestamp in seconds (Unix timestamps since 1970-01-01).
+        # Note: We always store as Unix timestamps regardless of the 'unit' parameter,
+        # which is only for display purposes.
+        from sigima.tools.datatypes import datetime64_to_seconds
 
-        # Convert to numpy array (pandas may return Float64Index)
-        x_float = np.array(timestamp_seconds, dtype=np.float64)
+        x_float = datetime64_to_seconds(dt_series.values).astype(np.float64)
 
         # Check if signal already has data with matching size
         if self.xydata is not None and self.xydata.shape[1] == len(x_float):

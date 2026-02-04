@@ -9,6 +9,39 @@ from __future__ import annotations
 import numpy as np
 
 
+def datetime64_to_seconds(dt_values: np.ndarray) -> np.ndarray:
+    """Convert numpy datetime64 array to float seconds (Unix timestamps).
+
+    This function handles different datetime resolutions (ns, us, ms, s) correctly,
+    providing compatibility with both older pandas versions (using nanoseconds) and
+    pandas 3.0+ (using microseconds by default).
+
+    Args:
+        dt_values: NumPy array of datetime64 values (from pandas Series.values or
+         DatetimeIndex.values)
+
+    Returns:
+        NumPy array of float64 Unix timestamps (seconds since 1970-01-01)
+
+    Example:
+        >>> import pandas as pd
+        >>> dt_series = pd.to_datetime(['2025-01-01 10:00:00'])
+        >>> seconds = datetime64_to_seconds(dt_series.values)
+        >>> seconds[0] > 1.7e9  # Year 2025
+        True
+    """
+    dtype_str = str(dt_values.dtype)
+    if "ns" in dtype_str:
+        divisor = 1e9
+    elif "us" in dtype_str:
+        divisor = 1e6
+    elif "ms" in dtype_str:
+        divisor = 1e3
+    else:
+        divisor = 1e9  # Default to nanoseconds for safety
+    return dt_values.view(np.int64) / divisor
+
+
 def clip_astype(data: np.ndarray, dtype: np.dtype) -> np.ndarray:
     """Convert array to a new data type, after having clipped values to the new
     data type's range if it is an integer type.
