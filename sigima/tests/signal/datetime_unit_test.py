@@ -58,7 +58,9 @@ def test_signal_datetime_methods() -> None:
         # Get x as datetime
         dt_values = signal.get_x_as_datetime()
         assert isinstance(dt_values, np.ndarray)
-        assert dt_values.dtype == np.dtype("datetime64[ns]")
+        # Accept any datetime64 resolution (ns, us, ms, s) for compatibility with
+        # different NumPy/pandas versions
+        assert np.issubdtype(dt_values.dtype, np.datetime64)
 
         # Verify y values are unchanged
         assert np.allclose(signal.y, values)
