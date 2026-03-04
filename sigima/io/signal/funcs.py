@@ -45,16 +45,41 @@ def get_labels_units_from_dataframe(
     # Retrieving units from labels
     xunit = ""
     yunits = [""] * len(ylabels)
-    pattern = r"([\S ]*) \(([\S]*)\)"
+    pattern = r"([\S ]*) \(([\S  ]*)\)"
     match = re.match(pattern, xlabel)
     if match is not None:
         xlabel, xunit = match.groups()
+        xlabel, xunit = xlabel.strip(), normalize_units(xunit)
     for i, ylabel in enumerate(ylabels):
         match = re.match(pattern, ylabel)
         if match is not None:
             ylabels[i], yunits[i] = match.groups()
+            ylabels[i], yunits[i] = ylabels[i].strip(), normalize_units(yunits[i])
 
     return xlabel, ylabels, xunit, yunits
+
+
+def normalize_units(units: str) -> str:
+    """Normalize unit string: replace spaces and middle dot between units with '*',
+    remove redundant operators.
+
+    Args:
+        units: Input unit string (e.g., 'kg m / s', 'kg·m')
+
+    Returns:
+        Normalized unit string (e.g., 'kg*m/s')
+    """
+    # Replace middle dot (U+00B7) and Unicode dot (U+22C5) with '*'
+    units = re.sub(r"[·⋅]", "*", units)
+    # Remove spaces around operators (*, /, ^)
+    units = re.sub(r"\s*([*/^])\s*", r"\1", units)
+    # Replace multiple spaces with single space
+    units = re.sub(r"\s+", " ", units)
+    # Replace spaces between unit names with '*'
+    units = re.sub(r"([a-zA-Z])\s+([a-zA-Z])", r"\1*\2", units)
+    # Remove spaces again (in case of leading/trailing)
+    units = units.strip()
+    return units
 
 
 def read_csv_by_chunks(
