@@ -32,11 +32,22 @@ from guidata.dataset import FuncProp, GetAttrProp
 
 from sigima.config import _
 from sigima.config import options as sigima_options
-from sigima.enums import Interpolation1DMethod, NormalizationMethod, WindowingMethod
+from sigima.enums import (
+    Interpolation1DMethod,
+    NormalizationMethod,
+    ReplacementStrategySignal,
+    WindowingMethod,
+)
 from sigima.objects import ROI1DParam, SignalObj
-from sigima.proc.base import ClipParam, NormalizeParam, dst_2_to_1
+from sigima.proc.base import (
+    ClipParam,
+    NormalizeParam,
+    ReplaceSpecialValuesSignalParam,
+    dst_2_to_1,
+)
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fourier, interpolation, scaling, windowing
+from sigima.tools.signal import replace_values as rv
 
 from .base import dst_1_to_1, is_uncertainty_data_available, restore_data_outside_roi
 
@@ -598,4 +609,120 @@ def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
     dst.xunit = src2.yunit if src2.yunit else ""
     # Y label and unit remain from src1
     restore_data_outside_roi(dst, src1)
+    return dst
+
+
+def _apply_signal_strategy(
+    x: np.ndarray,
+    y: np.ndarray,
+    mask: np.ndarray,
+    strategy: ReplacementStrategySignal,
+    neighbor_size: int,
+    constant_value: float,
+) -> tuple[np.ndarray, np.ndarray, bool]:
+    """Apply a single replacement strategy to masked positions in a signal.
+
+    Args:
+        x: abscissa array.
+        y: ordinate array (may be modified in place).
+        mask: boolean mask of positions to replace.
+        strategy: replacement strategy to apply.
+        neighbor_size: number of neighbors for neighbor-based strategies.
+        constant_value: value used for the CONSTANT strategy.
+
+    Returns:
+        Tuple ``(x, y, resized)`` where *resized* is ``True`` when the arrays
+        changed length (i.e. the ``DELETE`` strategy was applied).
+    """
+    s = strategy
+    if not np.any(mask) or s == ReplacementStrategySignal.NONE:
+        return x, y, False
+
+    if s == ReplacementStrategySignal.ZERO:
+        rv.replace_with_fixed(y, mask, 0.0)
+    elif s == ReplacementStrategySignal.CONSTANT:
+        rv.replace_with_fixed(y, mask, constant_value)
+    elif s == ReplacementStrategySignal.MIN:
+        rv.replace_with_stat(y, mask, "min")
+    elif s == ReplacementStrategySignal.MAX:
+        rv.replace_with_stat(y, mask, "max")
+    elif s == ReplacementStrategySignal.MEAN:
+        rv.replace_with_stat(y, mask, "mean")
+    elif s == ReplacementStrategySignal.MEDIAN:
+        rv.replace_with_stat(y, mask, "median")
+    elif s == ReplacementStrategySignal.DELETE:
+        if rv.check_uniform_sampling(x):
+            warnings.warn(
+                "Deleting points from a uniformly sampled signal will break "
+                "the uniform sampling. Consider using interpolation instead.",
+                stacklevel=3,
+            )
+        x, y = rv.delete_masked_points(x, y, mask)
+        return x, y, True
+    elif s == ReplacementStrategySignal.FORWARD_FILL:
+        rv.forward_fill(y, mask)
+    elif s == ReplacementStrategySignal.BACKWARD_FILL:
+        rv.backward_fill(y, mask)
+    elif s.value.startswith("interp_"):
+        rv.interpolate_masked(x, y, mask, s.value)
+    elif s == ReplacementStrategySignal.NEIGHBOR_MIN:
+        rv.neighbor_replace(y, mask, neighbor_size, "min")
+    elif s == ReplacementStrategySignal.NEIGHBOR_MAX:
+        rv.neighbor_replace(y, mask, neighbor_size, "max")
+    elif s == ReplacementStrategySignal.NEIGHBOR_MEAN:
+        rv.neighbor_replace(y, mask, neighbor_size, "mean")
+    elif s == ReplacementStrategySignal.NEIGHBOR_MEDIAN:
+        rv.neighbor_replace(y, mask, neighbor_size, "median")
+    else:
+        raise ValueError(f"Unsupported signal replacement strategy: {s}")
+    return x, y, False
+
+
+@computation_function()
+def replace_special_values(
+    src: SignalObj, p: ReplaceSpecialValuesSignalParam
+) -> SignalObj:
+    """Replace NaN, +Inf and -Inf values in a signal.
+
+    Each target (NaN, +Inf, -Inf) is treated independently with its own strategy.
+
+    Args:
+        src: source signal.
+        p: parameters specifying the strategy for each target.
+
+    Returns:
+        Result signal object with special values replaced.
+    """
+    strategies = []
+    if p.nan_strategy != ReplacementStrategySignal.NONE:
+        strategies.append(f"NaN→{p.nan_strategy.value}")
+    if p.posinf_strategy != ReplacementStrategySignal.NONE:
+        strategies.append(f"+Inf→{p.posinf_strategy.value}")
+    if p.neginf_strategy != ReplacementStrategySignal.NONE:
+        strategies.append(f"-Inf→{p.neginf_strategy.value}")
+    suffix = ", ".join(strategies) if strategies else "none"
+
+    dst = dst_1_to_1(src, "replace_special_values", suffix)
+    x, y = dst.get_data()
+    x = x.copy()
+    y = y.copy()
+
+    # Apply strategies in order: NaN first, then +Inf, then -Inf
+    for target, strategy, const_val, neigh_size in (
+        (np.isnan, p.nan_strategy, p.nan_constant_value, p.nan_neighbor_size),
+        (np.isposinf, p.posinf_strategy, p.posinf_constant_value, p.posinf_neighbor_size),
+        (np.isneginf, p.neginf_strategy, p.neginf_constant_value, p.neginf_neighbor_size),
+    ):
+        mask = target(y)
+        x, y, resized = _apply_signal_strategy(
+            x, y, mask, strategy, neigh_size, const_val,
+        )
+
+    # Rebuild signal data (set_xydata with only x, y strips any error bars;
+    # do NOT use dst.dy = None / dst.dx = None afterwards because the property
+    # setters would re-expand xydata to 4 rows filled with NaN)
+    dst.set_xydata(x, y)
+
+    if not resized:
+        restore_data_outside_roi(dst, src)
     return dst

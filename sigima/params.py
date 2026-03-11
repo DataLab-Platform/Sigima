@@ -361,6 +361,8 @@ __all__ = [
     "PulseFeaturesParam",
     "ROIGridParam",
     "RadialProfileParam",
+    "ReplaceSpecialValuesImageParam",
+    "ReplaceSpecialValuesSignalParam",
     "Resampling1DParam",
     "Resampling2DParam",
     "RescaleIntensityParam",
@@ -393,6 +395,8 @@ from sigima.proc.base import (
     MovingMedianParam,
     NormalizeParam,
     PhaseParam,
+    ReplaceSpecialValuesImageParam,
+    ReplaceSpecialValuesSignalParam,
     SignalsToImageParam,
     SpectrumParam,
 )
