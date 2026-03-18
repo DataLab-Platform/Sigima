@@ -21,6 +21,37 @@ if TYPE_CHECKING:
 NO_ROI: int = -1
 
 
+def auto_scientific(x: float) -> str:
+    """Format a float in scientific notation with the minimum number of significant
+    digits required for an exact round-trip representation.
+
+    Uses Python's ``repr()`` which always yields the shortest decimal string that
+    uniquely identifies the float, then maps to scientific notation.
+
+    Examples::
+
+        auto_scientific(1.23456789e-6)  # '1.23456789e-06'  (9 sig figs)
+        auto_scientific(1.5e-6)         # '1.5e-06'          (2 sig figs)
+        auto_scientific(1.0e-6)         # '1e-06'            (1 sig fig)
+
+    Args:
+        x: The float value to format.
+
+    Returns:
+        Scientific notation string with the minimum significant digits.
+    """
+    s = repr(abs(float(x)))
+    if "e" in s or "E" in s:
+        mantissa = s.split("e")[0]
+    else:
+        mantissa = s
+    # Remove dot, leading zeros, trailing zeros to count significant digits
+    digits = mantissa.replace(".", "").lstrip("0").rstrip("0")
+    n_sig = len(digits) or 1
+    n_dec = max(0, n_sig - 1)  # decimal places in scientific notation
+    return format(x, f".{n_dec}e")
+
+
 class DisplayPreferencesManager:
     """Manages display preferences for result objects."""
 
@@ -159,9 +190,36 @@ class ResultHtmlGenerator:
         # Create row headers
         row_headers = ResultHtmlGenerator._get_row_headers(result, roi_indices, obj)
 
+        # Apply per-column formatting on the original df (before any transpose)
+        # so that column names are still available for format lookup.
+        # We iterate over ALL columns (not just numeric dtype) because columns with
+        # Optional[float] fields may have object dtype in pandas
+        # when they contain None values, and would be missed by select_dtypes.
+        column_formats = result.attrs.get("column_formats", {})
+        global_default_fmt = ".4g"
+        default_fmt = column_formats.get("*", global_default_fmt)
+        for col in df.columns:
+            fmt = column_formats.get(col, default_fmt)
+            if callable(fmt):
+                df[col] = df[col].map(
+                    lambda x, f=fmt: (
+                        f(float(x))
+                        if isinstance(x, (int, float)) and pd.notna(x)
+                        else x
+                    )
+                )
+            else:
+                df[col] = df[col].map(
+                    lambda x, f=fmt: (
+                        format(float(x), f)
+                        if isinstance(x, (int, float)) and pd.notna(x)
+                        else x
+                    )
+                )
+
         # Transpose if single row and flag is set
         if transpose_single_row and len(df) == 1:
-            # Transpose the dataframe
+            # Transpose the dataframe (values already formatted)
             df_t = df.T
             df_t.columns = [row_headers[0] if row_headers[0] else "Value"]
             df_t.index.name = "Item"
@@ -171,9 +229,6 @@ class ResultHtmlGenerator:
             text = f'<u><b style="color: #5294e2">{result.title}</b></u>:'
             html_kwargs = {"border": 0}
             html_kwargs.update(kwargs)
-            # Format numeric columns only, avoiding float_format on mixed data types
-            for col in df_t.select_dtypes(include=["number"]).columns:
-                df_t[col] = df_t[col].map(lambda x: f"{x:.3g}" if pd.notna(x) else x)
             text += df_t.to_html(**html_kwargs)
         else:
             # Standard horizontal layout
@@ -181,9 +236,6 @@ class ResultHtmlGenerator:
             text = f'<u><b style="color: #5294e2">{result.title}</b></u>:'
             html_kwargs = {"border": 0}
             html_kwargs.update(kwargs)
-            # Format numeric columns only, avoiding float_format on mixed data types
-            for col in df.select_dtypes(include=["number"]).columns:
-                df[col] = df[col].map(lambda x: f"{x:.3g}" if pd.notna(x) else x)
             text += df.to_html(**html_kwargs)
 
         return text
