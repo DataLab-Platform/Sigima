@@ -1259,8 +1259,10 @@ class SquarePulseParam(BasePulseParam, title=_("Square pulse with noise")):
                     / self.total_rise_time
                 ),
                 y_high,
-                lambda t: y_high
-                - (y_high - self.offset) * (t - x_start_fall) / self.total_fall_time,
+                lambda t: (
+                    y_high
+                    - (y_high - self.offset) * (t - x_start_fall) / self.total_fall_time
+                ),
                 self.offset,
             ],
         )

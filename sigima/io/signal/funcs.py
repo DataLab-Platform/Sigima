@@ -24,6 +24,7 @@ from sigima.objects.signal.constants import (
     DATETIME_X_KEY,
     DEFAULT_DATETIME_FORMAT,
 )
+from sigima.tools.datatypes import datetime64_to_seconds
 from sigima.worker import CallbackWorkerProtocol
 
 
@@ -401,11 +402,11 @@ def _detect_datetime_col(df: pd.DataFrame) -> tuple[pd.DataFrame, dict | None]:
                 "ignore", message="Could not infer format", category=UserWarning
             )
             datetime_series = pd.to_datetime(col_data, errors="coerce")
+
         # For pandas 3.0+ compatibility: use utility that handles different
         # datetime resolutions (ns, us, ms) correctly.
-        from sigima.tools.datatypes import datetime64_to_seconds
-
         x_float = pd.Series(datetime64_to_seconds(datetime_series.values))
+
         # Store datetime metadata (unit will be stored in xunit attribute)
         datetime_metadata = {
             DATETIME_X_KEY: True,

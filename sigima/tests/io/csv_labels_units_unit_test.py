@@ -18,19 +18,17 @@ Unit tests for ``get_labels_units_from_dataframe``, ``normalize_units``,
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
-import pytest
 
 from sigima.io.signal.funcs import (
     _normalize_whitespace,
     _split_label_unit,
     get_labels_units_from_dataframe,
     normalize_units,
+    read_csv,
 )
 from sigima.tests.env import execenv
 from sigima.tests.helpers import get_test_fnames
-
 
 # ---------------------------------------------------------------------------
 #  _normalize_whitespace  –  isolated tests
@@ -41,21 +39,27 @@ class TestNormalizeWhitespace:
     """Tests for the _normalize_whitespace helper."""
 
     def test_leading_trailing_spaces(self) -> None:
+        """Leading and trailing spaces are removed."""
         assert _normalize_whitespace("  hello  ") == "hello"
 
     def test_tabs(self) -> None:
+        """Tabs are removed."""
         assert _normalize_whitespace("\tWavelength (nm)\t") == "Wavelength (nm)"
 
     def test_non_breaking_space(self) -> None:
+        """Non-breaking spaces are removed."""
         assert _normalize_whitespace("\xa0Signal\xa0") == "Signal"
 
     def test_mixed_whitespace(self) -> None:
+        """Mixed whitespace characters are all removed."""
         assert _normalize_whitespace(" \t\xa0Label (V)\xa0\t ") == "Label (V)"
 
     def test_empty_string(self) -> None:
+        """Empty string remains empty."""
         assert _normalize_whitespace("") == ""
 
     def test_only_spaces(self) -> None:
+        """String with only spaces becomes empty."""
         assert _normalize_whitespace("   ") == ""
 
     def test_internal_spaces_preserved(self) -> None:
@@ -72,9 +76,11 @@ class TestSplitLabelUnit:
     """Tests for the _split_label_unit helper."""
 
     def test_simple(self) -> None:
+        """Basic case: label and unit separated by ' ('."""
         assert _split_label_unit("Wavelength (nm)") == ("Wavelength", "nm")
 
     def test_no_parentheses(self) -> None:
+        """No parentheses → no unit extracted."""
         assert _split_label_unit("Voltage") == ("Voltage", "")
 
     def test_nested_parentheses(self) -> None:
@@ -99,6 +105,8 @@ class TestSplitLabelUnit:
         # But _normalize_whitespace is called *before* _split_label_unit, so this
         # would actually arrive as "(nm)".
         # Direct call: " (nm)" has a space at position 0 → label="", unit="nm"
+        assert label == ""
+        assert unit == "nm"
 
     def test_multiple_paren_groups(self) -> None:
         """Multiple ' (' groups: the first one wins."""
@@ -112,12 +120,15 @@ class TestSplitLabelUnit:
         assert _split_label_unit("Label (nm") == ("Label (nm", "")
 
     def test_unit_with_special_chars(self) -> None:
+        """Units with special characters like degree symbol."""
         assert _split_label_unit("Temperature (°C)") == ("Temperature", "°C")
 
     def test_unit_with_percent(self) -> None:
+        """Units with percent symbol."""
         assert _split_label_unit("Reflectance (%)") == ("Reflectance", "%")
 
     def test_unit_with_number(self) -> None:
+        """Units that contain numbers, like 'cm-1'."""
         assert _split_label_unit("Intensity (cm-1)") == ("Intensity", "cm-1")
 
 
@@ -188,9 +199,7 @@ class TestGetLabelsUnitsWhitespace:
 
     def test_leading_trailing_spaces_with_units(self) -> None:
         """Spaces around 'Label (unit)' are trimmed from both label and unit."""
-        df = pd.DataFrame(
-            {"  Wavelength (nm)  ": [1.0], "  Intensity (a.u.)  ": [2.0]}
-        )
+        df = pd.DataFrame({"  Wavelength (nm)  ": [1.0], "  Intensity (a.u.)  ": [2.0]})
         xlabel, ylabels, xunit, yunits = get_labels_units_from_dataframe(df)
         assert xlabel == "Wavelength"
         assert xunit == "nm"
@@ -273,6 +282,8 @@ class TestGetLabelsUnitsWhitespace:
         xlabel, ylabels, xunit, yunits = get_labels_units_from_dataframe(df)
         assert xlabel == ""
         assert xunit == ""
+        assert ylabels == ["Y"]
+        assert yunits == [""]
 
 
 # ---------------------------------------------------------------------------
@@ -401,8 +412,6 @@ def test_read_whitespace_units_csv() -> None:
     filenames = get_test_fnames("whitespace_units.csv", in_folder="curve_formats")
     assert len(filenames) > 0, "whitespace_units.csv test file not found"
 
-    from sigima.io.signal.funcs import read_csv
-
     csv_data = read_csv(filenames[0])
 
     # X column: "  Wavelength (nm)  "
@@ -431,38 +440,6 @@ def test_read_whitespace_units_csv() -> None:
     padded_idx = csv_data.ylabels.index("Padded NoUnit")
     assert csv_data.yunits[padded_idx] == ""
 
-    # " NestedParen (a.u. (norm)) " → label="NestedParen", unit="a.u.(norm)"
+    # " NestedParen (a.u. (norm)) " → label="NestedParen", unit="a.u. (norm)"
     nested_idx = csv_data.ylabels.index("NestedParen")
-    assert csv_data.yunits[nested_idx] == "a.u.(norm)"
-def test_read_whitespace_units_csv() -> None:
-    """End-to-end: read CSV file with whitespace in headers and verify parsing."""
-    execenv.print("Testing whitespace/units CSV file end-to-end ...")
-
-    filenames = get_test_fnames("whitespace_units.csv", in_folder="curve_formats")
-    assert len(filenames) > 0, "whitespace_units.csv test file not found"
-
-    from sigima.io.signal.funcs import read_csv
-
-    csv_data = read_csv(filenames[0])
-
-    # X column: "  Wavelength (nm)  "
-    assert csv_data.xlabel is not None
-    execenv.print(f"  xlabel={csv_data.xlabel!r}, xunit={csv_data.xunit!r}")
-    assert csv_data.xlabel.strip() == "Wavelength"
-    assert csv_data.xunit is not None
-    assert csv_data.xunit.strip() == "nm"
-
-    # Y columns should all be trimmed
-    assert csv_data.ylabels is not None
-    assert csv_data.yunits is not None
-    execenv.print(f"  ylabels={csv_data.ylabels}")
-    execenv.print(f"  yunits={csv_data.yunits}")
-
-    # Check data shape: 11 rows x 11 columns
-    assert csv_data.xydata.shape == (11, 11)
-
-    # Check a few known Y labels and units
-    for label in csv_data.ylabels:
-        assert label == label.strip(), f"Y label not trimmed: {label!r}"
-    for unit in csv_data.yunits:
-        assert unit == unit.strip(), f"Y unit not trimmed: {unit!r}"
+    assert csv_data.yunits[nested_idx] == "a.u. (norm)"

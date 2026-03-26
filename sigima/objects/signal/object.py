@@ -38,6 +38,7 @@ from sigima.objects.signal.constants import (
     VALID_TIME_UNITS,
 )
 from sigima.objects.signal.roi import SignalROI
+from sigima.tools.datatypes import datetime64_to_seconds
 
 
 def validate_and_convert_dtype(x: np.ndarray) -> np.ndarray:
@@ -472,8 +473,6 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         # Convert to float timestamp in seconds (Unix timestamps since 1970-01-01).
         # Note: We always store as Unix timestamps regardless of the 'unit' parameter,
         # which is only for display purposes.
-        from sigima.tools.datatypes import datetime64_to_seconds
-
         x_float = datetime64_to_seconds(dt_series.values).astype(np.float64)
 
         # Check if signal already has data with matching size
