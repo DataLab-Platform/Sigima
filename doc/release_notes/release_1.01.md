@@ -4,6 +4,11 @@
 
 ### 🛠️ Bug Fixes since version 1.1.1 ###
 
+* **CSV header parsing**: Fixed whitespace and unit extraction issues when reading CSV column headers
+  * Leading and trailing whitespace in column titles is now properly trimmed (e.g. `"  Padded NoUnit  "` → `"Padded NoUnit"`)
+  * Nested parentheses in units are now correctly handled (e.g. `"Signal (a.u. (norm))"` → label `"Signal"`, unit `"a.u.(norm)"` instead of incorrectly splitting at the last parenthesis)
+  * Exotic whitespace characters (tabs, non-breaking spaces) in headers are normalized before parsing
+
 * **Pandas 3.0 compatibility**: Fixed datetime CSV parsing issue with pandas 3.0+
   * Replaced `iloc` assignment with column name assignment to handle dtype conversion correctly
   * Ensures compatibility with both pandas < 3.0 and pandas 3.0+ versions
