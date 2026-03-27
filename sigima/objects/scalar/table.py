@@ -191,6 +191,17 @@ class TableResult:
 
     def to_dict(self) -> dict:
         """Convert the TableResult to a dictionary."""
+
+        # Sanitize attrs: remove non-JSON-serializable entries (e.g. callables)
+        # so that HDF5 serialization does not fail. Display-only settings such
+        # as callable column formatters are intentionally excluded.
+        def _sanitize(obj):
+            if isinstance(obj, dict):
+                return {k: _sanitize(v) for k, v in obj.items() if not callable(v)}
+            if isinstance(obj, (list, tuple)):
+                return [_sanitize(v) for v in obj]
+            return obj
+
         return {
             "schema": 1,
             "title": self.title,
@@ -199,7 +210,7 @@ class TableResult:
             "data": self.data,
             "roi_indices": self.roi_indices,
             "func_name": self.func_name,
-            "attrs": dict(self.attrs) if self.attrs else {},
+            "attrs": _sanitize(dict(self.attrs)) if self.attrs else {},
         }
 
     @staticmethod
@@ -272,6 +283,27 @@ class TableResult:
         return DisplayPreferencesManager.get_visible_headers(
             self, self.headers, "hidden_metrics"
         )
+
+    def get_column_formats(self) -> dict[str, str]:
+        """Get per-column display format strings.
+
+        Returns:
+            Dictionary mapping column names to Python format specifiers
+             (e.g. ``{"x0": ".2e", "amplitude": ".3g"}``).
+        """
+        return dict(self.attrs.get("column_formats", {}))
+
+    def set_column_formats(self, formats: dict[str, str]) -> None:
+        """Set per-column display format strings.
+
+        Args:
+            formats: Dictionary mapping column names to Python format specifiers
+             (e.g. ``{"x0": ".2e", "amplitude": ".3g"}``).
+        """
+        if formats:
+            self.attrs["column_formats"] = dict(formats)
+        elif "column_formats" in self.attrs:
+            del self.attrs["column_formats"]
 
     @classmethod
     def from_dataframe(
@@ -480,6 +512,7 @@ class TableResultBuilder:
         self.global_func: Callable | None = None
 
         self._hidden_columns: set[str] = set()
+        self._column_formats: dict[str, str] = {}
 
     def set_global_function(self, func: Callable) -> None:
         """Set a global function that returns a dataclass with float/int fields.
@@ -550,6 +583,19 @@ class TableResultBuilder:
             Self for method chaining.
         """
         self._hidden_columns.update(names)
+        return self
+
+    def set_column_formats(self, formats: dict[str, str]) -> TableResultBuilder:
+        """Set per-column display format strings.
+
+        Args:
+            formats: Dictionary mapping column names to Python format specifiers
+             (e.g. ``{"x0": ".2e", "amplitude": ".3g"}``).
+
+        Returns:
+            Self for method chaining.
+        """
+        self._column_formats.update(formats)
         return self
 
     @staticmethod
@@ -690,6 +736,10 @@ class TableResultBuilder:
         if self._hidden_columns:
             hidden_prefs = {name: name not in self._hidden_columns for name in names}
             result.set_display_preferences(hidden_prefs)
+
+        # Apply per-column format strings
+        if self._column_formats:
+            result.set_column_formats(self._column_formats)
 
         return result
 

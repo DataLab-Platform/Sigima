@@ -21,18 +21,9 @@ if TYPE_CHECKING:
 NO_ROI: int = -1
 
 
-def auto_scientific(x: float) -> str:
+def _exact_scientific(x: float) -> str:
     """Format a float in scientific notation with the minimum number of significant
     digits required for an exact round-trip representation.
-
-    Uses Python's ``repr()`` which always yields the shortest decimal string that
-    uniquely identifies the float, then maps to scientific notation.
-
-    Examples::
-
-        auto_scientific(1.23456789e-6)  # '1.23456789e-06'  (9 sig figs)
-        auto_scientific(1.5e-6)         # '1.5e-06'          (2 sig figs)
-        auto_scientific(1.0e-6)         # '1e-06'            (1 sig fig)
 
     Args:
         x: The float value to format.
@@ -50,6 +41,62 @@ def auto_scientific(x: float) -> str:
     n_sig = len(digits) or 1
     n_dec = max(0, n_sig - 1)  # decimal places in scientific notation
     return format(x, f".{n_dec}e")
+
+
+def format_legend_value(x: float | int) -> str:
+    """Format a numeric value for display in the legend area of a plot.
+
+    Display strategy:
+
+    1. If the plain representation is **≤ 6 characters** (``"."`` or ``","``
+       included): display the value as-is (int or float).
+    2. Otherwise, switch to **scientific notation**:
+
+       a. If the exact scientific string is **≤ 12 characters** (``"."``,
+          ``"e-"``, ``"e+"`` included): display the exact scientific value.
+       b. If it exceeds 12 characters: round the mantissa so that the
+          scientific string fits within 12 characters, then prepend ``"~"``
+          to signal the approximation.
+
+    Args:
+        x: The numeric value to format.
+
+    Returns:
+        Formatted string suitable for plot legend display.
+    """
+    MAX_PLAIN = 6
+    MAX_SCI = 12
+
+    # Plain representation
+    if isinstance(x, int):
+        plain = str(x)
+    else:
+        xf = float(x)
+        if xf != xf:  # NaN
+            return str(xf)
+        if xf == float("inf") or xf == float("-inf"):
+            return str(xf)
+        if xf == int(xf):
+            plain = str(int(xf))
+        else:
+            plain = str(xf)
+
+    if len(plain) <= MAX_PLAIN:
+        return plain
+
+    # Exact scientific notation
+    sci = _exact_scientific(x)
+    if len(sci) <= MAX_SCI:
+        return sci
+
+    # Rounded scientific notation with "~" prefix
+    # Reserve 1 char for "~", so the scientific part must fit in MAX_SCI - 1
+    max_sci_len = MAX_SCI - 1
+    for n_dec in range(MAX_SCI, -1, -1):
+        s = format(float(x), f".{n_dec}e")
+        if len(s) <= max_sci_len:
+            return f"~{s}"
+    return f"~{format(float(x), '.0e')}"
 
 
 class DisplayPreferencesManager:
