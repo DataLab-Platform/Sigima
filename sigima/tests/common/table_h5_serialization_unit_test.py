@@ -20,7 +20,6 @@ from __future__ import annotations
 import enum
 import os.path as osp
 
-import numpy as np
 import pytest
 from numpy import ma
 
@@ -32,22 +31,15 @@ from sigima.objects import (
 from sigima.tests.data import create_paracetamol_signal, create_test_signal_rois
 from sigima.tests.helpers import WorkdirRestoringTempDir
 
+
 # ---------------------------------------------------------------------------
 #  Helpers
 # ---------------------------------------------------------------------------
-
-
 class _SampleStrEnum(str, enum.Enum):
     """Str-based enum mimicking ``guidata.dataset.LabeledEnum``."""
 
     GAUSSIAN = "Gaussian"
     LORENTZIAN = "Lorentzian"
-
-
-def _create_signal_with_table(table: TableResult):
-    """Create a simple signal to host a TableResult in metadata."""
-    sig = create_paracetamol_signal()
-    return sig
 
 
 def _h5_roundtrip(sig):
@@ -69,7 +61,7 @@ def _strip_none(d: dict) -> dict:
 
 def _roundtrip_table(table: TableResult) -> TableResult:
     """Perform a full HDF5 round-trip and return the restored TableResult."""
-    sig = _create_signal_with_table(table)
+    sig = create_paracetamol_signal()
     # HDF5Writer.write_dict cannot serialise None values, so strip them
     # before storing — this mirrors what DataLab does at the adapter level.
     sig.metadata["table_test"] = _strip_none(table.to_dict())
@@ -148,7 +140,8 @@ class TestSanitizeCallablesH5:
             attrs={"fn1": abs, "fn2": lambda: None},
         )
         restored = _roundtrip_table(table)
-        assert restored.attrs == {}
+        # Same as "=={}""
+        assert not restored.attrs
 
     def test_title_and_data_survive_roundtrip(self) -> None:
         """Title, headers, and numeric data survive even with tainted attrs."""
@@ -249,7 +242,8 @@ class TestColumnFormatsH5:
         )
 
         restored = _roundtrip_table(table)
-        assert restored.get_column_formats() == {}
+        # Same as "=={}""
+        assert not restored.get_column_formats()
 
     def test_builder_formats_survive_roundtrip(self) -> None:
         """Formats set on the builder are present in the result after HDF5 I/O."""
