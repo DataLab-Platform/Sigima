@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pandas as pd
+from math import isnan, isinf
 
 if TYPE_CHECKING:
     from sigima.objects import GeometryResult, ImageObj, SignalObj, TableResult
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
 # Sentinel value for "full signal/image / no ROI" rows in result tables
 NO_ROI: int = -1
 
+NUM_DISPLAY_INFO_MAX_PLAIN = 6
+NUM_DISPLAY_INFO_MAX_SCI = 12
 
 def _exact_scientific(x: float) -> str:
     """Format a float in scientific notation with the minimum number of significant
@@ -64,35 +67,32 @@ def format_legend_value(x: float | int) -> str:
     Returns:
         Formatted string suitable for plot legend display.
     """
-    MAX_PLAIN = 6
-    MAX_SCI = 12
 
     # Plain representation
     if isinstance(x, int):
         plain = str(x)
     else:
         xf = float(x)
-        if xf != xf:  # NaN
-            return str(xf)
-        if xf == float("inf") or xf == float("-inf"):
+        if isnan(xf) or isinf(xf):  # NaN or infinity should be displayed as-is
             return str(xf)
         if xf == int(xf):
             plain = str(int(xf))
         else:
             plain = str(xf)
 
-    if len(plain) <= MAX_PLAIN:
+    if len(plain) <= NUM_DISPLAY_INFO_MAX_PLAIN:
         return plain
 
     # Exact scientific notation
     sci = _exact_scientific(x)
-    if len(sci) <= MAX_SCI:
+    if len(sci) <= NUM_DISPLAY_INFO_MAX_SCI:
         return sci
 
     # Rounded scientific notation with "~" prefix
-    # Reserve 1 char for "~", so the scientific part must fit in MAX_SCI - 1
-    max_sci_len = MAX_SCI - 1
-    for n_dec in range(MAX_SCI, -1, -1):
+    # Reserve 1 char for "~", so the scientific part must fit in
+    # NUM_DISPLAY_INFO_MAX_SCI - 1
+    max_sci_len = NUM_DISPLAY_INFO_MAX_SCI - 1
+    for n_dec in range(NUM_DISPLAY_INFO_MAX_SCI, -1, -1):
         s = format(float(x), f".{n_dec}e")
         if len(s) <= max_sci_len:
             return f"~{s}"

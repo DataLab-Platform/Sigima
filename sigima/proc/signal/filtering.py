@@ -178,8 +178,9 @@ class BaseHighLowBandParam(gds.DataSet, title=_("Filter")):
         "display",
         active=gds.FuncProp(
             _method_prop,
-            lambda x: x
-            in (FrequencyFilterMethod.CHEBYSHEV1, FrequencyFilterMethod.ELLIPTIC),
+            lambda x: (
+                x in (FrequencyFilterMethod.CHEBYSHEV1, FrequencyFilterMethod.ELLIPTIC)
+            ),
         ),
     )
     rs = gds.FloatItem(
@@ -188,8 +189,9 @@ class BaseHighLowBandParam(gds.DataSet, title=_("Filter")):
         "display",
         active=gds.FuncProp(
             _method_prop,
-            lambda x: x
-            in (FrequencyFilterMethod.CHEBYSHEV2, FrequencyFilterMethod.ELLIPTIC),
+            lambda x: (
+                x in (FrequencyFilterMethod.CHEBYSHEV2, FrequencyFilterMethod.ELLIPTIC)
+            ),
         ),
     )
 

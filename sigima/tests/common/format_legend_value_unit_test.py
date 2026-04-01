@@ -29,6 +29,7 @@ class TestPlainDisplay:
         ],
     )
     def test_integers_within_limit(self, value, expected) -> None:
+        """Integers that fit within 6 chars should be returned as-is."""
         assert format_legend_value(value) == expected
 
     @pytest.mark.parametrize(
@@ -42,6 +43,7 @@ class TestPlainDisplay:
         ],
     )
     def test_floats_within_limit(self, value, expected) -> None:
+        """Floats that fit within 6 chars should be returned as-is."""
         assert format_legend_value(value) == expected
 
     def test_float_with_integer_value(self) -> None:
@@ -49,6 +51,7 @@ class TestPlainDisplay:
         assert format_legend_value(42.0) == "42"
 
     def test_zero_float(self) -> None:
+        """A float like 0.0 should display as '0'."""
         assert format_legend_value(0.0) == "0"
 
 
@@ -77,6 +80,7 @@ class TestExactScientificDisplay:
         assert not result.startswith("~")
 
     def test_negative_scientific(self) -> None:
+        """Test that negative values also switch to scientific if plain is > 6 chars."""
         result = format_legend_value(-1234567)
         assert "e" in result
         assert len(result) <= 12
@@ -91,6 +95,10 @@ class TestExactScientificDisplay:
         ],
     )
     def test_various_scientific_values(self, value) -> None:
+        """
+        Test a variety of values that should switch to scientific but fit within
+        12 chars.
+        """
         result = format_legend_value(value)
         assert len(result) <= 12
         assert not result.startswith("~")
@@ -114,6 +122,7 @@ class TestRoundedScientificDisplay:
         assert len(result) <= 13  # ~ + ≤12 chars scientific
 
     def test_negative_many_digits(self) -> None:
+        """Negative value with many significant digits should also be rounded."""
         result = format_legend_value(-1.23456789012345e20)
         assert result.startswith("~")
         assert "e" in result
@@ -137,14 +146,17 @@ class TestSpecialValues:
     """NaN, inf, -inf are handled gracefully."""
 
     def test_nan(self) -> None:
+        """NaN should be displayed as 'nan'."""
         result = format_legend_value(float("nan"))
         assert result == "nan"
 
     def test_inf(self) -> None:
+        """Positive infinity should be displayed as 'inf'."""
         result = format_legend_value(float("inf"))
         assert result == "inf"
 
     def test_negative_inf(self) -> None:
+        """Negative infinity should be displayed as '-inf'."""
         result = format_legend_value(float("-inf"))
         assert result == "-inf"
 
