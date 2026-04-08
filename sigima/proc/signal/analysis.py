@@ -28,6 +28,7 @@ from sigima.objects import (
     TableResult,
     TableResultBuilder,
 )
+from sigima.objects.scalar.common import format_legend_value
 from sigima.proc.base import HistogramParam, new_signal_result
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import dynamic, features, pulse
@@ -177,6 +178,7 @@ def extract_pulse_features(obj: SignalObj, p: PulseFeaturesParam) -> TableResult
     builder.hide_columns(
         ["xstartmin", "xstartmax", "xendmin", "xendmax", "xplateaumin", "xplateaumax"]
     )
+    builder.set_column_formats({"*": format_legend_value})
     return builder.compute(obj)
 
 

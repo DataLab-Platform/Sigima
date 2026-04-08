@@ -13,8 +13,8 @@ from pathlib import Path
 def load_env_file(env_path: str | None = None) -> None:
     """Load environment variables from a .env file."""
     # Set a flag to indicate that the environment has been loaded by this script
-    # This prevents batch scripts (like utils.bat) from reloading .env and overwriting
-    # variables
+    # This prevents batch scripts (like utils.bat) from reloading .env
+    # and overwriting variables
 
     if env_path is None:
         # Get ".env" file from the current directory
