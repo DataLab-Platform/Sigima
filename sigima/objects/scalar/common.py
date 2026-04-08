@@ -10,10 +10,10 @@ without using inheritance or mixins, maintaining their dataclass integrity.
 
 from __future__ import annotations
 
+from math import isinf, isnan
 from typing import TYPE_CHECKING
 
 import pandas as pd
-from math import isnan, isinf
 
 if TYPE_CHECKING:
     from sigima.objects import GeometryResult, ImageObj, SignalObj, TableResult
@@ -23,6 +23,7 @@ NO_ROI: int = -1
 
 NUM_DISPLAY_INFO_MAX_PLAIN = 6
 NUM_DISPLAY_INFO_MAX_SCI = 12
+
 
 def _exact_scientific(x: float) -> str:
     """Format a float in scientific notation with the minimum number of significant
@@ -58,8 +59,7 @@ def format_legend_value(x: float | int) -> str:
        a. If the exact scientific string is **≤ 12 characters** (``"."``,
           ``"e-"``, ``"e+"`` included): display the exact scientific value.
        b. If it exceeds 12 characters: round the mantissa so that the
-          scientific string fits within 12 characters, then prepend ``"~"``
-          to signal the approximation.
+          scientific string fits within 12 characters.
 
     Args:
         x: The numeric value to format.
@@ -67,7 +67,6 @@ def format_legend_value(x: float | int) -> str:
     Returns:
         Formatted string suitable for plot legend display.
     """
-
     # Plain representation
     if isinstance(x, int):
         plain = str(x)
@@ -88,15 +87,12 @@ def format_legend_value(x: float | int) -> str:
     if len(sci) <= NUM_DISPLAY_INFO_MAX_SCI:
         return sci
 
-    # Rounded scientific notation with "~" prefix
-    # Reserve 1 char for "~", so the scientific part must fit in
-    # NUM_DISPLAY_INFO_MAX_SCI - 1
-    max_sci_len = NUM_DISPLAY_INFO_MAX_SCI - 1
+    # Rounded scientific notation
     for n_dec in range(NUM_DISPLAY_INFO_MAX_SCI, -1, -1):
         s = format(float(x), f".{n_dec}e")
-        if len(s) <= max_sci_len:
-            return f"~{s}"
-    return f"~{format(float(x), '.0e')}"
+        if len(s) <= NUM_DISPLAY_INFO_MAX_SCI:
+            return s
+    return format(float(x), ".0e")
 
 
 class DisplayPreferencesManager:

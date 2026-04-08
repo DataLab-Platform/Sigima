@@ -69,7 +69,6 @@ class TestExactScientificDisplay:
         result = format_legend_value(1234567)
         assert "e" in result or "E" in result
         assert len(result) <= 12
-        assert not result.startswith("~")
 
     def test_small_float(self) -> None:
         """0.000001 → plain '1e-06' (5 chars ≤ 6) → stays plain.
@@ -77,7 +76,6 @@ class TestExactScientificDisplay:
         result = format_legend_value(1.2e-06)
         assert "e" in result
         assert len(result) <= 12
-        assert not result.startswith("~")
 
     def test_negative_scientific(self) -> None:
         """Test that negative values also switch to scientific if plain is > 6 chars."""
@@ -101,40 +99,36 @@ class TestExactScientificDisplay:
         """
         result = format_legend_value(value)
         assert len(result) <= 12
-        assert not result.startswith("~")
 
 
 # ===================================================================
-# 3. Rounded scientific with "~" prefix: scientific > 12 chars
+# 3. Rounded scientific: scientific > 12 chars
 # ===================================================================
 
 
 class TestRoundedScientificDisplay:
     """Values whose exact scientific notation exceeds 12 chars get rounded
-    and prefixed with '~'."""
+    to fit within 12 chars."""
 
     def test_many_significant_digits(self) -> None:
         """A value with many significant digits should be rounded."""
         # 1.23456789012345e-10 has a very long scientific notation
         result = format_legend_value(1.23456789012345e-10)
-        assert result.startswith("~")
         assert "e" in result
-        assert len(result) <= 13  # ~ + ≤12 chars scientific
+        assert len(result) <= 12
 
     def test_negative_many_digits(self) -> None:
         """Negative value with many significant digits should also be rounded."""
         result = format_legend_value(-1.23456789012345e20)
-        assert result.startswith("~")
         assert "e" in result
+        assert len(result) <= 12
 
-    def test_rounded_value_is_approximation(self) -> None:
-        """The ~ prefix signals the value is rounded."""
+    def test_rounded_value_fits_limit(self) -> None:
+        """Rounded scientific value should fit within 12 chars."""
         val = 1.234567890123e-100
         result = format_legend_value(val)
-        assert result.startswith("~")
-        # The scientific part (after ~) should fit within 11 chars
-        sci_part = result[1:]
-        assert len(sci_part) <= 11
+        assert "e" in result
+        assert len(result) <= 12
 
 
 # ===================================================================
@@ -182,18 +176,15 @@ class TestBoundaryConditions:
         assert "e" in result  # switched to scientific
 
     def test_exactly_12_chars_scientific(self) -> None:
-        """A scientific string with exactly 12 chars is displayed without ~."""
+        """A scientific string with exactly 12 chars is displayed as-is."""
         # 1.234567e+07 → exact sci repr is "1.234567e+07" → 12 chars
         val = 1.234567e07
         result = format_legend_value(val)
-        assert not result.startswith("~")
         assert len(result) <= 12
 
-    def test_scientific_exceeding_12_gets_tilde(self) -> None:
-        """A scientific string > 12 chars gets rounded with ~ prefix."""
+    def test_scientific_exceeding_12_gets_rounded(self) -> None:
+        """A scientific string > 12 chars gets rounded to fit."""
         # Value with many significant digits
         val = 1.23456789012e07
         result = format_legend_value(val)
-        if len(result) > 12:
-            # Only if actual scientific notation exceeds 12
-            assert result.startswith("~")
+        assert len(result) <= 12
