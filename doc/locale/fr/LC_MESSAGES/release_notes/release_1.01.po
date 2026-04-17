@@ -6,16 +6,11 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Sigima \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
 
 msgid "Version 1.1"
 msgstr "Version 1.1"
@@ -25,6 +20,18 @@ msgstr "Sigima Version 1.1.2 (pas encore publiée)"
 
 msgid "🛠️ Bug Fixes since version 1.1.1"
 msgstr "🛠️ Corrections de bugs depuis la version 1.1.1"
+
+msgid "**CSV header parsing**: Fixed whitespace and unit extraction issues when reading CSV column headers"
+msgstr ""
+
+msgid "Leading and trailing whitespace in column titles is now properly trimmed (e.g. `\"  Padded NoUnit  \"` → `\"Padded NoUnit\"`)"
+msgstr ""
+
+msgid "Nested parentheses in units are now correctly handled (e.g. `\"Signal (a.u. (norm))\"` → label `\"Signal\"`, unit `\"a.u.(norm)\"` instead of incorrectly splitting at the last parenthesis)"
+msgstr ""
+
+msgid "Exotic whitespace characters (tabs, non-breaking spaces) in headers are normalized before parsing"
+msgstr ""
 
 msgid "**Pandas 3.0 compatibility**: Fixed datetime CSV parsing issue with pandas 3.0+"
 msgstr "**Compatibilité avec Pandas 3.0** : Correction du problème de parsing des dates dans les fichiers CSV avec pandas 3.0+"
@@ -142,3 +149,4 @@ msgstr "`TableResult` et `GeometryResult` affichent les données de résultat av
 
 msgid "Centralized CSS styling in `HTML_TABLE_CSS` constant for consistent appearance"
 msgstr "Centralisation du style CSS dans la constante `HTML_TABLE_CSS` pour une apparence cohérente"
+
