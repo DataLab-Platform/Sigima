@@ -43,6 +43,10 @@
 
 ### 🔧 Other changes ###
 
+* **Remote control client**: Added `set_object` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to push modified signal/image objects back to DataLab after retrieving them with `get_object` (see [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))
+* **Stub server**: Added `set_object` support to `DataLabStubServer` with proper UUID-based object lookup, and registered `add_object`/`set_object` as XML-RPC functions
+* **Stub server**: Signal and image objects now carry their UUID in metadata, enabling round-trip `get_object` → modify → `set_object` workflows
+
 * Improved development environment setup: new `run_with_env.py` script supporting multiple Python environment contexts (WinPython, venv, etc.)
 * CI: gated PyPI deployment on test suite passing
 

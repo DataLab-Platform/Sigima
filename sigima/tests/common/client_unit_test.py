@@ -361,6 +361,40 @@ class RemoteClientTester:
         assert len(group_info) == 3, "Should have 3 elements (titles, uuids, titles)"
         self.log(f"Groups: {group_info[0]}")
 
+    def test_set_object(self) -> None:
+        """Test set_object: modify and push back an object"""
+        if self.datalab is None:
+            return
+
+        self.datalab.set_current_panel("signal")
+        uuids = self.datalab.get_object_uuids()
+        if not uuids:
+            self.log("No signals available, skipping set_object test")
+            return
+
+        # Get an existing object
+        obj = self.datalab.get_object(uuids[0])
+        assert obj is not None, "Should retrieve object by UUID"
+        original_title = obj.title
+
+        # Modify the object and push it back
+        obj.title = "Modified by set_object"
+        self.datalab.set_object(obj)
+        self.log("Called set_object with modified title")
+
+        # Retrieve again and verify modification
+        obj2 = self.datalab.get_object(uuids[0])
+        assert obj2 is not None, "Should retrieve updated object"
+        assert obj2.title == "Modified by set_object", (
+            f"Title should be updated, got '{obj2.title}'"
+        )
+        self.log("set_object: title update verified")
+
+        # Restore original title
+        obj2.title = original_title
+        self.datalab.set_object(obj2)
+        self.log("set_object: restored original title")
+
     def test_metadata_operations(self) -> None:
         """Test metadata operations"""
         if self.datalab is None:
@@ -407,6 +441,9 @@ class RemoteClientTester:
 
             # Test metadata operations
             self.test_metadata_operations()
+
+            # Test set_object (modify and push back)
+            self.test_set_object()
 
             # Test file operations (this will reset data)
             self.test_file_operations()

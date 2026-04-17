@@ -106,6 +106,15 @@ msgstr "**Support de Python 3.14** : Ajout du classificateur Python 3.14"
 msgid "🔧 Other changes"
 msgstr "🔧 Autres changements"
 
+msgid "**Remote control client**: Added `set_object` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to push modified signal/image objects back to DataLab after retrieving them with `get_object` (see [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))"
+msgstr "**Client de contrôle à distance** : Ajout de la méthode `set_object` à `SimpleRemoteProxy` et `SimpleAbstractDLControl`, permettant aux utilisateurs de renvoyer des objets signal/image modifiés à DataLab après les avoir récupérés avec `get_object` (voir [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))"
+
+msgid "**Stub server**: Added `set_object` support to `DataLabStubServer` with proper UUID-based object lookup, and registered `add_object`/`set_object` as XML-RPC functions"
+msgstr "**Serveur factice** : Ajout de la prise en charge de `set_object` à `DataLabStubServer` avec une recherche d'objet basée sur UUID, et enregistrement de `add_object`/`set_object` en tant que fonctions XML-RPC"
+
+msgid "**Stub server**: Signal and image objects now carry their UUID in metadata, enabling round-trip `get_object` → modify → `set_object` workflows"
+msgstr "**Serveur factice** : Les objets signal et image portent désormais leur UUID dans les métadonnées, permettant des flux de travail aller-retour `get_object` → modifier → `set_object`"
+
 msgid "Improved development environment setup: new `run_with_env.py` script supporting multiple Python environment contexts (WinPython, venv, etc.)"
 msgstr "Amélioration de la configuration de l'environnement de développement : nouveau script `run_with_env.py` prenant en charge plusieurs contextes d'environnement Python (WinPython, venv, etc.)"
 

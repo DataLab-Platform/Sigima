@@ -385,6 +385,17 @@ class SimpleRemoteProxy(SimpleBaseProxy):
         """
         self._datalab.add_object(dataset_to_rpcjson(obj), group_id, set_current)
 
+    def set_object(self, obj: SignalObj | ImageObj) -> None:
+        """Update an existing object in DataLab.
+
+        The object is identified by its UUID (carried in metadata from a
+        previous :meth:`get_object` call).
+
+        Args:
+            obj: Signal or image object with the same UUID as an existing object
+        """
+        self._datalab.set_object(dataset_to_rpcjson(obj))
+
     def load_from_directory(self, path: str) -> None:
         """Open objects from directory in current panel (signals/images).
 
