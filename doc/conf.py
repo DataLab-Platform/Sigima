@@ -97,7 +97,7 @@ def setup(app):
 
 project = "Sigima"
 author = ""
-copyright = "2025, DataLab Platform Developers"
+copyright = "2026, DataLab Platform Developers"
 release = sigima.__version__
 
 # -- General configuration ---------------------------------------------------
