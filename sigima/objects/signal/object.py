@@ -289,7 +289,12 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
             "dx data size must match X data size"
         )
         if len(self.xydata) == 2:
-            self.xydata = np.vstack((self.xydata, np.zeros((2, self.xydata.shape[1]))))
+            # Initialize uncertainty rows with NaN so that the uncertainty for
+            # the other dimension is reported as missing (None) rather than as
+            # an array of phantom zero values.
+            self.xydata = np.vstack(
+                (self.xydata, np.full((2, self.xydata.shape[1]), np.nan))
+            )
         self.xydata[2] = validate_and_convert_dtype(data)
 
     def __get_dy(self) -> np.ndarray | None:
@@ -313,7 +318,12 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
             "dy data size must match X data size"
         )
         if len(self.xydata) == 2:
-            self.xydata = np.vstack((self.xydata, np.zeros((2, self.xydata.shape[1]))))
+            # Initialize uncertainty rows with NaN so that the uncertainty for
+            # the other dimension is reported as missing (None) rather than as
+            # an array of phantom zero values.
+            self.xydata = np.vstack(
+                (self.xydata, np.full((2, self.xydata.shape[1]), np.nan))
+            )
         self.xydata[3] = validate_and_convert_dtype(data)
 
     x = property(__get_x, __set_x)
