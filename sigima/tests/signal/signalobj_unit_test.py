@@ -587,6 +587,40 @@ def test_coordinate_conversion() -> None:
     execenv.print(f"{test_coordinate_conversion.__doc__}: OK")
 
 
+def test_set_dy_does_not_create_phantom_dx() -> None:
+    """Setting only ``dy`` must leave ``dx`` as ``None`` (not phantom zeros).
+
+    Regression test: ``__set_dy`` used to extend ``xydata`` with ``np.zeros``,
+    so ``dx`` was silently reported as an array of zeros instead of ``None``.
+    """
+    x = np.linspace(0.0, 1.0, 5)
+    obj = sigima.objects.create_signal("test", x, x.copy())
+    assert obj.dx is None
+    assert obj.dy is None
+
+    obj.dy = 0.1 * np.ones_like(x)
+
+    assert obj.dy is not None
+    assert obj.dx is None, (
+        f"Setting dy should not create phantom dx values, got {obj.dx!r}"
+    )
+
+
+def test_set_dx_does_not_create_phantom_dy() -> None:
+    """Setting only ``dx`` must leave ``dy`` as ``None`` (not phantom zeros)."""
+    x = np.linspace(0.0, 1.0, 5)
+    obj = sigima.objects.create_signal("test", x, x.copy())
+    assert obj.dx is None
+    assert obj.dy is None
+
+    obj.dx = 0.01 * np.ones_like(x)
+
+    assert obj.dx is not None
+    assert obj.dy is None, (
+        f"Setting dx should not create phantom dy values, got {obj.dy!r}"
+    )
+
+
 def run_all_tests() -> None:
     """Run all tests in this module"""
     test_signal_parameters_interactive()
@@ -597,6 +631,8 @@ def run_all_tests() -> None:
     test_create_signal_from_param()
     test_signal_copy()
     test_coordinate_conversion()
+    test_set_dy_does_not_create_phantom_dx()
+    test_set_dx_does_not_create_phantom_dy()
 
 
 if __name__ == "__main__":

@@ -23,6 +23,11 @@ import sigima.proc.signal
 from sigima.tests import guiutils
 from sigima.tests.data import get_test_signal
 from sigima.tests.helpers import check_scalar_result
+from sigima.tools.signal.features import (
+    contrast,
+    find_x_axis_crossings,
+    find_zero_crossings,
+)
 
 
 @pytest.mark.validation
@@ -87,6 +92,52 @@ def test_signal_contrast() -> None:
     table = sigima.proc.signal.contrast(obj)
     assert table is not None, "Contrast computation failed"
     check_scalar_result("Contrast", table["contrast"][0], 0.825, rtol=0.001)
+
+    # Regression checks on the underlying ``contrast`` tool: the original
+    # Michelson formula ``(max-min)/(max+min)`` returned ``inf`` or ``nan``
+    # for signals with negative samples, and was unbounded outside [0, 1].
+    value = contrast(np.array([-1.0, 1.0]))
+    assert np.isfinite(value), f"contrast must be finite, got {value!r}"
+    value = contrast(np.array([-2.0, 1.0]))
+    assert np.isfinite(value)
+    assert 0.0 <= value <= 1.0, f"contrast should be in [0, 1], got {value!r}"
+    # For non-negative signals, contrast keeps the standard Michelson value:
+    np.testing.assert_allclose(contrast(np.array([1.0, 5.0])), 4.0 / 6.0)
+    # A zero signal has an undefined contrast: must return NaN, not raise:
+    assert np.isnan(contrast(np.zeros(5)))
+
+
+@pytest.mark.parametrize(
+    "y,expected_count",
+    [
+        (np.array([-1.0, 0.0, 1.0]), 1),
+        (np.array([-1.0, 0.0, 0.0, 1.0]), 1),
+        (np.array([1.0, 0.0, -1.0, 0.0, 1.0]), 2),
+        (np.array([1.0, 0.0, 1.0]), 0),  # touches zero but does not cross
+        (np.array([1.0, -1.0, 1.0]), 2),
+        (np.array([1.0, 1.0, 1.0]), 0),
+    ],
+)
+def test_find_zero_crossings_counts(y: np.ndarray, expected_count: int) -> None:
+    """find_zero_crossings must report each crossing exactly once.
+
+    Regression test: the original implementation double-counted exact-zero
+    samples and reported false crossings on touch-and-bounce patterns.
+    """
+    crossings = find_zero_crossings(y)
+    assert len(crossings) == expected_count, (
+        f"Wrong crossing count for {y.tolist()}: got {crossings.tolist()}, "
+        f"expected {expected_count}"
+    )
+
+
+def test_find_x_axis_crossings_through_exact_zero() -> None:
+    """find_x_axis_crossings must report exactly one crossing for an exact zero."""
+    x = np.array([0.0, 1.0, 2.0])
+    y = np.array([-1.0, 0.0, 1.0])
+    xc = find_x_axis_crossings(x, y)
+    assert len(xc) == 1, f"Expected 1 crossing, got {xc.tolist()}"
+    np.testing.assert_allclose(xc, [1.0])
 
 
 @pytest.mark.validation
@@ -299,6 +350,7 @@ if __name__ == "__main__":
     test_dynamic_parameters()
     test_signal_sampling_rate_period()
     test_signal_contrast()
+    test_find_x_axis_crossings_through_exact_zero()
     test_signal_x_at_minmax()
     test_signal_x_at_y()
     test_signal_y_at_x()
