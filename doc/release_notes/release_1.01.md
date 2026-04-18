@@ -23,6 +23,23 @@
 * **Datetime signal compatibility**: Fixed datetime column handling for compatibility with various NumPy and pandas versions
   * Allowed any `datetime64` resolution (not just `ns`) to support newer NumPy/pandas combinations
 
+* **Signal uncertainty (dx/dy)**: Fixed phantom error bars displayed when only one of `dx` or `dy` was set on a fresh signal
+  * When `dy` was set first (or `dx` first), the deferred uncertainty row for the other dimension was previously filled with zeros, which downstream tools interpreted as a real all-zero uncertainty array (e.g. PlotPy drew zero-width error bars)
+  * Deferred rows are now initialized with NaN, so a missing uncertainty is properly reported as absent — no more spurious error bars
+
+* **ROI extraction with uncertainty data**: Fixed `extract_roi` and `extract_rois` losing the input signal's `dx` / `dy` uncertainty arrays
+  * Uncertainty samples are now sliced and propagated to the extracted signal exactly like the X/Y data
+  * Affects both single-ROI and multi-ROI extraction workflows
+
+* **Zero-crossing detection**: Fixed `find_zero_crossings` over-reporting on signals containing exact-zero samples
+  * Samples exactly equal to zero used to count as two crossings (e.g. `[-1, 0, 1]` reported two crossings instead of one) and "touch-and-bounce" patterns like `[1, 0, 1]` were wrongly flagged as crossings
+  * Sign changes are now detected between consecutive non-zero samples, with contiguous zero runs collapsed to a single crossing only when they actually bridge opposite signs
+  * Downstream features benefit from the fix: `find_x_axis_crossings`, `find_x_values_at_y`, `find_bandwidth_coordinates`, and pulse FWHM / rise / fall measurements
+
+* **Contrast computation**: Fixed `contrast` returning `inf` / `nan` warnings on signals with negative or all-zero values
+  * Denominator now uses absolute values (`(max - min) / (|max| + |min|)`), keeping the result bounded in `[0, 1]` for signals with negative samples while matching the standard Michelson contrast for non-negative signals
+  * Returns `nan` cleanly (without a division-by-zero warning) when both `max` and `min` are zero
+
 ### ✨ Enhancements since version 1.1.1 ###
 
 * **Legend value formatting**: Improved numeric formatting in analysis result legends
@@ -34,14 +51,14 @@
   * `TableResultBuilder` supports `set_column_formats()` for specifying format strings (e.g. `{"x0": ".2e"}`) or callable formatters
   * Supports `"*"` wildcard key as a per-table default formatter
 
-### 📦 Dependencies ###
+### 📦 Dependencies changes since version 1.1.1 ###
 
 * **Pandas 3.0 support**: Officially support pandas 3.0.x after validation — upper bound raised from `< 3.0` to `< 3.1`
   * This closes [Issue #13](https://github.com/DataLab-Platform/Sigima/issues/13) - Support pandas 3.0
 
 * **Python 3.14 support**: Added Python 3.14 classifier
 
-### 🔧 Other changes ###
+### 🔧 Other changes since version 1.1.1 ###
 
 * **Remote control client**: Added `set_object` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to push modified signal/image objects back to DataLab after retrieving them with `get_object` (see [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))
 * **Stub server**: Added `set_object` support to `DataLabStubServer` with proper UUID-based object lookup, and registered `add_object`/`set_object` as XML-RPC functions
@@ -59,7 +76,7 @@
   * Added `stop_webapi_server()` stub
   * Added `get_webapi_status()` stub (returns server status dictionary)
 
-### 🔧 Other changes ###
+### 🔧 Other changes since version 1.1.0 ###
 
 * Updated development status classifier to "Production/Stable"
 * Added "Try it Online" section with [notebook.link](https://notebook.link/) integration in documentation

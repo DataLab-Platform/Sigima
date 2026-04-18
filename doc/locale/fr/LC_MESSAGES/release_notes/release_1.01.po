@@ -66,6 +66,45 @@ msgstr "**Compatibilité des signaux datetime** : Correction de la gestion des c
 msgid "Allowed any `datetime64` resolution (not just `ns`) to support newer NumPy/pandas combinations"
 msgstr "Autorisation de toute résolution `datetime64` (pas seulement `ns`) pour prendre en charge les combinaisons plus récentes de NumPy/pandas"
 
+msgid "**Signal uncertainty (dx/dy)**: Fixed phantom error bars displayed when only one of `dx` or `dy` was set on a fresh signal"
+msgstr "**Incertitudes des signaux (dx/dy)** : Correction de barres d'erreur fantômes affichées lorsque seul `dx` ou `dy` était défini sur un signal vierge"
+
+msgid "When `dy` was set first (or `dx` first), the deferred uncertainty row for the other dimension was previously filled with zeros, which downstream tools interpreted as a real all-zero uncertainty array (e.g. PlotPy drew zero-width error bars)"
+msgstr "Lorsque `dy` était défini en premier (ou `dx` en premier), la ligne d'incertitude différée pour l'autre dimension était auparavant remplie de zéros, ce qui était interprété par les outils en aval comme un véritable tableau d'incertitudes nulles (par ex. PlotPy traçait des barres d'erreur de largeur nulle)"
+
+msgid "Deferred rows are now initialized with NaN, so a missing uncertainty is properly reported as absent — no more spurious error bars"
+msgstr "Les lignes différées sont désormais initialisées avec NaN, de sorte qu'une incertitude manquante est correctement signalée comme absente — plus de barres d'erreur parasites"
+
+msgid "**ROI extraction with uncertainty data**: Fixed `extract_roi` and `extract_rois` losing the input signal's `dx` / `dy` uncertainty arrays"
+msgstr "**Extraction de ROI avec incertitudes** : Correction d'`extract_roi` et `extract_rois` qui perdaient les tableaux d'incertitudes `dx` / `dy` du signal d'entrée"
+
+msgid "Uncertainty samples are now sliced and propagated to the extracted signal exactly like the X/Y data"
+msgstr "Les échantillons d'incertitude sont désormais découpés et propagés au signal extrait exactement comme les données X/Y"
+
+msgid "Affects both single-ROI and multi-ROI extraction workflows"
+msgstr "Concerne les flux d'extraction mono-ROI et multi-ROI"
+
+msgid "**Zero-crossing detection**: Fixed `find_zero_crossings` over-reporting on signals containing exact-zero samples"
+msgstr "**Détection des passages à zéro** : Correction de `find_zero_crossings` qui sur-comptait les passages sur les signaux contenant des échantillons exactement nuls"
+
+msgid "Samples exactly equal to zero used to count as two crossings (e.g. `[-1, 0, 1]` reported two crossings instead of one) and \"touch-and-bounce\" patterns like `[1, 0, 1]` were wrongly flagged as crossings"
+msgstr "Les échantillons exactement nuls comptaient auparavant pour deux passages (par ex. `[-1, 0, 1]` signalait deux passages au lieu d'un) et les motifs « touche-et-rebondit » comme `[1, 0, 1]` étaient signalés à tort comme des passages"
+
+msgid "Sign changes are now detected between consecutive non-zero samples, with contiguous zero runs collapsed to a single crossing only when they actually bridge opposite signs"
+msgstr "Les changements de signe sont désormais détectés entre échantillons non nuls consécutifs, les suites contiguës de zéros n'étant comptées comme un unique passage que lorsqu'elles relient effectivement des signes opposés"
+
+msgid "Downstream features benefit from the fix: `find_x_axis_crossings`, `find_x_values_at_y`, `find_bandwidth_coordinates`, and pulse FWHM / rise / fall measurements"
+msgstr "Les fonctionnalités en aval bénéficient de cette correction : `find_x_axis_crossings`, `find_x_values_at_y`, `find_bandwidth_coordinates` et les mesures FWHM / temps de montée / descente d'impulsions"
+
+msgid "**Contrast computation**: Fixed `contrast` returning `inf` / `nan` warnings on signals with negative or all-zero values"
+msgstr "**Calcul du contraste** : Correction de `contrast` qui émettait des avertissements `inf` / `nan` sur les signaux à valeurs négatives ou intégralement nulles"
+
+msgid "Denominator now uses absolute values (`(max - min) / (|max| + |min|)`), keeping the result bounded in `[0, 1]` for signals with negative samples while matching the standard Michelson contrast for non-negative signals"
+msgstr "Le dénominateur utilise désormais les valeurs absolues (`(max - min) / (|max| + |min|)`), bornant le résultat dans `[0, 1]` pour les signaux à valeurs négatives tout en correspondant au contraste de Michelson standard pour les signaux positifs ou nuls"
+
+msgid "Returns `nan` cleanly (without a division-by-zero warning) when both `max` and `min` are zero"
+msgstr "Retourne proprement `nan` (sans avertissement de division par zéro) lorsque `max` et `min` sont tous deux nuls"
+
 msgid "✨ Enhancements since version 1.1.1"
 msgstr "✨ Améliorations depuis la version 1.1.1"
 
@@ -91,8 +130,8 @@ msgstr "`TableResultBuilder` prend en charge `set_column_formats()` pour spécif
 msgid "Supports `\"*\"` wildcard key as a per-table default formatter"
 msgstr "Prend en charge la clé générique `\"*\"` comme formatteur par défaut pour chaque table"
 
-msgid "📦 Dependencies"
-msgstr "📦 Dépendances"
+msgid "📦 Dependencies changes since version 1.1.1"
+msgstr "📦 Changements de dépendances depuis la version 1.1.1"
 
 msgid "**Pandas 3.0 support**: Officially support pandas 3.0.x after validation — upper bound raised from `< 3.0` to `< 3.1`"
 msgstr "**Support de Pandas 3.0** : Prise en charge officielle de pandas 3.0.x après validation — la limite supérieure est passée de `< 3.0` à `< 3.1`"
@@ -103,8 +142,8 @@ msgstr "Cela clôt [Issue #13](https://github.com/DataLab-Platform/Sigima/issues
 msgid "**Python 3.14 support**: Added Python 3.14 classifier"
 msgstr "**Support de Python 3.14** : Ajout du classificateur Python 3.14"
 
-msgid "🔧 Other changes"
-msgstr "🔧 Autres changements"
+msgid "🔧 Other changes since version 1.1.1"
+msgstr "🔧 Autres changements depuis la version 1.1.1"
 
 msgid "**Remote control client**: Added `set_object` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to push modified signal/image objects back to DataLab after retrieving them with `get_object` (see [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))"
 msgstr "**Client de contrôle à distance** : Ajout de la méthode `set_object` à `SimpleRemoteProxy` et `SimpleAbstractDLControl`, permettant aux utilisateurs de renvoyer des objets signal/image modifiés à DataLab après les avoir récupérés avec `get_object` (voir [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))"
@@ -138,6 +177,9 @@ msgstr "Ajout du stub `stop_webapi_server()`"
 
 msgid "Added `get_webapi_status()` stub (returns server status dictionary)"
 msgstr "Ajout du stub `get_webapi_status()` (retourne un dictionnaire d'état du serveur)"
+
+msgid "🔧 Other changes since version 1.1.0"
+msgstr "🔧 Autres changements depuis la version 1.1.0"
 
 msgid "Updated development status classifier to \"Production/Stable\""
 msgstr "Mise à jour du classificateur d'état de développement vers \"Production/Stable\""
