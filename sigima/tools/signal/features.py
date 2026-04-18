@@ -123,13 +123,23 @@ def find_bandwidth_coordinates(
 
 
 def contrast(y: np.ndarray) -> float:
-    """Compute contrast
+    """Compute contrast.
+
+    The contrast is defined as ``(max - min) / (|max| + |min|)``. For
+    non-negative signals this matches the standard Michelson contrast
+    ``(max - min) / (max + min)``. For signals containing negative samples,
+    the absolute values in the denominator keep the result well-defined and
+    bounded in ``[0, 1]``. If both ``max`` and ``min`` are zero, ``nan`` is
+    returned.
 
     Args:
         y: Input array
 
     Returns:
-        Contrast
+        Contrast value in ``[0, 1]``, or ``nan`` if undefined.
     """
     max_, min_ = np.max(y), np.min(y)
-    return (max_ - min_) / (max_ + min_)
+    denom = np.abs(max_) + np.abs(min_)
+    if denom == 0:
+        return float("nan")
+    return float((max_ - min_) / denom)
