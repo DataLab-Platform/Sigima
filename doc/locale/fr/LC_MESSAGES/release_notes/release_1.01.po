@@ -117,6 +117,24 @@ msgstr "Le dénominateur utilise désormais les valeurs absolues (`(max - min) /
 msgid "Returns `nan` cleanly (without a division-by-zero warning) when both `max` and `min` are zero"
 msgstr "Retourne proprement `nan` (sans avertissement de division par zéro) lorsque `max` et `min` sont tous deux nuls"
 
+msgid "**Datetime conversion accuracy**: Fixed `datetime64_to_seconds` returning wrong Unix timestamps for coarse `datetime64` resolutions"
+msgstr "**Précision de la conversion datetime** : Correction de `datetime64_to_seconds` qui retournait des timestamps Unix erronés pour les résolutions `datetime64` grossières"
+
+msgid "The previous implementation only recognized `ns`, `us` and `ms` and silently used a nanosecond divisor for any other resolution, producing incorrect timestamps for `datetime64[s]`, `datetime64[m]`, `datetime64[h]` or `datetime64[D]`"
+msgstr "L'implémentation précédente ne reconnaissait que `ns`, `us` et `ms` et utilisait silencieusement un diviseur en nanosecondes pour toute autre résolution, produisant des timestamps erronés pour `datetime64[s]`, `datetime64[m]`, `datetime64[h]` ou `datetime64[D]`"
+
+msgid "Inputs are now normalized to `datetime64[ns]` before conversion, ensuring correct results for any source resolution and for pandas `DatetimeIndex` objects"
+msgstr "Les entrées sont désormais normalisées en `datetime64[ns]` avant conversion, garantissant des résultats corrects pour toute résolution source et pour les objets pandas `DatetimeIndex`"
+
+msgid "**DICOM image origin and spacing**: Fixed `ImageObj.dicom_template` falling back to inconsistent default coordinates when DICOM tags were missing"
+msgstr "**Origine et pas pixel des images DICOM** : Correction de `ImageObj.dicom_template` qui utilisait des coordonnées de repli incohérentes lorsque des tags DICOM étaient absents"
+
+msgid "When `ImagePositionPatient` or `PixelSpacing` was absent from the DICOM template, only the Y origin and Y pixel spacing received the fallback while the X origin and X pixel spacing were left as bare scalars, due to operator precedence"
+msgstr "Lorsque `ImagePositionPatient` ou `PixelSpacing` était absent du modèle DICOM, seuls l'origine Y et le pas pixel Y recevaient la valeur de repli, tandis que l'origine X et le pas pixel X restaient des scalaires bruts, en raison de la précédence des opérateurs"
+
+msgid "Both X and Y origin (`x0`, `y0`) and pixel spacing (`dx`, `dy`) are now consistently filled with the intended `(0.0, 0.0)` and `(1.0, 1.0)` defaults"
+msgstr "L'origine X et Y (`x0`, `y0`) et le pas pixel (`dx`, `dy`) sont désormais renseignés de manière cohérente avec les valeurs par défaut prévues `(0.0, 0.0)` et `(1.0, 1.0)`"
+
 msgid "✨ Enhancements since version 1.1.1"
 msgstr "✨ Améliorations depuis la version 1.1.1"
 
@@ -171,6 +189,9 @@ msgstr "Amélioration de la configuration de l'environnement de développement :
 
 msgid "CI: gated PyPI deployment on test suite passing"
 msgstr "CI : déploiement PyPI conditionné à la réussite de la suite de tests"
+
+msgid "**Test coverage**: Substantially expanded the unit-test suite to exercise previously untested branches across `sigima.objects`, `sigima.io`, `sigima.tools`, `sigima.proc` and `sigima.viz` (26 new test modules), and excluded the GUI visualization layer from coverage reports for more meaningful metrics"
+msgstr "**Couverture de tests** : Extension substantielle de la suite de tests unitaires pour couvrir des branches jusqu'alors non testées dans `sigima.objects`, `sigima.io`, `sigima.tools`, `sigima.proc` et `sigima.viz` (26 nouveaux modules de tests), et exclusion de la couche de visualisation GUI des rapports de couverture pour des métriques plus pertinentes"
 
 msgid "Sigima Version 1.1.1 (2026-02-02)"
 msgstr "Sigima Version 1.1.1 (02/02/2026)"

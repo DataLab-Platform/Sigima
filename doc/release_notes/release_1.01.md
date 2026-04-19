@@ -46,6 +46,14 @@
   * Denominator now uses absolute values (`(max - min) / (|max| + |min|)`), keeping the result bounded in `[0, 1]` for signals with negative samples while matching the standard Michelson contrast for non-negative signals
   * Returns `nan` cleanly (without a division-by-zero warning) when both `max` and `min` are zero
 
+* **Datetime conversion accuracy**: Fixed `datetime64_to_seconds` returning wrong Unix timestamps for coarse `datetime64` resolutions
+  * The previous implementation only recognized `ns`, `us` and `ms` and silently used a nanosecond divisor for any other resolution, producing incorrect timestamps for `datetime64[s]`, `datetime64[m]`, `datetime64[h]` or `datetime64[D]`
+  * Inputs are now normalized to `datetime64[ns]` before conversion, ensuring correct results for any source resolution and for pandas `DatetimeIndex` objects
+
+* **DICOM image origin and spacing**: Fixed `ImageObj.dicom_template` falling back to inconsistent default coordinates when DICOM tags were missing
+  * When `ImagePositionPatient` or `PixelSpacing` was absent from the DICOM template, only the Y origin and Y pixel spacing received the fallback while the X origin and X pixel spacing were left as bare scalars, due to operator precedence
+  * Both X and Y origin (`x0`, `y0`) and pixel spacing (`dx`, `dy`) are now consistently filled with the intended `(0.0, 0.0)` and `(1.0, 1.0)` defaults
+
 ### ✨ Enhancements since version 1.1.1 ###
 
 * **Legend value formatting**: Improved numeric formatting in analysis result legends
@@ -72,6 +80,7 @@
 
 * Improved development environment setup: new `run_with_env.py` script supporting multiple Python environment contexts (WinPython, venv, etc.)
 * CI: gated PyPI deployment on test suite passing
+* **Test coverage**: Substantially expanded the unit-test suite to exercise previously untested branches across `sigima.objects`, `sigima.io`, `sigima.tools`, `sigima.proc` and `sigima.viz` (26 new test modules), and excluded the GUI visualization layer from coverage reports for more meaningful metrics
 
 ## Sigima Version 1.1.1 (2026-02-02) ##
 
