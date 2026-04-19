@@ -11,6 +11,10 @@ concurrency = multiprocessing,thread
 omit =
     */sigima/tests/*
     */sigima/client/stub.py
+    #--- GUI visualization layer (PlotPy/Matplotlib backends) — Sigima is
+    #--- headless by design; viz code requires a Qt event loop and is
+    #--- exercised only by `--gui` tests, so it is excluded from coverage:
+    */sigima/viz/*
     */guidata/*
     */plotpy/*
     */qwt/*
