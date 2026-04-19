@@ -141,9 +141,9 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
         """Set DICOM template"""
         if template is not None:
             ipp = getattr(template, "ImagePositionPatient", None)
-            x0, y0 = 0.0, 0.0 if ipp is None else (float(ipp[0]), float(ipp[1]))
+            x0, y0 = (0.0, 0.0) if ipp is None else (float(ipp[0]), float(ipp[1]))
             pxs = getattr(template, "PixelSpacing", None)
-            dx, dy = 1.0, 1.0 if pxs is None else (float(pxs[0]), float(pxs[1]))
+            dx, dy = (1.0, 1.0) if pxs is None else (float(pxs[0]), float(pxs[1]))
             self.set_uniform_coords(dx, dy, x0, y0)
             self.__set_metadata_from(template)
             self._dicom_template = template
