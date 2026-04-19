@@ -11,9 +11,19 @@ they are trivial ``raise NotImplementedError`` placeholders.
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import sys
 
 import pytest
+
+# ===========================================================================
+# Backend availability detection (CI may have neither PlotPy nor Matplotlib)
+# ===========================================================================
+
+HAS_PLOTPY = importlib.util.find_spec("plotpy") is not None
+HAS_MPL = importlib.util.find_spec("matplotlib") is not None
+HAS_ANY_BACKEND = HAS_PLOTPY or HAS_MPL
+
 
 # ===========================================================================
 # Backend selection (sigima.viz)
@@ -27,6 +37,7 @@ def _reload_viz():
     return importlib.import_module("sigima.viz")
 
 
+@pytest.mark.skipif(not HAS_PLOTPY, reason="PlotPy not installed")
 def test_select_backend_via_env_plotpy(monkeypatch):
     """Setting ``SIGIMA_VIZ_BACKEND=plotpy`` selects the PlotPy backend via env."""
     monkeypatch.setenv("SIGIMA_VIZ_BACKEND", "plotpy")
@@ -36,6 +47,7 @@ def test_select_backend_via_env_plotpy(monkeypatch):
     assert name in ("plotpy", "matplotlib") or name == "plotpy"
 
 
+@pytest.mark.skipif(not HAS_MPL, reason="Matplotlib not installed")
 def test_select_backend_via_env_matplotlib(monkeypatch):
     """Setting ``SIGIMA_VIZ_BACKEND=matplotlib`` forces the Matplotlib backend."""
     monkeypatch.setenv("SIGIMA_VIZ_BACKEND", "matplotlib")
@@ -45,6 +57,7 @@ def test_select_backend_via_env_matplotlib(monkeypatch):
     assert name == "matplotlib"
 
 
+@pytest.mark.skipif(not HAS_ANY_BACKEND, reason="No viz backend installed")
 def test_select_backend_via_env_auto(monkeypatch):
     """``SIGIMA_VIZ_BACKEND=auto`` is a recognised value that triggers detection."""
     monkeypatch.setenv("SIGIMA_VIZ_BACKEND", "auto")
@@ -54,6 +67,7 @@ def test_select_backend_via_env_auto(monkeypatch):
     assert name in ("plotpy", "matplotlib")
 
 
+@pytest.mark.skipif(not HAS_ANY_BACKEND, reason="No viz backend installed")
 def test_select_backend_unrecognized_env_falls_back(monkeypatch):
     """An unrecognised ``SIGIMA_VIZ_BACKEND`` value must not crash: the
     selection logic must fall back to the configuration / auto-detection
@@ -93,6 +107,7 @@ def test_dir_returns_known_attrs(monkeypatch):
     assert "BACKEND_SOURCE" in listing
 
 
+@pytest.mark.skipif(not HAS_ANY_BACKEND, reason="No viz backend installed")
 def test_lazy_attribute_access_initializes_backend(monkeypatch):
     """Backend selection is deferred until first use: ``BACKEND_NAME`` starts as
     ``None`` and gets populated only when a public attribute is touched.
