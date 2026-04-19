@@ -2,6 +2,12 @@
 
 ## Sigima Version 1.1.2 (2026-04-20) ##
 
+### 💥 Breaking changes since version 1.1.1 ###
+
+* **Removed deprecated `sigima.tests.vistools` module**: The backward-compatibility shim introduced in version 1.1.0 has been removed
+  * Update imports from `from sigima.tests import vistools` to `from sigima import viz`
+  * All visualization helpers (`view_curves`, `view_images`, `create_curve`, `create_image`, etc.) remain available under their new home in `sigima.viz`
+
 ### 🛠️ Bug Fixes since version 1.1.1 ###
 
 * **CSV header parsing**: Fixed whitespace and unit extraction issues when reading CSV column headers

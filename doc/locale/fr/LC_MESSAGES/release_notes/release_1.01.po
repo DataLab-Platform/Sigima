@@ -18,6 +18,18 @@ msgstr "Version 1.1"
 msgid "Sigima Version 1.1.2 (2026-04-20)"
 msgstr "Sigima Version 1.1.2 (20/04/2026)"
 
+msgid "💥 Breaking changes since version 1.1.1"
+msgstr "💥 Changements incompatibles depuis la version 1.1.1"
+
+msgid "**Removed deprecated `sigima.tests.vistools` module**: The backward-compatibility shim introduced in version 1.1.0 has been removed"
+msgstr "**Suppression du module déprécié `sigima.tests.vistools`** : La couche de compatibilité ascendante introduite en version 1.1.0 a été supprimée"
+
+msgid "Update imports from `from sigima.tests import vistools` to `from sigima import viz`"
+msgstr "Remplacer les imports `from sigima.tests import vistools` par `from sigima import viz`"
+
+msgid "All visualization helpers (`view_curves`, `view_images`, `create_curve`, `create_image`, etc.) remain available under their new home in `sigima.viz`"
+msgstr "Tous les utilitaires de visualisation (`view_curves`, `view_images`, `create_curve`, `create_image`, etc.) restent disponibles dans leur nouvel emplacement `sigima.viz`"
+
 msgid "🛠️ Bug Fixes since version 1.1.1"
 msgstr "🛠️ Corrections de bugs depuis la version 1.1.1"
 
