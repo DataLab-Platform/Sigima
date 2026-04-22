@@ -74,6 +74,61 @@ def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     return dst
 
 
+@computation_function()
+def extract_peak_positions(obj: SignalObj, p: PeakDetectionParam) -> TableResult:
+    """Extract peak positions as an XY-markers table.
+
+    Detects peaks with
+    :py:func:`sigima.tools.signal.peakdetection.peak_indices` and returns a
+    :class:`~sigima.objects.TableResult` of kind
+    :attr:`~sigima.objects.TableKind.XY_MARKERS`. Each row holds the
+    ``(x, y)`` coordinates of a detected peak. Suitable for highlighting
+    remarkable points such as spectral lines (e.g. gamma-ray spectra) or
+    pulse positions: DataLab renders such tables as cross markers at the
+    corresponding ``(x, y)`` positions.
+
+    Args:
+        obj: source signal
+        p: peak detection parameters
+
+    Returns:
+        Table result with columns ``x`` and ``y``, one row per detected peak.
+    """
+    rows: list[list] = []
+    roi_idx: list[int] = []
+    for i_roi in obj.iterate_roi_indices():
+        x, y = obj.get_data(i_roi)
+        indices = peakdetection.peak_indices(
+            y, thres=p.threshold * 0.01, min_dist=p.min_dist
+        )
+        for idx in indices:
+            rows.append([float(x[idx]), float(y[idx])])
+            roi_idx.append(-1 if i_roi is None else int(i_roi))
+
+    def _axis_header(default: str, label: str, unit: str) -> str:
+        """Build a column header from a signal axis label/unit pair."""
+        text = label or default
+        if unit:
+            text = f"{text} ({unit})"
+        return text
+
+    return TableResult.from_rows(
+        title=_("Peak positions"),
+        headers=[
+            _axis_header("x", obj.xlabel, obj.xunit),
+            _axis_header("y", obj.ylabel, obj.yunit),
+        ],
+        rows=rows,
+        roi_indices=roi_idx if rows else None,
+        kind=TableKind.XY_MARKERS,
+        attrs={
+            "threshold": p.threshold,
+            "min_dist": p.min_dist,
+            "show_row_index": True,
+        },
+    )
+
+
 class FWHMParam(
     gds.DataSet,
     title=_("FWHM"),
