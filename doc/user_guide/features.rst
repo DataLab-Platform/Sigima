@@ -376,10 +376,13 @@ Peak and Feature Detection
 
    * - Function
      - Description
-   * - :func:`peak_detection <sigima.proc.signal.peak_detection>`
-     - Peak detection in signals
    * - :func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`
-     - Extract peak positions as an XY-markers table
+     - Extract peak positions as an XY-markers table (preferred entry point)
+   * - :func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`
+     - Convert an XY-markers table back into a sticks signal
+   * - :func:`peak_detection <sigima.proc.signal.peak_detection>`
+     - **Deprecated** — use ``extract_peak_positions`` (+ ``markers_table_to_signal``
+       when a sticks signal is also needed)
    * - :func:`bandwidth_3db <sigima.proc.signal.bandwidth_3db>`
      - 3dB bandwidth measurement
    * - :func:`fwhm <sigima.proc.signal.fwhm>`

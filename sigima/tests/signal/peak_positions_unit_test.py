@@ -76,7 +76,8 @@ def test_signal_extract_peak_positions() -> None:
     assert result.attrs.get("show_row_index") is True
 
     # Cross-check with the existing peak_detection function (same algorithm)
-    expected = sigima.proc.signal.peak_detection(src, param)
+    with pytest.warns(DeprecationWarning, match="peak_detection is deprecated"):
+        expected = sigima.proc.signal.peak_detection(src, param)
     xs = np.array(result.col(x_header))
     ys = np.array(result.col(y_header))
     assert xs.size == expected.x.size
