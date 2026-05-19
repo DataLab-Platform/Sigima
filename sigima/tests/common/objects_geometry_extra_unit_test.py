@@ -115,7 +115,7 @@ def test_geometry_kind_wrong_type_raises() -> None:
     """``kind`` must be a string or ``KindShape``; integers (and other
     non-string types) are rejected."""
     with pytest.raises(ValueError):
-        GeometryResult(title="t", kind=42, coords=np.zeros((1, 2)))  # type: ignore[arg-type]
+        GeometryResult(title="t", kind=42, coords=np.zeros((1, 2)))
 
 
 def test_geometry_empty_title_raises() -> None:

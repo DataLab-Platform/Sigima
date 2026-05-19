@@ -163,7 +163,12 @@ class _CurveClippedXRangeSelection(XRangeSelection):
         """Override the fill color for this ROI instance."""
         self._fill_color = QG.QColor(color)
 
-    def _build_curve_polygon(self, xMap, yMap, rct):
+    def _build_curve_polygon(  # pylint: disable=too-many-return-statements
+        self,
+        xMap,  # pylint: disable=invalid-name
+        yMap,  # pylint: disable=invalid-name
+        rct,
+    ):
         """Build a polygon following the signal curve between ``self._min``
         and ``self._max`` with a baseline at ``y=0`` (clamped to the visible
         canvas, with a fallback to canvas bottom for log-Y)."""
@@ -214,15 +219,12 @@ class _CurveClippedXRangeSelection(XRangeSelection):
         polygon.append(QC.QPointF(xMap.transform(xs[-1]), baseline_y))
         return polygon
 
-    def _compute_baseline_y(self, yMap, rct):
+    def _compute_baseline_y(self, yMap, rct):  # pylint: disable=invalid-name
         """Return the canvas y-coordinate of the polygon baseline."""
         plot = self.plot()
         is_log_y = False
         if plot is not None:
-            try:
-                is_log_y = plot.get_axis_scale(self.yAxis()) == "log"
-            except Exception:  # pragma: no cover - defensive
-                is_log_y = False
+            is_log_y = plot.get_axis_scale(self.yAxis()) == "log"
         if is_log_y:
             return rct.bottom()
         baseline_y = yMap.transform(0.0)
@@ -284,8 +286,14 @@ class _CurveClippedXRangeSelection(XRangeSelection):
             sym.drawSymbol(painter, QC.QPointF(x1, y))
 
 
-class _CurveClippedAnnotatedXRange(AnnotatedXRange):
-    """Annotated X-range whose underlying shape is curve-clipped."""
+class _CurveClippedAnnotatedXRange(AnnotatedXRange):  # pylint: disable=abstract-method
+    """Annotated X-range selection whose underlying shape is a
+    :class:`_CurveClippedXRangeSelection` (curve-clipped fill + per-instance
+    color).
+
+    ``get_tr_size`` is intentionally not overridden: ``AnnotatedXRange`` (from
+    PlotPy) does not override it either, so the abstract-method warning is a
+    false positive inherited from upstream."""
 
     SHAPE_CLASS = _CurveClippedXRangeSelection
 

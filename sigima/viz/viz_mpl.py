@@ -177,6 +177,7 @@ def view_curves(
     x_unit = xunit
     y_unit = yunit
 
+    # pylint: disable=too-many-nested-blocks
     for idx, data_or_obj in enumerate(datalist):
         color, linestyle = _get_next_style(idx)
 

@@ -15,7 +15,13 @@ import pytest
 import sigima.objects
 import sigima.params
 import sigima.proc.signal
-from sigima.objects import GaussParam, SineParam, create_signal_from_param
+from sigima.objects import (
+    GaussParam,
+    SineParam,
+    TableKind,
+    TableResult,
+    create_signal_from_param,
+)
 from sigima.tests.data import create_paracetamol_signal
 from sigima.tests.helpers import check_scalar_result
 
@@ -183,8 +189,6 @@ def test_markers_table_to_signal() -> None:
 
 def test_markers_table_to_signal_invalid_kind() -> None:
     """Non XY-markers tables must be rejected."""
-    from sigima.objects import TableKind, TableResult
-
     table = TableResult.from_rows(
         title="not markers",
         headers=["a", "b"],
@@ -197,8 +201,6 @@ def test_markers_table_to_signal_invalid_kind() -> None:
 
 def test_markers_table_to_signal_header_fallback() -> None:
     """When ``x`` / ``y`` headers are missing, the first two columns are used."""
-    from sigima.objects import TableKind, TableResult
-
     table = TableResult.from_rows(
         title="raw markers",
         headers=["lambda", "intensity", "ignored"],

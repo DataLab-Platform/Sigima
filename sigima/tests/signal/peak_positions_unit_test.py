@@ -98,7 +98,7 @@ def test_signal_extract_peak_positions_no_peak() -> None:
     param = sigima.params.PeakDetectionParam.create(threshold=100, min_dist=1)
     result = sigima.proc.signal.extract_peak_positions(src, param)
     assert result.kind == TableKind.XY_MARKERS
-    assert result.data == []
+    assert not result.data
     assert result.roi_indices is None
 
 
