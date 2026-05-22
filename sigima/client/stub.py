@@ -170,6 +170,9 @@ class DataLabStubServer:
         self.server.register_function(self.select_objects, "select_objects")
         self.server.register_function(self.select_groups, "select_groups")
         self.server.register_function(self.get_sel_object_uuids, "get_sel_object_uuids")
+        self.server.register_function(
+            self.get_current_object_uuid, "get_current_object_uuid"
+        )
 
         # Group operations
         self.server.register_function(self.add_group, "add_group")
@@ -621,6 +624,10 @@ class DataLabStubServer:
     def get_sel_object_uuids(self, include_groups: bool = False) -> list[str]:
         """Return selected objects uuids."""
         return self.selected_objects.copy()
+
+    def get_current_object_uuid(self) -> str | None:
+        """Return current object uuid (first selected, or None)."""
+        return self.selected_objects[0] if self.selected_objects else None
 
     def select_groups(self, selection: list[int], panel: str | None = None) -> None:
         """Select groups by indices."""
