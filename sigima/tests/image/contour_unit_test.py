@@ -17,6 +17,7 @@ import sigima.objects
 import sigima.params
 import sigima.proc.image
 from sigima.enums import ContourShape
+from sigima.objects.image.roi import CircularROI, PolygonalROI
 from sigima.tests import guiutils
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
@@ -144,6 +145,71 @@ def test_contour_shape() -> None:
     execenv.print("All contour shape tests passed!")
 
 
+def test_contour_roi_polygon() -> None:
+    """Test contour detection with polygon shape creates polygon ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.POLYGON, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+    for roi in image.roi.single_rois:
+        assert isinstance(roi, PolygonalROI)
+    execenv.print(f"Polygon ROIs created: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_ellipse() -> None:
+    """Test contour detection with ellipse shape creates polygon ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.ELLIPSE, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+    # Ellipses are approximated as polygon ROIs
+    for roi in image.roi.single_rois:
+        assert isinstance(roi, PolygonalROI)
+    execenv.print(f"Polygon ROIs from ellipses: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_circle() -> None:
+    """Test contour detection with circle shape creates circle ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.CIRCLE, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+    for roi in image.roi.single_rois:
+        assert isinstance(roi, CircularROI)
+    execenv.print(f"Circle ROIs created: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_disabled() -> None:
+    """Test contour detection with create_rois=False does not create ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.POLYGON, create_rois=False
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is None
+
+
 if __name__ == "__main__":
     test_contour_interactive()
     test_contour_shape()
+    test_contour_roi_polygon()
+    test_contour_roi_ellipse()
+    test_contour_roi_circle()
+    test_contour_roi_disabled()
