@@ -13,7 +13,9 @@
 * **Circle/ellipse detection with calibrated images**: Fixed radius and semi-axes not being converted from pixel units to physical units
   * When an image had non-default pixel calibration (e.g., dx=2 mm/pixel), center coordinates were correctly converted to physical units but the radius and semi-axes remained in pixels, causing values to be wrong by a factor equal to the pixel size
 
+### 🧪 Tests ###
 
+* **Non-uniform image coordinates**: Strengthened test coverage for images with non-uniform (irregularly spaced) X/Y coordinates, closing the remaining gaps in coordinate-mode switching, geometry operations and coordinated-text reading. This closes [Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24).
 
 ## Sigima Version 1.1.2 (2026-04-20) ##
 

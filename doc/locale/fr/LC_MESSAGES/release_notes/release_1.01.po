@@ -250,6 +250,12 @@ msgstr "Mise à jour de toutes les fonctions de test interactives pour utiliser 
 msgid "Improved code consistency across signal and image test modules"
 msgstr "Amélioration de la cohérence du code entre les modules de test de signaux et d'images"
 
+msgid "🧪 Tests"
+msgstr "🧪 Tests"
+
+msgid "**Non-uniform image coordinates**: Strengthened test coverage for images with non-uniform (irregularly spaced) X/Y coordinates, closing the remaining gaps in coordinate-mode switching, geometry operations and coordinated-text reading. This closes [Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
+msgstr "**Coordonnées d'image non uniformes** : Renforcement de la couverture de tests pour les images à coordonnées X/Y non uniformes (espacement irrégulier), comblant les dernières lacunes concernant le changement de mode de coordonnées, les opérations géométriques et la lecture du format texte coordonné. Ceci clôt l'[Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
+
 msgid "**Visualization backend flexibility**: Added support for Matplotlib as an alternative to PlotPy for test visualizations"
 msgstr "**Flexibilité du backend de visualisation** : Ajout de la prise en charge de Matplotlib comme alternative à PlotPy pour les visualisations de test"
 
