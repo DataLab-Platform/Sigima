@@ -753,6 +753,40 @@ def test_coordinate_conversion() -> None:
     execenv.print(f"{test_coordinate_conversion.__doc__}: OK")
 
 
+def test_switch_coords_errors() -> None:
+    """Test switch_coords_to error handling with insufficient coordinates"""
+    execenv.print(f"{test_switch_coords_errors.__doc__}:")
+
+    # A single-column image only has one X coordinate, so switching its
+    # non-uniform coordinates back to a uniform grid is impossible.
+    data = np.random.rand(4, 1)
+    image = sigima.objects.create_image(title="Single column", data=data)
+    image.set_coords(xcoords=np.array([2.0]), ycoords=np.array([0.0, 1.0, 2.0, 3.0]))
+    assert not image.is_uniform_coords
+
+    try:
+        image.switch_coords_to("uniform")
+        assert False, "Should have raised ValueError for insufficient coordinates"
+    except ValueError as exc:
+        assert "not enough non-uniform coordinates" in str(exc)
+        execenv.print("    ✓ ValueError raised when switching to uniform fails")
+
+    # Switching a uniform image to non-uniform and back must round-trip exactly.
+    image2 = sigima.objects.create_image(
+        title="Round-trip", data=np.random.rand(10, 12)
+    )
+    image2.set_uniform_coords(dx=0.5, dy=0.8, x0=10.0, y0=20.0)
+    image2.switch_coords_to("non-uniform")
+    assert not image2.is_uniform_coords
+    image2.switch_coords_to("uniform")
+    assert image2.is_uniform_coords
+    np.testing.assert_allclose([image2.x0, image2.y0], [10.0, 20.0], rtol=1e-10)
+    np.testing.assert_allclose([image2.dx, image2.dy], [0.5, 0.8], rtol=1e-10)
+    execenv.print("    ✓ Uniform → non-uniform → uniform round-trip preserved")
+
+    execenv.print(f"{test_switch_coords_errors.__doc__}: OK")
+
+
 if __name__ == "__main__":
     guiutils.enable_gui()
     test_create_image()
@@ -762,3 +796,4 @@ if __name__ == "__main__":
     test_create_image_from_param()
     test_image_copy()
     test_coordinate_conversion()
+    test_switch_coords_errors()
