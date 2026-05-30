@@ -183,6 +183,37 @@ def test_image_transpose() -> None:
 
 
 @pytest.mark.validation
+def test_image_geometry_nonuniform_coords() -> None:
+    """Check that geometry operations propagate non-uniform coordinates.
+
+    ``translate`` and ``transpose`` keep the coordinate arrays in sync with the
+    transformed data when the source image uses non-uniform coordinates.
+    """
+    execenv.print("*** Testing non-uniform coordinate propagation")
+
+    src = get_test_image("flower.npy")
+    ny, nx = src.data.shape
+    xcoords = np.linspace(0.0, 10.0, nx) ** 1.5  # non-uniform spacing
+    ycoords = np.linspace(0.0, 8.0, ny) ** 2  # non-uniform spacing
+    src.set_coords(xcoords, ycoords)
+
+    # translate must offset the coordinate arrays (not x0/y0)
+    dst_t = sigima.proc.image.translate(
+        src, sigima.params.TranslateParam.create(dx=3.0, dy=-2.0)
+    )
+    assert not dst_t.is_uniform_coords, "translate must keep non-uniform coords"
+    check_array_result("Translate non-uniform xcoords", dst_t.xcoords, xcoords + 3.0)
+    check_array_result("Translate non-uniform ycoords", dst_t.ycoords, ycoords - 2.0)
+
+    # transpose must swap the coordinate arrays
+    dst_tr = sigima.proc.image.transpose(src)
+    assert not dst_tr.is_uniform_coords, "transpose must keep non-uniform coords"
+    check_array_result("Transpose non-uniform xcoords", dst_tr.xcoords, ycoords)
+    check_array_result("Transpose non-uniform ycoords", dst_tr.ycoords, xcoords)
+    check_array_result("Transpose non-uniform data", dst_tr.data, src.data.T)
+
+
+@pytest.mark.validation
 def test_image_resampling() -> None:
     """Image resampling test."""
     execenv.print("*** Testing image resampling")
