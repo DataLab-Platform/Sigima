@@ -182,7 +182,6 @@ def test_image_transpose() -> None:
     check_array_result("Transpose", dst.data, exp)
 
 
-@pytest.mark.validation
 def test_image_geometry_nonuniform_coords() -> None:
     """Check that geometry operations propagate non-uniform coordinates.
 
