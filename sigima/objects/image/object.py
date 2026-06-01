@@ -504,7 +504,12 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
             return view
         single_roi = self.roi.get_single_roi(roi_index)
         # pylint: disable=unbalanced-tuple-unpacking
-        x0, y0, x1, y1 = self.physical_to_indices(single_roi.get_bounding_box(self))
+        if getattr(single_roi, "inverse", False):
+            # Inverse ROI: the region of interest is the whole image minus the
+            # ROI shape, so the bounding box must cover the entire image.
+            x0, y0, x1, y1 = 0, 0, self.data.shape[1], self.data.shape[0]
+        else:
+            x0, y0, x1, y1 = self.physical_to_indices(single_roi.get_bounding_box(self))
         # Clip coordinates to image boundaries to handle ROIs extending beyond canvas
         x0 = max(0, x0)
         y0 = max(0, y0)

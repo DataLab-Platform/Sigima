@@ -55,6 +55,8 @@ def get_2d_peaks_coords(
     Returns:
         Coordinates of peaks
     """
+    if isinstance(data, ma.MaskedArray):
+        data = data.filled(np.ma.median(data))
     if size is None:
         size = max(min(data.shape) // 40, 50)
     data_max = spi.maximum_filter(data, size)
@@ -154,6 +156,8 @@ def get_hough_circle_peaks(
         Coordinates of circles
     """
     assert min_radius is not None and max_radius is not None and max_radius > min_radius
+    if isinstance(data, ma.MaskedArray):
+        data = data.filled(np.ma.median(data))
     if nb_radius is None:
         nb_radius = max_radius - min_radius + 1
     hough_radii = np.arange(
@@ -214,6 +218,8 @@ def find_blobs_dog(
         Coordinates of blobs
     """
     # Use scikit-image's Difference of Gaussians (DoG) method
+    if isinstance(data, ma.MaskedArray):
+        data = data.filled(np.ma.median(data))
     blobs = feature.blob_dog(
         data,
         min_sigma=min_sigma,
@@ -256,6 +262,8 @@ def find_blobs_doh(
         Coordinates of blobs
     """
     # Use scikit-image's Determinant of Hessian (DoH) method to detect blobs
+    if isinstance(data, ma.MaskedArray):
+        data = data.filled(np.ma.median(data))
     blobs = feature.blob_doh(
         data,
         min_sigma=min_sigma,
@@ -302,6 +310,8 @@ def find_blobs_log(
         Coordinates of blobs
     """
     # Use scikit-image's Laplacian of Gaussian (LoG) method to detect blobs
+    if isinstance(data, ma.MaskedArray):
+        data = data.filled(np.ma.median(data))
     blobs = feature.blob_log(
         data,
         min_sigma=min_sigma,
@@ -442,6 +452,8 @@ def find_blobs_opencv(
     if max_convexity is not None:
         params.maxConvexity = max_convexity
     detector = cv2.SimpleBlobDetector_create(params)
+    if isinstance(data, ma.MaskedArray):
+        data = data.filled(np.ma.median(data))
     image = exposure.rescale_intensity(data, out_range=np.uint8)
     keypoints = detector.detect(image)
     if keypoints:

@@ -22,6 +22,7 @@ from collections.abc import Callable
 from typing import Any
 
 import numpy as np
+import numpy.ma as ma
 
 from sigima.objects import NO_ROI, GeometryResult, ImageObj, KindShape, SignalObj
 from sigima.proc.base import dst_1_to_1 as _dst_1_to_1_base
@@ -300,6 +301,25 @@ def compute_geometry_from_obj(
 
         if coords.size:
             coords = np.array(coords, dtype=float)
+
+            # Post-filter: discard detections whose center falls in a masked
+            # pixel (e.g., from inverse ROI). This catches false positives
+            # caused by the fill value used for masked data in detection
+            # algorithms. The check is done before coordinate conversion, while
+            # coords are still in sub-image pixel units.
+            if isinstance(data_roi, ma.MaskedArray) and data_roi.mask.any():
+                # Center is always in columns 0 (x) and 1 (y)
+                cx = np.clip(
+                    np.round(coords[:, 0]).astype(int), 0, data_roi.shape[1] - 1
+                )
+                cy = np.clip(
+                    np.round(coords[:, 1]).astype(int), 0, data_roi.shape[0] - 1
+                )
+                valid = ~data_roi.mask[cy, cx]
+                coords = coords[valid]
+                if coords.size == 0:
+                    continue
+
             if coords.shape[1] % 2 == 0:
                 # Coordinates are in the form [x0, y0, x1, y1, ...]
                 colx, coly = slice(None, None, 2), slice(1, None, 2)
@@ -320,9 +340,14 @@ def compute_geometry_from_obj(
                     coords[:, 3] *= pixel_scale
                 # Column 4 (theta) is an angle: no scaling needed
             if obj.roi is not None:
-                x0, y0, _x1, _y1 = obj.roi.get_single_roi(i_roi).get_bounding_box(obj)
-                coords[:, colx] += x0 - obj.x0
-                coords[:, coly] += y0 - obj.y0
+                single_roi = obj.roi.get_single_roi(i_roi)
+                if getattr(single_roi, "inverse", False):
+                    # Inverse ROI: data covers the entire image, no offset
+                    pass
+                else:
+                    x0, y0, _x1, _y1 = single_roi.get_bounding_box(obj)
+                    coords[:, colx] += x0 - obj.x0
+                    coords[:, coly] += y0 - obj.y0
 
             rows.append(coords)
             num_cols.append(coords.shape[1])
