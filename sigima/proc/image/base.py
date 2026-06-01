@@ -22,7 +22,7 @@ from collections.abc import Callable
 from typing import Any
 
 import numpy as np
-import numpy.ma as ma
+from numpy import ma
 
 from sigima.objects import NO_ROI, GeometryResult, ImageObj, KindShape, SignalObj
 from sigima.proc.base import dst_1_to_1 as _dst_1_to_1_base
