@@ -67,7 +67,7 @@ msgid "Blank images: Zeros"
 msgstr "Images vierges : zéros"
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Method 2: Loading images from files"
 msgstr "Méthode 2 : Chargement d'images depuis des fichiers"
@@ -91,7 +91,7 @@ msgid "Text formats: CSV, TXT, ASC (with coordinate support)"
 msgstr "Formats texte : CSV, TXT, ASC (avec prise en charge des coordonnées)"
 
 msgid "Method 3: Creating images from NumPy arrays"
-msgstr ""
+msgstr "Méthode 3 : Création d'images à partir de tableaux NumPy"
 
 msgid "Convert existing NumPy arrays into Sigima image objects to add metadata, coordinate systems, and enable advanced processing."
 msgstr "Convertir les tableaux NumPy existants en objets image Sigima pour ajouter des métadonnées, des systèmes de coordonnées et activer le traitement avancé."

@@ -15,6 +15,56 @@ msgstr ""
 msgid "Version 1.1"
 msgstr "Version 1.1"
 
+#, fuzzy
+msgid "Sigima Version 1.1.3"
+msgstr "Sigima Version 1.1.0 (31/01/2026)"
+
+#, fuzzy
+msgid "🛠️ Bug Fixes since version 1.1.2"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.1"
+
+msgid "**Ellipse/circle contour detection**: Fixed swapped X/Y coordinates when using scikit-image ≥ 0.26.0. This closes [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21)."
+msgstr "**Détection de contours d'ellipse/cercle** : Correction des coordonnées X/Y inversées lors de l'utilisation de scikit-image ≥ 0.26.0. Cela clôt [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21)."
+
+msgid "The new `EllipseModel`/`CircleModel` API returns center coordinates as `(row, col)` but the code was treating them as `(x, y)`, causing detected ellipses and circles to appear at wrong positions on the image"
+msgstr "La nouvelle API `EllipseModel`/`CircleModel` renvoie les coordonnées du centre sous forme de `(row, col)`, mais le code les traitait comme `(x, y)`, ce qui faisait apparaître les ellipses et les cercles détectés à des positions incorrectes sur l'image"
+
+msgid "Semi-axis lengths were also swapped for ellipses, resulting in incorrect aspect ratios"
+msgstr "Les longueurs des demi-axes étaient également inversées pour les ellipses, entraînant des rapports d'aspect incorrects"
+
+msgid "This bug only affected scikit-image ≥ 0.26.0; older versions were handled correctly"
+msgstr "Ce bogue n'affectait que scikit-image ≥ 0.26.0 ; les versions plus anciennes étaient correctement gérées"
+
+msgid "**Ellipse visualization**: Fixed incorrect minor axis direction in `ellipse_to_diameters` coordinate conversion"
+msgstr "**Visualisation des ellipses** : Correction de la direction incorrecte de l'axe mineur dans la conversion des coordonnées `ellipse_to_diameters`"
+
+msgid "The minor axis endpoints were computed with a wrong sign, making the minor axis non-perpendicular to the major axis for rotated ellipses (e.g., at θ=45° both axes pointed in the same direction). This caused distorted ellipse overlays in DataLab when displaying detected or annotated ellipses at non-trivial rotation angles"
+msgstr "Les extrémités de l'axe mineur étaient calculées avec un signe incorrect, rendant l'axe mineur non perpendiculaire à l'axe majeur pour les ellipses tournées (par exemple, à θ=45° les deux axes pointaient dans la même direction). Cela provoquait des superpositions d'ellipses déformées dans DataLab lors de l'affichage d'ellipses détectées ou annotées à des angles de rotation non triviaux"
+
+msgid "**Circle/ellipse detection with calibrated images**: Fixed radius and semi-axes not being converted from pixel units to physical units"
+msgstr "**Détection de cercles/ellipses avec des images calibrées** : Correction du rayon et des demi-axes qui n'étaient pas convertis des unités de pixels aux unités physiques"
+
+msgid "When an image had non-default pixel calibration (e.g., dx=2 mm/pixel), center coordinates were correctly converted to physical units but the radius and semi-axes remained in pixels, causing values to be wrong by a factor equal to the pixel size"
+msgstr "Lorsque une image avait une calibration de pixels non par défaut (par exemple, dx=2 mm/pixel), les coordonnées du centre étaient correctement converties en unités physiques, mais le rayon et les demi-axes restaient en pixels, ce qui entraînait des valeurs incorrectes par un facteur égal à la taille du pixel"
+
+msgid "**Custom signal XY preservation**: Fixed user-edited XY values being silently discarded when regenerating a custom signal from its creation parameters. `generate_1d_data()` now initializes the XY array only on first use and preserves user-edited contents on subsequent calls. This closes [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25)."
+msgstr "Signaux personnalisés : Correction de la suppression silencieuse des valeurs XY modifiées par l'utilisateur lors de la régénération d'un signal personnalisé à partir de ses paramètres de création. `generate_1d_data()` initialise désormais le tableau XY uniquement lors de la première utilisation et préserve les contenus modifiés par l'utilisateur lors des appels suivants. Cela clôt [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25)."
+
+msgid "🔧 Other changes since version 1.1.2"
+msgstr "🔧 Autres changements depuis la version 1.1.2"
+
+msgid "**Debug environment variable**: Renamed the test debug environment variable from `DEBUG` to `SIGIMA_DEBUG` to avoid collisions with unrelated tools and frameworks that commonly export a bare `DEBUG` variable. This closes [Issue #19](https://github.com/DataLab-Platform/Sigima/issues/19)."
+msgstr "**Variable d'environnement de débogage** : Renommage de la variable d'environnement de débogage de test de `DEBUG` à `SIGIMA_DEBUG` pour éviter les collisions avec des outils et frameworks non liés qui exportent couramment une variable `DEBUG` seule. Cela clôt [Issue #19](https://github.com/DataLab-Platform/Sigima/issues/19)."
+
+msgid "**Remote control client**: Added `get_current_object_uuid()` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to retrieve the UUID of the currently selected object in DataLab"
+msgstr "**Client de contrôle à distance** : Ajout de la méthode `get_current_object_uuid()` à `SimpleRemoteProxy` et `SimpleAbstractDLControl`, permettant aux utilisateurs de récupérer l'UUID de l'objet actuellement sélectionné dans DataLab"
+
+msgid "🧪 Tests"
+msgstr "🧪 Tests"
+
+msgid "**Non-uniform image coordinates**: Strengthened test coverage for images with non-uniform (irregularly spaced) X/Y coordinates, closing the remaining gaps in coordinate-mode switching, geometry operations and coordinated-text reading. This closes [Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
+msgstr "**Coordonnées d'image non uniformes** : Renforcement de la couverture de tests pour les images à coordonnées X/Y non uniformes (espacement irrégulier), comblant les dernières lacunes concernant le changement de mode de coordonnées, les opérations géométriques et la lecture du format texte coordonné. Ceci clôt l'[Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
+
 msgid "Sigima Version 1.1.2 (2026-04-20)"
 msgstr "Sigima Version 1.1.2 (20/04/2026)"
 
@@ -249,12 +299,6 @@ msgstr "Mise à jour de toutes les fonctions de test interactives pour utiliser 
 
 msgid "Improved code consistency across signal and image test modules"
 msgstr "Amélioration de la cohérence du code entre les modules de test de signaux et d'images"
-
-msgid "🧪 Tests"
-msgstr "🧪 Tests"
-
-msgid "**Non-uniform image coordinates**: Strengthened test coverage for images with non-uniform (irregularly spaced) X/Y coordinates, closing the remaining gaps in coordinate-mode switching, geometry operations and coordinated-text reading. This closes [Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
-msgstr "**Coordonnées d'image non uniformes** : Renforcement de la couverture de tests pour les images à coordonnées X/Y non uniformes (espacement irrégulier), comblant les dernières lacunes concernant le changement de mode de coordonnées, les opérations géométriques et la lecture du format texte coordonné. Ceci clôt l'[Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
 
 msgid "**Visualization backend flexibility**: Added support for Matplotlib as an alternative to PlotPy for test visualizations"
 msgstr "**Flexibilité du backend de visualisation** : Ajout de la prise en charge de Matplotlib comme alternative à PlotPy pour les visualisations de test"
