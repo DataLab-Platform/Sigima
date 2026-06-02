@@ -1,5 +1,28 @@
 # Version 1.1 #
 
+## Sigima Version 1.1.3 ##
+
+### 🛠️ Bug Fixes since version 1.1.2 ###
+
+* **Ellipse/circle contour detection**: Fixed swapped X/Y coordinates when using scikit-image ≥ 0.26.0. This closes [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21).
+  * The new `EllipseModel`/`CircleModel` API returns center coordinates as `(row, col)` but the code was treating them as `(x, y)`, causing detected ellipses and circles to appear at wrong positions on the image
+  * Semi-axis lengths were also swapped for ellipses, resulting in incorrect aspect ratios
+  * This bug only affected scikit-image ≥ 0.26.0; older versions were handled correctly
+* **Ellipse visualization**: Fixed incorrect minor axis direction in `ellipse_to_diameters` coordinate conversion
+  * The minor axis endpoints were computed with a wrong sign, making the minor axis non-perpendicular to the major axis for rotated ellipses (e.g., at θ=45° both axes pointed in the same direction). This caused distorted ellipse overlays in DataLab when displaying detected or annotated ellipses at non-trivial rotation angles
+* **Circle/ellipse detection with calibrated images**: Fixed radius and semi-axes not being converted from pixel units to physical units
+  * When an image had non-default pixel calibration (e.g., dx=2 mm/pixel), center coordinates were correctly converted to physical units but the radius and semi-axes remained in pixels, causing values to be wrong by a factor equal to the pixel size
+* **Custom signal XY preservation**: Fixed user-edited XY values being silently discarded when regenerating a custom signal from its creation parameters. `generate_1d_data()` now initializes the XY array only on first use and preserves user-edited contents on subsequent calls. This closes [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25).
+
+### 🔧 Other changes since version 1.1.2 ###
+
+* **Debug environment variable**: Renamed the test debug environment variable from `DEBUG` to `SIGIMA_DEBUG` to avoid collisions with unrelated tools and frameworks that commonly export a bare `DEBUG` variable. This closes [Issue #19](https://github.com/DataLab-Platform/Sigima/issues/19).
+* **Remote control client**: Added `get_current_object_uuid()` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to retrieve the UUID of the currently selected object in DataLab
+
+### 🧪 Tests ###
+
+* **Non-uniform image coordinates**: Strengthened test coverage for images with non-uniform (irregularly spaced) X/Y coordinates, closing the remaining gaps in coordinate-mode switching, geometry operations and coordinated-text reading. This closes [Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24).
+
 ## Sigima Version 1.1.2 (2026-04-20) ##
 
 ### 💥 Breaking changes since version 1.1.1 ###

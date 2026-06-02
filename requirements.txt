@@ -22,9 +22,11 @@ pytest-xvfb
 qtpy
 ruff
 scikit-image >= 0.19.2, < 0.27
+setuptools
 sphinx
 sphinx-copybutton
 sphinx-gallery
 sphinx_design
 sphinx_intl
 typing-extensions >= 4.0
+wheel

@@ -36,7 +36,7 @@ msgid "We load a sample paracetamol spectrum included in the Sigima test data. T
 msgstr "On charge un spectre de paracétamol fourni dans les données de test de Sigima. Ce spectre contient des pics d'absorption caractéristiques que l'on analyse à l'aide de différentes techniques de traitement du signal."
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Apply Wiener filter for noise reduction"
 msgstr "Appliquer un filtre de Wiener pour réduire le bruit"
