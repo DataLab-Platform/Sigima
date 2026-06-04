@@ -84,6 +84,49 @@ def test_fit_ellipse_model_failure() -> None:
     assert result is None or isinstance(result, tuple)
 
 
+def test_fit_circle_model_ground_truth() -> None:
+    """Verify that ``fit_circle_model`` recovers **all** circle parameters
+    (xc, yc, radius) from a noise-free contour.
+
+    Note: the functions swap x/y because scikit-image models interpret the
+    contour columns as (row, col), so the returned ``xc`` corresponds to the
+    contour's second column and ``yc`` to the first.
+    """
+    xc_in, yc_in, r_in = 7.0, -5.0, 12.0
+    contour = _circle_contour(xc_in, yc_in, r_in, n=256)
+    result = fit_circle_model(contour)
+    assert result is not None
+    # xc/yc are swapped by the row/col → x/y conversion
+    yc, xc, r = result
+    assert xc == pytest.approx(xc_in, abs=1e-6)
+    assert yc == pytest.approx(yc_in, abs=1e-6)
+    assert r == pytest.approx(r_in, abs=1e-6)
+
+
+def test_fit_ellipse_model_ground_truth() -> None:
+    """Verify that ``fit_ellipse_model`` recovers **all** ellipse parameters
+    (xc, yc, a, b, theta) from a noise-free contour.
+
+    Note: the functions swap x/y and a/b because scikit-image models interpret
+    the contour columns as (row, col), so centre and semi-axes are transposed.
+    """
+    xc_in, yc_in = -3.0, 5.0
+    a_in, b_in = 4.0, 8.0
+    theta_in = np.pi / 6
+    contour = _ellipse_contour(xc_in, yc_in, a_in, b_in, theta0=theta_in, n=256)
+    result = fit_ellipse_model(contour)
+    assert result is not None
+    # xc/yc are swapped by the row/col → x/y conversion
+    yc, xc, a, b, theta = result
+    assert xc == pytest.approx(xc_in, abs=1e-4)
+    assert yc == pytest.approx(yc_in, abs=1e-4)
+    assert a == pytest.approx(a_in, abs=1e-4)
+    assert b == pytest.approx(b_in, abs=1e-4)
+    # The fitted angle is expected to differ by π/2,
+    # theta along y axis instead of x axis
+    assert theta == pytest.approx(theta_in + np.pi / 2, abs=1e-4)
+
+
 # ===========================================================================
 # get_absolute_level
 # ===========================================================================
