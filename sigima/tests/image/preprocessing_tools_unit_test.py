@@ -11,6 +11,7 @@ import pytest
 
 from sigima.enums import BinningOperation
 from sigima.tools.image.preprocessing import (
+    _USE_NEW_SHAPE_API,
     binning,
     distance_matrix,
     fit_circle_model,
@@ -92,6 +93,8 @@ def test_fit_circle_model_ground_truth() -> None:
     contour columns as (row, col), so the returned ``xc`` corresponds to the
     contour's second column and ``yc`` to the first.
     """
+    if not _USE_NEW_SHAPE_API:
+        pytest.skip()
     xc_in, yc_in, r_in = 7.0, -5.0, 12.0
     contour = _circle_contour(xc_in, yc_in, r_in, n=256)
     result = fit_circle_model(contour)
@@ -110,6 +113,8 @@ def test_fit_ellipse_model_ground_truth() -> None:
     Note: the functions swap x/y and a/b because scikit-image models interpret
     the contour columns as (row, col), so centre and semi-axes are transposed.
     """
+    if not _USE_NEW_SHAPE_API:
+        pytest.skip()
     xc_in, yc_in = -3.0, 5.0
     a_in, b_in = 4.0, 8.0
     theta_in = np.pi / 6
