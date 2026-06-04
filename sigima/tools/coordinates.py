@@ -98,7 +98,7 @@ def ellipse_to_diameters(
         Ellipse X/Y diameters (major/minor axes) coordinates
     """
     dxa, dya = a * np.cos(theta), a * np.sin(theta)
-    dxb, dyb = -b * np.sin(theta), b * np.cos(theta)
+    dxb, dyb = b * np.sin(theta), b * np.cos(theta)
     x0, y0, x1, y1 = xc - dxa, yc - dya, xc + dxa, yc + dya
     x2, y2, x3, y3 = xc - dxb, yc - dyb, xc + dxb, yc + dyb
     return x0, y0, x1, y1, x2, y2, x3, y3
@@ -117,7 +117,7 @@ def array_ellipse_to_diameters(data: np.ndarray) -> np.ndarray:
     """
     xc, yc, a, b, theta = data[:, 0], data[:, 1], data[:, 2], data[:, 3], data[:, 4]
     dxa, dya = a * np.cos(theta), a * np.sin(theta)
-    dxb, dyb = -b * np.sin(theta), b * np.cos(theta)
+    dxb, dyb = b * np.sin(theta), b * np.cos(theta)
     x0, y0, x1, y1 = xc - dxa, yc - dya, xc + dxa, yc + dya
     x2, y2, x3, y3 = xc - dxb, yc - dyb, xc + dxb, yc + dyb
     result = np.column_stack((x0, y0, x1, y1, x2, y2, x3, y3)).astype(float)

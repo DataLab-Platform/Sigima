@@ -1,5 +1,13 @@
 # Version 1.1 #
 
+## Sigima Version 1.1.4 ##
+
+### 🛠️ Bug Fixes since version 1.1.3 ###
+
+* **Ellipse/circle contour detection**: Fixed regression in axis orientation after the v1.1.3 coordinate swap fix. This closes [Issue #27](https://github.com/DataLab-Platform/Sigima/issues/27).
+  * The sign correction applied in v1.1.3 for the `(row, col)` → `(x, y)` conversion introduced a regression in ellipse axis orientation, causing the semi-major and semi-minor axes to be transposed
+  * Added ground-truth unit tests for `fit_circle_model` and `fit_ellipse_model` verifying all output parameters (center coordinates, radius/semi-axes, and rotation angle)
+
 ## Sigima Version 1.1.3 ##
 
 ### 🛠️ Bug Fixes since version 1.1.2 ###
