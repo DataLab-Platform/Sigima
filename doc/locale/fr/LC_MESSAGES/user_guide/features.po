@@ -633,14 +633,26 @@ msgstr "Analyser le taux et la période d'échantillonnage"
 msgid "Peak and Feature Detection"
 msgstr "Détection de pics et de caractéristiques"
 
+msgid ":func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`"
+msgstr ":func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`"
+
+msgid "Extract peak positions as an XY-markers table (preferred entry point)"
+msgstr "Extraire les positions des pics sous forme de table de marqueurs XY (point d'entrée préféré)"
+
+msgid ":func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`"
+msgstr ":func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`"
+
+msgid "Convert an XY-markers table back into a sticks signal"
+msgstr "Convertir une table de marqueurs XY en un signal de type bâtons"
+
 msgid ":func:`peak_detection <sigima.proc.signal.peak_detection>`"
 msgstr ""
 
-msgid "Peak detection in signals"
-msgstr "Détection de pics dans les signaux"
+msgid "**Deprecated** — use ``extract_peak_positions`` (+ ``markers_table_to_signal`` when a sticks signal is also needed)"
+msgstr "**Obsolète** — utilisez ``extract_peak_positions`` (+ ``markers_table_to_signal`` lorsque vous avez également besoin d'un signal de type bâtons)"
 
 msgid ":func:`bandwidth_3db <sigima.proc.signal.bandwidth_3db>`"
-msgstr ""
+msgstr ":func:`bandwidth_3db <sigima.proc.signal.bandwidth_3db>`"
 
 msgid "3dB bandwidth measurement"
 msgstr "Mesure de la bande passante à 3 dB"

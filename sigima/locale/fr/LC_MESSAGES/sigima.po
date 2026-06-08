@@ -1618,3 +1618,5 @@ msgstr "Nombre de colonnes"
 msgid "Centroid"
 msgstr "Barycentre"
 
+msgid "Plot dialog"
+msgstr "Fenêtre de tracé"

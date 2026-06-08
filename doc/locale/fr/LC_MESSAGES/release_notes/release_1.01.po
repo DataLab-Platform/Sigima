@@ -15,13 +15,26 @@ msgstr ""
 msgid "Version 1.1"
 msgstr "Version 1.1"
 
-#, fuzzy
-msgid "Sigima Version 1.1.3"
-msgstr "Sigima Version 1.1.0 (31/01/2026)"
+msgid "Sigima Version 1.1.4"
+msgstr "Sigima Version 1.1.4 (04/06/2026)"
 
-#, fuzzy
+msgid "🛠️ Bug Fixes since version 1.1.3"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.3"
+
+msgid "**Ellipse/circle contour detection**: Fixed regression in axis orientation after the v1.1.3 coordinate swap fix. This closes [Issue #27](https://github.com/DataLab-Platform/Sigima/issues/27)."
+msgstr "**Détection de contours d'ellipse/cercle** : Correction de la régression dans l'orientation des axes après la correction de l'inversion des coordonnées dans la v1.1.3. Cela clôt [Issue #27](https://github.com/DataLab-Platform/Sigima/issues/27)."
+
+msgid "The sign correction applied in v1.1.3 for the `(row, col)` → `(x, y)` conversion introduced a regression in ellipse axis orientation, causing the semi-major and semi-minor axes to be transposed"
+msgstr "La correction du signe appliquée dans la v1.1.3 pour la conversion `(row, col)` → `(x, y)` a introduit une régression dans l'orientation des axes d'ellipse, entraînant l'inversion des demi-axes majeur et mineur"
+
+msgid "Added ground-truth unit tests for `fit_circle_model` and `fit_ellipse_model` verifying all output parameters (center coordinates, radius/semi-axes, and rotation angle)"
+msgstr "Ajout de tests unitaires de référence pour `fit_circle_model` et `fit_ellipse_model` vérifiant tous les paramètres de sortie (coordonnées du centre, rayon/demi-axes et angle de rotation)"
+
+msgid "Sigima Version 1.1.3"
+msgstr "Sigima Version 1.1.3 (04/06/2026)"
+
 msgid "🛠️ Bug Fixes since version 1.1.2"
-msgstr "🛠️ Corrections de bugs depuis la version 1.1.1"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.2"
 
 msgid "**Ellipse/circle contour detection**: Fixed swapped X/Y coordinates when using scikit-image ≥ 0.26.0. This closes [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21)."
 msgstr "**Détection de contours d'ellipse/cercle** : Correction des coordonnées X/Y inversées lors de l'utilisation de scikit-image ≥ 0.26.0. Cela clôt [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21)."
