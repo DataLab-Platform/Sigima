@@ -25,7 +25,7 @@ msgid "Usage:"
 msgstr "Utilisation :"
 
 msgid "python fabry_perot_example.py"
-msgstr ""
+msgstr "python fabry_perot_example.py"
 
 msgid "The script demonstrates optical analysis workflows commonly used in interferometry, optical metrology, and precision measurements."
 msgstr "Ce script illustre des flux d'analyse optique couramment utilisés en interférométrie, en métrologie optique et en mesures de précision."
@@ -43,7 +43,7 @@ msgid "We load two sample image of Fabry-Perot interference patterns. These imag
 msgstr "On charge deux images d'exemple de franges d'interférence de Fabry-Perot. Elles sont fournies avec les données de test de Sigima. On analysera les franges d'interférence présentes dans ces images."
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Define circular ROI for fringe analysis"
 msgstr "Définir une ROI circulaire pour l'analyse des franges"

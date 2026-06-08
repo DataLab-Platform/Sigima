@@ -408,14 +408,14 @@ msgstr "Métadonnées"
 msgid "Annotations"
 msgstr "Annotations"
 
-msgid "Uniform coordinates"
-msgstr "Coordonnées uniformes"
-
 msgid "Origin"
 msgstr "Origine"
 
 msgid "Pixel spacing"
 msgstr "Taille des pixels"
+
+msgid "Uniform coordinates"
+msgstr "Coordonnées uniformes"
 
 msgid "Extent"
 msgstr "Bornes"
@@ -757,11 +757,11 @@ msgstr "Méthode de normalisation"
 msgid "Method used for normalization"
 msgstr "Méthode utilisée pour la normalisation"
 
-msgid "columns"
-msgstr "colonnes"
-
 msgid "rows"
 msgstr "lignes"
+
+msgid "columns"
+msgstr "colonnes"
 
 msgid "Distribute over"
 msgstr "Distribuer selon les"
@@ -1043,8 +1043,24 @@ msgstr "Translation en X"
 msgid "Y translation"
 msgstr "Translation en Y"
 
+#, fuzzy
+msgid "column size"
+msgstr "Colonnes"
+
+#, fuzzy
+msgid "row size"
+msgstr "Taille"
+
+#, fuzzy
+msgid "column spacing"
+msgstr "Espace entre chaque colonne"
+
 msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
 msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
+
+#, fuzzy
+msgid "row spacing"
+msgstr "Espace entre chaque ligne"
 
 msgid "Vertical spacing between ROI centers, as a percentage of the automatically computed cell height (100% = evenly distributed grid)"
 msgstr "Espacement vertical entre les centres des ROI, en pourcentage de la hauteur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
@@ -1156,6 +1172,9 @@ msgstr "Comment retourner le résultat de la FFT inverse"
 
 msgid "Frequency"
 msgstr "Fréquence"
+
+msgid "Angle"
+msgstr "Angle"
 
 msgid "cval"
 msgstr "cval"
@@ -1506,9 +1525,6 @@ msgstr "Convertir le type de données"
 msgid "Power"
 msgstr "Puissance"
 
-msgid "Angle"
-msgstr "Angle"
-
 msgid "x"
 msgstr "x"
 
@@ -1601,3 +1617,4 @@ msgstr "Nombre de colonnes"
 
 msgid "Centroid"
 msgstr "Barycentre"
+

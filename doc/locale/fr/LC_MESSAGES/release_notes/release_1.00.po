@@ -13,10 +13,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "Version 1.0"
-msgstr ""
+msgstr "Version 1.0"
 
 msgid "Sigima Version 1.0.6"
-msgstr ""
+msgstr "Sigima Version 1.0.6"
 
 msgid "🛠️ Bug fixes:"
 msgstr "🛠️ Correctifs :"
@@ -91,7 +91,7 @@ msgid "Enhanced workflow dispatch with configurable job selection for flexible t
 msgstr "Amélioration du workflow de déclenchement avec une sélection de jobs configurable pour des scénarios de test flexibles"
 
 msgid "Sigima Version 1.0.5 (2025-12-19)"
-msgstr ""
+msgstr "Sigima Version 1.0.5 (19/12/2025)"
 
 msgid "ℹ️ This is a hotfix release addressing a packaging issue where French translations were missing from the previous release package. This release contains no functional changes compared to version 1.0.4 - it only ensures that the compiled translation files (.mo) are properly included in the distribution package."
 msgstr "ℹ️ Ceci est une version corrective qui résout un problème d'emballage où les traductions françaises manquaient dans le package de la version précédente. Cette version ne contient aucun changement fonctionnel par rapport à la version 1.0.4 - elle garantit uniquement que les fichiers de traduction compilés (.mo) sont correctement inclus dans le package de distribution."
@@ -109,7 +109,7 @@ msgid "No functional code changes - this is purely a packaging fix to restore in
 msgstr "Aucun changement de code fonctionnel - il s'agit purement d'une correction d'emballage pour restaurer la prise en charge de l'internationalisation"
 
 msgid "Sigima Version 1.0.4 (2025-12-18)"
-msgstr ""
+msgstr "Sigima Version 1.0.4 (18/12/2025)"
 
 msgid "**Image processing: LUT range incorrectly copied to result**: Fixed processed images showing incorrect contrast because LUT range was copied from original"
 msgstr "**Traitement d'image : plage LUT copiée incorrectement dans le résultat** : Correction des images traitées affichant un contraste incorrect car la plage LUT a été copiée de l'original"
@@ -250,19 +250,19 @@ msgid "Created new example `doc/examples/features/zero_padding.py` demonstrating
 msgstr "Création d'un nouvel exemple `doc/examples/features/zero_padding.py` démontrant l'initialisation correcte des paramètres"
 
 msgid "**New ROI grid example**: Added example demonstrating the grid ROI feature"
-msgstr ""
+msgstr "**Nouvel exemple de grille ROI** : Ajout d'un exemple démontrant la fonctionnalité de grille ROI"
 
 msgid "Introduced `laser_spot_array.png` test image (6×6 laser spot array) to help debug an issue reported in DataLab"
-msgstr ""
+msgstr "Introduction de l'image de test `laser_spot_array.png` (grille de points laser 6×6) pour aider à déboguer un problème signalé dans DataLab"
 
 msgid "Created new example `doc/examples/features/roi_grid.py` showcasing the `generate_image_grid_roi()` function"
 msgstr "Création d'un nouvel exemple `doc/examples/features/roi_grid.py` démontrant la fonction `generate_image_grid_roi()`"
 
 msgid "Example covers: loading images, extracting sub-regions, generating ROI grids, configuring size/translation/step parameters, understanding direction labels, and extracting individual spots"
-msgstr ""
+msgstr "L'exemple couvre : le chargement des images, l'extraction des sous-régions, la génération de grilles ROI, la configuration des paramètres de taille/traduction/pas, la compréhension des étiquettes de direction et l'extraction des points individuels"
 
 msgid "Sigima Version 1.0.3 (2025-12-03)"
-msgstr ""
+msgstr "Sigima Version 1.0.3 (03/12/2025)"
 
 msgid "**Signal data type validation**: Fixed integer arrays not being automatically converted to float64"
 msgstr "**Validation du type de données du signal** : Correction des tableaux entiers qui n'étaient pas automatiquement convertis en float64"
@@ -346,7 +346,7 @@ msgid "This closes [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/
 msgstr "Ceci clôture [Issue #1](https://github.com/DataLab-Platform/Sigima/issues/1) - `ValueError` lors du calcul des statistiques sur ROI s'étendant au-delà des limites de l'image"
 
 msgid "Sigima Version 1.0.2 (2025-11-12)"
-msgstr ""
+msgstr "Sigima Version 1.0.2 (12/11/2025)"
 
 msgid "✨ New features and enhancements:"
 msgstr "✨ Nouvelles fonctionnalités et améliorations:"
@@ -442,7 +442,7 @@ msgid "Made `BaseObj.roi_has_changed` method private (by renaming to `BaseObj.__
 msgstr "La méthode `BaseObj.roi_has_changed` a été rendue privée (en la renommant en `BaseObj.__roi_has_changed`) pour éviter une utilisation externe accidentelle. Cela interférerait avec le mécanisme interne de rafraîchissement des masques qui repose sur un accès contrôlé à cette méthode. La méthode ne fait pas partie de l'API publique et ne doit pas être appelée directement par les applications."
 
 msgid "Sigima Version 1.0.1 (2025-11-05)"
-msgstr ""
+msgstr "Sigima Version 1.0.1 (05/11/2025)"
 
 msgid "**Detection ROI creation**: Generic mechanism for ROI creation across all detection functions"
 msgstr "**Création de ROI de détection** : Mécanisme générique de création de ROI pour toutes les fonctions de détection"
@@ -682,7 +682,7 @@ msgid "Added comprehensive unit tests covering all ROI types (rectangular, circu
 msgstr "Ajout de tests unitaires complets couvrant tous les types de ROI (rectangulaire, circulaire, polygonal) et les cas limites"
 
 msgid "Sigima Version 1.0.0 (2025-10-28)"
-msgstr ""
+msgstr "Sigima Version 1.0.0 (28/10/2025)"
 
 msgid "**Signals to image conversion**: New feature to combine multiple signals into a 2D image"
 msgstr "**Conversion de signaux en image** : Nouvelle fonctionnalité pour combiner plusieurs signaux en une image 2D"

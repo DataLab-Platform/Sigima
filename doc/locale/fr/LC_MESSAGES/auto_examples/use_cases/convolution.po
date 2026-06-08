@@ -13,101 +13,100 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid ":ref:`Go to the end <sphx_glr_download_auto_examples_use_cases_convolution.py>` to download the full example code."
-msgstr ""
+msgstr ":ref:`Aller à la fin <sphx_glr_download_auto_examples_use_cases_convolution.py>` pour télécharger le code complet de l'exemple."
 
 msgid "Image Blurring and Sharpening with Convolution"
-msgstr ""
+msgstr "Flou et netteté d'image avec convolution"
 
 msgid "This example demonstrates the image convolution and deconvolution features available in Sigima, showing various kernels and their effects on images. Each section builds upon the previous one to create a comprehensive understanding of convolution operations."
-msgstr ""
+msgstr "Cet exemple illustre les fonctionnalités de convolution et de déconvolution d'images disponibles dans Sigima, en montrant divers noyaux et leurs effets sur les images. Chaque section s'appuie sur la précédente pour créer une compréhension complète des opérations de convolution."
 
 msgid "The example shows:"
-msgstr ""
+msgstr "L'exemple montre :"
 
 msgid "Creating test images and kernels"
-msgstr ""
+msgstr "Création d'images de test et de noyaux"
 
 msgid "Basic convolution with Gaussian kernel"
-msgstr ""
+msgstr "Convolution de base avec un noyau gaussien"
 
 msgid "Identity convolution (preserving original image)"
-msgstr ""
+msgstr "Convolution identité (préservation de l'image originale)"
 
 msgid "Deconvolution operations"
-msgstr ""
+msgstr "Opérations de déconvolution"
 
 msgid "Effects of different kernel parameters"
-msgstr ""
+msgstr "Effets de différents paramètres de noyau"
 
 msgid "Custom edge detection and sharpening kernels"
-msgstr ""
+msgstr "Noyaux personnalisés pour la détection de contours et le renforcement"
 
 msgid "This tutorial uses PlotPy for visualization, providing interactive plots that allow you to explore the convolution results in detail."
-msgstr ""
+msgstr "Ce tutoriel utilise PlotPy pour la visualisation, offrant des graphiques interactifs qui permettent d'explorer en détail les résultats de la convolution."
 
 msgid "Importing necessary modules"
-msgstr ""
+msgstr "Importation des modules nécessaires"
 
 msgid "We'll start by importing all the required modules for image processing and visualization."
-msgstr ""
+msgstr "Nous commençons par importer tous les modules nécessaires au traitement d'image et à la visualisation."
 
 msgid "We start by creating a test image and various convolution kernels."
-msgstr ""
+msgstr "Nous commençons par créer une image de test et divers noyaux de convolution."
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Now we'll perform convolution with the Gaussian kernel and compare the result with scipy's implementation to verify correctness."
-msgstr ""
+msgstr "Nous allons maintenant effectuer une convolution avec le noyau gaussien et comparer le résultat avec l'implémentation de scipy pour vérifier la précision."
 
 msgid "Identity convolution"
-msgstr ""
+msgstr "Convolution identité"
 
 msgid "Identity convolution should preserve the original image exactly. This demonstrates that our convolution implementation is working correctly."
-msgstr ""
+msgstr "La convolution identité doit préserver exactement l'image originale. Cela démontre que notre implémentation de la convolution fonctionne correctement."
 
 msgid "Deconvolution with identity kernel"
-msgstr ""
+msgstr "Déconvolution avec noyau identité"
 
 msgid "Deconvolution is the inverse operation of convolution. We'll start with a simple case using the identity kernel."
-msgstr ""
+msgstr "La déconvolution est l'opération inverse de la convolution. Nous commençons par un cas simple utilisant le noyau identité."
 
 msgid "Advanced deconvolution with Gaussian kernel"
-msgstr ""
+msgstr "Déconvolution avancée avec noyau gaussien"
 
 msgid "Now we'll try deconvolution with a Gaussian kernel, which is more challenging and demonstrates the limitations of deconvolution."
-msgstr ""
+msgstr "Nous allons maintenant essayer la déconvolution avec un noyau gaussien, ce qui est plus complexe et montre les limites de la déconvolution."
 
 msgid "Exploring different kernel parameters"
-msgstr ""
+msgstr "Exploration de différents paramètres de noyau"
 
 msgid "Different sigma values in Gaussian kernels produce different blurring effects. Let's compare several sigma values side by side."
-msgstr ""
+msgstr "Différentes valeurs de sigma dans les noyaux gaussiens produisent différents effets de flou. Comparons plusieurs valeurs de sigma côte à côte."
 
 msgid "Qt widget 2"
-msgstr ""
+msgstr "Qt widget 2"
 
 msgid "Custom convolution kernels"
-msgstr ""
+msgstr "Noyaux de convolution personnalisés "
 
 msgid "Besides Gaussian kernels, we can create custom kernels for specific image processing tasks like edge detection and sharpening."
-msgstr ""
+msgstr "En plus des noyaux gaussiens, nous pouvons créer des noyaux personnalisés pour des tâches spécifiques de traitement d'image telles que la détection de contours et le renforcement."
 
 msgid "Summary and conclusions"
-msgstr ""
+msgstr "Résumé et conclusions"
 
 msgid "This tutorial demonstrated the key concepts of convolution and deconvolution in image processing using Sigima."
-msgstr ""
+msgstr "Ce tutoriel a démontré les concepts clés de la convolution et de la déconvolution dans le traitement d'image en utilisant Sigima."
 
 msgid ":download:`Download Jupyter notebook: convolution.ipynb <convolution.ipynb>`"
-msgstr ""
+msgstr ":download:`Télécharger le notebook Jupyter : convolution.ipynb <convolution.ipynb>`"
 
 msgid ":download:`Download Python source code: convolution.py <convolution.py>`"
-msgstr ""
+msgstr ":download:`Télécharger le code source Python : convolution.py <convolution.py>`"
 
 msgid ":download:`Download zipped: convolution.zip <convolution.zip>`"
-msgstr ""
+msgstr ":download:`Télécharger le fichier compressé : convolution.zip <convolution.zip>`"
 
 msgid "`Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_"
-msgstr ""
-
+msgstr "`Galerie générée par Sphinx-Gallery <https://sphinx-gallery.github.io>`_"

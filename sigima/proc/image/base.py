@@ -308,6 +308,17 @@ def compute_geometry_from_obj(
                 colx, coly = 0, 1
             coords[:, colx] = obj.dx * coords[:, colx] + obj.x0
             coords[:, coly] = obj.dy * coords[:, coly] + obj.y0
+            if coords.shape[1] % 2 != 0:
+                # Scale distance-like values (radius, semi-axes) from pixel to
+                # physical units. Use average pixel size for isotropic scaling.
+                pixel_scale = (obj.dx + obj.dy) / 2
+                if coords.shape[1] >= 3:
+                    # Column 2: radius (circle) or semi-axis a (ellipse)
+                    coords[:, 2] *= pixel_scale
+                if coords.shape[1] >= 4:
+                    # Column 3: semi-axis b (ellipse)
+                    coords[:, 3] *= pixel_scale
+                # Column 4 (theta) is an angle: no scaling needed
             if obj.roi is not None:
                 x0, y0, _x1, _y1 = obj.roi.get_single_roi(i_roi).get_bounding_box(obj)
                 coords[:, colx] += x0 - obj.x0

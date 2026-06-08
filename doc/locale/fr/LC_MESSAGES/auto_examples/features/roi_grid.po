@@ -66,7 +66,7 @@ msgid "For clearer visualization of the ROI grid feature, we'll extract a 2×2 s
 msgstr "Pour une visualisation plus claire de la fonctionnalité de grille de ROI, nous extrairons une sous-région 2×2 du centre de la matrice complète 6×6 de spots."
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Creating a basic grid of ROIs"
 msgstr "Création d'une grille de base de ROI"

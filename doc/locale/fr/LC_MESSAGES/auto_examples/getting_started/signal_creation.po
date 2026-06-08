@@ -70,7 +70,7 @@ msgid "Special functions: Planck (blackbody), Linear chirp, Step, Exponential"
 msgstr "Fonctions spéciales : Planck (corps noir), chirp linéaire, échelon, exponentielle"
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Method 2: Loading signals from files"
 msgstr "Méthode 2 : Chargement de signaux depuis des fichiers"
@@ -91,7 +91,7 @@ msgid "Specialized: MCA spectrum files (.mca), FT-Lab (.sig)"
 msgstr "Spécialisés : fichiers de spectre MCA (.mca), FT-Lab (.sig)"
 
 msgid "Qt widget 2"
-msgstr ""
+msgstr "Qt widget 2"
 
 msgid "It is interesting to remark here that when importing data from files, Sigima automatically extracts and preserves metadata when possible. This includes:"
 msgstr "Il est intéressant de noter ici que lors de l'importation de données depuis des fichiers, Sigima extrait et préserve automatiquement les métadonnées lorsque c'est possible. Cela inclut :"
