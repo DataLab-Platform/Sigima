@@ -10,6 +10,7 @@ without using inheritance or mixins, maintaining their dataclass integrity.
 
 from __future__ import annotations
 
+from math import isinf, isnan
 from typing import TYPE_CHECKING
 
 import pandas as pd
@@ -19,6 +20,79 @@ if TYPE_CHECKING:
 
 # Sentinel value for "full signal/image / no ROI" rows in result tables
 NO_ROI: int = -1
+
+NUM_DISPLAY_INFO_MAX_PLAIN = 6
+NUM_DISPLAY_INFO_MAX_SCI = 12
+
+
+def _exact_scientific(x: float) -> str:
+    """Format a float in scientific notation with the minimum number of significant
+    digits required for an exact round-trip representation.
+
+    Args:
+        x: The float value to format.
+
+    Returns:
+        Scientific notation string with the minimum significant digits.
+    """
+    s = repr(abs(float(x)))
+    if "e" in s or "E" in s:
+        mantissa = s.split("e")[0]
+    else:
+        mantissa = s
+    # Remove dot, leading zeros, trailing zeros to count significant digits
+    digits = mantissa.replace(".", "").lstrip("0").rstrip("0")
+    n_sig = len(digits) or 1
+    n_dec = max(0, n_sig - 1)  # decimal places in scientific notation
+    return format(x, f".{n_dec}e")
+
+
+def format_legend_value(x: float | int) -> str:
+    """Format a numeric value for display in the legend area of a plot.
+
+    Display strategy:
+
+    1. If the plain representation is **≤ 6 characters** (``"."`` or ``","``
+       included): display the value as-is (int or float).
+    2. Otherwise, switch to **scientific notation**:
+
+       a. If the exact scientific string is **≤ 12 characters** (``"."``,
+          ``"e-"``, ``"e+"`` included): display the exact scientific value.
+       b. If it exceeds 12 characters: round the mantissa so that the
+          scientific string fits within 12 characters.
+
+    Args:
+        x: The numeric value to format.
+
+    Returns:
+        Formatted string suitable for plot legend display.
+    """
+    # Plain representation
+    if isinstance(x, int):
+        plain = str(x)
+    else:
+        xf = float(x)
+        if isnan(xf) or isinf(xf):  # NaN or infinity should be displayed as-is
+            return str(xf)
+        if xf == int(xf):
+            plain = str(int(xf))
+        else:
+            plain = str(xf)
+
+    if len(plain) <= NUM_DISPLAY_INFO_MAX_PLAIN:
+        return plain
+
+    # Exact scientific notation
+    sci = _exact_scientific(x)
+    if len(sci) <= NUM_DISPLAY_INFO_MAX_SCI:
+        return sci
+
+    # Rounded scientific notation
+    for n_dec in range(NUM_DISPLAY_INFO_MAX_SCI, -1, -1):
+        s = format(float(x), f".{n_dec}e")
+        if len(s) <= NUM_DISPLAY_INFO_MAX_SCI:
+            return s
+    return format(float(x), ".0e")
 
 
 class DisplayPreferencesManager:
@@ -159,9 +233,36 @@ class ResultHtmlGenerator:
         # Create row headers
         row_headers = ResultHtmlGenerator._get_row_headers(result, roi_indices, obj)
 
+        # Apply per-column formatting on the original df (before any transpose)
+        # so that column names are still available for format lookup.
+        # We iterate over ALL columns (not just numeric dtype) because columns with
+        # Optional[float] fields may have object dtype in pandas
+        # when they contain None values, and would be missed by select_dtypes.
+        column_formats = result.attrs.get("column_formats", {})
+        global_default_fmt = ".4g"
+        default_fmt = column_formats.get("*", global_default_fmt)
+        for col in df.columns:
+            fmt = column_formats.get(col, default_fmt)
+            if callable(fmt):
+                df[col] = df[col].map(
+                    lambda x, f=fmt: (
+                        f(float(x))
+                        if isinstance(x, (int, float)) and pd.notna(x)
+                        else x
+                    )
+                )
+            else:
+                df[col] = df[col].map(
+                    lambda x, f=fmt: (
+                        format(float(x), f)
+                        if isinstance(x, (int, float)) and pd.notna(x)
+                        else x
+                    )
+                )
+
         # Transpose if single row and flag is set
         if transpose_single_row and len(df) == 1:
-            # Transpose the dataframe
+            # Transpose the dataframe (values already formatted)
             df_t = df.T
             df_t.columns = [row_headers[0] if row_headers[0] else "Value"]
             df_t.index.name = "Item"
@@ -171,9 +272,6 @@ class ResultHtmlGenerator:
             text = f'<u><b style="color: #5294e2">{result.title}</b></u>:'
             html_kwargs = {"border": 0}
             html_kwargs.update(kwargs)
-            # Format numeric columns only, avoiding float_format on mixed data types
-            for col in df_t.select_dtypes(include=["number"]).columns:
-                df_t[col] = df_t[col].map(lambda x: f"{x:.3g}" if pd.notna(x) else x)
             text += df_t.to_html(**html_kwargs)
         else:
             # Standard horizontal layout
@@ -181,9 +279,6 @@ class ResultHtmlGenerator:
             text = f'<u><b style="color: #5294e2">{result.title}</b></u>:'
             html_kwargs = {"border": 0}
             html_kwargs.update(kwargs)
-            # Format numeric columns only, avoiding float_format on mixed data types
-            for col in df.select_dtypes(include=["number"]).columns:
-                df[col] = df[col].map(lambda x: f"{x:.3g}" if pd.notna(x) else x)
             text += df.to_html(**html_kwargs)
 
         return text
@@ -203,7 +298,21 @@ class ResultHtmlGenerator:
            - `roi_indices` reference ROIs that no longer exist in `obj.roi`
              (e.g., if HTML rendering happens before result recomputation after
              ROI deletion)
+
+           When ``result.attrs["show_row_index"]`` is truthy, row headers are
+           formatted as ``"#0"``, ``"#1"``, ... regardless of ROI indices.
+           This is typically used for markers tables (XY/X/Y) where each row
+           represents an independent marker rather than a per-ROI aggregate.
         """
+        # Resolve number of rows once (used by both branches below)
+        df = result.to_dataframe()
+        if "roi_index" in df.columns:
+            df = df.drop(columns=["roi_index"])
+        n_rows = len(df)
+
+        if getattr(result, "attrs", {}).get("show_row_index"):
+            return [f"#{i}" for i in range(n_rows)]
+
         row_headers = []
         if roi_indices is not None:
             for roi_idx in roi_indices:
@@ -219,9 +328,5 @@ class ResultHtmlGenerator:
                         # else: keep default "ROI {roi_idx}" for out-of-bounds indices
                 row_headers.append(header)
         else:
-            # Need to get DataFrame to know the number of rows
-            df = result.to_dataframe()
-            if "roi_index" in df.columns:
-                df = df.drop(columns=["roi_index"])
-            row_headers = [""] * len(df)
+            row_headers = [""] * n_rows
         return row_headers

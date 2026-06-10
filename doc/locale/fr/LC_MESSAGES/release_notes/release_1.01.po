@@ -6,25 +6,107 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Sigima \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
 
 msgid "Version 1.1"
 msgstr "Version 1.1"
 
-msgid "Sigima Version 1.1.2 (not released yet)"
-msgstr "Sigima Version 1.1.2 (pas encore publiée)"
+msgid "Sigima Version 1.1.4"
+msgstr "Sigima Version 1.1.4 (04/06/2026)"
+
+msgid "🛠️ Bug Fixes since version 1.1.3"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.3"
+
+msgid "**Ellipse/circle contour detection**: Fixed regression in axis orientation after the v1.1.3 coordinate swap fix. This closes [Issue #27](https://github.com/DataLab-Platform/Sigima/issues/27)."
+msgstr "**Détection de contours d'ellipse/cercle** : Correction de la régression dans l'orientation des axes après la correction de l'inversion des coordonnées dans la v1.1.3. Cela clôt [Issue #27](https://github.com/DataLab-Platform/Sigima/issues/27)."
+
+msgid "The sign correction applied in v1.1.3 for the `(row, col)` → `(x, y)` conversion introduced a regression in ellipse axis orientation, causing the semi-major and semi-minor axes to be transposed"
+msgstr "La correction du signe appliquée dans la v1.1.3 pour la conversion `(row, col)` → `(x, y)` a introduit une régression dans l'orientation des axes d'ellipse, entraînant l'inversion des demi-axes majeur et mineur"
+
+msgid "Added ground-truth unit tests for `fit_circle_model` and `fit_ellipse_model` verifying all output parameters (center coordinates, radius/semi-axes, and rotation angle)"
+msgstr "Ajout de tests unitaires de référence pour `fit_circle_model` et `fit_ellipse_model` vérifiant tous les paramètres de sortie (coordonnées du centre, rayon/demi-axes et angle de rotation)"
+
+msgid "Sigima Version 1.1.3"
+msgstr "Sigima Version 1.1.3 (04/06/2026)"
+
+msgid "🛠️ Bug Fixes since version 1.1.2"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.2"
+
+msgid "**Ellipse/circle contour detection**: Fixed swapped X/Y coordinates when using scikit-image ≥ 0.26.0. This closes [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21)."
+msgstr "**Détection de contours d'ellipse/cercle** : Correction des coordonnées X/Y inversées lors de l'utilisation de scikit-image ≥ 0.26.0. Cela clôt [Issue #21](https://github.com/DataLab-Platform/Sigima/issues/21)."
+
+msgid "The new `EllipseModel`/`CircleModel` API returns center coordinates as `(row, col)` but the code was treating them as `(x, y)`, causing detected ellipses and circles to appear at wrong positions on the image"
+msgstr "La nouvelle API `EllipseModel`/`CircleModel` renvoie les coordonnées du centre sous forme de `(row, col)`, mais le code les traitait comme `(x, y)`, ce qui faisait apparaître les ellipses et les cercles détectés à des positions incorrectes sur l'image"
+
+msgid "Semi-axis lengths were also swapped for ellipses, resulting in incorrect aspect ratios"
+msgstr "Les longueurs des demi-axes étaient également inversées pour les ellipses, entraînant des rapports d'aspect incorrects"
+
+msgid "This bug only affected scikit-image ≥ 0.26.0; older versions were handled correctly"
+msgstr "Ce bogue n'affectait que scikit-image ≥ 0.26.0 ; les versions plus anciennes étaient correctement gérées"
+
+msgid "**Ellipse visualization**: Fixed incorrect minor axis direction in `ellipse_to_diameters` coordinate conversion"
+msgstr "**Visualisation des ellipses** : Correction de la direction incorrecte de l'axe mineur dans la conversion des coordonnées `ellipse_to_diameters`"
+
+msgid "The minor axis endpoints were computed with a wrong sign, making the minor axis non-perpendicular to the major axis for rotated ellipses (e.g., at θ=45° both axes pointed in the same direction). This caused distorted ellipse overlays in DataLab when displaying detected or annotated ellipses at non-trivial rotation angles"
+msgstr "Les extrémités de l'axe mineur étaient calculées avec un signe incorrect, rendant l'axe mineur non perpendiculaire à l'axe majeur pour les ellipses tournées (par exemple, à θ=45° les deux axes pointaient dans la même direction). Cela provoquait des superpositions d'ellipses déformées dans DataLab lors de l'affichage d'ellipses détectées ou annotées à des angles de rotation non triviaux"
+
+msgid "**Circle/ellipse detection with calibrated images**: Fixed radius and semi-axes not being converted from pixel units to physical units"
+msgstr "**Détection de cercles/ellipses avec des images calibrées** : Correction du rayon et des demi-axes qui n'étaient pas convertis des unités de pixels aux unités physiques"
+
+msgid "When an image had non-default pixel calibration (e.g., dx=2 mm/pixel), center coordinates were correctly converted to physical units but the radius and semi-axes remained in pixels, causing values to be wrong by a factor equal to the pixel size"
+msgstr "Lorsque une image avait une calibration de pixels non par défaut (par exemple, dx=2 mm/pixel), les coordonnées du centre étaient correctement converties en unités physiques, mais le rayon et les demi-axes restaient en pixels, ce qui entraînait des valeurs incorrectes par un facteur égal à la taille du pixel"
+
+msgid "**Custom signal XY preservation**: Fixed user-edited XY values being silently discarded when regenerating a custom signal from its creation parameters. `generate_1d_data()` now initializes the XY array only on first use and preserves user-edited contents on subsequent calls. This closes [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25)."
+msgstr "Signaux personnalisés : Correction de la suppression silencieuse des valeurs XY modifiées par l'utilisateur lors de la régénération d'un signal personnalisé à partir de ses paramètres de création. `generate_1d_data()` initialise désormais le tableau XY uniquement lors de la première utilisation et préserve les contenus modifiés par l'utilisateur lors des appels suivants. Cela clôt [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25)."
+
+msgid "🔧 Other changes since version 1.1.2"
+msgstr "🔧 Autres changements depuis la version 1.1.2"
+
+msgid "**Debug environment variable**: Renamed the test debug environment variable from `DEBUG` to `SIGIMA_DEBUG` to avoid collisions with unrelated tools and frameworks that commonly export a bare `DEBUG` variable. This closes [Issue #19](https://github.com/DataLab-Platform/Sigima/issues/19)."
+msgstr "**Variable d'environnement de débogage** : Renommage de la variable d'environnement de débogage de test de `DEBUG` à `SIGIMA_DEBUG` pour éviter les collisions avec des outils et frameworks non liés qui exportent couramment une variable `DEBUG` seule. Cela clôt [Issue #19](https://github.com/DataLab-Platform/Sigima/issues/19)."
+
+msgid "**Remote control client**: Added `get_current_object_uuid()` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to retrieve the UUID of the currently selected object in DataLab"
+msgstr "**Client de contrôle à distance** : Ajout de la méthode `get_current_object_uuid()` à `SimpleRemoteProxy` et `SimpleAbstractDLControl`, permettant aux utilisateurs de récupérer l'UUID de l'objet actuellement sélectionné dans DataLab"
+
+msgid "🧪 Tests"
+msgstr "🧪 Tests"
+
+msgid "**Non-uniform image coordinates**: Strengthened test coverage for images with non-uniform (irregularly spaced) X/Y coordinates, closing the remaining gaps in coordinate-mode switching, geometry operations and coordinated-text reading. This closes [Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
+msgstr "**Coordonnées d'image non uniformes** : Renforcement de la couverture de tests pour les images à coordonnées X/Y non uniformes (espacement irrégulier), comblant les dernières lacunes concernant le changement de mode de coordonnées, les opérations géométriques et la lecture du format texte coordonné. Ceci clôt l'[Issue #24](https://github.com/DataLab-Platform/Sigima/issues/24)."
+
+msgid "Sigima Version 1.1.2 (2026-04-20)"
+msgstr "Sigima Version 1.1.2 (20/04/2026)"
+
+msgid "💥 Breaking changes since version 1.1.1"
+msgstr "💥 Changements incompatibles depuis la version 1.1.1"
+
+msgid "**Removed deprecated `sigima.tests.vistools` module**: The backward-compatibility shim introduced in version 1.1.0 has been removed"
+msgstr "**Suppression du module déprécié `sigima.tests.vistools`** : La couche de compatibilité ascendante introduite en version 1.1.0 a été supprimée"
+
+msgid "Update imports from `from sigima.tests import vistools` to `from sigima import viz`"
+msgstr "Remplacer les imports `from sigima.tests import vistools` par `from sigima import viz`"
+
+msgid "All visualization helpers (`view_curves`, `view_images`, `create_curve`, `create_image`, etc.) remain available under their new home in `sigima.viz`"
+msgstr "Tous les utilitaires de visualisation (`view_curves`, `view_images`, `create_curve`, `create_image`, etc.) restent disponibles dans leur nouvel emplacement `sigima.viz`"
 
 msgid "🛠️ Bug Fixes since version 1.1.1"
 msgstr "🛠️ Corrections de bugs depuis la version 1.1.1"
+
+msgid "**CSV header parsing**: Fixed whitespace and unit extraction issues when reading CSV column headers"
+msgstr "**Parsing des en-têtes CSV** : Correction des problèmes d'extraction des espaces et des unités lors de la lecture des en-têtes de colonnes CSV"
+
+msgid "Leading and trailing whitespace in column titles is now properly trimmed (e.g. `\"  Padded NoUnit  \"` → `\"Padded NoUnit\"`)"
+msgstr "Les espaces en début et fin de titre de colonne sont désormais correctement supprimés (par ex. `\"  Padded NoUnit  \"` → `\"Padded NoUnit\"`)"
+
+msgid "Nested parentheses in units are now correctly handled (e.g. `\"Signal (a.u. (norm))\"` → label `\"Signal\"`, unit `\"a.u.(norm)\"` instead of incorrectly splitting at the last parenthesis)"
+msgstr "Les parenthèses imbriquées dans les unités sont désormais correctement gérées (par ex. `\"Signal (a.u. (norm))\"` → étiquette `\"Signal\"`, unité `\"a.u.(norm)\"` au lieu de se séparer incorrectement à la dernière parenthèse)"
+
+msgid "Exotic whitespace characters (tabs, non-breaking spaces) in headers are normalized before parsing"
+msgstr "Les caractères d'espacement exotiques (tabulations, espaces insécables) dans les en-têtes sont normalisés avant l'analyse"
 
 msgid "**Pandas 3.0 compatibility**: Fixed datetime CSV parsing issue with pandas 3.0+"
 msgstr "**Compatibilité avec Pandas 3.0** : Correction du problème de parsing des dates dans les fichiers CSV avec pandas 3.0+"
@@ -44,8 +126,138 @@ msgstr "Tous les tests liés passent après la correction"
 msgid "This closes [Issue #12](https://github.com/DataLab-Platform/Sigima/issues/12) - Fix pandas 3.0 compatibility issue in datetime CSV parsing"
 msgstr "Cela clôt [Issue #12](https://github.com/DataLab-Platform/Sigima/issues/12) - Correction du problème de compatibilité avec pandas 3.0 dans le parsing des dates des fichiers CSV"
 
+msgid "**HDF5 serialization of TableResult**: Fixed DataLab workspace save failure when table results contain enum values or callable formatters"
+msgstr "**Sérialisation HDF5 de TableResult** : Correction de l'échec de sauvegarde de l'espace de travail de DataLab lorsque les résultats de table contiennent des valeurs d'énumération ou des formatteurs appelables"
+
+msgid "Enum subclasses (e.g. `SignalShape`) stored in table data are now converted to plain strings before serialization, preventing `dtype('<U4')` errors"
+msgstr "Les sous-classes d'énumération (par ex. `SignalShape`) stockées dans les données de la table sont désormais converties en chaînes simples avant la sérialisation, évitant les erreurs `dtype('<U4')`"
+
+msgid "Non-serializable entries (e.g. callable column formatters) in `TableResult.attrs` are now sanitized before HDF5/JSON export"
+msgstr "Les entrées non sérialisables (par ex. les formatteurs de colonnes appelables) dans `TableResult.attrs` sont désormais nettoyées avant l'exportation HDF5/JSON"
+
+msgid "**Datetime signal compatibility**: Fixed datetime column handling for compatibility with various NumPy and pandas versions"
+msgstr "**Compatibilité des signaux datetime** : Correction de la gestion des colonnes datetime pour la compatibilité avec diverses versions de NumPy et pandas"
+
+msgid "Allowed any `datetime64` resolution (not just `ns`) to support newer NumPy/pandas combinations"
+msgstr "Autorisation de toute résolution `datetime64` (pas seulement `ns`) pour prendre en charge les combinaisons plus récentes de NumPy/pandas"
+
+msgid "**Signal uncertainty (dx/dy)**: Fixed phantom error bars displayed when only one of `dx` or `dy` was set on a fresh signal"
+msgstr "**Incertitudes des signaux (dx/dy)** : Correction de barres d'erreur fantômes affichées lorsque seul `dx` ou `dy` était défini sur un signal vierge"
+
+msgid "When `dy` was set first (or `dx` first), the deferred uncertainty row for the other dimension was previously filled with zeros, which downstream tools interpreted as a real all-zero uncertainty array (e.g. PlotPy drew zero-width error bars)"
+msgstr "Lorsque `dy` était défini en premier (ou `dx` en premier), la ligne d'incertitude différée pour l'autre dimension était auparavant remplie de zéros, ce qui était interprété par les outils en aval comme un véritable tableau d'incertitudes nulles (par ex. PlotPy traçait des barres d'erreur de largeur nulle)"
+
+msgid "Deferred rows are now initialized with NaN, so a missing uncertainty is properly reported as absent — no more spurious error bars"
+msgstr "Les lignes différées sont désormais initialisées avec NaN, de sorte qu'une incertitude manquante est correctement signalée comme absente — plus de barres d'erreur parasites"
+
+msgid "**ROI extraction with uncertainty data**: Fixed `extract_roi` and `extract_rois` losing the input signal's `dx` / `dy` uncertainty arrays"
+msgstr "**Extraction de ROI avec incertitudes** : Correction d'`extract_roi` et `extract_rois` qui perdaient les tableaux d'incertitudes `dx` / `dy` du signal d'entrée"
+
+msgid "Uncertainty samples are now sliced and propagated to the extracted signal exactly like the X/Y data"
+msgstr "Les échantillons d'incertitude sont désormais découpés et propagés au signal extrait exactement comme les données X/Y"
+
+msgid "Affects both single-ROI and multi-ROI extraction workflows"
+msgstr "Concerne les flux d'extraction mono-ROI et multi-ROI"
+
+msgid "**Zero-crossing detection**: Fixed `find_zero_crossings` over-reporting on signals containing exact-zero samples"
+msgstr "**Détection des passages à zéro** : Correction de `find_zero_crossings` qui sur-comptait les passages sur les signaux contenant des échantillons exactement nuls"
+
+msgid "Samples exactly equal to zero used to count as two crossings (e.g. `[-1, 0, 1]` reported two crossings instead of one) and \"touch-and-bounce\" patterns like `[1, 0, 1]` were wrongly flagged as crossings"
+msgstr "Les échantillons exactement nuls comptaient auparavant pour deux passages (par ex. `[-1, 0, 1]` signalait deux passages au lieu d'un) et les motifs « touche-et-rebondit » comme `[1, 0, 1]` étaient signalés à tort comme des passages"
+
+msgid "Sign changes are now detected between consecutive non-zero samples, with contiguous zero runs collapsed to a single crossing only when they actually bridge opposite signs"
+msgstr "Les changements de signe sont désormais détectés entre échantillons non nuls consécutifs, les suites contiguës de zéros n'étant comptées comme un unique passage que lorsqu'elles relient effectivement des signes opposés"
+
+msgid "Downstream features benefit from the fix: `find_x_axis_crossings`, `find_x_values_at_y`, `find_bandwidth_coordinates`, and pulse FWHM / rise / fall measurements"
+msgstr "Les fonctionnalités en aval bénéficient de cette correction : `find_x_axis_crossings`, `find_x_values_at_y`, `find_bandwidth_coordinates` et les mesures FWHM / temps de montée / descente d'impulsions"
+
+msgid "**Contrast computation**: Fixed `contrast` returning `inf` / `nan` warnings on signals with negative or all-zero values"
+msgstr "**Calcul du contraste** : Correction de `contrast` qui émettait des avertissements `inf` / `nan` sur les signaux à valeurs négatives ou intégralement nulles"
+
+msgid "Denominator now uses absolute values (`(max - min) / (|max| + |min|)`), keeping the result bounded in `[0, 1]` for signals with negative samples while matching the standard Michelson contrast for non-negative signals"
+msgstr "Le dénominateur utilise désormais les valeurs absolues (`(max - min) / (|max| + |min|)`), bornant le résultat dans `[0, 1]` pour les signaux à valeurs négatives tout en correspondant au contraste de Michelson standard pour les signaux positifs ou nuls"
+
+msgid "Returns `nan` cleanly (without a division-by-zero warning) when both `max` and `min` are zero"
+msgstr "Retourne proprement `nan` (sans avertissement de division par zéro) lorsque `max` et `min` sont tous deux nuls"
+
+msgid "**Datetime conversion accuracy**: Fixed `datetime64_to_seconds` returning wrong Unix timestamps for coarse `datetime64` resolutions"
+msgstr "**Précision de la conversion datetime** : Correction de `datetime64_to_seconds` qui retournait des timestamps Unix erronés pour les résolutions `datetime64` grossières"
+
+msgid "The previous implementation only recognized `ns`, `us` and `ms` and silently used a nanosecond divisor for any other resolution, producing incorrect timestamps for `datetime64[s]`, `datetime64[m]`, `datetime64[h]` or `datetime64[D]`"
+msgstr "L'implémentation précédente ne reconnaissait que `ns`, `us` et `ms` et utilisait silencieusement un diviseur en nanosecondes pour toute autre résolution, produisant des timestamps erronés pour `datetime64[s]`, `datetime64[m]`, `datetime64[h]` ou `datetime64[D]`"
+
+msgid "Inputs are now normalized to `datetime64[ns]` before conversion, ensuring correct results for any source resolution and for pandas `DatetimeIndex` objects"
+msgstr "Les entrées sont désormais normalisées en `datetime64[ns]` avant conversion, garantissant des résultats corrects pour toute résolution source et pour les objets pandas `DatetimeIndex`"
+
+msgid "**DICOM image origin and spacing**: Fixed `ImageObj.dicom_template` falling back to inconsistent default coordinates when DICOM tags were missing"
+msgstr "**Origine et pas pixel des images DICOM** : Correction de `ImageObj.dicom_template` qui utilisait des coordonnées de repli incohérentes lorsque des tags DICOM étaient absents"
+
+msgid "When `ImagePositionPatient` or `PixelSpacing` was absent from the DICOM template, only the Y origin and Y pixel spacing received the fallback while the X origin and X pixel spacing were left as bare scalars, due to operator precedence"
+msgstr "Lorsque `ImagePositionPatient` ou `PixelSpacing` était absent du modèle DICOM, seuls l'origine Y et le pas pixel Y recevaient la valeur de repli, tandis que l'origine X et le pas pixel X restaient des scalaires bruts, en raison de la précédence des opérateurs"
+
+msgid "Both X and Y origin (`x0`, `y0`) and pixel spacing (`dx`, `dy`) are now consistently filled with the intended `(0.0, 0.0)` and `(1.0, 1.0)` defaults"
+msgstr "L'origine X et Y (`x0`, `y0`) et le pas pixel (`dx`, `dy`) sont désormais renseignés de manière cohérente avec les valeurs par défaut prévues `(0.0, 0.0)` et `(1.0, 1.0)`"
+
+msgid "✨ Enhancements since version 1.1.1"
+msgstr "✨ Améliorations depuis la version 1.1.1"
+
+msgid "**Legend value formatting**: Improved numeric formatting in analysis result legends"
+msgstr "**Formatage des valeurs dans les légendes** : Amélioration du formatage numérique dans les légendes des résultats d'analyse"
+
+msgid "Short values are displayed as plain numbers, while long values use scientific notation adapted to fit within the display width"
+msgstr "Les valeurs courtes sont affichées sous forme de nombres simples, tandis que les valeurs longues utilisent une notation scientifique adaptée pour s'adapter à la largeur d'affichage"
+
+msgid "Pulse features table now uses adaptive scientific notation showing only the significant digits needed for exact round-trip representation"
+msgstr "La table des caractéristiques des impulsions utilise désormais une notation scientifique adaptative affichant uniquement les chiffres significatifs nécessaires pour une représentation exacte aller-retour"
+
+msgid "**Table column display formats**: Added per-column format control for `TableResult`"
+msgstr "**Formats d'affichage des colonnes de table** : Ajout du contrôle du format par colonne pour `TableResult`"
+
+msgid "New `get_column_formats()` / `set_column_formats()` methods on `TableResult`"
+msgstr "Nouvelles méthodes `get_column_formats()` / `set_column_formats()` sur `TableResult`"
+
+#, python-brace-format
+msgid "`TableResultBuilder` supports `set_column_formats()` for specifying format strings (e.g. `{\"x0\": \".2e\"}`) or callable formatters"
+msgstr "`TableResultBuilder` prend en charge `set_column_formats()` pour spécifier des chaînes de format (par ex. `{\"x0\": \".2e\"}`) ou des formatteurs appelables"
+
+msgid "Supports `\"*\"` wildcard key as a per-table default formatter"
+msgstr "Prend en charge la clé générique `\"*\"` comme formatteur par défaut pour chaque table"
+
+msgid "📦 Dependencies changes since version 1.1.1"
+msgstr "📦 Changements de dépendances depuis la version 1.1.1"
+
+msgid "**Pandas 3.0 support**: Officially support pandas 3.0.x after validation — upper bound raised from `< 3.0` to `< 3.1`"
+msgstr "**Support de Pandas 3.0** : Prise en charge officielle de pandas 3.0.x après validation — la limite supérieure est passée de `< 3.0` à `< 3.1`"
+
+msgid "This closes [Issue #13](https://github.com/DataLab-Platform/Sigima/issues/13) - Support pandas 3.0"
+msgstr "Cela clôt [Issue #13](https://github.com/DataLab-Platform/Sigima/issues/13) - Support de pandas 3.0"
+
+msgid "**Python 3.14 support**: Added Python 3.14 classifier"
+msgstr "**Support de Python 3.14** : Ajout du classificateur Python 3.14"
+
+msgid "🔧 Other changes since version 1.1.1"
+msgstr "🔧 Autres changements depuis la version 1.1.1"
+
+msgid "**Remote control client**: Added `set_object` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`, allowing users to push modified signal/image objects back to DataLab after retrieving them with `get_object` (see [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))"
+msgstr "**Client de contrôle à distance** : Ajout de la méthode `set_object` à `SimpleRemoteProxy` et `SimpleAbstractDLControl`, permettant aux utilisateurs de renvoyer des objets signal/image modifiés à DataLab après les avoir récupérés avec `get_object` (voir [DataLab Issue #305](https://github.com/DataLab-Platform/DataLab/issues/305))"
+
+msgid "**Stub server**: Added `set_object` support to `DataLabStubServer` with proper UUID-based object lookup, and registered `add_object`/`set_object` as XML-RPC functions"
+msgstr "**Serveur factice** : Ajout de la prise en charge de `set_object` à `DataLabStubServer` avec une recherche d'objet basée sur UUID, et enregistrement de `add_object`/`set_object` en tant que fonctions XML-RPC"
+
+msgid "**Stub server**: Signal and image objects now carry their UUID in metadata, enabling round-trip `get_object` → modify → `set_object` workflows"
+msgstr "**Serveur factice** : Les objets signal et image portent désormais leur UUID dans les métadonnées, permettant des flux de travail aller-retour `get_object` → modifier → `set_object`"
+
+msgid "Improved development environment setup: new `run_with_env.py` script supporting multiple Python environment contexts (WinPython, venv, etc.)"
+msgstr "Amélioration de la configuration de l'environnement de développement : nouveau script `run_with_env.py` prenant en charge plusieurs contextes d'environnement Python (WinPython, venv, etc.)"
+
+msgid "CI: gated PyPI deployment on test suite passing"
+msgstr "CI : déploiement PyPI conditionné à la réussite de la suite de tests"
+
+msgid "**Test coverage**: Substantially expanded the unit-test suite to exercise previously untested branches across `sigima.objects`, `sigima.io`, `sigima.tools`, `sigima.proc` and `sigima.viz` (26 new test modules), and excluded the GUI visualization layer from coverage reports for more meaningful metrics"
+msgstr "**Couverture de tests** : Extension substantielle de la suite de tests unitaires pour couvrir des branches jusqu'alors non testées dans `sigima.objects`, `sigima.io`, `sigima.tools`, `sigima.proc` et `sigima.viz` (26 nouveaux modules de tests), et exclusion de la couche de visualisation GUI des rapports de couverture pour des métriques plus pertinentes"
+
 msgid "Sigima Version 1.1.1 (2026-02-02)"
-msgstr "Sigima Version 1.1.1 (2026-02-02)"
+msgstr "Sigima Version 1.1.1 (02/02/2026)"
 
 msgid "🛠️ Bug Fixes since version 1.1.0"
 msgstr "🛠️ Corrections de bugs depuis la version 1.1.0"
@@ -62,8 +274,8 @@ msgstr "Ajout du stub `stop_webapi_server()`"
 msgid "Added `get_webapi_status()` stub (returns server status dictionary)"
 msgstr "Ajout du stub `get_webapi_status()` (retourne un dictionnaire d'état du serveur)"
 
-msgid "🔧 Other changes"
-msgstr "🔧 Autres changements"
+msgid "🔧 Other changes since version 1.1.0"
+msgstr "🔧 Autres changements depuis la version 1.1.0"
 
 msgid "Updated development status classifier to \"Production/Stable\""
 msgstr "Mise à jour du classificateur d'état de développement vers \"Production/Stable\""
@@ -72,7 +284,7 @@ msgid "Added \"Try it Online\" section with [notebook.link](https://notebook.lin
 msgstr "Ajout de la section \"Essayez en ligne\" avec intégration de [notebook.link](https://notebook.link/) dans la documentation"
 
 msgid "Sigima Version 1.1.0 (2026-01-31)"
-msgstr "Sigima Version 1.1.0 (2026-01-31)"
+msgstr "Sigima Version 1.1.0 (31/01/2026)"
 
 msgid "✨ New features and enhancements:"
 msgstr "✨ Nouvelles fonctionnalités et améliorations:"

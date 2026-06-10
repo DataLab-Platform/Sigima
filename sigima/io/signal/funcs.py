@@ -24,7 +24,53 @@ from sigima.objects.signal.constants import (
     DATETIME_X_KEY,
     DEFAULT_DATETIME_FORMAT,
 )
+from sigima.tools.datatypes import datetime64_to_seconds
 from sigima.worker import CallbackWorkerProtocol
+
+
+def _normalize_whitespace(text: str) -> str:
+    """Normalize whitespace in a column header.
+
+    Replaces tabs, non-breaking spaces and other Unicode whitespace with regular
+    spaces, then strips leading/trailing whitespace.
+
+    Args:
+        text: Raw column header string
+
+    Returns:
+        Cleaned string
+    """
+    # Replace non-breaking space (U+00A0), tabs, and other Unicode whitespace
+    text = re.sub(r"[\t\xa0\u2000-\u200b]", " ", text)
+    return text.strip()
+
+
+def _split_label_unit(text: str) -> tuple[str, str]:
+    """Split a column header into (label, unit).
+
+    The unit is the content of the *outermost* parenthesized suffix preceded by a
+    space, e.g. ``"Label (unit)"`` → ``("Label", "unit")``.
+    Nested parentheses are preserved inside the unit string,
+    e.g. ``"Label (a.u. (norm))"`` → ``("Label", "a.u. (norm)")``.
+
+    If no unit is found the returned unit is ``""``.
+
+    Args:
+        text: Cleaned (already stripped) column header
+
+    Returns:
+        Tuple (label, raw_unit)
+    """
+    # Find the first " (" — i.e. space followed by opening parenthesis
+    idx = text.find(" (")
+    if idx == -1:
+        return text, ""
+    # The unit is everything between the first " (" and the last ")"
+    if text.endswith(")"):
+        label = text[:idx]
+        unit = text[idx + 2 : -1]  # content between '(' and final ')'
+        return label, unit
+    return text, ""
 
 
 def get_labels_units_from_dataframe(
@@ -38,23 +84,47 @@ def get_labels_units_from_dataframe(
     Returns:
         Tuple (xlabel, ylabels, xunit, yunits)
     """
-    # Reading X,Y labels
-    xlabel = str(df.columns[0])
-    ylabels = [str(col) for col in df.columns[1:]]
+    # Reading X,Y labels — normalize whitespace unconditionally
+    xlabel = _normalize_whitespace(str(df.columns[0]))
+    ylabels = [_normalize_whitespace(str(col)) for col in df.columns[1:]]
 
     # Retrieving units from labels
     xunit = ""
     yunits = [""] * len(ylabels)
-    pattern = r"([\S ]*) \(([\S]*)\)"
-    match = re.match(pattern, xlabel)
-    if match is not None:
-        xlabel, xunit = match.groups()
+
+    xlabel, raw_xunit = _split_label_unit(xlabel)
+    if raw_xunit:
+        xunit = normalize_units(raw_xunit)
+
     for i, ylabel in enumerate(ylabels):
-        match = re.match(pattern, ylabel)
-        if match is not None:
-            ylabels[i], yunits[i] = match.groups()
+        ylabels[i], raw_yunit = _split_label_unit(ylabel)
+        if raw_yunit:
+            yunits[i] = normalize_units(raw_yunit)
 
     return xlabel, ylabels, xunit, yunits
+
+
+def normalize_units(units: str) -> str:
+    """Normalize unit string: replace spaces and middle dot between units with '*',
+    remove redundant operators.
+
+    Args:
+        units: Input unit string (e.g., 'kg m / s', 'kg·m')
+
+    Returns:
+        Normalized unit string (e.g., 'kg*m/s')
+    """
+    # Replace middle dot (U+00B7) and Unicode dot (U+22C5) with '*'
+    units = re.sub(r"[·⋅]", "*", units)
+    # Remove spaces around operators (*, /, ^)
+    units = re.sub(r"\s*([*/^])\s*", r"\1", units)
+    # Replace multiple spaces with single space
+    units = re.sub(r"\s+", " ", units)
+    # Replace spaces between unit names with '*'
+    units = re.sub(r"([a-zA-Z])\s+([a-zA-Z])", r"\1*\2", units)
+    # Remove spaces again (in case of leading/trailing)
+    units = units.strip()
+    return units
 
 
 def read_csv_by_chunks(
@@ -332,11 +402,11 @@ def _detect_datetime_col(df: pd.DataFrame) -> tuple[pd.DataFrame, dict | None]:
                 "ignore", message="Could not infer format", category=UserWarning
             )
             datetime_series = pd.to_datetime(col_data, errors="coerce")
+
         # For pandas 3.0+ compatibility: use utility that handles different
         # datetime resolutions (ns, us, ms) correctly.
-        from sigima.tools.datatypes import datetime64_to_seconds
-
         x_float = pd.Series(datetime64_to_seconds(datetime_series.values))
+
         # Store datetime metadata (unit will be stored in xunit attribute)
         datetime_metadata = {
             DATETIME_X_KEY: True,

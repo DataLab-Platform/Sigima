@@ -37,6 +37,7 @@ from plotpy.items import (
     MaskedImageItem,
     MaskedXYImageItem,
 )
+from plotpy.items.shape.range import XRangeSelection
 from plotpy.plot import (
     BasePlot,
     BasePlotOptions,
@@ -45,6 +46,8 @@ from plotpy.plot import (
     SyncPlotDialog,
 )
 from plotpy.styles import LINESTYLES, ShapeParam
+from qtpy import QtCore as QC
+from qtpy import QtGui as QG
 from qtpy import QtWidgets as QW
 
 from sigima.config import _
@@ -97,6 +100,203 @@ except ImportError:
 QAPP: QW.QApplication | None = None
 
 WIDGETS: list[QW.QWidget] = []
+
+
+# ---------------------------------------------------------------------------
+# Curve-clipped Signal ROI rendering (mirrors DataLab's adapter behavior)
+# ---------------------------------------------------------------------------
+
+#: Color palette used to cycle through Signal ROI fill colors when several
+#: ROIs are defined on the same signal. Mirrors DataLab's ``tab10``-inspired
+#: palette so ROI colors stay consistent across DataLab, DataLab-Kernel and
+#: Sigima viewers.
+_ROI_FILL_COLORS: tuple[str, ...] = (
+    "#1f77b4",  # blue
+    "#ff7f0e",  # orange
+    "#2ca02c",  # green
+    "#d62728",  # red
+    "#9467bd",  # purple
+    "#8c564b",  # brown
+    "#e377c2",  # pink
+    "#7f7f7f",  # grey
+    "#bcbd22",  # yellow-green
+    "#17becf",  # cyan
+)
+#: Alpha (0..255) used for the translucent fill of Signal ROIs.
+_ROI_FILL_ALPHA: int = 90
+
+
+def roi_color_for_index(index: int) -> QG.QColor:
+    """Return the Signal ROI fill color for the given ROI index (cycles
+    through the predefined palette)."""
+    name = _ROI_FILL_COLORS[index % len(_ROI_FILL_COLORS)]
+    color = QG.QColor(name)
+    color.setAlpha(_ROI_FILL_ALPHA)
+    return color
+
+
+class _CurveClippedXRangeSelection(XRangeSelection):
+    """X-range selection whose translucent fill is clipped vertically to the
+    underlying signal curve (instead of filling the whole canvas height).
+
+    Mirrors :class:`datalab.adapters_plotpy.roi.signal._CurveClippedXRangeSelection`
+    so Sigima's PlotPy viewer renders Signal ROIs identically to DataLab.
+    """
+
+    def __init__(
+        self,
+        _min: float | None = None,
+        _max: float | None = None,
+        shapeparam=None,
+    ) -> None:
+        super().__init__(_min, _max, shapeparam)
+        self._curve_x: np.ndarray | None = None
+        self._curve_y: np.ndarray | None = None
+        self._fill_color: QG.QColor | None = None
+
+    def set_signal_curve(self, x: np.ndarray, y: np.ndarray) -> None:
+        """Attach the signal curve coordinates used to clip the fill area."""
+        self._curve_x = np.asarray(x, dtype=float)
+        self._curve_y = np.asarray(y, dtype=float)
+
+    def set_fill_color(self, color: QG.QColor) -> None:
+        """Override the fill color for this ROI instance."""
+        self._fill_color = QG.QColor(color)
+
+    def _build_curve_polygon(  # pylint: disable=too-many-return-statements
+        self,
+        xMap,  # pylint: disable=invalid-name
+        yMap,  # pylint: disable=invalid-name
+        rct,
+    ):
+        """Build a polygon following the signal curve between ``self._min``
+        and ``self._max`` with a baseline at ``y=0`` (clamped to the visible
+        canvas, with a fallback to canvas bottom for log-Y)."""
+        if self._curve_x is None or self._curve_y is None:
+            return None
+        x_arr = self._curve_x
+        y_arr = self._curve_y
+        if x_arr.size < 2:
+            return None
+        finite = np.isfinite(x_arr) & np.isfinite(y_arr)
+        if not finite.all():
+            x_arr = x_arr[finite]
+            y_arr = y_arr[finite]
+            if x_arr.size < 2:
+                return None
+        xmin, xmax = self._min, self._max
+        if xmin is None or xmax is None:
+            return None
+        if xmin > xmax:
+            xmin, xmax = xmax, xmin
+        if not np.all(np.diff(x_arr) >= 0):
+            order = np.argsort(x_arr)
+            x_arr = x_arr[order]
+            y_arr = y_arr[order]
+        x0 = max(xmin, float(x_arr[0]))
+        x1 = min(xmax, float(x_arr[-1]))
+        if x1 <= x0:
+            return None
+        mask = (x_arr >= x0) & (x_arr <= x1)
+        xs_in = x_arr[mask]
+        ys_in = y_arr[mask]
+        y_left = float(np.interp(x0, x_arr, y_arr))
+        y_right = float(np.interp(x1, x_arr, y_arr))
+        xs = np.concatenate(([x0], xs_in, [x1]))
+        ys = np.concatenate(([y_left], ys_in, [y_right]))
+        keep = np.concatenate(([True], np.diff(xs) > 0))
+        xs = xs[keep]
+        ys = ys[keep]
+        if xs.size < 2:
+            return None
+        baseline_y = self._compute_baseline_y(yMap, rct)
+        if baseline_y is None:
+            return None
+        polygon = QG.QPolygonF()
+        polygon.append(QC.QPointF(xMap.transform(xs[0]), baseline_y))
+        for xv, yv in zip(xs, ys):
+            polygon.append(QC.QPointF(xMap.transform(xv), yMap.transform(yv)))
+        polygon.append(QC.QPointF(xMap.transform(xs[-1]), baseline_y))
+        return polygon
+
+    def _compute_baseline_y(self, yMap, rct):  # pylint: disable=invalid-name
+        """Return the canvas y-coordinate of the polygon baseline."""
+        plot = self.plot()
+        is_log_y = False
+        if plot is not None:
+            is_log_y = plot.get_axis_scale(self.yAxis()) == "log"
+        if is_log_y:
+            return rct.bottom()
+        baseline_y = yMap.transform(0.0)
+        if not np.isfinite(baseline_y):
+            return rct.bottom()
+        return max(rct.top(), min(rct.bottom(), baseline_y))
+
+    def draw(self, painter, xMap, yMap, canvasRect):
+        """Draw the ROI: filled polygon clipped to the curve (or a fallback
+        rectangle), surrounded by the usual handle decoration."""
+        plot = self.plot()
+        if not plot:
+            return
+        if self.selected:
+            pen = self.sel_pen
+            sym = self.sel_symbol
+        else:
+            pen = self.pen
+            sym = self.symbol
+
+        rct = QC.QRectF(plot.canvas().contentsRect())
+        rct.setLeft(xMap.transform(self._min))
+        rct.setRight(xMap.transform(self._max))
+
+        if self._fill_color is not None:
+            brush = QG.QBrush(self._fill_color)
+            edge_color = QG.QColor(self._fill_color)
+            edge_color.setAlpha(255)
+            pen = QG.QPen(pen)
+            pen.setColor(edge_color)
+        else:
+            brush = self.brush
+
+        polygon = self._build_curve_polygon(xMap, yMap, rct)
+        painter.save()
+        painter.setPen(QC.Qt.NoPen)
+        painter.setBrush(brush)
+        if polygon is not None:
+            painter.drawPolygon(polygon)
+        else:
+            painter.fillRect(rct, brush)
+        painter.restore()
+
+        painter.setPen(pen)
+        painter.drawLine(rct.topLeft(), rct.bottomLeft())
+        painter.drawLine(rct.topRight(), rct.bottomRight())
+
+        dash = QG.QPen(pen)
+        dash.setStyle(QC.Qt.DashLine)
+        dash.setWidth(1)
+        painter.setPen(dash)
+        cx = rct.center().x()
+        painter.drawLine(QC.QPointF(cx, rct.top()), QC.QPointF(cx, rct.bottom()))
+
+        if self.can_resize() and not self.is_readonly():
+            painter.setPen(pen)
+            x0, x1, y = self.get_handles_pos()
+            sym.drawSymbol(painter, QC.QPointF(x0, y))
+            sym.drawSymbol(painter, QC.QPointF(x1, y))
+
+
+class _CurveClippedAnnotatedXRange(AnnotatedXRange):  # pylint: disable=abstract-method
+    """Annotated X-range selection whose underlying shape is a
+    :class:`_CurveClippedXRangeSelection` (curve-clipped fill + per-instance
+    color).
+
+    ``get_tr_size`` is intentionally not overridden: ``AnnotatedXRange`` (from
+    PlotPy) does not override it either, so the abstract-method warning is a
+    false positive inherited from upstream."""
+
+    SHAPE_CLASS = _CurveClippedXRangeSelection
+
 
 CONF.set("plot", "title/font/size", 11)
 
@@ -553,14 +753,23 @@ def __create_curve_roi_items(obj: SignalObj) -> list[AnnotatedXRange]:
     """
     items = []
     if obj.roi is not None and not obj.roi.is_empty():
-        for single_roi in obj.roi:
+        # Curve coordinates used to clip the ROI fill vertically (so each
+        # ROI follows the underlying signal curve, with a baseline at y=0).
+        x_curve, y_curve = (None, None)
+        if obj.xydata is not None:
+            x_curve, y_curve = obj.xydata
+        for roi_idx, single_roi in enumerate(obj.roi):
             assert isinstance(single_roi, SegmentROI)
             x0, x1 = single_roi.get_physical_coords(obj)
-            roi_item = make.annotated_xrange(x0, x1, single_roi.title)
+            roi_item = _CurveClippedAnnotatedXRange(x0, x1)
+            roi_item.setTitle(single_roi.title)
+            roi_item.shape.set_style("plot", "range")
+            if x_curve is not None and y_curve is not None:
+                roi_item.shape.set_signal_curve(x_curve, y_curve)
+            roi_item.shape.set_fill_color(roi_color_for_index(roi_idx))
             roi_item.label.labelparam.anchor = "T"
             roi_item.label.labelparam.xc = 20
             roi_item.label.labelparam.update_item(roi_item.label)
-            # roi_item.set_style("plot", "shape/drag")
             roi_item.set_movable(False)
             roi_item.set_resizable(False)
             roi_item.set_selectable(False)

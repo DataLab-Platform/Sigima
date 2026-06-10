@@ -30,16 +30,11 @@ def datetime64_to_seconds(dt_values: np.ndarray) -> np.ndarray:
         >>> seconds[0] > 1.7e9  # Year 2025
         True
     """
-    dtype_str = str(dt_values.dtype)
-    if "ns" in dtype_str:
-        divisor = 1e9
-    elif "us" in dtype_str:
-        divisor = 1e6
-    elif "ms" in dtype_str:
-        divisor = 1e3
-    else:
-        divisor = 1e9  # Default to nanoseconds for safety
-    return dt_values.view(np.int64) / divisor
+    # Normalize all datetime64 resolutions (ns, us, ms, s, m, h, D...) to
+    # nanoseconds before converting to float seconds. This avoids the previous
+    # substring-matching heuristic which silently produced wrong results for
+    # coarser resolutions such as datetime64[s] or datetime64[D].
+    return dt_values.astype("datetime64[ns]").view(np.int64) / 1e9
 
 
 def clip_astype(data: np.ndarray, dtype: np.dtype) -> np.ndarray:

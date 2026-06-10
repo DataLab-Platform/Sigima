@@ -281,6 +281,17 @@ class SimpleAbstractDLControl(abc.ABC):
         """
 
     @abc.abstractmethod
+    def set_object(self, obj: SignalObj | ImageObj) -> None:
+        """Update an existing object in DataLab.
+
+        The object is identified by its UUID (carried in metadata from a
+        previous :meth:`get_object` call).
+
+        Args:
+            obj: Signal or image object with the same UUID as an existing object
+        """
+
+    @abc.abstractmethod
     def load_from_directory(self, path: str) -> None:
         """Open objects from directory in current panel (signals/images).
 
@@ -309,6 +320,14 @@ class SimpleAbstractDLControl(abc.ABC):
 
         Returns:
             List of selected objects uuids.
+        """
+
+    @abc.abstractmethod
+    def get_current_object_uuid(self) -> str | None:
+        """Return current object uuid in current panel.
+
+        Returns:
+            UUID of the current object, or None if no object is current.
         """
 
     @abc.abstractmethod
@@ -721,6 +740,14 @@ class SimpleBaseProxy(SimpleAbstractDLControl, metaclass=abc.ABCMeta):
             List of selected objects uuids.
         """
         return self._datalab.get_sel_object_uuids(include_groups)
+
+    def get_current_object_uuid(self) -> str | None:
+        """Return current object uuid in current panel.
+
+        Returns:
+            UUID of the current object, or None if no object is current.
+        """
+        return self._datalab.get_current_object_uuid()
 
     def select_objects(
         self,

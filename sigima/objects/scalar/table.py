@@ -62,6 +62,9 @@ class TableKind(str, enum.Enum):
 
     STATISTICS = "statistics"
     PULSE_FEATURES = "pulse_features"
+    XY_MARKERS = "xy_markers"
+    X_MARKERS = "x_markers"
+    Y_MARKERS = "y_markers"
     CUSTOM = "results"
 
     @classmethod
@@ -191,6 +194,17 @@ class TableResult:
 
     def to_dict(self) -> dict:
         """Convert the TableResult to a dictionary."""
+
+        # Sanitize attrs: remove non-JSON-serializable entries (e.g. callables)
+        # so that HDF5 serialization does not fail. Display-only settings such
+        # as callable column formatters are intentionally excluded.
+        def _sanitize(obj):
+            if isinstance(obj, dict):
+                return {k: _sanitize(v) for k, v in obj.items() if not callable(v)}
+            if isinstance(obj, (list, tuple)):
+                return [_sanitize(v) for v in obj]
+            return obj
+
         return {
             "schema": 1,
             "title": self.title,
@@ -199,7 +213,7 @@ class TableResult:
             "data": self.data,
             "roi_indices": self.roi_indices,
             "func_name": self.func_name,
-            "attrs": dict(self.attrs) if self.attrs else {},
+            "attrs": _sanitize(dict(self.attrs)) if self.attrs else {},
         }
 
     @staticmethod
@@ -272,6 +286,27 @@ class TableResult:
         return DisplayPreferencesManager.get_visible_headers(
             self, self.headers, "hidden_metrics"
         )
+
+    def get_column_formats(self) -> dict[str, str]:
+        """Get per-column display format strings.
+
+        Returns:
+            Dictionary mapping column names to Python format specifiers
+             (e.g. ``{"x0": ".2e", "amplitude": ".3g"}``).
+        """
+        return dict(self.attrs.get("column_formats", {}))
+
+    def set_column_formats(self, formats: dict[str, str]) -> None:
+        """Set per-column display format strings.
+
+        Args:
+            formats: Dictionary mapping column names to Python format specifiers
+             (e.g. ``{"x0": ".2e", "amplitude": ".3g"}``).
+        """
+        if formats:
+            self.attrs["column_formats"] = dict(formats)
+        elif "column_formats" in self.attrs:
+            del self.attrs["column_formats"]
 
     @classmethod
     def from_dataframe(
@@ -457,6 +492,39 @@ class TableResult:
         """Check if this is a pulse features table."""
         return self.kind == TableKind.PULSE_FEATURES
 
+    def is_xy_markers(self) -> bool:
+        """Check if this is an XY-markers table.
+
+        XY-markers tables hold one or more ``(x, y)`` couples meant to be
+        displayed as cross markers at the corresponding positions. Typical
+        use cases include peak positions in spectra (e.g. spectral lines in
+        gamma-ray spectra) or any list of remarkable points where the Y
+        value has been computed by the processing code (e.g. by
+        interpolation or curve fitting) and should not be recomputed at
+        display time.
+
+        Headers must include ``"x"`` and ``"y"`` (in any position).
+        Additional columns are allowed (e.g. labels, intensities) and are
+        shown in the table view but ignored by the graphical overlay.
+        """
+        return self.kind == TableKind.XY_MARKERS
+
+    def is_x_markers(self) -> bool:
+        """Check if this is an X-markers table.
+
+        X-markers tables hold one or more X positions to be displayed as
+        vertical cursors. The header must include ``"x"``.
+        """
+        return self.kind == TableKind.X_MARKERS
+
+    def is_y_markers(self) -> bool:
+        """Check if this is a Y-markers table.
+
+        Y-markers tables hold one or more Y positions to be displayed as
+        horizontal cursors. The header must include ``"y"``.
+        """
+        return self.kind == TableKind.Y_MARKERS
+
     def is_custom(self) -> bool:
         """Check if this is a custom table."""
         return self.kind == TableKind.CUSTOM
@@ -480,6 +548,7 @@ class TableResultBuilder:
         self.global_func: Callable | None = None
 
         self._hidden_columns: set[str] = set()
+        self._column_formats: dict[str, str] = {}
 
     def set_global_function(self, func: Callable) -> None:
         """Set a global function that returns a dataclass with float/int fields.
@@ -552,6 +621,19 @@ class TableResultBuilder:
         self._hidden_columns.update(names)
         return self
 
+    def set_column_formats(self, formats: dict[str, str]) -> TableResultBuilder:
+        """Set per-column display format strings.
+
+        Args:
+            formats: Dictionary mapping column names to Python format specifiers
+             (e.g. ``{"x0": ".2e", "amplitude": ".3g"}``).
+
+        Returns:
+            Self for method chaining.
+        """
+        self._column_formats.update(formats)
+        return self
+
     @staticmethod
     def __check_value(value) -> float | str:
         """Check and convert a value to float or str.
@@ -567,9 +649,12 @@ class TableResultBuilder:
         """
         try:
             value = float(value)
-        except ValueError as exc:
+        except (ValueError, TypeError) as exc:
             if not isinstance(value, str):
                 raise ValueError(f"Unexpected non-numeric value: {value!r}") from exc
+            value = str(
+                value
+            )  # Convert enum subclasses (e.g. SignalShape) to plain str
         return value
 
     def __compute_row_from_column_funcs(self, data: np.ndarray) -> list:
@@ -621,6 +706,8 @@ class TableResultBuilder:
         - PULSE_FEATURES: Computes results ONLY for ROIs if any are defined; otherwise
           computes for the whole object. This is because pulse features are meaningful
           only within specific ROI regions when multiple pulses are present.
+        - XY_MARKERS / X_MARKERS / Y_MARKERS: Same per-ROI semantics as
+          PULSE_FEATURES (only ROIs if any are defined; otherwise the whole object).
         - CUSTOM: Default behavior is same as STATISTICS (whole object + ROIs).
 
         Args:
@@ -645,9 +732,17 @@ class TableResultBuilder:
 
         # Add whole object (None ROI) if:
         # 1. No ROIs exist, OR
-        # 2. ROIs exist AND kind is not PULSE_FEATURES (which computes only on ROIs)
+        # 2. ROIs exist AND kind is not in {PULSE_FEATURES, XY_MARKERS,
+        #    X_MARKERS, Y_MARKERS} (these kinds compute only on ROIs when
+        #    ROIs are defined)
+        roi_only_kinds = {
+            TableKind.PULSE_FEATURES,
+            TableKind.XY_MARKERS,
+            TableKind.X_MARKERS,
+            TableKind.Y_MARKERS,
+        }
         has_rois = roi_indices and roi_indices[0] is not None
-        if not has_rois or kind_enum != TableKind.PULSE_FEATURES:
+        if not has_rois or kind_enum not in roi_only_kinds:
             if has_rois:
                 roi_indices.insert(0, None)
 
@@ -690,6 +785,10 @@ class TableResultBuilder:
         if self._hidden_columns:
             hidden_prefs = {name: name not in self._hidden_columns for name in names}
             result.set_display_preferences(hidden_prefs)
+
+        # Apply per-column format strings
+        if self._column_formats:
+            result.set_column_formats(self._column_formats)
 
         return result
 

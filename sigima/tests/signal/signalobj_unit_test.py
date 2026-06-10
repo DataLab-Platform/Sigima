@@ -306,6 +306,29 @@ def test_create_signal_from_param() -> None:
     execenv.print(f"{test_create_signal_from_param.__doc__}: OK")
 
 
+def test_custom_signal_preserves_edited_array() -> None:
+    """Test that editing CustomSignalParam.xyarray is preserved on regeneration"""
+    execenv.print(f"{test_custom_signal_preserves_edited_array.__doc__}:")
+
+    param = sigima.objects.CustomSignalParam.create(size=5, xmin=0.0, xmax=1.0)
+
+    # First generation initializes the array from size/xmin/xmax.
+    x0, y0 = param.generate_1d_data()
+    assert np.allclose(x0, np.linspace(0.0, 1.0, 5))
+    assert np.allclose(y0, x0)
+
+    # Simulate a user editing the XY values in the array editor.
+    edited = np.array([[0.0, 10.0], [0.25, 20.0], [0.5, 30.0], [0.75, 40.0]])
+    param.xyarray = edited
+
+    # Regenerating must keep the edited values instead of clobbering them.
+    x1, y1 = param.generate_1d_data()
+    assert np.allclose(x1, edited[:, 0]), "Edited X values were not preserved"
+    assert np.allclose(y1, edited[:, 1]), "Edited Y values were not preserved"
+
+    execenv.print(f"{test_custom_signal_preserves_edited_array.__doc__}: OK")
+
+
 def test_signal_copy() -> None:
     """Test copying signal objects with all attributes"""
     execenv.print(f"{test_signal_copy.__doc__}:")
@@ -587,6 +610,40 @@ def test_coordinate_conversion() -> None:
     execenv.print(f"{test_coordinate_conversion.__doc__}: OK")
 
 
+def test_set_dy_does_not_create_phantom_dx() -> None:
+    """Setting only ``dy`` must leave ``dx`` as ``None`` (not phantom zeros).
+
+    Regression test: ``__set_dy`` used to extend ``xydata`` with ``np.zeros``,
+    so ``dx`` was silently reported as an array of zeros instead of ``None``.
+    """
+    x = np.linspace(0.0, 1.0, 5)
+    obj = sigima.objects.create_signal("test", x, x.copy())
+    assert obj.dx is None
+    assert obj.dy is None
+
+    obj.dy = 0.1 * np.ones_like(x)
+
+    assert obj.dy is not None
+    assert obj.dx is None, (
+        f"Setting dy should not create phantom dx values, got {obj.dx!r}"
+    )
+
+
+def test_set_dx_does_not_create_phantom_dy() -> None:
+    """Setting only ``dx`` must leave ``dy`` as ``None`` (not phantom zeros)."""
+    x = np.linspace(0.0, 1.0, 5)
+    obj = sigima.objects.create_signal("test", x, x.copy())
+    assert obj.dx is None
+    assert obj.dy is None
+
+    obj.dx = 0.01 * np.ones_like(x)
+
+    assert obj.dx is not None
+    assert obj.dy is None, (
+        f"Setting dx should not create phantom dy values, got {obj.dy!r}"
+    )
+
+
 def run_all_tests() -> None:
     """Run all tests in this module"""
     test_signal_parameters_interactive()
@@ -597,6 +654,8 @@ def run_all_tests() -> None:
     test_create_signal_from_param()
     test_signal_copy()
     test_coordinate_conversion()
+    test_set_dy_does_not_create_phantom_dx()
+    test_set_dx_does_not_create_phantom_dy()
 
 
 if __name__ == "__main__":

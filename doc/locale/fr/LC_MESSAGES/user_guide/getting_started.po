@@ -6,16 +6,11 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Sigima \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
 
 msgid "Getting Started"
 msgstr "Premiers pas"
@@ -30,7 +25,7 @@ msgid "The best way to start learning Sigima is through an interactive Jupyter n
 msgstr "La meilleure façon de commencer à apprendre Sigima est à travers un notebook Jupyter interactif. Cet exemple démontre le traitement d'images avec des régions d'intérêt (ROI) et utilise le backend matplotlib pour une visualisation adaptée au web."
 
 msgid ":download:`Download simple_example.ipynb <../simple_example.ipynb>`"
-msgstr ""
+msgstr ":download:`Télécharger simple_example.ipynb <../simple_example.ipynb>`"
 
 msgid "What This Example Shows"
 msgstr "Ce que cet exemple montre"
@@ -81,7 +76,7 @@ msgid "Sigima also enables remote control of DataLab sessions from external scri
 msgstr "Sigima permet également le contrôle à distance des sessions DataLab à partir de scripts ou de notebooks externes. Cela est utile pour l'automatisation, le traitement par lots ou l'intégration de DataLab dans des flux de travail plus larges."
 
 msgid ":download:`Download remote_example.ipynb <../remote_example.ipynb>`"
-msgstr ""
+msgstr ":download:`Télécharger remote_example.ipynb <../remote_example.ipynb>`"
 
 msgid "This notebook demonstrates:"
 msgstr "Ce notebook démontre :"

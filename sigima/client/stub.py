@@ -158,6 +158,8 @@ class DataLabStubServer:
         # Object operations
         self.server.register_function(self.add_signal, "add_signal")
         self.server.register_function(self.add_image, "add_image")
+        self.server.register_function(self.add_object, "add_object")
+        self.server.register_function(self.set_object, "set_object")
         self.server.register_function(self.get_object_titles, "get_object_titles")
         self.server.register_function(self.get_object_uuids, "get_object_uuids")
         self.server.register_function(self.get_object, "get_object")
@@ -168,6 +170,9 @@ class DataLabStubServer:
         self.server.register_function(self.select_objects, "select_objects")
         self.server.register_function(self.select_groups, "select_groups")
         self.server.register_function(self.get_sel_object_uuids, "get_sel_object_uuids")
+        self.server.register_function(
+            self.get_current_object_uuid, "get_current_object_uuid"
+        )
 
         # Group operations
         self.server.register_function(self.add_group, "add_group")
@@ -394,8 +399,9 @@ class DataLabStubServer:
         signal.xlabel = xlabel or ""
         signal.ylabel = ylabel or ""
 
-        # Store signal
+        # Store signal with UUID in metadata
         obj_uuid = str(uuid.uuid4())
+        signal.set_metadata_option("uuid", obj_uuid)
         self.signals[obj_uuid] = signal
 
         # Add to group if specified
@@ -430,8 +436,9 @@ class DataLabStubServer:
         image.ylabel = ylabel or ""
         image.zlabel = zlabel or ""
 
-        # Store image
+        # Store image with UUID in metadata
         obj_uuid = str(uuid.uuid4())
+        image.set_metadata_option("uuid", obj_uuid)
         self.images[obj_uuid] = image
 
         # Add to group if specified
@@ -463,6 +470,25 @@ class DataLabStubServer:
                 self.images[obj_uuid] = obj
                 if group_id and group_id in self.image_groups:
                     self.image_groups[group_id].objects.append(obj_uuid)
+
+    def set_object(self, obj_data: list[str]) -> None:
+        """Set object data (update an existing object by UUID).
+
+        Args:
+            obj_data: Serialized signal or image object
+        """
+        obj: SignalObj | ImageObj = utils.rpcjson_to_dataset(obj_data)
+        obj_uuid = obj.get_metadata_option("uuid", "")
+        if isinstance(obj, SignalObj) and obj_uuid in self.signals:
+            self.signals[obj_uuid] = obj
+            if self.verbose:
+                print(f"Updated signal {obj.title} (UUID {obj_uuid})")
+        elif isinstance(obj, ImageObj) and obj_uuid in self.images:
+            self.images[obj_uuid] = obj
+            if self.verbose:
+                print(f"Updated image {obj.title} (UUID {obj_uuid})")
+        elif self.verbose:
+            print(f"set_object: no object found with UUID {obj_uuid}")
 
     def load_from_files(self, filenames: list[str]) -> None:
         """Load objects from files (stub implementation).
@@ -598,6 +624,10 @@ class DataLabStubServer:
     def get_sel_object_uuids(self, include_groups: bool = False) -> list[str]:
         """Return selected objects uuids."""
         return self.selected_objects.copy()
+
+    def get_current_object_uuid(self) -> str | None:
+        """Return current object uuid (first selected, or None)."""
+        return self.selected_objects[0] if self.selected_objects else None
 
     def select_groups(self, selection: list[int], panel: str | None = None) -> None:
         """Select groups by indices."""

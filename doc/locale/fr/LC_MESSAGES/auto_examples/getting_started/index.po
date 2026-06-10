@@ -6,22 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Sigima \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
 
 msgid "Getting Started"
 msgstr "Premiers pas"
 
-msgid ":ref:`sphx_glr_auto_examples_getting_started_image_creation.py`"
-msgstr ""
+msgid ":doc:`/auto_examples/getting_started/image_creation`"
+msgstr ":doc:`/auto_examples/getting_started/image_creation`"
 
-msgid ":ref:`sphx_glr_auto_examples_getting_started_signal_creation.py`"
-msgstr ""
+msgid ":doc:`/auto_examples/getting_started/signal_creation`"
+msgstr ":doc:`/auto_examples/getting_started/signal_creation`"

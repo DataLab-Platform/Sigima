@@ -591,6 +591,48 @@ def test_wrap1to1func_with_args_kwargs() -> None:
     )
 
 
+def test_extract_roi_uncertainty_propagation() -> None:
+    """extract_roi must preserve dx/dy uncertainty data from the source signal.
+
+    Regression test: ``extract_roi`` used to drop ``dx`` and ``dy``.
+    """
+    x = np.linspace(0.0, 10.0, 11)
+    y = np.sin(x)
+    obj = sigima.objects.create_signal("s", x, y)
+    obj.dx = 0.01 * np.ones_like(x)
+    obj.dy = 0.1 * np.ones_like(y)
+
+    p = sigima.objects.ROI1DParam.create(xmin=2.0, xmax=7.0)
+    dst = sigima.proc.signal.extract_roi(obj, p)
+
+    assert dst.dx is not None, "extract_roi dropped dx uncertainty data"
+    assert dst.dy is not None, "extract_roi dropped dy uncertainty data"
+    assert dst.dx.shape == dst.x.shape
+    assert dst.dy.shape == dst.y.shape
+    check_array_result("extract_roi dx", dst.dx, np.full_like(dst.x, 0.01))
+    check_array_result("extract_roi dy", dst.dy, np.full_like(dst.y, 0.1))
+
+
+def test_extract_rois_uncertainty_propagation() -> None:
+    """extract_rois must preserve dx/dy uncertainty data from the source signal."""
+    x = np.linspace(0.0, 10.0, 21)
+    y = np.cos(x)
+    obj = sigima.objects.create_signal("s", x, y)
+    obj.dx = 0.005 * np.ones_like(x)
+    obj.dy = 0.05 * np.ones_like(y)
+
+    p1 = sigima.objects.ROI1DParam.create(xmin=1.0, xmax=3.0)
+    p2 = sigima.objects.ROI1DParam.create(xmin=6.0, xmax=8.0)
+    dst = sigima.proc.signal.extract_rois(obj, [p1, p2])
+
+    assert dst.dx is not None, "extract_rois dropped dx uncertainty data"
+    assert dst.dy is not None, "extract_rois dropped dy uncertainty data"
+    assert dst.dx.shape == dst.x.shape
+    assert dst.dy.shape == dst.y.shape
+    check_array_result("extract_rois dx", dst.dx, np.full_like(dst.x, 0.005))
+    check_array_result("extract_rois dy", dst.dy, np.full_like(dst.y, 0.05))
+
+
 if __name__ == "__main__":
     test_sqrt_uncertainty_propagation()
     test_log10_uncertainty_propagation()
@@ -609,3 +651,5 @@ if __name__ == "__main__":
     test_moving_median_uncertainty_propagation()
     test_wrap1to1func_basic_behavior()
     test_wrap1to1func_with_args_kwargs()
+    test_extract_roi_uncertainty_propagation()
+    test_extract_rois_uncertainty_propagation()

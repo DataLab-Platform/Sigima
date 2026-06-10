@@ -6,16 +6,11 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Sigima \n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.17.0\n"
 
 msgid "Public features:"
 msgstr "Fonctionnalités publiques :"
@@ -33,43 +28,43 @@ msgid "Purpose"
 msgstr "Objectif"
 
 msgid ":mod:`sigima.tools`"
-msgstr ""
+msgstr ":mod:`sigima.tools`"
 
 msgid "Algorithms for data analysis (operating on NumPy arrays) which purpose is to fill in the gaps of common scientific libraries (NumPy, SciPy, scikit-image, etc.), offering consistent tools for computation functions (see :mod:`sigima.proc`)"
 msgstr "Algorithmes d'analyse de données (fonctionnant sur des tableaux NumPy) dont le but est de combler les lacunes des bibliothèques scientifiques courantes (NumPy, SciPy, scikit-image, etc.), offrant des outils cohérents pour les fonctions de calcul (voir :mod:`sigima.proc`)"
 
 msgid ":mod:`sigima.params`"
-msgstr ""
+msgstr ":mod:`sigima.params`"
 
 msgid "Sets of parameters for configuring computation functions (these parameters are instances of :class:`guidata.dataset.DataSet` objects)"
 msgstr "Ensembles de paramètres pour configurer les fonctions de calcul (ces paramètres sont des instances d'objets :class:`guidata.dataset.DataSet`)"
 
 msgid ":mod:`sigima.objects`"
-msgstr ""
+msgstr ":mod:`sigima.objects`"
 
 msgid "Object model for signals and images (:class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`), scalar results (:class:`sigima.objects.GeometryResult` and :class:`sigima.objects.TableResult`), and related functions"
 msgstr "Modèle d'objet pour les signaux et les images (:class:`sigima.objects.SignalObj` et :class:`sigima.objects.ImageObj`), résultats scalaires (:class:`sigima.objects.GeometryResult` et :class:`sigima.objects.TableResult`), et fonctions associées"
 
 msgid ":mod:`sigima.proc`"
-msgstr ""
+msgstr ":mod:`sigima.proc`"
 
 msgid "Computation functions, which operate on signal and image objects (:class:`sigima.objects.SignalObj` or :class:`sigima.objects.ImageObj`) and return signal or image objects, or scalar results (:class:`sigima.objects.GeometryResult` or :class:`sigima.objects.TableResult`)."
 msgstr "Fonctions de calcul, qui opèrent sur des objets signal et image (:class:`sigima.objects.SignalObj` ou :class:`sigima.objects.ImageObj`) et retournent des objets signal ou image, ou des résultats scalaires (:class:`sigima.objects.GeometryResult` ou :class:`sigima.objects.TableResult`)."
 
 msgid ":mod:`sigima.config`"
-msgstr ""
+msgstr ":mod:`sigima.config`"
 
 msgid "Configuration management for the Sigima library, including options for data paths, translations, and other settings."
 msgstr "Gestion de la configuration pour la bibliothèque Sigima, y compris les options pour les chemins de données, les traductions et d'autres paramètres."
 
 msgid ":mod:`sigima.client`"
-msgstr ""
+msgstr ":mod:`sigima.client`"
 
 msgid "Client interface for connecting to DataLab application through XML-RPC protocol, providing remote control capabilities for signal and image processing workflows."
 msgstr "Interface client pour se connecter à l'application DataLab via le protocole XML-RPC, offrant des capacités de contrôle à distance pour les flux de travail de traitement de signaux et d'images."
 
 msgid ":mod:`sigima.viz`"
-msgstr ""
+msgstr ":mod:`sigima.viz`"
 
 msgid "Visualization tools for interactive display of signal and image objects, supporting PlotPy and Matplotlib backends for testing, debugging, and Jupyter notebook analysis."
 msgstr "Outils de visualisation pour l'affichage interactif des objets signal et image, prenant en charge les backends PlotPy et Matplotlib pour les tests, le débogage et l'analyse dans les notebooks Jupyter."

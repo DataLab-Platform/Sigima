@@ -1259,8 +1259,10 @@ class SquarePulseParam(BasePulseParam, title=_("Square pulse with noise")):
                     / self.total_rise_time
                 ),
                 y_high,
-                lambda t: y_high
-                - (y_high - self.offset) * (t - x_start_fall) / self.total_fall_time,
+                lambda t: (
+                    y_high
+                    - (y_high - self.offset) * (t - x_start_fall) / self.total_fall_time
+                ),
                 self.offset,
             ],
         )
@@ -1387,7 +1389,11 @@ class CustomSignalParam(NewSignalParam, title=_("Custom signal")):
         Returns:
             Tuple of (x, y) arrays
         """
-        self.setup_array(size=self.size, xmin=self.xmin, xmax=self.xmax)
+        if self.xyarray is None:
+            # Initialize the array on first use (no user-defined values yet).
+            # When the user has already edited ``xyarray``, its contents must be
+            # preserved here instead of being regenerated from size/xmin/xmax.
+            self.setup_array(size=self.size, xmin=self.xmin, xmax=self.xmax)
         x, y = self.xyarray.T
         return x, y
 

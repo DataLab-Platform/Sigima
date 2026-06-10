@@ -57,6 +57,8 @@ Sigima/
 │   │   ├── signal/       # Signal algorithms (peak detection, stability, etc.)
 │   │   └── image/        # Image algorithms (detection, geometry, etc.)
 │   ├── io/               # I/O for signals/images (CSV, formats)
+│   ├── viz/              # Visualization utilities (PlotPy and Matplotlib backends)
+│   ├── data/             # Bundled test/example data files
 │   ├── params.py         # Centralized parameter import (re-exports from proc/)
 │   ├── client/           # SimpleRemoteProxy for DataLab control
 │   └── tests/            # pytest test suite
