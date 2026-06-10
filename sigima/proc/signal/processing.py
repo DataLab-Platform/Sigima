@@ -710,12 +710,27 @@ def replace_special_values(
     # Apply strategies in order: NaN first, then +Inf, then -Inf
     for target, strategy, const_val, neigh_size in (
         (np.isnan, p.nan_strategy, p.nan_constant_value, p.nan_neighbor_size),
-        (np.isposinf, p.posinf_strategy, p.posinf_constant_value, p.posinf_neighbor_size),
-        (np.isneginf, p.neginf_strategy, p.neginf_constant_value, p.neginf_neighbor_size),
+        (
+            np.isposinf,
+            p.posinf_strategy,
+            p.posinf_constant_value,
+            p.posinf_neighbor_size,
+        ),
+        (
+            np.isneginf,
+            p.neginf_strategy,
+            p.neginf_constant_value,
+            p.neginf_neighbor_size,
+        ),
     ):
         mask = target(y)
         x, y, resized = _apply_signal_strategy(
-            x, y, mask, strategy, neigh_size, const_val,
+            x,
+            y,
+            mask,
+            strategy,
+            neigh_size,
+            const_val,
         )
 
     # Rebuild signal data (set_xydata with only x, y strips any error bars;

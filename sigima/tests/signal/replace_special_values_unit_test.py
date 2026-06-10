@@ -394,7 +394,12 @@ def test_signal_replace_special_values() -> None:
         assert not np.any(np.isnan(dst.y))
 
     # Test neighbor strategies
-    for strategy in (S.NEIGHBOR_MIN, S.NEIGHBOR_MAX, S.NEIGHBOR_MEAN, S.NEIGHBOR_MEDIAN):
+    for strategy in (
+        S.NEIGHBOR_MIN,
+        S.NEIGHBOR_MAX,
+        S.NEIGHBOR_MEAN,
+        S.NEIGHBOR_MEDIAN,
+    ):
         src = _make_signal(y_nan.copy())
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=strategy,

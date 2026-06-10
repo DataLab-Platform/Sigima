@@ -259,7 +259,12 @@ def test_image_replace_special_values() -> None:
     # Test neighbor strategies
     data_smooth = np.arange(25, dtype=float).reshape(5, 5)
     data_smooth[2, 2] = np.nan
-    for strategy in (S.NEIGHBOR_MIN, S.NEIGHBOR_MAX, S.NEIGHBOR_MEAN, S.NEIGHBOR_MEDIAN):
+    for strategy in (
+        S.NEIGHBOR_MIN,
+        S.NEIGHBOR_MAX,
+        S.NEIGHBOR_MEAN,
+        S.NEIGHBOR_MEDIAN,
+    ):
         src = _make_image(data_smooth.copy())
         p = ReplaceSpecialValuesImageParam.create(
             nan_strategy=strategy,

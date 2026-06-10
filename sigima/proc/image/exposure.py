@@ -485,8 +485,18 @@ def replace_special_values(
 
     for target, strategy, const_val, neigh_size in (
         (np.isnan, p.nan_strategy, p.nan_constant_value, p.nan_neighbor_size),
-        (np.isposinf, p.posinf_strategy, p.posinf_constant_value, p.posinf_neighbor_size),
-        (np.isneginf, p.neginf_strategy, p.neginf_constant_value, p.neginf_neighbor_size),
+        (
+            np.isposinf,
+            p.posinf_strategy,
+            p.posinf_constant_value,
+            p.posinf_neighbor_size,
+        ),
+        (
+            np.isneginf,
+            p.neginf_strategy,
+            p.neginf_constant_value,
+            p.neginf_neighbor_size,
+        ),
     ):
         mask = target(data)
         data = _apply_image_strategy(data, mask, strategy, neigh_size, const_val)
