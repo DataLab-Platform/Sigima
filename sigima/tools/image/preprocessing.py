@@ -48,7 +48,8 @@ def fit_circle_model(contour: np.ndarray) -> tuple[float, float, float] | None:
     if _USE_NEW_SHAPE_API:
         model = measure.CircleModel.from_estimate(contour)
         if model:
-            return model.center[0], model.center[1], model.radius
+            # model.center is (row, col) = (y, x), swap to (x, y)
+            return model.center[1], model.center[0], model.radius
     else:
         model = measure.CircleModel()
         if model.estimate(contour):
@@ -73,8 +74,10 @@ def fit_ellipse_model(
     if _USE_NEW_SHAPE_API:
         model = measure.EllipseModel.from_estimate(contour)
         if model:
-            xc, yc = model.center[0], model.center[1]
-            a, b = model.axis_lengths[0], model.axis_lengths[1]
+            # model.center is (row, col) = (y, x), swap to (x, y)
+            # model.axis_lengths is (semi_row, semi_col), swap to (semi_x, semi_y)
+            xc, yc = model.center[1], model.center[0]
+            a, b = model.axis_lengths[1], model.axis_lengths[0]
             return xc, yc, a, b, model.theta
     else:
         model = measure.EllipseModel()

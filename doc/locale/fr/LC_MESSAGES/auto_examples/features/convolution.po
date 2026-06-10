@@ -55,7 +55,7 @@ msgid "We start by creating a test image and various convolution kernels."
 msgstr "Nous commençons par créer une image de test et divers noyaux de convolution."
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Now we'll perform convolution with the Gaussian kernel and compare the result with scipy's implementation to verify correctness."
 msgstr "Nous allons maintenant effectuer une convolution avec le noyau gaussien et comparer le résultat avec l'implémentation de scipy pour vérifier la justesse."
@@ -85,7 +85,7 @@ msgid "Different sigma values in Gaussian kernels produce different blurring eff
 msgstr "Différentes valeurs de sigma dans les noyaux gaussiens produisent différents effets de flou. Comparons plusieurs valeurs de sigma côte à côte."
 
 msgid "Qt widget 2"
-msgstr ""
+msgstr "Qt widget 2"
 
 msgid "Custom convolution kernels"
 msgstr "Kernels de convolution personnalisés"

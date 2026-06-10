@@ -45,7 +45,7 @@ msgid "We wrapped a simple function to do perform visualizations tasks required 
 msgstr "On a encapsulé une fonction simple pour réaliser les visualisations nécessaires à ce tutoriel et aux autres, afin de limiter l'impact du code lié à l'interface graphique dans la documentation et de vous laisser vous concentrer sur l'analyse."
 
 msgid "Qt widget 1"
-msgstr ""
+msgstr "Qt widget 1"
 
 msgid "Image preprocessing - Binning"
 msgstr "Prétraitement d'image - binning"

@@ -160,6 +160,27 @@ def test_read_nonuniform_coordinates():
         os.unlink(temp_filename)
 
 
+def test_read_nonuniform_coordinates_fixture() -> None:
+    """Read the permanent non-uniform fixture file and check coordinates.
+
+    Unlike ``test_read_nonuniform_coordinates`` (which builds the file in a
+    temporary directory), this exercises the bundled test artifact so the
+    non-uniform read path is covered by a real, version-controlled file.
+    """
+    path = get_test_fnames("coordinated_text/image_nonuniform.txt")[0]
+    imgs = CoordinatedTextFileReader.read_images(path)
+    assert len(imgs) == 1, f"Expected 1 image, got {len(imgs)}"
+
+    img = imgs[0]
+    assert not img.is_uniform_coords, "Fixture should be detected as non-uniform"
+
+    np.testing.assert_allclose(img.xcoords, [0.0, 1.5, 4.0, 9.0], rtol=1e-10)
+    np.testing.assert_allclose(img.ycoords, [0.0, 2.0, 5.0], rtol=1e-10)
+    assert img.data.shape == (3, 4), f"Expected shape (3, 4), got {img.data.shape}"
+    expected = np.arange(1.0, 13.0).reshape(3, 4)
+    np.testing.assert_allclose(img.data, expected)
+
+
 def test_nonuniform_coordinates_io() -> None:
     """Test I/O (read and write) for coordinated text format
     with non-uniform coordinates

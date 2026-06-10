@@ -1389,7 +1389,11 @@ class CustomSignalParam(NewSignalParam, title=_("Custom signal")):
         Returns:
             Tuple of (x, y) arrays
         """
-        self.setup_array(size=self.size, xmin=self.xmin, xmax=self.xmax)
+        if self.xyarray is None:
+            # Initialize the array on first use (no user-defined values yet).
+            # When the user has already edited ``xyarray``, its contents must be
+            # preserved here instead of being regenerated from size/xmin/xmax.
+            self.setup_array(size=self.size, xmin=self.xmin, xmax=self.xmax)
         x, y = self.xyarray.T
         return x, y
 
