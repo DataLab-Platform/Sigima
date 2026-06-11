@@ -210,6 +210,7 @@ from sigima.proc.image.exposure import (
     histogram,
     normalize,
     offset_correction,
+    replace_special_values,
     rescale_intensity,
 )
 from sigima.proc.image.extraction import (
@@ -461,6 +462,7 @@ __all__ = [
     "quadratic_difference",
     "radial_profile",
     "real",
+    "replace_special_values",
     "resampling",
     "rescale_intensity",
     "resize",

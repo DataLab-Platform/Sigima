@@ -24,6 +24,8 @@ from sigima.enums import (
     FilterMode,
     MathOperator,
     NormalizationMethod,
+    ReplacementStrategyImage,
+    ReplacementStrategySignal,
     SignalsToImageOrientation,
 )
 from sigima.proc.title_formatting import get_default_title_formatter
@@ -234,6 +236,193 @@ class SignalsToImageParam(gds.DataSet, title=_("Signals to image")):
         default=NormalizationMethod.MAXIMUM,
         help=_("Method used for normalization"),
     ).set_prop("display", active=_prop)
+
+
+_NEIGHBOR_HELP = _(
+    "Number of neighboring points used when a neighbor-based strategy is selected"
+)
+_CONSTANT_HELP = _("Value used when a 'Replace with constant' strategy is selected")
+
+_S_SIG = ReplacementStrategySignal
+_S_IMG = ReplacementStrategyImage
+
+
+def _is_signal_constant(x: ReplacementStrategySignal) -> bool:
+    return x == _S_SIG.CONSTANT
+
+
+def _is_signal_neighbor(x: ReplacementStrategySignal) -> bool:
+    return x in (
+        _S_SIG.NEIGHBOR_MIN,
+        _S_SIG.NEIGHBOR_MAX,
+        _S_SIG.NEIGHBOR_MEAN,
+        _S_SIG.NEIGHBOR_MEDIAN,
+    )
+
+
+def _is_image_constant(x: ReplacementStrategyImage) -> bool:
+    return x == _S_IMG.CONSTANT
+
+
+def _is_image_neighbor(x: ReplacementStrategyImage) -> bool:
+    return x in (
+        _S_IMG.NEIGHBOR_MIN,
+        _S_IMG.NEIGHBOR_MAX,
+        _S_IMG.NEIGHBOR_MEAN,
+        _S_IMG.NEIGHBOR_MEDIAN,
+    )
+
+
+class ReplaceSpecialValuesSignalParam(
+    gds.DataSet, title=_("Replace special values (signal)")
+):
+    """Parameters for replacing NaN, +Inf and -Inf values in signals.
+
+    Each target has its own tab with strategy and related advanced parameters.
+    """
+
+    _tabs = gds.BeginTabGroup("targets")
+
+    # --- NaN ---
+    _g_nan = gds.BeginGroup(_("NaN"))
+    _prop_nan = gds.GetAttrProp("nan_strategy")
+    nan_strategy = gds.ChoiceItem(
+        _("Strategy"),
+        ReplacementStrategySignal,
+        default=ReplacementStrategySignal.ZERO,
+    ).set_prop("display", store=_prop_nan)
+    nan_constant_value = gds.FloatItem(
+        _("Constant value"),
+        default=0.0,
+        help=_CONSTANT_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_nan, _is_signal_constant))
+    nan_neighbor_size = gds.IntItem(
+        _("Neighbor size"),
+        default=3,
+        min=1,
+        help=_NEIGHBOR_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_nan, _is_signal_neighbor))
+    _e_g_nan = gds.EndGroup(_("NaN"))
+
+    # --- +Infinity ---
+    _g_posinf = gds.BeginGroup(_("+ Infinity"))
+    _prop_posinf = gds.GetAttrProp("posinf_strategy")
+    posinf_strategy = gds.ChoiceItem(
+        _("Strategy"),
+        ReplacementStrategySignal,
+        default=ReplacementStrategySignal.ZERO,
+    ).set_prop("display", store=_prop_posinf)
+    posinf_constant_value = gds.FloatItem(
+        _("Constant value"),
+        default=0.0,
+        help=_CONSTANT_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_posinf, _is_signal_constant))
+    posinf_neighbor_size = gds.IntItem(
+        _("Neighbor size"),
+        default=3,
+        min=1,
+        help=_NEIGHBOR_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_posinf, _is_signal_neighbor))
+    _e_g_posinf = gds.EndGroup(_("+ Infinity"))
+
+    # --- -Infinity ---
+    _g_neginf = gds.BeginGroup(_("- Infinity"))
+    _prop_neginf = gds.GetAttrProp("neginf_strategy")
+    neginf_strategy = gds.ChoiceItem(
+        _("Strategy"),
+        ReplacementStrategySignal,
+        default=ReplacementStrategySignal.ZERO,
+    ).set_prop("display", store=_prop_neginf)
+    neginf_constant_value = gds.FloatItem(
+        _("Constant value"),
+        default=0.0,
+        help=_CONSTANT_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_neginf, _is_signal_constant))
+    neginf_neighbor_size = gds.IntItem(
+        _("Neighbor size"),
+        default=3,
+        min=1,
+        help=_NEIGHBOR_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_neginf, _is_signal_neighbor))
+    _e_g_neginf = gds.EndGroup(_("- Infinity"))
+
+    _e_tabs = gds.EndTabGroup("targets")
+
+
+class ReplaceSpecialValuesImageParam(
+    gds.DataSet, title=_("Replace special values (image)")
+):
+    """Parameters for replacing NaN, +Inf and -Inf values in images.
+
+    Each target has its own tab with strategy and related advanced parameters.
+    """
+
+    _tabs = gds.BeginTabGroup("targets")
+
+    # --- NaN ---
+    _g_nan = gds.BeginGroup(_("NaN"))
+    _prop_nan = gds.GetAttrProp("nan_strategy")
+    nan_strategy = gds.ChoiceItem(
+        _("Strategy"),
+        ReplacementStrategyImage,
+        default=ReplacementStrategyImage.ZERO,
+    ).set_prop("display", store=_prop_nan)
+    nan_constant_value = gds.FloatItem(
+        _("Constant value"),
+        default=0.0,
+        help=_CONSTANT_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_nan, _is_image_constant))
+    nan_neighbor_size = gds.IntItem(
+        _("Neighbor size"),
+        default=3,
+        min=1,
+        help=_NEIGHBOR_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_nan, _is_image_neighbor))
+    _e_g_nan = gds.EndGroup(_("NaN"))
+
+    # --- +Infinity ---
+    _g_posinf = gds.BeginGroup(_("+ Infinity"))
+    _prop_posinf = gds.GetAttrProp("posinf_strategy")
+    posinf_strategy = gds.ChoiceItem(
+        _("Strategy"),
+        ReplacementStrategyImage,
+        default=ReplacementStrategyImage.ZERO,
+    ).set_prop("display", store=_prop_posinf)
+    posinf_constant_value = gds.FloatItem(
+        _("Constant value"),
+        default=0.0,
+        help=_CONSTANT_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_posinf, _is_image_constant))
+    posinf_neighbor_size = gds.IntItem(
+        _("Neighbor size"),
+        default=3,
+        min=1,
+        help=_NEIGHBOR_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_posinf, _is_image_neighbor))
+    _e_g_posinf = gds.EndGroup(_("+ Infinity"))
+
+    # --- -Infinity ---
+    _g_neginf = gds.BeginGroup(_("- Infinity"))
+    _prop_neginf = gds.GetAttrProp("neginf_strategy")
+    neginf_strategy = gds.ChoiceItem(
+        _("Strategy"),
+        ReplacementStrategyImage,
+        default=ReplacementStrategyImage.ZERO,
+    ).set_prop("display", store=_prop_neginf)
+    neginf_constant_value = gds.FloatItem(
+        _("Constant value"),
+        default=0.0,
+        help=_CONSTANT_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_neginf, _is_image_constant))
+    neginf_neighbor_size = gds.IntItem(
+        _("Neighbor size"),
+        default=3,
+        min=1,
+        help=_NEIGHBOR_HELP,
+    ).set_prop("display", active=gds.FuncProp(_prop_neginf, _is_image_neighbor))
+    _e_g_neginf = gds.EndGroup(_("- Infinity"))
+
+    _e_tabs = gds.EndTabGroup("targets")
 
 
 # MARK: Helper functions for creating result objects -----------------------------------
