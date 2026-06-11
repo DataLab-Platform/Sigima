@@ -14,10 +14,10 @@ import numpy as np
 import pytest
 
 import sigima.objects
-import sigima.proc.signal
 import sigima.proc.signal as sips
 from sigima.enums import ReplacementStrategySignal as S
 from sigima.proc.base import ReplaceSpecialValuesSignalParam
+from sigima.tools.signal.replace_values import count_special_values
 
 
 def _make_signal(
@@ -39,10 +39,12 @@ class TestFixedValueStrategies:
 
     @pytest.fixture()
     def signal_with_nan(self):
+        """Fixture: a signal containing NaN values."""
         y = np.array([1.0, np.nan, 3.0, np.nan, 5.0])
         return _make_signal(y)
 
     def test_replace_zero(self, signal_with_nan):
+        """Test replacement of NaN values with zero."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.ZERO, posinf_strategy=S.NONE, neginf_strategy=S.NONE
         )
@@ -52,6 +54,7 @@ class TestFixedValueStrategies:
         assert dst.y[3] == 0.0
 
     def test_replace_min(self, signal_with_nan):
+        """Test replacement of NaN values with the minimum of valid data."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.MIN, posinf_strategy=S.NONE, neginf_strategy=S.NONE
         )
@@ -60,6 +63,7 @@ class TestFixedValueStrategies:
         assert dst.y[3] == 1.0
 
     def test_replace_max(self, signal_with_nan):
+        """Test replacement of NaN values with the maximum of valid data."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.MAX, posinf_strategy=S.NONE, neginf_strategy=S.NONE
         )
@@ -68,6 +72,7 @@ class TestFixedValueStrategies:
         assert dst.y[3] == 5.0
 
     def test_replace_mean(self, signal_with_nan):
+        """Test replacement of NaN values with the mean of valid data."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.MEAN, posinf_strategy=S.NONE, neginf_strategy=S.NONE
         )
@@ -77,6 +82,7 @@ class TestFixedValueStrategies:
         np.testing.assert_allclose(dst.y[3], expected_mean)
 
     def test_replace_median(self, signal_with_nan):
+        """Test replacement of NaN values with the median of valid data."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.MEDIAN, posinf_strategy=S.NONE, neginf_strategy=S.NONE
         )
@@ -85,6 +91,7 @@ class TestFixedValueStrategies:
         np.testing.assert_allclose(dst.y[1], expected_median)
 
     def test_replace_constant(self, signal_with_nan):
+        """Test replacement of NaN values with a user-specified constant."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.CONSTANT,
             posinf_strategy=S.NONE,
@@ -106,16 +113,20 @@ class TestRemovalStrategies:
     """Test delete, forward fill, and backward fill."""
 
     def test_delete(self):
+        """Test deletion of NaN values."""
+        x = np.array([0.0, 1.0, 2.5, 4.5, 7.0])
         y = np.array([1.0, np.nan, 3.0, 4.0, 5.0])
-        src = _make_signal(y)
+        src = _make_signal(y, x)
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.DELETE, posinf_strategy=S.NONE, neginf_strategy=S.NONE
         )
         dst = sips.replace_special_values(src, p)
         assert len(dst.y) == 4
         np.testing.assert_array_equal(dst.y, [1.0, 3.0, 4.0, 5.0])
+        np.testing.assert_array_equal(dst.x, [0.0, 2.5, 4.5, 7.0])
 
     def test_delete_warns_uniform_sampling(self):
+        """Test that deletion of NaN values emits a warning about uniform sampling."""
         x = np.linspace(0, 10, 100)
         y = np.sin(x)
         y[50] = np.nan
@@ -127,6 +138,7 @@ class TestRemovalStrategies:
             sips.replace_special_values(src, p)
 
     def test_forward_fill(self):
+        """Test forward fill of NaN values."""
         y = np.array([1.0, np.nan, np.nan, 4.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -138,6 +150,7 @@ class TestRemovalStrategies:
         np.testing.assert_array_equal(dst.y, [1.0, 1.0, 1.0, 4.0, 5.0])
 
     def test_forward_fill_leading_nan(self):
+        """Test forward fill when leading values are NaN."""
         y = np.array([np.nan, np.nan, 3.0, 4.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -149,6 +162,7 @@ class TestRemovalStrategies:
         np.testing.assert_array_equal(dst.y, [3.0, 3.0, 3.0, 4.0, 5.0])
 
     def test_backward_fill(self):
+        """Test backward fill of NaN values."""
         y = np.array([1.0, np.nan, np.nan, 4.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -160,6 +174,7 @@ class TestRemovalStrategies:
         np.testing.assert_array_equal(dst.y, [1.0, 4.0, 4.0, 4.0, 5.0])
 
     def test_backward_fill_trailing_nan(self):
+        """Test backward fill when trailing values are NaN."""
         y = np.array([1.0, 2.0, 3.0, np.nan, np.nan])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -181,6 +196,7 @@ class TestInterpolationStrategies:
 
     @pytest.fixture()
     def signal_with_gap(self):
+        """Fixture: a signal containing NaN values with valid data on both sides."""
         x = np.arange(10, dtype=float)
         y = 2.0 * x + 1.0  # linear: y = 2x + 1
         y[3] = np.nan
@@ -188,6 +204,7 @@ class TestInterpolationStrategies:
         return _make_signal(y, x)
 
     def test_interp_linear(self, signal_with_gap):
+        """Test linear interpolation of NaN values."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.INTERP_LINEAR,
             posinf_strategy=S.NONE,
@@ -199,6 +216,7 @@ class TestInterpolationStrategies:
         np.testing.assert_allclose(dst.y[7], 15.0, atol=1e-10)
 
     def test_interp_cubic(self, signal_with_gap):
+        """Test cubic interpolation of NaN values."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.INTERP_CUBIC,
             posinf_strategy=S.NONE,
@@ -208,6 +226,7 @@ class TestInterpolationStrategies:
         np.testing.assert_allclose(dst.y[3], 7.0, atol=1e-6)
 
     def test_interp_pchip(self, signal_with_gap):
+        """Test PCHIP interpolation of NaN values."""
         p = ReplaceSpecialValuesSignalParam.create(
             nan_strategy=S.INTERP_PCHIP,
             posinf_strategy=S.NONE,
@@ -226,6 +245,7 @@ class TestNeighborStrategies:
     """Test neighbor-based replacement."""
 
     def test_neighbor_mean(self):
+        """Test replacement of NaN values with the mean of neighboring valid data."""
         y = np.array([1.0, 2.0, np.nan, 4.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -239,6 +259,7 @@ class TestNeighborStrategies:
         np.testing.assert_allclose(dst.y[2], 3.0)
 
     def test_neighbor_median(self):
+        """Test replacement of NaN values with the median of neighboring valid data."""
         y = np.array([1.0, 2.0, np.nan, 8.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -252,6 +273,7 @@ class TestNeighborStrategies:
         np.testing.assert_allclose(dst.y[2], 5.0)
 
     def test_neighbor_min(self):
+        """Test replacement of NaN values with the minimum of neighboring valid data."""
         y = np.array([1.0, 2.0, np.nan, 8.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -265,6 +287,7 @@ class TestNeighborStrategies:
         np.testing.assert_allclose(dst.y[2], 2.0)
 
     def test_neighbor_max(self):
+        """Test replacement of NaN values with the maximum of neighboring valid data."""
         y = np.array([1.0, 2.0, np.nan, 8.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -287,6 +310,7 @@ class TestMultipleTargets:
     """Test replacing NaN, +Inf and -Inf simultaneously."""
 
     def test_all_three_targets(self):
+        """Test replacement of NaN, +Inf and -Inf values in the same signal."""
         y = np.array([1.0, np.nan, np.inf, -np.inf, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -300,6 +324,7 @@ class TestMultipleTargets:
         assert dst.y[3] == 0.0  # -inf → min (0.0 is now min after NaN→0)
 
     def test_none_strategy_skips(self):
+        """Test that the NONE strategy skips replacement."""
         y = np.array([1.0, np.nan, 3.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -318,6 +343,7 @@ class TestEdgeCases:
     """Test edge cases."""
 
     def test_no_special_values(self):
+        """Test that a signal with no special values is unchanged."""
         y = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -327,6 +353,7 @@ class TestEdgeCases:
         np.testing.assert_array_equal(dst.y, y)
 
     def test_all_nan(self):
+        """Test that a signal with all NaN values is replaced correctly."""
         y = np.array([np.nan, np.nan, np.nan])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -336,6 +363,7 @@ class TestEdgeCases:
         np.testing.assert_array_equal(dst.y, [0.0, 0.0, 0.0])
 
     def test_posinf_only(self):
+        """Test replacement of +Inf values with zero."""
         y = np.array([1.0, np.inf, 3.0])
         src = _make_signal(y)
         p = ReplaceSpecialValuesSignalParam.create(
@@ -432,22 +460,22 @@ class TestCountSpecialValues:
     """Test the count_special_values utility."""
 
     def test_count_mixed(self):
+        """Test counting of NaN, +Inf and -Inf values in a mixed array."""
         y = np.array([1.0, np.nan, np.inf, -np.inf, 5.0, np.nan])
-        from sigima.tools.signal.replace_values import count_special_values
 
         counts = count_special_values(y)
         assert counts == {"nan": 2, "posinf": 1, "neginf": 1}
 
     def test_count_none(self):
+        """Test counting when there are no special values."""
         y = np.array([1.0, 2.0, 3.0])
-        from sigima.tools.signal.replace_values import count_special_values
 
         counts = count_special_values(y)
         assert counts == {"nan": 0, "posinf": 0, "neginf": 0}
 
     def test_count_all_nan(self):
+        """Test counting when all values are NaN."""
         y = np.array([np.nan, np.nan])
-        from sigima.tools.signal.replace_values import count_special_values
 
         counts = count_special_values(y)
         assert counts == {"nan": 2, "posinf": 0, "neginf": 0}

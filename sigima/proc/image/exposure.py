@@ -27,6 +27,8 @@ especially under variable lighting conditions.
 
 from __future__ import annotations
 
+import warnings
+
 import guidata.dataset as gds
 import numpy as np
 from skimage import exposure
@@ -481,7 +483,18 @@ def replace_special_values(
     suffix = ", ".join(strategies) if strategies else "none"
 
     dst = dst_1_to_1(src, "replace_special_values", suffix)
-    data = dst.data.astype(float).copy()
+
+    if np.issubdtype(src.data.dtype, np.integer):
+        warnings.warn(
+            _(
+                "Replace special values is not applicable to integer images "
+                "because they cannot contain NaN or infinite values."
+            ),
+            stacklevel=2,
+        )
+        return dst
+
+    data = dst.data.copy()
 
     for target, strategy, const_val, neigh_size in (
         (np.isnan, p.nan_strategy, p.nan_constant_value, p.nan_neighbor_size),

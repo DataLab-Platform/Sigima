@@ -204,6 +204,8 @@ def count_special_values_2d(
         Dictionary with keys ``"nan"``, ``"posinf"``, ``"neginf"``
         and integer counts.
     """
+    if np.issubdtype(data.dtype, np.integer):
+        return {"nan": 0, "posinf": 0, "neginf": 0}
     return {
         "nan": int(np.count_nonzero(np.isnan(data))),
         "posinf": int(np.count_nonzero(np.isposinf(data))),
