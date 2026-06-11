@@ -142,6 +142,63 @@ msgstr "Chaque signal devient une colonne"
 msgid "Rectangle"
 msgstr "Rectangle"
 
+msgid "Do nothing"
+msgstr "Ne rien faire"
+
+msgid "Replace with zero"
+msgstr "Remplacer par zéro"
+
+msgid "Replace with constant"
+msgstr "Remplacer par une constante"
+
+msgid "Replace with minimum"
+msgstr "Remplacer par le minimum"
+
+msgid "Replace with maximum"
+msgstr "Remplacer par le maximum"
+
+msgid "Replace with mean"
+msgstr "Remplacer par la moyenne"
+
+msgid "Replace with median"
+msgstr "Remplacer par la médiane"
+
+msgid "Delete points"
+msgstr "Supprimer les points"
+
+msgid "Forward fill (previous value)"
+msgstr "Remplissage vers l'avant (valeur précédente)"
+
+msgid "Backward fill (next value)"
+msgstr "Remplissage vers l'arrière (valeur suivante)"
+
+msgid "Interpolation: Linear"
+msgstr "Interpolation linéaire"
+
+msgid "Interpolation: Spline"
+msgstr "Interpolation spline"
+
+msgid "Interpolation: Quadratic"
+msgstr "Interpolation quadratique"
+
+msgid "Interpolation: Cubic"
+msgstr "Interpolation cubique"
+
+msgid "Interpolation: PCHIP"
+msgstr "Interpolation PCHIP"
+
+msgid "N-neighbor minimum"
+msgstr "Plus proche voisin minimum"
+
+msgid "N-neighbor maximum"
+msgstr "Plus proche voisin maximum"
+
+msgid "N-neighbor mean"
+msgstr "Plus proche voisin moyenne"
+
+msgid "N-neighbor median"
+msgstr "Plus proche voisin médiane"
+
 msgid "All supported files"
 msgstr "Tous les fichiers pris en charge"
 
@@ -756,6 +813,33 @@ msgstr "Méthode de normalisation"
 
 msgid "Method used for normalization"
 msgstr "Méthode utilisée pour la normalisation"
+
+msgid "Number of neighboring points used when a neighbor-based strategy is selected"
+msgstr "Nombre de points voisins utilisés lorsqu'une stratégie basée sur les voisins est sélectionnée"
+
+msgid "Value used when a 'Replace with constant' strategy is selected"
+msgstr "Valeur utilisée lorsqu'une stratégie 'Remplacer par une constante' est sélectionnée"
+
+msgid "Replace special values (signal)"
+msgstr "Remplacer les valeurs spéciales (signal)"
+
+msgid "NaN"
+msgstr "NaN"
+
+msgid "Strategy"
+msgstr "Stratégie"
+
+msgid "Neighbor size"
+msgstr "Taille du voisinage"
+
+msgid "+ Infinity"
+msgstr "+ Infini"
+
+msgid "- Infinity"
+msgstr "- Infini"
+
+msgid "Replace special values (image)"
+msgstr "Remplacer les valeurs spéciales (image)"
 
 msgid "rows"
 msgstr "lignes"
@@ -1503,9 +1587,6 @@ msgstr "Ajustement polynomial"
 msgid "Degree"
 msgstr "Degré"
 
-msgid "Strategy"
-msgstr "Stratégie"
-
 msgid "Location"
 msgstr "Emplacement"
 
@@ -1617,83 +1698,5 @@ msgstr "Barycentre"
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
 
-msgid "Do nothing"
-msgstr "Ne rien faire"
-
-msgid "Replace with zero"
-msgstr "Remplacer par zéro"
-
-msgid "Replace with constant"
-msgstr "Remplacer par une constante"
-
-msgid "Replace with minimum"
-msgstr "Remplacer par le minimum"
-
-msgid "Replace with maximum"
-msgstr "Remplacer par le maximum"
-
-msgid "Replace with mean"
-msgstr "Remplacer par la moyenne"
-
-msgid "Replace with median"
-msgstr "Remplacer par la médiane"
-
-msgid "Delete points"
-msgstr "Supprimer les points"
-
-msgid "Forward fill (previous value)"
-msgstr "Remplissage vers l'avant (valeur précédente)"
-
-msgid "Backward fill (next value)"
-msgstr "Remplissage vers l'arrière (valeur suivante)"
-
-msgid "Interpolation: Linear"
-msgstr "Interpolation linéaire"
-
-msgid "Interpolation: Spline"
-msgstr "Interpolation spline"
-
-msgid "Interpolation: Quadratic"
-msgstr "Interpolation quadratique"
-
-msgid "Interpolation: Cubic"
-msgstr "Interpolation cubique"
-
-msgid "Interpolation: PCHIP"
-msgstr "Interpolation PCHIP"
-
-msgid "N-neighbor minimum"
-msgstr "Plus proche voisin minimum"
-
-msgid "N-neighbor maximum"
-msgstr "Plus proche voisin maximum"
-
-msgid "N-neighbor mean"
-msgstr "Plus proche voisin moyenne"
-
-msgid "N-neighbor median"
-msgstr "Plus proche voisin médiane"
-
-msgid "Number of neighboring points used when a neighbor-based strategy is selected"
-msgstr "Nombre de points voisins utilisés lorsqu'une stratégie basée sur les voisins est sélectionnée"
-
-msgid "Value used when a 'Replace with constant' strategy is selected"
-msgstr "Valeur utilisée lorsqu'une stratégie 'Remplacer par une constante' est sélectionnée"
-
-msgid "Replace special values (signal)"
-msgstr "Remplacer les valeurs spéciales (signal)"
-
-msgid "NaN"
-msgstr "NaN"
-
-msgid "Neighbor size"
-msgstr "Taille du voisinage"
-
-msgid "+ Infinity"
-msgstr "+ Infini"
-
-msgid "- Infinity"
-msgstr "- Infini"
-
-msgid "Replace special values (image)"
-msgstr "Remplacer les valeurs spéciales (image)"
+msgid "Replace special values is not applicable to integer images because they cannot contain NaN or infinite values."
+msgstr "Le remplacement des valeurs spéciales n'est pas applicable aux images de type entier car elles ne peuvent pas contenir de valeurs NaN ou infinies."
