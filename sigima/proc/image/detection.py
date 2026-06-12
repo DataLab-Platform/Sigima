@@ -160,7 +160,15 @@ def apply_detection_rois(
     # Check if ROI creation was requested (or forced)
     create_rois = force or geometry.attrs.get("create_rois", False)
 
-    if not create_rois or len(geometry) < 2:
+    if not create_rois:
+        return False
+
+    # Handle contour-based ROIs (polygon, ellipse, circle shapes from contour_shape)
+    # These bypass the len >= 2 check: each detected contour is already a complete shape.
+    if geometry.attrs.get("contour_rois", False):
+        return _apply_contour_rois(obj, geometry)
+
+    if len(geometry) < 2:
         return False
 
     # Get ROI geometry from parameter, attrs, or use default
@@ -169,10 +177,6 @@ def apply_detection_rois(
             "roi_geometry",
             sigima.enums.DetectionROIGeometry.RECTANGLE,
         )
-
-    # Handle contour-based ROIs (polygon, ellipse, circle shapes from contour_shape)
-    if geometry.attrs.get("contour_rois", False):
-        return _apply_contour_rois(obj, geometry)
 
     # Get detection coordinates (centers of detected objects)
     coords = geometry.centers()
