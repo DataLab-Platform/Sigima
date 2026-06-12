@@ -17,7 +17,10 @@ import sigima.objects
 import sigima.params
 import sigima.proc.image
 from sigima.enums import ContourShape
+from sigima.objects import KindShape
 from sigima.objects.image.roi import CircularROI, PolygonalROI
+from sigima.objects.scalar import GeometryResult
+from sigima.proc.image import apply_detection_rois, store_contour_roi_metadata
 from sigima.tests import guiutils
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
@@ -206,6 +209,42 @@ def test_contour_roi_disabled() -> None:
     assert image.roi is None
 
 
+def test_store_contour_roi_metadata_none_geometry() -> None:
+    """store_contour_roi_metadata must return None when geometry is None."""
+    result = store_contour_roi_metadata(None, create_rois=True)
+    assert result is None
+
+
+def test_store_contour_roi_metadata_empty_geometry() -> None:
+    """store_contour_roi_metadata must not set attrs when geometry has 0 rows."""
+    geometry = GeometryResult("test", KindShape.CIRCLE, np.empty((0, 3)))
+    result = store_contour_roi_metadata(geometry, create_rois=True)
+    # The geometry object is returned but the attrs must NOT be populated because
+    # len(geometry) == 0 < 1 (the guard in store_contour_roi_metadata)
+    assert result is geometry
+    assert not result.attrs.get("contour_rois", False)
+    assert not result.attrs.get("create_rois", False)
+
+
+def test_apply_contour_rois_no_detections_returns_false() -> None:
+    """apply_detection_rois returns False when contour detection found nothing.
+
+    Regression guard: calling apply_detection_rois with a contour-flagged
+    GeometryResult that has no rows must not crash and must return False.
+    """
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+
+    # Build a geometry that carries the contour_rois flag but has no rows
+    geometry = GeometryResult("test", KindShape.POLYGON, np.empty((0, 6)))
+    geometry.attrs["create_rois"] = True
+    geometry.attrs["contour_rois"] = True
+
+    result = apply_detection_rois(image, geometry)
+    assert result is False
+    assert image.roi is None
+
+
 if __name__ == "__main__":
     test_contour_interactive()
     test_contour_shape()
@@ -213,3 +252,6 @@ if __name__ == "__main__":
     test_contour_roi_ellipse()
     test_contour_roi_circle()
     test_contour_roi_disabled()
+    test_store_contour_roi_metadata_none_geometry()
+    test_store_contour_roi_metadata_empty_geometry()
+    test_apply_contour_rois_no_detections_returns_false()
