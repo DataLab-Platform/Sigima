@@ -13,7 +13,6 @@ detection algorithms (peak detection, blob detection, …) must be positioned in
 from __future__ import annotations
 
 import numpy as np
-import pytest
 from skimage.draw import disk
 
 import sigima.enums
