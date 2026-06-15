@@ -27,6 +27,8 @@ especially under variable lighting conditions.
 
 from __future__ import annotations
 
+import warnings
+
 import guidata.dataset as gds
 import numpy as np
 from skimage import exposure
@@ -34,12 +36,14 @@ from skimage import exposure
 import sigima.enums
 import sigima.tools.image
 from sigima.config import _
+from sigima.enums import ReplacementStrategyImage
 from sigima.objects.image import ImageObj, ROI2DParam
 from sigima.objects.signal import SignalObj
 from sigima.proc.base import (
     ClipParam,
     HistogramParam,
     NormalizeParam,
+    ReplaceSpecialValuesImageParam,
     new_signal_result,
 )
 from sigima.proc.decorator import computation_function
@@ -49,6 +53,7 @@ from sigima.proc.image.base import (
     dst_2_to_1,
     restore_data_outside_roi,
 )
+from sigima.tools.image import replace_values as rv2d
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT
@@ -72,6 +77,7 @@ __all__ = [
     "histogram",
     "normalize",
     "offset_correction",
+    "replace_special_values",
     "rescale_intensity",
 ]
 
@@ -400,5 +406,114 @@ def offset_correction(src: ImageObj, p: ROI2DParam) -> ImageObj:
     """
     dst = dst_1_to_1(src, "offset_correction", p.get_suffix())
     dst.data = src.data - np.nanmean(p.get_data(src))
+    restore_data_outside_roi(dst, src)
+    return dst
+
+
+def _apply_image_strategy(
+    data: np.ndarray,
+    mask: np.ndarray,
+    strategy: ReplacementStrategyImage,
+    neighbor_size: int,
+    constant_value: float,
+) -> np.ndarray:
+    """Apply a single replacement strategy to masked positions in an image.
+
+    Args:
+        data: 2-D data array (may be modified in place).
+        mask: boolean mask of positions to replace.
+        strategy: replacement strategy to apply.
+        neighbor_size: neighborhood radius for neighbor-based strategies.
+        constant_value: value used for the CONSTANT strategy.
+
+    Returns:
+        Data array with replacements applied.
+    """
+    s = strategy
+    if not np.any(mask) or s == ReplacementStrategyImage.NONE:
+        return data
+
+    if s == ReplacementStrategyImage.ZERO:
+        rv2d.replace_with_fixed_2d(data, mask, 0.0)
+    elif s == ReplacementStrategyImage.CONSTANT:
+        rv2d.replace_with_fixed_2d(data, mask, constant_value)
+    elif s == ReplacementStrategyImage.MIN:
+        rv2d.replace_with_stat_2d(data, mask, "min")
+    elif s == ReplacementStrategyImage.MAX:
+        rv2d.replace_with_stat_2d(data, mask, "max")
+    elif s == ReplacementStrategyImage.MEAN:
+        rv2d.replace_with_stat_2d(data, mask, "mean")
+    elif s == ReplacementStrategyImage.MEDIAN:
+        rv2d.replace_with_stat_2d(data, mask, "median")
+    elif s == ReplacementStrategyImage.NEIGHBOR_MIN:
+        rv2d.neighbor_replace_2d(data, mask, neighbor_size, "min")
+    elif s == ReplacementStrategyImage.NEIGHBOR_MAX:
+        rv2d.neighbor_replace_2d(data, mask, neighbor_size, "max")
+    elif s == ReplacementStrategyImage.NEIGHBOR_MEAN:
+        rv2d.neighbor_replace_2d(data, mask, neighbor_size, "mean")
+    elif s == ReplacementStrategyImage.NEIGHBOR_MEDIAN:
+        rv2d.neighbor_replace_2d(data, mask, neighbor_size, "median")
+    else:
+        raise ValueError(f"Unsupported image replacement strategy: {s}")
+    return data
+
+
+@computation_function()
+def replace_special_values(
+    src: ImageObj, p: ReplaceSpecialValuesImageParam
+) -> ImageObj:
+    """Replace NaN, +Inf and -Inf values in an image.
+
+    Each target (NaN, +Inf, -Inf) is treated independently with its own strategy.
+
+    Args:
+        src: input image object.
+        p: parameters specifying the strategy for each target.
+
+    Returns:
+        Output image object with special values replaced.
+    """
+    strategies = []
+    if p.nan_strategy != ReplacementStrategyImage.NONE:
+        strategies.append(f"NaN→{p.nan_strategy.value}")
+    if p.posinf_strategy != ReplacementStrategyImage.NONE:
+        strategies.append(f"+Inf→{p.posinf_strategy.value}")
+    if p.neginf_strategy != ReplacementStrategyImage.NONE:
+        strategies.append(f"-Inf→{p.neginf_strategy.value}")
+    suffix = ", ".join(strategies) if strategies else "none"
+
+    dst = dst_1_to_1(src, "replace_special_values", suffix)
+
+    if np.issubdtype(src.data.dtype, np.integer):
+        warnings.warn(
+            _(
+                "Replace special values is not applicable to integer images "
+                "because they cannot contain NaN or infinite values."
+            ),
+            stacklevel=2,
+        )
+        return dst
+
+    data = dst.data.copy()
+
+    for target, strategy, const_val, neigh_size in (
+        (np.isnan, p.nan_strategy, p.nan_constant_value, p.nan_neighbor_size),
+        (
+            np.isposinf,
+            p.posinf_strategy,
+            p.posinf_constant_value,
+            p.posinf_neighbor_size,
+        ),
+        (
+            np.isneginf,
+            p.neginf_strategy,
+            p.neginf_constant_value,
+            p.neginf_neighbor_size,
+        ),
+    ):
+        mask = target(data)
+        data = _apply_image_strategy(data, mask, strategy, neigh_size, const_val)
+
+    dst.data = data
     restore_data_outside_roi(dst, src)
     return dst

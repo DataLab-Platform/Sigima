@@ -453,11 +453,20 @@ msgstr ""
 msgid "Clip values to specified range"
 msgstr "Écrêter les valeurs à une plage spécifiée"
 
+msgid ":func:`replace_special_values <sigima.proc.signal.replace_special_values>`"
+msgstr ":func:`replace_special_values <sigima.proc.signal.replace_special_values>`"
+
+msgid ":func:`replace_special_values <sigima.proc.image.replace_special_values>`"
+msgstr ":func:`replace_special_values <sigima.proc.image.replace_special_values>`"
+
+msgid "Replace NaN, +Inf and -Inf values with configurable strategies"
+msgstr "Remplacer les valeurs NaN, +Inf et -Inf avec des stratégies configurables"
+
 msgid ":func:`offset_correction <sigima.proc.signal.offset_correction>`"
-msgstr ""
+msgstr ":func:`offset_correction <sigima.proc.signal.offset_correction>`"
 
 msgid ":func:`offset_correction <sigima.proc.image.offset_correction>`"
-msgstr ""
+msgstr ":func:`offset_correction <sigima.proc.image.offset_correction>`"
 
 msgid "Remove DC offset/background"
 msgstr "Supprimer le décalage DC/fond continu"
