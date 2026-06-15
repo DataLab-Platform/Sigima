@@ -212,6 +212,10 @@ def _ellipse_to_polygon(
 
 
 def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
+    # Keep the early returns here: each shape branch is intentionally small and
+    # symmetric, and splitting this dispatch into helper functions would add
+    # indirection without making the code clearer.
+    # pylint: disable=too-many-return-statements
     """Apply ROI creation from contour-based geometry results.
 
     Converts contour detection results into ROIs:
