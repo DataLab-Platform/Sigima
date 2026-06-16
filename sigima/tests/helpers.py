@@ -11,6 +11,7 @@ import functools
 import os
 import os.path as osp
 import pathlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -31,6 +32,26 @@ from sigima.objects.signal import SignalObj
 from sigima.tests.env import execenv
 
 TST_PATH = []
+
+
+def _patch_python39_tempdir_cleanup() -> None:
+    """Patch TemporaryDirectory.cleanup to prevent stack overflow on Python 3.9.
+
+    On Python 3.9 (Windows), ``TemporaryDirectory.__del__`` during interpreter
+    shutdown causes recursive ``shutil.rmtree`` calls, leading to a stack overflow.
+    Python 3.10+ is not affected and is left untouched.
+    """
+    if sys.version_info >= (3, 10):
+        return
+
+    def _safe_cleanup(self: tempfile.TemporaryDirectory) -> None:
+        self._finalizer.detach()
+        shutil.rmtree(self.name, ignore_errors=True)
+
+    tempfile.TemporaryDirectory.cleanup = _safe_cleanup  # type: ignore[assignment]
+
+
+_patch_python39_tempdir_cleanup()
 
 
 def get_test_paths() -> list[str]:
@@ -202,12 +223,9 @@ class WorkdirRestoringTempDir(tempfile.TemporaryDirectory):
         self.__cwd = os.getcwd()
 
     def cleanup(self) -> None:
-        """Clean up temporary directory, restore working directory, ignore errors."""
+        """Restore the working directory before cleaning up."""
         os.chdir(self.__cwd)
-        try:
-            super().cleanup()
-        except (PermissionError, RecursionError):
-            pass
+        super().cleanup()
 
 
 def get_temporary_directory() -> str:
