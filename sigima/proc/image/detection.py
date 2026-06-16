@@ -193,21 +193,33 @@ def _ellipse_to_polygon(
 ) -> np.ndarray:
     """Convert ellipse parameters to polygon vertex coordinates.
 
+    The ``(xc, yc, a, b, theta)`` parameters come from
+    :func:`sigima.tools.image.preprocessing.fit_ellipse_model`, which fits the
+    contour in scikit-image ``(row, col)`` space and then swaps axes back to
+    ``(x, y)``. Because of that swap, the angle is measured relative to the
+    ``y`` axis and ``a``/``b`` are the semi-axes along ``col``/``row``. Sampling
+    the ellipse therefore uses orthogonal semi-axis vectors
+    ``u = (b*sin(theta), b*cos(theta))`` (cos term) and
+    ``v = (a*cos(theta), -a*sin(theta))`` (sin term), so each vertex is
+    ``center + cos(t)*u + sin(t)*v``. This reproduces the actual fitted ellipse
+    (the polygon ROI follows the contour data), unlike a naive rotation matrix
+    which would shear it for rotated contours.
+
     Args:
         xc: center x
         yc: center y
-        a: semi-major axis
-        b: semi-minor axis
-        theta: rotation angle in radians
+        a: semi-axis along the x (col) direction returned by the fit
+        b: semi-axis along the y (row) direction returned by the fit
+        theta: ellipse angle returned by the fit (relative to the y axis)
         n_points: number of vertices for the polygon approximation
 
     Returns:
         1D array [x0, y0, x1, y1, ...] of polygon vertices
     """
     t = np.linspace(0, 2 * np.pi, n_points, endpoint=False)
-    cos_t, sin_t = np.cos(theta), np.sin(theta)
-    x = xc + a * np.cos(t) * cos_t - b * np.sin(t) * sin_t
-    y = yc + a * np.cos(t) * sin_t + b * np.sin(t) * cos_t
+    cos_th, sin_th = np.cos(theta), np.sin(theta)
+    x = xc + b * np.cos(t) * sin_th + a * np.sin(t) * cos_th
+    y = yc + b * np.cos(t) * cos_th - a * np.sin(t) * sin_th
     return np.column_stack((x, y)).flatten()
 
 
