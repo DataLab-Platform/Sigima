@@ -249,6 +249,9 @@ Signal Conditioning
    * - :func:`clip <sigima.proc.signal.clip>`
      - :func:`clip <sigima.proc.image.clip>`
      - Clip values to specified range
+   * - :func:`replace_special_values <sigima.proc.signal.replace_special_values>`
+     - :func:`replace_special_values <sigima.proc.image.replace_special_values>`
+     - Replace NaN, +Inf and -Inf values with configurable strategies
    * - :func:`offset_correction <sigima.proc.signal.offset_correction>`
      - :func:`offset_correction <sigima.proc.image.offset_correction>`
      - Remove DC offset/background
@@ -376,8 +379,13 @@ Peak and Feature Detection
 
    * - Function
      - Description
+   * - :func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`
+     - Extract peak positions as an XY-markers table (preferred entry point)
+   * - :func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`
+     - Convert an XY-markers table back into a sticks signal
    * - :func:`peak_detection <sigima.proc.signal.peak_detection>`
-     - Peak detection in signals
+     - **Deprecated** — use ``extract_peak_positions`` (+ ``markers_table_to_signal``
+       when a sticks signal is also needed)
    * - :func:`bandwidth_3db <sigima.proc.signal.bandwidth_3db>`
      - 3dB bandwidth measurement
    * - :func:`fwhm <sigima.proc.signal.fwhm>`

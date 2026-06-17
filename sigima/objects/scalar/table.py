@@ -62,6 +62,9 @@ class TableKind(str, enum.Enum):
 
     STATISTICS = "statistics"
     PULSE_FEATURES = "pulse_features"
+    XY_MARKERS = "xy_markers"
+    X_MARKERS = "x_markers"
+    Y_MARKERS = "y_markers"
     CUSTOM = "results"
 
     @classmethod
@@ -489,6 +492,39 @@ class TableResult:
         """Check if this is a pulse features table."""
         return self.kind == TableKind.PULSE_FEATURES
 
+    def is_xy_markers(self) -> bool:
+        """Check if this is an XY-markers table.
+
+        XY-markers tables hold one or more ``(x, y)`` couples meant to be
+        displayed as cross markers at the corresponding positions. Typical
+        use cases include peak positions in spectra (e.g. spectral lines in
+        gamma-ray spectra) or any list of remarkable points where the Y
+        value has been computed by the processing code (e.g. by
+        interpolation or curve fitting) and should not be recomputed at
+        display time.
+
+        Headers must include ``"x"`` and ``"y"`` (in any position).
+        Additional columns are allowed (e.g. labels, intensities) and are
+        shown in the table view but ignored by the graphical overlay.
+        """
+        return self.kind == TableKind.XY_MARKERS
+
+    def is_x_markers(self) -> bool:
+        """Check if this is an X-markers table.
+
+        X-markers tables hold one or more X positions to be displayed as
+        vertical cursors. The header must include ``"x"``.
+        """
+        return self.kind == TableKind.X_MARKERS
+
+    def is_y_markers(self) -> bool:
+        """Check if this is a Y-markers table.
+
+        Y-markers tables hold one or more Y positions to be displayed as
+        horizontal cursors. The header must include ``"y"``.
+        """
+        return self.kind == TableKind.Y_MARKERS
+
     def is_custom(self) -> bool:
         """Check if this is a custom table."""
         return self.kind == TableKind.CUSTOM
@@ -670,6 +706,8 @@ class TableResultBuilder:
         - PULSE_FEATURES: Computes results ONLY for ROIs if any are defined; otherwise
           computes for the whole object. This is because pulse features are meaningful
           only within specific ROI regions when multiple pulses are present.
+        - XY_MARKERS / X_MARKERS / Y_MARKERS: Same per-ROI semantics as
+          PULSE_FEATURES (only ROIs if any are defined; otherwise the whole object).
         - CUSTOM: Default behavior is same as STATISTICS (whole object + ROIs).
 
         Args:
@@ -694,9 +732,17 @@ class TableResultBuilder:
 
         # Add whole object (None ROI) if:
         # 1. No ROIs exist, OR
-        # 2. ROIs exist AND kind is not PULSE_FEATURES (which computes only on ROIs)
+        # 2. ROIs exist AND kind is not in {PULSE_FEATURES, XY_MARKERS,
+        #    X_MARKERS, Y_MARKERS} (these kinds compute only on ROIs when
+        #    ROIs are defined)
+        roi_only_kinds = {
+            TableKind.PULSE_FEATURES,
+            TableKind.XY_MARKERS,
+            TableKind.X_MARKERS,
+            TableKind.Y_MARKERS,
+        }
         has_rois = roi_indices and roi_indices[0] is not None
-        if not has_rois or kind_enum != TableKind.PULSE_FEATURES:
+        if not has_rois or kind_enum not in roi_only_kinds:
             if has_rois:
                 roi_indices.insert(0, None)
 

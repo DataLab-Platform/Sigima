@@ -28,7 +28,7 @@ msgid "Python"
 msgstr "Python"
 
 msgid ">=3.9, <4"
-msgstr ""
+msgstr ">=3.9, <4"
 
 msgid "Python programming language"
 msgstr "Langage de programmation Python"
@@ -37,100 +37,100 @@ msgid "guidata"
 msgstr "guidata"
 
 msgid ">= 3.13"
-msgstr ""
+msgstr ">= 3.13"
 
 msgid "Automatic GUI generation for easy dataset editing and display"
 msgstr "Génération automatique d'interface graphique pour une édition et un affichage faciles des ensembles de données"
 
 msgid "NumPy"
-msgstr ""
+msgstr "NumPy"
 
 msgid ">= 1.22, < 2.5"
-msgstr ""
+msgstr ">= 1.22, < 2.5"
 
 msgid "Fundamental package for array computing in Python"
 msgstr "Paquet fondamental pour le calcul sur tableaux en Python"
 
 msgid "SciPy"
-msgstr ""
+msgstr "SciPy"
 
 msgid ">= 1.10.1, < 1.17"
-msgstr ""
+msgstr ">= 1.10.1, < 1.17"
 
 msgid "Fundamental algorithms for scientific computing in Python"
 msgstr "Algorithmes fondamentaux pour le calcul scientifique en Python"
 
 msgid "scikit-image"
-msgstr ""
+msgstr "scikit-image"
 
 msgid ">= 0.19.2, < 0.27"
-msgstr ""
+msgstr ">= 0.19.2, < 0.27"
 
 msgid "Image processing in Python"
 msgstr "Traitement d'image en Python"
 
 msgid "pandas"
-msgstr ""
+msgstr "pandas"
 
-msgid ">= 1.4, < 3.0"
-msgstr ""
+msgid ">= 1.4, < 3.1"
+msgstr ">= 1.4, < 3.1"
 
 msgid "Powerful data structures for data analysis, time series, and statistics"
-msgstr ""
+msgstr "Structures de données puissantes pour l'analyse de données, les séries temporelles et les statistiques"
 
 msgid "PyWavelets"
-msgstr ""
+msgstr "PyWavelets"
 
 msgid ">= 1.2, < 2.0"
-msgstr ""
+msgstr ">= 1.2, < 2.0"
 
 msgid "PyWavelets, wavelet transform module"
 msgstr "PyWavelets, module de transformation en ondelettes"
 
 msgid "packaging"
-msgstr ""
+msgstr "packaging"
 
 msgid ">= 21.3"
-msgstr ""
+msgstr ">= 21.3"
 
 msgid "Core utilities for Python packages"
 msgstr "Utilitaires de base pour les paquets Python"
 
 msgid "typing-extensions"
-msgstr ""
+msgstr "typing-extensions"
 
 msgid ">= 4.0"
-msgstr ""
+msgstr ">= 4.0"
 
 msgid "Backported and Experimental Type Hints for Python 3.9+"
 msgstr "Extensions de typage rétroportées et expérimentales pour Python 3.9+"
 
 msgid "makefun"
-msgstr ""
+msgstr "makefun"
 
 msgid ">= 1.13.1"
-msgstr ""
+msgstr ">= 1.13.1"
 
 msgid "Small library to dynamically create python functions."
-msgstr ""
+msgstr "Petite bibliothèque pour créer dynamiquement des fonctions Python."
 
 msgid "Optional modules for GUI support (Qt):"
-msgstr ""
+msgstr "Modules facultatifs pour le support GUI (Qt) :"
 
 msgid "qtpy"
-msgstr ""
+msgstr "qtpy"
 
 msgid "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
 msgstr "Fournit une couche d'abstraction au-dessus des différentes liaisons Qt (PyQt5/6 et PySide2/6)."
 
 msgid "PyQt5"
-msgstr ""
+msgstr "PyQt5"
 
 msgid "Python bindings for the Qt cross platform application toolkit"
 msgstr "Liaisons Python pour l'outil de développement d'applications multiplateforme Qt"
 
 msgid "plotpy"
-msgstr ""
+msgstr "plotpy"
 
 msgid "Curve and image plotting tools for Python/Qt applications"
 msgstr "Outils de traçage de courbes et d'images pour les applications Python/Qt"
@@ -139,104 +139,115 @@ msgid "Optional modules for development:"
 msgstr "Modules facultatifs pour le développement :"
 
 msgid "build"
-msgstr ""
+msgstr "build"
 
 msgid "A simple, correct Python build frontend"
 msgstr "Un frontend de construction Python simple et correct"
 
 msgid "babel"
-msgstr ""
+msgstr "babel"
 
 msgid "Internationalization utilities"
 msgstr "Utilitaires d'internationalisation"
 
 msgid "ruff"
-msgstr ""
+msgstr "ruff"
 
 msgid "An extremely fast Python linter and code formatter, written in Rust."
 msgstr "Un linter Python extrêmement rapide et un formateur de code, écrit en Rust."
 
 msgid "pylint"
-msgstr ""
+msgstr "pylint"
 
 msgid "python code static checker"
 msgstr "Analyseur statique de code Python"
 
 msgid "Coverage"
-msgstr ""
+msgstr "Coverage"
 
 msgid "Code coverage measurement for Python"
 msgstr "Mesure de la couverture du code pour Python"
 
 msgid "pre-commit"
-msgstr ""
+msgstr "pre-commit"
 
 msgid "A framework for managing and maintaining multi-language pre-commit hooks."
 msgstr "Un framework pour gérer et maintenir des hooks de pré-commit multi-langages."
+
+msgid "setuptools"
+msgstr "setuptools"
+
+msgid "Most extensible Python build backend with support for C/C++ extension modules"
+msgstr "Backend de construction Python le plus extensible avec support pour les modules d'extension C/C++"
+
+msgid "wheel"
+msgstr "wheel"
+
+msgid "Command line tool for manipulating wheel files"
+msgstr "Outil en ligne de commande pour manipuler les fichiers wheel"
 
 msgid "Optional modules for building the documentation:"
 msgstr "Modules facultatifs pour la construction de la documentation :"
 
 msgid "sphinx"
-msgstr ""
+msgstr "sphinx"
 
 msgid "Python documentation generator"
 msgstr "Générateur de documentation Python"
 
 msgid "sphinx-gallery"
-msgstr ""
+msgstr "sphinx-gallery"
 
 msgid "A Sphinx extension that builds an HTML gallery of examples from any set of Python scripts."
 msgstr "Une extension Sphinx qui crée une galerie HTML d'exemples à partir de n'importe quel ensemble de scripts Python."
 
 msgid "sphinx_intl"
-msgstr ""
+msgstr "sphinx_intl"
 
 msgid "Sphinx utility that make it easy to translate and to apply translation."
 msgstr "Utilitaire Sphinx qui facilite la traduction et l'application de la traduction."
 
 msgid "myst_parser"
-msgstr ""
+msgstr "myst_parser"
 
 msgid "An extended [CommonMark](https://spec.commonmark.org/) compliant parser,"
 msgstr "Un analyseur conforme à [CommonMark](https://spec.commonmark.org/) étendu,"
 
 msgid "myst-nb"
-msgstr ""
+msgstr "myst-nb"
 
 msgid "A Jupyter Notebook Sphinx reader built on top of the MyST markdown parser."
-msgstr ""
+msgstr "Un lecteur de notebooks Jupyter pour Sphinx construit sur le parseur Markdown MyST."
 
 msgid "sphinx_design"
-msgstr ""
+msgstr "sphinx_design"
 
 msgid "A sphinx extension for designing beautiful, view size responsive web components."
 msgstr "Une extension Sphinx pour concevoir de beaux composants web réactifs à la taille de la vue."
 
 msgid "sphinx-copybutton"
-msgstr ""
+msgstr "sphinx-copybutton"
 
 msgid "Add a copy button to each of your code cells."
 msgstr "Ajoute un bouton de copie à chacune de vos cellules de code."
 
 msgid "pydata-sphinx-theme"
-msgstr ""
+msgstr "pydata-sphinx-theme"
 
 msgid "Bootstrap-based Sphinx theme from the PyData community"
 msgstr "Thème Sphinx basé sur Bootstrap de la communauté PyData"
 
 msgid "matplotlib"
-msgstr ""
+msgstr "matplotlib"
 
-#, fuzzy
 msgid "Python plotting package"
-msgstr "Langage de programmation Python"
+msgstr "Bibliothèque de tracé pour Python"
 
 msgid "opencv-python-headless"
-msgstr ""
+msgstr "opencv-python-headless"
 
 msgid ">= 4.8.1.78"
-msgstr ""
+msgstr ">= 4.8.1.78"
 
 msgid "Wrapper package for OpenCV python bindings."
 msgstr "Bibliothèque d'interfaces Python pour OpenCV."
@@ -245,14 +256,13 @@ msgid "Optional modules for running test suite:"
 msgstr "Modules facultatifs pour exécuter la suite de tests :"
 
 msgid "pytest"
-msgstr ""
+msgstr "pytest"
 
 msgid "pytest: simple powerful testing with Python"
 msgstr "pytest : tests simples et puissants avec Python"
 
 msgid "pytest-xvfb"
-msgstr ""
+msgstr "pytest-xvfb"
 
 msgid "A pytest plugin to run Xvfb (or Xephyr/Xvnc) for tests."
 msgstr "Un plugin pytest pour exécuter Xvfb (ou Xephyr/Xvnc) pour les tests."
-

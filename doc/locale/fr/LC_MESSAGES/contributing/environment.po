@@ -133,37 +133,37 @@ msgid "WinPython version"
 msgstr "Version de WinPython"
 
 msgid "3.9"
-msgstr ""
+msgstr "3.9"
 
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 msgid "3.9.10.0"
-msgstr ""
+msgstr "3.9.10.0"
 
 msgid "3.10"
-msgstr ""
+msgstr "3.10"
 
 msgid "3.10.11.1"
-msgstr ""
+msgstr "3.10.11.1"
 
 msgid "3.11"
-msgstr ""
+msgstr "3.11"
 
 msgid "3.11.5.0"
-msgstr ""
+msgstr "3.11.5.0"
 
 msgid "3.12"
-msgstr ""
+msgstr "3.12"
 
 msgid "3.12.3.0"
-msgstr ""
+msgstr "3.12.3.0"
 
 msgid "3.13"
-msgstr ""
+msgstr "3.13"
 
 msgid "3.13.2.0"
-msgstr ""
+msgstr "3.13.2.0"
 
 msgid "⚠ We strongly recommend using the `.dot` versions of WinPython which are lightweight and can be customized to your needs (using `pip install -r requirements.txt`)."
 msgstr "⚠ Nous recommandons fortement d'utiliser les versions `.dot` de WinPython qui sont légères et peuvent être personnalisées selon vos besoins (en utilisant `pip install -r requirements.txt`)."
@@ -214,19 +214,19 @@ msgid "Software"
 msgstr "Logiciel"
 
 msgid "[gettext](https://mlocati.github.io/articles/gettext-iconv-windows.html)"
-msgstr ""
+msgstr "[gettext](https://mlocati.github.io/articles/gettext-iconv-windows.html)"
 
 msgid "Translations"
 msgstr "Traductions"
 
 msgid "[Git](https://git-scm.com/)"
-msgstr ""
+msgstr "[Git](https://git-scm.com/)"
 
 msgid "Version control system"
 msgstr "Système de contrôle de version"
 
 msgid "[ImageMagick](https://imagemagick.org/)"
-msgstr ""
+msgstr "[ImageMagick](https://imagemagick.org/)"
 
 msgid "Image manipulation utilities"
 msgstr "Utilitaires de manipulation d'images"

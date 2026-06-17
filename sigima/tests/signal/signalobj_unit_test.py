@@ -306,6 +306,29 @@ def test_create_signal_from_param() -> None:
     execenv.print(f"{test_create_signal_from_param.__doc__}: OK")
 
 
+def test_custom_signal_preserves_edited_array() -> None:
+    """Test that editing CustomSignalParam.xyarray is preserved on regeneration"""
+    execenv.print(f"{test_custom_signal_preserves_edited_array.__doc__}:")
+
+    param = sigima.objects.CustomSignalParam.create(size=5, xmin=0.0, xmax=1.0)
+
+    # First generation initializes the array from size/xmin/xmax.
+    x0, y0 = param.generate_1d_data()
+    assert np.allclose(x0, np.linspace(0.0, 1.0, 5))
+    assert np.allclose(y0, x0)
+
+    # Simulate a user editing the XY values in the array editor.
+    edited = np.array([[0.0, 10.0], [0.25, 20.0], [0.5, 30.0], [0.75, 40.0]])
+    param.xyarray = edited
+
+    # Regenerating must keep the edited values instead of clobbering them.
+    x1, y1 = param.generate_1d_data()
+    assert np.allclose(x1, edited[:, 0]), "Edited X values were not preserved"
+    assert np.allclose(y1, edited[:, 1]), "Edited Y values were not preserved"
+
+    execenv.print(f"{test_custom_signal_preserves_edited_array.__doc__}: OK")
+
+
 def test_signal_copy() -> None:
     """Test copying signal objects with all attributes"""
     execenv.print(f"{test_signal_copy.__doc__}:")

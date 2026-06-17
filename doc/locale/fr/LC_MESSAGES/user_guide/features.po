@@ -40,73 +40,73 @@ msgid "Description"
 msgstr "Description"
 
 msgid ":func:`addition <sigima.proc.signal.addition>`"
-msgstr ""
+msgstr ":func:`addition <sigima.proc.signal.addition>`"
 
 msgid ":func:`addition <sigima.proc.image.addition>`"
-msgstr ""
+msgstr ":func:`addition <sigima.proc.image.addition>`"
 
 msgid "Add two signals/images"
 msgstr "Ajouter deux signaux/images"
 
 msgid ":func:`difference <sigima.proc.signal.difference>`"
-msgstr ""
+msgstr ":func:`difference <sigima.proc.signal.difference>`"
 
 msgid ":func:`difference <sigima.proc.image.difference>`"
-msgstr ""
+msgstr ":func:`difference <sigima.proc.image.difference>`"
 
 msgid "Subtract one signal/image from another"
 msgstr "Soustraire un signal/image d'un autre"
 
 msgid ":func:`product <sigima.proc.signal.product>`"
-msgstr ""
+msgstr ":func:`product <sigima.proc.signal.product>`"
 
 msgid ":func:`product <sigima.proc.image.product>`"
-msgstr ""
+msgstr ":func:`product <sigima.proc.image.product>`"
 
 msgid "Multiply two signals/images"
 msgstr "Multiplier deux signaux/images"
 
 msgid ":func:`division <sigima.proc.signal.division>`"
-msgstr ""
+msgstr ":func:`division <sigima.proc.signal.division>`"
 
 msgid ":func:`division <sigima.proc.image.division>`"
-msgstr ""
+msgstr ":func:`division <sigima.proc.image.division>`"
 
 msgid "Divide one signal/image by another"
 msgstr "Diviser un signal/image par un autre"
 
 msgid ":func:`average <sigima.proc.signal.average>`"
-msgstr ""
+msgstr ":func:`average <sigima.proc.signal.average>`"
 
 msgid ":func:`average <sigima.proc.image.average>`"
-msgstr ""
+msgstr ":func:`average <sigima.proc.image.average>`"
 
 msgid "Compute average of multiple signals/images"
 msgstr "Calculer la moyenne de plusieurs signaux/images"
 
 msgid ":func:`standard_deviation <sigima.proc.signal.standard_deviation>`"
-msgstr ""
+msgstr ":func:`standard_deviation <sigima.proc.signal.standard_deviation>`"
 
 msgid ":func:`standard_deviation <sigima.proc.image.standard_deviation>`"
-msgstr ""
+msgstr ":func:`standard_deviation <sigima.proc.image.standard_deviation>`"
 
 msgid "Compute standard deviation of multiple signals/images"
 msgstr "Calculer l'écart-type de plusieurs signaux/images"
 
 msgid ":func:`quadratic_difference <sigima.proc.signal.quadratic_difference>`"
-msgstr ""
+msgstr ":func:`quadratic_difference <sigima.proc.signal.quadratic_difference>`"
 
 msgid ":func:`quadratic_difference <sigima.proc.image.quadratic_difference>`"
-msgstr ""
+msgstr ":func:`quadratic_difference <sigima.proc.image.quadratic_difference>`"
 
 msgid "Compute quadratic difference between signals/images"
 msgstr "Calculer la différence quadratique entre signaux/images"
 
 msgid ":func:`arithmetic <sigima.proc.signal.arithmetic>`"
-msgstr ""
+msgstr ":func:`arithmetic <sigima.proc.signal.arithmetic>`"
 
 msgid ":func:`arithmetic <sigima.proc.image.arithmetic>`"
-msgstr ""
+msgstr ":func:`arithmetic <sigima.proc.image.arithmetic>`"
 
 msgid "Generic arithmetic operations with parameters"
 msgstr "Opérations arithmétiques génériques avec paramètres"
@@ -115,37 +115,37 @@ msgid "Constant Operations"
 msgstr "Opérations avec constantes"
 
 msgid ":func:`addition_constant <sigima.proc.signal.addition_constant>`"
-msgstr ""
+msgstr ":func:`addition_constant <sigima.proc.signal.addition_constant>`"
 
 msgid ":func:`addition_constant <sigima.proc.image.addition_constant>`"
-msgstr ""
+msgstr ":func:`addition_constant <sigima.proc.image.addition_constant>`"
 
 msgid "Add a constant value to signal/image"
 msgstr "Ajouter une constante au signal/image"
 
 msgid ":func:`difference_constant <sigima.proc.signal.difference_constant>`"
-msgstr ""
+msgstr ":func:`difference_constant <sigima.proc.signal.difference_constant>`"
 
 msgid ":func:`difference_constant <sigima.proc.image.difference_constant>`"
-msgstr ""
+msgstr ":func:`difference_constant <sigima.proc.image.difference_constant>`"
 
 msgid "Subtract a constant from signal/image"
 msgstr "Soustraire une constante du signal/image"
 
 msgid ":func:`product_constant <sigima.proc.signal.product_constant>`"
-msgstr ""
+msgstr ":func:`product_constant <sigima.proc.signal.product_constant>`"
 
 msgid ":func:`product_constant <sigima.proc.image.product_constant>`"
-msgstr ""
+msgstr ":func:`product_constant <sigima.proc.image.product_constant>`"
 
 msgid "Multiply signal/image by a constant"
 msgstr "Multiplier le signal/image par une constante"
 
 msgid ":func:`division_constant <sigima.proc.signal.division_constant>`"
-msgstr ""
+msgstr ":func:`division_constant <sigima.proc.signal.division_constant>`"
 
 msgid ":func:`division_constant <sigima.proc.image.division_constant>`"
-msgstr ""
+msgstr ":func:`division_constant <sigima.proc.image.division_constant>`"
 
 msgid "Divide signal/image by a constant"
 msgstr "Diviser le signal/image par une constante"
@@ -154,82 +154,82 @@ msgid "Mathematical Operations"
 msgstr "Opérations mathématiques"
 
 msgid ":func:`absolute <sigima.proc.signal.absolute>`"
-msgstr ""
+msgstr ":func:`absolute <sigima.proc.signal.absolute>`"
 
 msgid ":func:`absolute <sigima.proc.image.absolute>`"
-msgstr ""
+msgstr ":func:`absolute <sigima.proc.image.absolute>`"
 
 msgid "Compute absolute value"
 msgstr "Calculer la valeur absolue"
 
 msgid ":func:`exp <sigima.proc.signal.exp>`"
-msgstr ""
+msgstr ":func:`exp <sigima.proc.signal.exp>`"
 
 msgid ":func:`exp <sigima.proc.image.exp>`"
-msgstr ""
+msgstr ":func:`exp <sigima.proc.image.exp>`"
 
 msgid "Exponential function"
 msgstr "Fonction exponentielle"
 
 msgid ":func:`log10 <sigima.proc.signal.log10>`"
-msgstr ""
+msgstr ":func:`log10 <sigima.proc.signal.log10>`"
 
 msgid ":func:`log10 <sigima.proc.image.log10>`"
-msgstr ""
+msgstr ":func:`log10 <sigima.proc.image.log10>`"
 
 msgid "Base-10 logarithm"
 msgstr "Logarithme en base 10"
 
 msgid ":func:`inverse <sigima.proc.signal.inverse>`"
-msgstr ""
+msgstr ":func:`inverse <sigima.proc.signal.inverse>`"
 
 msgid ":func:`inverse <sigima.proc.image.inverse>`"
-msgstr ""
+msgstr ":func:`inverse <sigima.proc.image.inverse>`"
 
 msgid "Compute reciprocal"
 msgstr "Calculer l'inverse"
 
 msgid ":func:`real <sigima.proc.signal.real>`"
-msgstr ""
+msgstr ":func:`real <sigima.proc.signal.real>`"
 
 msgid ":func:`real <sigima.proc.image.real>`"
-msgstr ""
+msgstr ":func:`real <sigima.proc.image.real>`"
 
 msgid "Extract real part of complex data"
 msgstr "Extraire la partie réelle des données complexes"
 
 msgid ":func:`imag <sigima.proc.signal.imag>`"
-msgstr ""
+msgstr ":func:`imag <sigima.proc.signal.imag>`"
 
 msgid ":func:`imag <sigima.proc.image.imag>`"
-msgstr ""
+msgstr ":func:`imag <sigima.proc.image.imag>`"
 
 msgid "Extract imaginary part of complex data"
 msgstr "Extraire la partie imaginaire des données complexes"
 
 msgid ":func:`phase <sigima.proc.signal.phase>`"
-msgstr ""
+msgstr ":func:`phase <sigima.proc.signal.phase>`"
 
 msgid ":func:`phase <sigima.proc.image.phase>`"
-msgstr ""
+msgstr ":func:`phase <sigima.proc.image.phase>`"
 
 msgid "Extract phase of complex data"
 msgstr "Extraire la phase des données complexes"
 
 msgid ":func:`astype <sigima.proc.signal.astype>`"
-msgstr ""
+msgstr ":func:`astype <sigima.proc.signal.astype>`"
 
 msgid ":func:`astype <sigima.proc.image.astype>`"
-msgstr ""
+msgstr ":func:`astype <sigima.proc.image.astype>`"
 
 msgid "Convert data type"
 msgstr "Convertir le type de données"
 
 msgid ":func:`transpose <sigima.proc.signal.transpose>`"
-msgstr ""
+msgstr ":func:`transpose <sigima.proc.signal.transpose>`"
 
 msgid ":func:`transpose <sigima.proc.image.transpose>`"
-msgstr ""
+msgstr ":func:`transpose <sigima.proc.image.transpose>`"
 
 msgid "Transpose coordinates/axes"
 msgstr "Transposer les coordonnées/axes"
@@ -238,7 +238,7 @@ msgid "N/A"
 msgstr "N/A"
 
 msgid ":func:`log10_z_plus_n <sigima.proc.image.log10_z_plus_n>`"
-msgstr ""
+msgstr ":func:`log10_z_plus_n <sigima.proc.image.log10_z_plus_n>`"
 
 msgid "Log10 with offset for zero handling"
 msgstr "Log10 avec décalage pour la gestion des zéros"
@@ -250,25 +250,25 @@ msgid "Function"
 msgstr "Fonction"
 
 msgid ":func:`sqrt <sigima.proc.signal.sqrt>`"
-msgstr ""
+msgstr ":func:`sqrt <sigima.proc.signal.sqrt>`"
 
 msgid "Square root"
 msgstr "Racine carrée"
 
 msgid ":func:`power <sigima.proc.signal.power>`"
-msgstr ""
+msgstr ":func:`power <sigima.proc.signal.power>`"
 
 msgid "Raise to power"
 msgstr "Élever à une puissance"
 
 msgid ":func:`to_cartesian <sigima.proc.signal.to_cartesian>`"
-msgstr ""
+msgstr ":func:`to_cartesian <sigima.proc.signal.to_cartesian>`"
 
 msgid "Convert to Cartesian coordinates"
 msgstr "Convertir en coordonnées cartésiennes"
 
 msgid ":func:`to_polar <sigima.proc.signal.to_polar>`"
-msgstr ""
+msgstr ":func:`to_polar <sigima.proc.signal.to_polar>`"
 
 msgid "Convert to polar coordinates"
 msgstr "Convertir en coordonnées polaires"
@@ -453,11 +453,20 @@ msgstr ""
 msgid "Clip values to specified range"
 msgstr "Écrêter les valeurs à une plage spécifiée"
 
+msgid ":func:`replace_special_values <sigima.proc.signal.replace_special_values>`"
+msgstr ":func:`replace_special_values <sigima.proc.signal.replace_special_values>`"
+
+msgid ":func:`replace_special_values <sigima.proc.image.replace_special_values>`"
+msgstr ":func:`replace_special_values <sigima.proc.image.replace_special_values>`"
+
+msgid "Replace NaN, +Inf and -Inf values with configurable strategies"
+msgstr "Remplacer les valeurs NaN, +Inf et -Inf avec des stratégies configurables"
+
 msgid ":func:`offset_correction <sigima.proc.signal.offset_correction>`"
-msgstr ""
+msgstr ":func:`offset_correction <sigima.proc.signal.offset_correction>`"
 
 msgid ":func:`offset_correction <sigima.proc.image.offset_correction>`"
-msgstr ""
+msgstr ":func:`offset_correction <sigima.proc.image.offset_correction>`"
 
 msgid "Remove DC offset/background"
 msgstr "Supprimer le décalage DC/fond continu"
@@ -633,14 +642,26 @@ msgstr "Analyser le taux et la période d'échantillonnage"
 msgid "Peak and Feature Detection"
 msgstr "Détection de pics et de caractéristiques"
 
+msgid ":func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`"
+msgstr ":func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`"
+
+msgid "Extract peak positions as an XY-markers table (preferred entry point)"
+msgstr "Extraire les positions des pics sous forme de table de marqueurs XY (point d'entrée préféré)"
+
+msgid ":func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`"
+msgstr ":func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`"
+
+msgid "Convert an XY-markers table back into a sticks signal"
+msgstr "Convertir une table de marqueurs XY en un signal de type bâtons"
+
 msgid ":func:`peak_detection <sigima.proc.signal.peak_detection>`"
 msgstr ""
 
-msgid "Peak detection in signals"
-msgstr "Détection de pics dans les signaux"
+msgid "**Deprecated** — use ``extract_peak_positions`` (+ ``markers_table_to_signal`` when a sticks signal is also needed)"
+msgstr "**Obsolète** — utilisez ``extract_peak_positions`` (+ ``markers_table_to_signal`` lorsque vous avez également besoin d'un signal de type bâtons)"
 
 msgid ":func:`bandwidth_3db <sigima.proc.signal.bandwidth_3db>`"
-msgstr ""
+msgstr ":func:`bandwidth_3db <sigima.proc.signal.bandwidth_3db>`"
 
 msgid "3dB bandwidth measurement"
 msgstr "Mesure de la bande passante à 3 dB"
