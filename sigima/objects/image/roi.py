@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import abc
 import re
-from collections.abc import ByteString, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Literal, Type
 
 import guidata.dataset as gds
@@ -54,7 +54,7 @@ def to_builtin(obj) -> str | int | float | list | dict | np.ndarray | None:
         return int(obj) if int(obj) == float(obj) else float(obj)
     except (TypeError, ValueError):
         pass
-    if isinstance(obj, ByteString):
+    if isinstance(obj, (bytes, bytearray)):
         return str(obj)
     if isinstance(obj, Sequence):
         return str(obj) if len(obj) == len(str(obj)) else list(obj)
