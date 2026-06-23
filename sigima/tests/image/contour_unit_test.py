@@ -20,7 +20,8 @@ from sigima.enums import ContourShape
 from sigima.objects import KindShape
 from sigima.objects.image.roi import CircularROI, PolygonalROI
 from sigima.objects.scalar import GeometryResult
-from sigima.proc.image import apply_detection_rois, store_contour_roi_metadata
+from sigima.proc.image import apply_detection_rois
+from sigima.proc.image.detection import _store_contour_roi_metadata
 from sigima.tests import guiutils
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
@@ -210,15 +211,15 @@ def test_contour_roi_disabled() -> None:
 
 
 def test_store_contour_roi_metadata_none_geometry() -> None:
-    """store_contour_roi_metadata must return None when geometry is None."""
-    result = store_contour_roi_metadata(None, create_rois=True)
+    """_store_contour_roi_metadata must return None when geometry is None."""
+    result = _store_contour_roi_metadata(None, create_rois=True)
     assert result is None
 
 
 def test_store_contour_roi_metadata_empty_geometry() -> None:
-    """store_contour_roi_metadata must not set attrs when geometry has 0 rows."""
+    """_store_contour_roi_metadata must not set attrs when geometry has 0 rows."""
     geometry = GeometryResult("test", KindShape.CIRCLE, np.empty((0, 3)))
-    result = store_contour_roi_metadata(geometry, create_rois=True)
+    result = _store_contour_roi_metadata(geometry, create_rois=True)
     # The geometry object is returned but the attrs must NOT be populated because
     # len(geometry) == 0 < 1 (the guard in store_contour_roi_metadata)
     assert result is geometry

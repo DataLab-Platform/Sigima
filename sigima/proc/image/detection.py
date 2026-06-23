@@ -63,7 +63,6 @@ __all__ = [
     "contour_shape",
     "hough_circle_peaks",
     "peak_detection",
-    "store_contour_roi_metadata",
     "store_roi_creation_metadata",
 ]
 
@@ -281,7 +280,7 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
     return False
 
 
-def store_contour_roi_metadata(
+def _store_contour_roi_metadata(
     geometry: GeometryResult | None,
     create_rois: bool,
 ) -> GeometryResult | None:
@@ -393,7 +392,7 @@ def contour_shape(image: ImageObj, p: ContourShapeParam) -> GeometryResult | Non
         shape,
         p.threshold,
     )
-    return store_contour_roi_metadata(geometry, p.create_rois)
+    return _store_contour_roi_metadata(geometry, p.create_rois)
 
 
 class BaseBlobParam(gds.DataSet):

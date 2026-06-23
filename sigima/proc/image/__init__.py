@@ -172,7 +172,6 @@ from sigima.proc.image.detection import (
     contour_shape,
     hough_circle_peaks,
     peak_detection,
-    store_contour_roi_metadata,
 )
 from sigima.proc.image.edges import (
     CannyParam,
@@ -482,7 +481,6 @@ __all__ = [
     "sobel_v",
     "standard_deviation",
     "stats",
-    "store_contour_roi_metadata",
     "threshold",
     "threshold_isodata",
     "threshold_li",
