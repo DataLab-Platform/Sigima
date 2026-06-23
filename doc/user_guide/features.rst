@@ -600,7 +600,7 @@ Feature Detection
    * - :func:`peak_detection <sigima.proc.image.peak_detection>`
      - 2D peak detection
    * - :func:`contour_shape <sigima.proc.image.contour_shape>`
-     - Contour shape analysis
+     - Contour shape analysis (with optional ROI creation from detected contours)
    * - :func:`hough_circle_peaks <sigima.proc.image.hough_circle_peaks>`
      - Circular Hough transform
 

@@ -1011,4 +1011,4 @@ def create_image_roi_around_points(
             roi_coords.append([x0, y0, dx, dy])
         else:  # circle
             roi_coords.append([x, y, radius])
-    return create_image_roi(roi_geometry, roi_coords, indices=True)
+    return create_image_roi(roi_geometry, roi_coords, indices=False)

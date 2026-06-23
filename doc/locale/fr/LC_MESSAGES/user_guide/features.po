@@ -1080,8 +1080,8 @@ msgstr "Détection de pics 2D"
 msgid ":func:`contour_shape <sigima.proc.image.contour_shape>`"
 msgstr ""
 
-msgid "Contour shape analysis"
-msgstr "Analyse de forme de contour"
+msgid "Contour shape analysis (with optional ROI creation from detected contours)"
+msgstr "Analyse de forme de contour (avec création optionnelle de ROI à partir des contours détectés)"
 
 msgid ":func:`hough_circle_peaks <sigima.proc.image.hough_circle_peaks>`"
 msgstr ""

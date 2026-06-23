@@ -315,17 +315,17 @@ msgstr "Image sans titre"
 msgid "Title"
 msgstr "Titre"
 
-msgid "Height"
-msgstr "Hauteur"
-
 msgid "Image height: number of rows"
 msgstr "Hauteur de l'image : nombre de lignes"
 
-msgid "Width"
-msgstr "Largeur"
+msgid "Height"
+msgstr "Hauteur"
 
 msgid "Image width: number of columns"
 msgstr "Largeur de l'image : nombre de colonnes"
+
+msgid "Width"
+msgstr "Largeur"
 
 msgid "Type"
 msgstr "Type"
@@ -372,17 +372,17 @@ msgstr "Décalage X"
 msgid "Y offset"
 msgstr "Décalage Y"
 
-msgid "Minimum value"
-msgstr "Minimum"
-
 msgid "Value for dark squares"
 msgstr "Valeur des carrés foncés"
 
-msgid "Maximum value"
-msgstr "Maximum"
+msgid "Minimum value"
+msgstr "Minimum"
 
 msgid "Value for light squares"
 msgstr "Valeur des carrés clairs"
+
+msgid "Maximum value"
+msgstr "Maximum"
 
 msgid "Amplitude and offset"
 msgstr "Amplitude et décalage"
@@ -489,11 +489,11 @@ msgstr "Coordonnées Y"
 msgid "Titles / Units"
 msgstr "Titres / Unités"
 
-msgid "Untitled"
-msgstr "Sans titre"
-
 msgid "Image title"
 msgstr "Titre de l'image"
+
+msgid "Untitled"
+msgstr "Sans titre"
 
 msgid "X-axis"
 msgstr "Axe des X"
@@ -892,6 +892,19 @@ msgstr "Taille de la fenêtre glissante utilisée dans l'algorithme de filtrage 
 
 msgid "Shape"
 msgstr "Forme"
+
+msgid ""
+"Regions of interest will be created from detected contours.\n"
+"ROI geometry is determined by the selected contour shape:\n"
+"  • Polygon → polygon ROIs\n"
+"  • Ellipse → polygon ROIs (approximated)\n"
+"  • Circle → circular ROIs"
+msgstr ""
+"Des régions d'intérêt seront créées à partir des contours détectés.\n"
+"La géométrie de la ROI est déterminée par la forme de contour sélectionnée :\n"
+"  • Polygone → ROIs polygonales\n"
+"  • Ellipse → ROIs polygonales (approximées)\n"
+"  • Cercle → ROIs circulaires"
 
 msgid "The minimum standard deviation for Gaussian Kernel. Keep this low to detect smaller blobs."
 msgstr "L'écart-type minimal pour le noyau gaussien. Cette valeur doit être faible pour détecter de petites taches."
