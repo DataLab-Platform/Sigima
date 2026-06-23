@@ -156,8 +156,8 @@ msgstr "Traitement d'images en Python"
 msgid "pandas"
 msgstr "pandas"
 
-msgid ">= 1.4, < 3.0"
-msgstr ">= 1.4, < 3.0"
+msgid ">= 1.4, < 3.1"
+msgstr ">= 1.4, < 3.1"
 
 msgid "Powerful data structures for data analysis, time series, and statistics"
 msgstr "Structures de données puissantes pour l'analyse de données, les séries temporelles et les statistiques"
@@ -257,6 +257,18 @@ msgstr "pre-commit"
 
 msgid "A framework for managing and maintaining multi-language pre-commit hooks."
 msgstr "Un cadre pour gérer et maintenir des hooks pre-commit multilingues."
+
+msgid "setuptools"
+msgstr "setuptools"
+
+msgid "Most extensible Python build backend with support for C/C++ extension modules"
+msgstr "Backend de construction Python le plus extensible avec support pour les modules d'extension C/C++"
+
+msgid "wheel"
+msgstr "wheel"
+
+msgid "Command line tool for manipulating wheel files"
+msgstr "Outil en ligne de commande pour manipuler les fichiers wheel"
 
 msgid "Optional modules for building the documentation:"
 msgstr "Modules optionnels pour la génération de la documentation :"
