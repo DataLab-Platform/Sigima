@@ -11,6 +11,7 @@ import functools
 import os
 import os.path as osp
 import pathlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -189,7 +190,7 @@ class WorkdirRestoringTempDir(tempfile.TemporaryDirectory):
     A subclass of :py:class:`tempfile.TemporaryDirectory` that:
 
     * Preserves and automatically restores the working directory during cleanup
-    * Handles common cleanup errors silently (PermissionError, RecursionError)
+    * Removes the directory robustly, tolerating leftover locks without crashing
 
     Example::
 
@@ -202,12 +203,18 @@ class WorkdirRestoringTempDir(tempfile.TemporaryDirectory):
         self.__cwd = os.getcwd()
 
     def cleanup(self) -> None:
-        """Clean up temporary directory, restore working directory, ignore errors."""
+        """Restore the working directory, then remove the temporary directory.
+
+        Removal uses ``shutil.rmtree(..., ignore_errors=True)`` and detaches the
+        finalizer. This is a local safety net against the Python 3.9 recursive
+        ``rmtree`` stack overflow on Windows when a file -- or the directory
+        itself -- is still locked (e.g. held as the current working directory by
+        another process). It deliberately does not patch :mod:`tempfile`
+        globally.
+        """
         os.chdir(self.__cwd)
-        try:
-            super().cleanup()
-        except (PermissionError, RecursionError):
-            pass
+        self._finalizer.detach()
+        shutil.rmtree(self.name, ignore_errors=True)
 
 
 def get_temporary_directory() -> str:
