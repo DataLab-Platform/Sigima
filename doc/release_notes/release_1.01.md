@@ -1,5 +1,16 @@
 # Version 1.1 #
 
+## Sigima Version 1.1.5 ##
+
+### 🛠️ Bug Fixes since version 1.1.4 ###
+
+* **EllipseModel TypeError**: Added defensive fallback for `EllipseModel` raising `TypeError` under scikit-image 0.26 edge cases
+* **Deprecated `collections.abc.ByteString`**: Replaced usage removed in Python 3.14 with `bytes` and `bytearray` checks
+
+### 🔧 Other changes since version 1.1.4 ###
+
+* **Test infrastructure**: Made `WorkdirRestoringTempDir` cleanup robust on Windows (avoids `PermissionError` on temporary directories)
+
 ## Sigima Version 1.1.4 ##
 
 ### 🛠️ Bug Fixes since version 1.1.3 ###
