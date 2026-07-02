@@ -33,7 +33,7 @@ class _RecordingBuilder:
     def __init__(self) -> None:
         self.rect_coords: tuple[float, float, float, float] | None = None
 
-    def annotated_rectangle(self, x0, y0, x1, y1, title=""):  # noqa: D401
+    def annotated_rectangle(self, x0, y0, x1, y1, _title=""):  # noqa: D401
         """Record the rectangle coordinates and return a sentinel item."""
         self.rect_coords = (x0, y0, x1, y1)
         return object()
