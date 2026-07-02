@@ -173,5 +173,63 @@ class TestInverseROI2DParamExtraction:
         assert dst.y0 == obj.y0 + 5.0
 
 
+class TestROI2DParamGetDataMasking:
+    """Test that ROI2DParam.get_data fills the part of the returned extent that
+    falls outside the actual ROI shape with NaN (bounding-box corners for
+    circle/polygon ROIs, shape interior for inverse ROIs).
+    """
+
+    def test_normal_rect_get_data_has_no_nan(self):
+        """Normal rectangle: crop == shape, no NaN should be introduced."""
+        obj = _create_image()
+        p = ROI2DParam()
+        p.geometry = "rectangle"
+        p.x0, p.y0, p.dx, p.dy = 5.0, 5.0, 20.0, 15.0
+        p.inverse = False
+        data = p.get_data(obj)
+        assert not np.isnan(data).any()
+
+    def test_normal_circle_get_data_masks_bbox_corners(self):
+        """Normal circle: pixels in the bounding box but outside the circle
+        must be NaN, pixels inside the circle must not."""
+        obj = _create_image(rows=40, cols=50)
+        p = ROI2DParam()
+        p.geometry = "circle"
+        p.xc, p.yc, p.r = 25.0, 20.0, 10.0
+        p.inverse = False
+        data = p.get_data(obj)
+        # Corners of the (square) bounding box are outside the circle
+        assert np.isnan(data[0, 0])
+        assert np.isnan(data[-1, -1])
+        # Center of the circle is inside
+        assert not np.isnan(data[data.shape[0] // 2, data.shape[1] // 2])
+
+    def test_normal_polygon_get_data_masks_outside_polygon(self):
+        """Normal polygon (triangle): pixels in the bounding box but outside the
+        triangle must be NaN."""
+        obj = _create_image(rows=40, cols=50)
+        p = ROI2DParam()
+        p.geometry = "polygon"
+        p.points = np.array([10.0, 10.0, 40.0, 10.0, 25.0, 30.0])
+        p.inverse = False
+        data = p.get_data(obj)
+        # Bottom-left corner of the bounding box (10, 30) is not a triangle
+        # vertex and lies outside the triangle (whose only bottom vertex is
+        # the apex at (25, 30)).
+        assert np.isnan(data[-1, 0])
+
+    def test_inverse_rect_get_data_masks_shape_interior(self):
+        """Inverse rectangle: the rectangle's own interior must be NaN, the
+        rest of the (full) image must be preserved."""
+        obj = _create_image()
+        p = ROI2DParam()
+        p.geometry = "rectangle"
+        p.x0, p.y0, p.dx, p.dy = 5.0, 5.0, 20.0, 15.0
+        p.inverse = True
+        data = p.get_data(obj)
+        assert np.isnan(data[10, 10])  # inside the rectangle -> masked
+        assert not np.isnan(data[0, 0])  # outside the rectangle -> preserved
+
+
 if __name__ == "__main__":
     test_roi_2d_param_interactive()

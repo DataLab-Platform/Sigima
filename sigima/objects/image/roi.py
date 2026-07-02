@@ -249,12 +249,20 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
             obj: image object
 
         Returns:
-            Data in ROI (full image for inverse ROIs, cropped for normal ROIs)
+            Data in ROI (full image for inverse ROIs, cropped for normal ROIs).
+            Pixels within the returned extent but outside the actual ROI shape
+            (e.g. the corners of a circle's or polygon's bounding box, or the
+            shape's interior for an inverse ROI) are set to NaN.
         """
         ix0, iy0, ix1, iy1 = self.get_bounding_box_indices(obj)
         ix0, iy0 = max(0, ix0), max(0, iy0)
         ix1, iy1 = min(obj.data.shape[1], ix1), min(obj.data.shape[0], iy1)
-        return obj.data[iy0:iy1, ix0:ix1]
+        data = obj.data[iy0:iy1, ix0:ix1]
+        mask = self.to_single_roi(obj).to_mask(obj)[iy0:iy1, ix0:ix1]
+        if mask.any():
+            data = data.astype(float)
+            data[mask] = np.nan
+        return data
 
 
 class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
