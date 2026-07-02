@@ -203,15 +203,13 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
 
         When extracting ROIs from an image to multiple images (i.e. one image per ROI),
         this method returns the ROI that has to be kept in the destination image. This
-        is not necessary for a rectangular ROI: the destination image is simply a crop
-        of the source image according to the ROI coordinates. But for a circular ROI or
-        a polygonal ROI, the destination image is a crop of the source image according
-        to the bounding box of the ROI. Thus, to avoid any loss of information, a ROI
-        has to be defined for the destination image: this is the ROI returned by this
-        method. It's simply the same as the source ROI, but with coordinates adjusted
-        to the destination image. One may called this ROI the "extracted ROI".
+        is not necessary for a normal rectangular ROI: the destination image is simply
+        a crop of the source image according to the ROI coordinates. But for a circular
+        ROI, a polygonal ROI, or any inverse ROI, the destination image is either a
+        crop according to the bounding box or the full image (for inverse), and a ROI
+        must be kept to preserve the mask shape.
         """
-        if self.geometry == "rectangle":
+        if self.geometry == "rectangle" and not self.inverse:
             return None
         single_roi = self.to_single_roi(obj)
         roi = ImageROI()
@@ -232,20 +230,26 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
         return x0, y0, x1, y1
 
     def get_bounding_box_indices(self, obj: ImageObj) -> tuple[int, int, int, int]:
-        """Get bounding box (pixel coordinates)"""
+        """Get bounding box (pixel coordinates).
+
+        For inverse ROIs returns the full image extent, because the extracted
+        data covers the whole image.
+        """
+        if self.inverse:
+            return 0, 0, obj.data.shape[1], obj.data.shape[0]
         x0, y0, x1, y1 = self.get_bounding_box_physical()
         ix0, iy0 = obj.physical_to_indices((x0, y0))
         ix1, iy1 = obj.physical_to_indices((x1, y1))
         return ix0, iy0, ix1, iy1
 
     def get_data(self, obj: ImageObj) -> np.ndarray:
-        """Get data in ROI
+        """Get data in ROI.
 
         Args:
             obj: image object
 
         Returns:
-            Data in ROI
+            Data in ROI (full image for inverse ROIs, cropped for normal ROIs)
         """
         ix0, iy0, ix1, iy1 = self.get_bounding_box_indices(obj)
         ix0, iy0 = max(0, ix0), max(0, iy0)
