@@ -523,7 +523,7 @@ class TestEdgeCases:
 
 
 class TestInverseROIBoundingBox:
-    """Tests for get_bounding_box / _get_shape_bounding_box with inverse ROIs.
+    """Tests for get_bounding_box / _shape_circumscribed_rect with inverse ROIs.
 
     Rationale
     ---------
@@ -534,7 +534,7 @@ class TestInverseROIBoundingBox:
        the entire image → ``(x0, y0, x0+width, y0+height)``.
     2. Shape rendering (``get_indices_coords`` → ``to_mask``):
        the actual shape bounds are always needed regardless of the inverse flag,
-       so ``_get_shape_bounding_box`` (and the ``get_indices_coords`` that calls
+       so ``_shape_circumscribed_rect`` (and the ``get_indices_coords`` that calls
        it) must not be affected by ``inverse``.
     """
 
@@ -621,11 +621,11 @@ class TestInverseROIBoundingBox:
         assert (x0, y0, x1, y1) == (35.0, 35.0, 65.0, 65.0)
 
     # ------------------------------------------------------------------
-    # _get_shape_bounding_box: always returns shape bounds regardless of inverse
+    # _shape_circumscribed_rect: always returns shape bounds regardless of inverse
     # ------------------------------------------------------------------
 
     def test_shape_bbox_unaffected_by_inverse_flag(self):
-        """_get_shape_bounding_box always returns the real shape bounds."""
+        """_shape_circumscribed_rect always returns the real shape bounds."""
         obj = self._img()
         roi_normal = RectangularROI(
             [20.0, 20.0, 30.0, 30.0], indices=False, inverse=False
@@ -633,9 +633,9 @@ class TestInverseROIBoundingBox:
         roi_inverse = RectangularROI(
             [20.0, 20.0, 30.0, 30.0], indices=False, inverse=True
         )
-        assert roi_normal._get_shape_bounding_box(
+        assert roi_normal._shape_circumscribed_rect(
             obj
-        ) == roi_inverse._get_shape_bounding_box(obj)
+        ) == roi_inverse._shape_circumscribed_rect(obj)
 
     # ------------------------------------------------------------------
     # get_indices_coords: must use the real shape bounds (not full image)

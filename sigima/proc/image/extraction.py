@@ -118,7 +118,7 @@ def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
     if p.inverse:
         x0, y0 = 0.0, 0.0
     else:
-        x0, y0, _x1, _y1 = p.get_bounding_box_physical()
+        x0, y0, _x1, _y1 = p.get_shape_circumscribed_rect()
     if src.is_uniform_coords:
         dst.set_uniform_coords(dst.dx, dst.dy, dst.x0 + x0, dst.y0 + y0)
     else:

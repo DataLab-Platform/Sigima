@@ -216,8 +216,8 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
         roi.add_roi(single_roi)
         return roi
 
-    def get_bounding_box_physical(self) -> tuple[int, int, int, int]:
-        """Get bounding box (physical coordinates)"""
+    def get_shape_circumscribed_rect(self) -> tuple[int, int, int, int]:
+        """Get the shape's circumscribed rectangle (physical coordinates)"""
         if self.geometry == "circle":
             x0, y0 = self.xc - self.r, self.yc - self.r
             x1, y1 = self.xc + self.r, self.yc + self.r
@@ -237,7 +237,7 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
         """
         if self.inverse:
             return 0, 0, obj.data.shape[1], obj.data.shape[0]
-        x0, y0, x1, y1 = self.get_bounding_box_physical()
+        x0, y0, x1, y1 = self.get_shape_circumscribed_rect()
         ix0, iy0 = obj.physical_to_indices((x0, y0))
         ix1, iy1 = obj.physical_to_indices((x1, y1))
         return ix0, iy0, ix1, iy1
@@ -312,11 +312,11 @@ class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
         return cls(dictdata["coords"], dictdata["indices"], dictdata["title"], inverse)
 
     @abc.abstractmethod
-    def _get_shape_bounding_box(
+    def _shape_circumscribed_rect(
         self, obj: ImageObj
     ) -> tuple[float, float, float, float]:
-        """Get the shape's own bounding box (physical coordinates), regardless of the
-        inverse flag.
+        """Get the shape's circumscribed rectangle (physical coordinates),
+        regardless of the inverse flag.
 
         Args:
             obj: image object
@@ -334,7 +334,7 @@ class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
         """
         if self.inverse:
             return obj.x0, obj.y0, obj.x0 + obj.width, obj.y0 + obj.height
-        return self._get_shape_bounding_box(obj)
+        return self._shape_circumscribed_rect(obj)
 
 
 class PolygonalROI(BaseSingleImageROI):
@@ -394,10 +394,10 @@ class PolygonalROI(BaseSingleImageROI):
             inverse=param.inverse,
         )
 
-    def _get_shape_bounding_box(
+    def _shape_circumscribed_rect(
         self, obj: ImageObj
     ) -> tuple[float, float, float, float]:
-        """Get bounding box (physical coordinates)
+        """Get the shape's circumscribed rectangle (physical coordinates)
 
         Args:
             obj: image object
@@ -491,7 +491,7 @@ class RectangularROI(BaseSingleImageROI):
             obj: image object
             param: parameters
         """
-        x0, y0, x1, y1 = param.get_bounding_box_physical()
+        x0, y0, x1, y1 = param.get_shape_circumscribed_rect()
         return cls(
             [x0, y0, x1 - x0, y1 - y0],
             indices=False,
@@ -499,10 +499,10 @@ class RectangularROI(BaseSingleImageROI):
             inverse=param.inverse,
         )
 
-    def _get_shape_bounding_box(
+    def _shape_circumscribed_rect(
         self, obj: ImageObj
     ) -> tuple[float, float, float, float]:
-        """Get bounding box (physical coordinates)
+        """Get the shape's circumscribed rectangle (physical coordinates)
 
         Args:
             obj: image object
@@ -550,7 +550,9 @@ class RectangularROI(BaseSingleImageROI):
         """
         if self.indices:
             return self.coords.tolist()
-        ix0, iy0, ix1, iy1 = obj.physical_to_indices(self._get_shape_bounding_box(obj))
+        ix0, iy0, ix1, iy1 = obj.physical_to_indices(
+            self._shape_circumscribed_rect(obj)
+        )
         return [ix0, iy0, ix1 - ix0, iy1 - iy0]
 
     def set_indices_coords(self, obj: ImageObj, coords: np.ndarray) -> None:
@@ -649,7 +651,7 @@ class CircularROI(BaseSingleImageROI):
             obj: image object
             param: parameters
         """
-        x0, y0, x1, y1 = param.get_bounding_box_physical()
+        x0, y0, x1, y1 = param.get_shape_circumscribed_rect()
         ixc, iyc = (x0 + x1) * 0.5, (y0 + y1) * 0.5
         ir = (x1 - x0) * 0.5
         return cls(
@@ -682,10 +684,10 @@ class CircularROI(BaseSingleImageROI):
         xc, yc, r = self.coords
         return f"Center: ({xc:.4g}, {yc:.4g}), R: {r:.4g}"
 
-    def _get_shape_bounding_box(
+    def _shape_circumscribed_rect(
         self, obj: ImageObj
     ) -> tuple[float, float, float, float]:
-        """Get bounding box (physical coordinates)
+        """Get the shape's circumscribed rectangle (physical coordinates)
 
         Args:
             obj: image object
@@ -740,7 +742,7 @@ class CircularROI(BaseSingleImageROI):
         if self.indices:
             return self.coords
         ix0, iy0, ix1, iy1 = obj.physical_to_indices(
-            self._get_shape_bounding_box(obj), as_float=True
+            self._shape_circumscribed_rect(obj), as_float=True
         )
         ixc, iyc = (ix0 + ix1) * 0.5, (iy0 + iy1) * 0.5
         ir = (ix1 - ix0) * 0.5
