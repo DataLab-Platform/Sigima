@@ -308,12 +308,29 @@ class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
         return cls(dictdata["coords"], dictdata["indices"], dictdata["title"], inverse)
 
     @abc.abstractmethod
-    def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
-        """Get bounding box (physical coordinates)
+    def _get_shape_bounding_box(
+        self, obj: ImageObj
+    ) -> tuple[float, float, float, float]:
+        """Get the shape's own bounding box (physical coordinates), regardless of the
+        inverse flag.
 
         Args:
             obj: image object
         """
+
+    def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
+        """Get bounding box (physical coordinates).
+
+        For inverse ROIs the bounding box is the entire image, because the
+        computation function receives the full image data.  For normal ROIs the
+        bounding box is the shape's actual extent.
+
+        Args:
+            obj: image object
+        """
+        if self.inverse:
+            return obj.x0, obj.y0, obj.x0 + obj.width, obj.y0 + obj.height
+        return self._get_shape_bounding_box(obj)
 
 
 class PolygonalROI(BaseSingleImageROI):
@@ -373,7 +390,9 @@ class PolygonalROI(BaseSingleImageROI):
             inverse=param.inverse,
         )
 
-    def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
+    def _get_shape_bounding_box(
+        self, obj: ImageObj
+    ) -> tuple[float, float, float, float]:
         """Get bounding box (physical coordinates)
 
         Args:
@@ -476,7 +495,9 @@ class RectangularROI(BaseSingleImageROI):
             inverse=param.inverse,
         )
 
-    def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
+    def _get_shape_bounding_box(
+        self, obj: ImageObj
+    ) -> tuple[float, float, float, float]:
         """Get bounding box (physical coordinates)
 
         Args:
@@ -525,7 +546,7 @@ class RectangularROI(BaseSingleImageROI):
         """
         if self.indices:
             return self.coords.tolist()
-        ix0, iy0, ix1, iy1 = obj.physical_to_indices(self.get_bounding_box(obj))
+        ix0, iy0, ix1, iy1 = obj.physical_to_indices(self._get_shape_bounding_box(obj))
         return [ix0, iy0, ix1 - ix0, iy1 - iy0]
 
     def set_indices_coords(self, obj: ImageObj, coords: np.ndarray) -> None:
@@ -657,7 +678,9 @@ class CircularROI(BaseSingleImageROI):
         xc, yc, r = self.coords
         return f"Center: ({xc:.4g}, {yc:.4g}), R: {r:.4g}"
 
-    def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
+    def _get_shape_bounding_box(
+        self, obj: ImageObj
+    ) -> tuple[float, float, float, float]:
         """Get bounding box (physical coordinates)
 
         Args:
@@ -713,7 +736,7 @@ class CircularROI(BaseSingleImageROI):
         if self.indices:
             return self.coords
         ix0, iy0, ix1, iy1 = obj.physical_to_indices(
-            self.get_bounding_box(obj), as_float=True
+            self._get_shape_bounding_box(obj), as_float=True
         )
         ixc, iyc = (ix0 + ix1) * 0.5, (iy0 + iy1) * 0.5
         ir = (ix1 - ix0) * 0.5

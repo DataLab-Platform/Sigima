@@ -15,6 +15,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import sigima.objects
 from sigima.objects import ImageObj
 from sigima.objects.image.roi import CircularROI, PolygonalROI, RectangularROI
 
@@ -519,6 +520,214 @@ class TestEdgeCases:
         # Verify bounding box is correct
         x0, y0, x1, y1 = roi.get_bounding_box(obj)
         assert x0 == 10.0 and y0 == 10.0 and x1 == 50.0 and y1 == 50.0
+
+
+class TestInverseROIBoundingBox:
+    """Tests for get_bounding_box / _get_shape_bounding_box with inverse ROIs.
+
+    Rationale
+    ---------
+    ``get_bounding_box`` is used for two unrelated purposes:
+
+    1. Data extraction (``ImageObj.get_data``, ``compute_geometry_from_obj``):
+       an inverse ROI receives the *full* image, so its bounding box must cover
+       the entire image → ``(x0, y0, x0+width, y0+height)``.
+    2. Shape rendering (``get_indices_coords`` → ``to_mask``):
+       the actual shape bounds are always needed regardless of the inverse flag,
+       so ``_get_shape_bounding_box`` (and the ``get_indices_coords`` that calls
+       it) must not be affected by ``inverse``.
+    """
+
+    # ------------------------------------------------------------------
+    # Helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _img(dx: float = 1.0, dy: float = 1.0, x0: float = 0.0, y0: float = 0.0):
+        """Return a 100×100 float64 image with the given coordinate system."""
+        obj = ImageObj(title="Test")
+        obj.data = np.zeros((100, 100), dtype=np.float64)
+        obj.set_uniform_coords(dx, dy, x0, y0)
+        return obj
+
+    # ------------------------------------------------------------------
+    # get_bounding_box: inverse=True → full image extent
+    # ------------------------------------------------------------------
+
+    def test_rectangular_inverse_bbox_is_full_image(self):
+        """RectangularROI with inverse=True: bounding box is the full image."""
+        obj = self._img()
+        roi = RectangularROI([20.0, 20.0, 30.0, 30.0], indices=False, inverse=True)
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert (x0, y0, x1, y1) == (
+            obj.x0,
+            obj.y0,
+            obj.x0 + obj.width,
+            obj.y0 + obj.height,
+        )
+
+    def test_circular_inverse_bbox_is_full_image(self):
+        """CircularROI with inverse=True: bounding box is the full image."""
+        obj = self._img()
+        roi = CircularROI([50.0, 50.0, 15.0], indices=False, inverse=True)
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert (x0, y0, x1, y1) == (
+            obj.x0,
+            obj.y0,
+            obj.x0 + obj.width,
+            obj.y0 + obj.height,
+        )
+
+    def test_polygonal_inverse_bbox_is_full_image(self):
+        """PolygonalROI with inverse=True: bounding box is the full image."""
+        obj = self._img()
+        roi = PolygonalROI(
+            [10.0, 10.0, 40.0, 10.0, 25.0, 40.0], indices=False, inverse=True
+        )
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert (x0, y0, x1, y1) == (
+            obj.x0,
+            obj.y0,
+            obj.x0 + obj.width,
+            obj.y0 + obj.height,
+        )
+
+    def test_inverse_bbox_respects_pixel_spacing_and_origin(self):
+        """Full-image bounding box uses obj.width/height, not pixel counts."""
+        obj = self._img(dx=0.5, dy=2.0, x0=10.0, y0=-5.0)
+        roi = RectangularROI([12.0, 0.0, 5.0, 5.0], indices=False, inverse=True)
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert x0 == pytest.approx(10.0)
+        assert y0 == pytest.approx(-5.0)
+        assert x1 == pytest.approx(10.0 + 0.5 * 100)  # x0 + dx * cols
+        assert y1 == pytest.approx(-5.0 + 2.0 * 100)  # y0 + dy * rows
+
+    # ------------------------------------------------------------------
+    # get_bounding_box: inverse=False → shape's actual bounds (unchanged)
+    # ------------------------------------------------------------------
+
+    def test_rectangular_normal_bbox_is_shape_bounds(self):
+        """RectangularROI with inverse=False: bounding box is the rectangle itself."""
+        obj = self._img()
+        roi = RectangularROI([20.0, 30.0, 40.0, 25.0], indices=False, inverse=False)
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert (x0, y0, x1, y1) == (20.0, 30.0, 60.0, 55.0)
+
+    def test_circular_normal_bbox_is_shape_bounds(self):
+        """CircularROI with inverse=False: bounding box is the circle's extent."""
+        obj = self._img()
+        roi = CircularROI([50.0, 50.0, 15.0], indices=False, inverse=False)
+        x0, y0, x1, y1 = roi.get_bounding_box(obj)
+        assert (x0, y0, x1, y1) == (35.0, 35.0, 65.0, 65.0)
+
+    # ------------------------------------------------------------------
+    # _get_shape_bounding_box: always returns shape bounds regardless of inverse
+    # ------------------------------------------------------------------
+
+    def test_shape_bbox_unaffected_by_inverse_flag(self):
+        """_get_shape_bounding_box always returns the real shape bounds."""
+        obj = self._img()
+        roi_normal = RectangularROI(
+            [20.0, 20.0, 30.0, 30.0], indices=False, inverse=False
+        )
+        roi_inverse = RectangularROI(
+            [20.0, 20.0, 30.0, 30.0], indices=False, inverse=True
+        )
+        assert roi_normal._get_shape_bounding_box(
+            obj
+        ) == roi_inverse._get_shape_bounding_box(obj)
+
+    # ------------------------------------------------------------------
+    # get_indices_coords: must use the real shape bounds (not full image)
+    # so that to_mask still draws the correct shape
+    # ------------------------------------------------------------------
+
+    def test_rectangular_inverse_indices_coords_are_shape_not_full_image(self):
+        """For an inverse RectangularROI, get_indices_coords returns the rectangle's
+        pixel coordinates, not the full image extent."""
+        obj = self._img()
+        roi = RectangularROI([20.0, 30.0, 40.0, 25.0], indices=False, inverse=True)
+        ix0, iy0, idx, idy = roi.get_indices_coords(obj)
+        # Must match the rectangle (x0=20, y0=30, dx=40, dy=25), not the full 100×100
+        assert ix0 == 20 and iy0 == 30 and idx == 40 and idy == 25
+
+    def test_circular_inverse_indices_coords_are_shape_not_full_image(self):
+        """For an inverse CircularROI, get_indices_coords returns the circle's
+        pixel coordinates, not the full image extent."""
+        obj = self._img()
+        roi = CircularROI([50.0, 50.0, 15.0], indices=False, inverse=True)
+        ixc, iyc, ir = roi.get_indices_coords(obj)
+        assert ixc == pytest.approx(50.0) and iyc == pytest.approx(50.0)
+        assert ir == pytest.approx(15.0)
+
+    # ------------------------------------------------------------------
+    # ImageObj.get_data: inverse ROI must return full-image data
+    # ------------------------------------------------------------------
+
+    def test_get_data_inverse_roi_returns_full_image(self):
+        """ImageObj.get_data with an inverse ROI returns data with the full shape."""
+        obj = self._img()
+        # Fill data so we can verify content
+        obj.data[:] = np.arange(100 * 100, dtype=np.float64).reshape(100, 100)
+        obj.roi = sigima.objects.create_image_roi(
+            "rectangle", [20.0, 20.0, 30.0, 30.0], inverse=True
+        )
+        data = obj.get_data(0)
+        assert data.shape == (100, 100)
+
+    def test_get_data_normal_roi_returns_cropped_image(self):
+        """ImageObj.get_data with a normal ROI returns cropped data."""
+        obj = self._img()
+        obj.roi = sigima.objects.create_image_roi(
+            "rectangle", [20.0, 30.0, 40.0, 25.0], inverse=False
+        )
+        data = obj.get_data(0)
+        assert data.shape == (25, 40)
+
+    # ------------------------------------------------------------------
+    # compute_geometry_from_obj: inverse ROI → no coordinate offset applied
+    # ------------------------------------------------------------------
+
+    def test_compute_geometry_inverse_roi_no_offset(self):
+        """With an inverse ROI the coordinates returned by the computation
+        function are already absolute, so no offset must be added."""
+        from sigima.objects import KindShape
+        from sigima.proc.image.base import compute_geometry_from_obj
+
+        obj = self._img()
+        obj.roi = sigima.objects.create_image_roi(
+            "rectangle", [30.0, 40.0, 20.0, 20.0], inverse=True
+        )
+
+        # Simulated detection: returns pixel (10, 20) relative to received data.
+        # With inverse ROI the received data IS the full image, so (10, 20) is
+        # the absolute pixel → physical coordinate = (10, 20) (dx=dy=x0=y0=0/1).
+        def _detect(data):
+            return np.array([[10.0, 20.0]])
+
+        result = compute_geometry_from_obj("pts", KindShape.POINT, obj, _detect)
+        assert result is not None
+        np.testing.assert_allclose(result.coords[0], [10.0, 20.0])
+
+    def test_compute_geometry_normal_roi_offset_applied(self):
+        """With a normal ROI the pixel coordinates are relative to the crop,
+        so the ROI origin offset must be added to recover absolute coordinates."""
+        from sigima.objects import KindShape
+        from sigima.proc.image.base import compute_geometry_from_obj
+
+        obj = self._img()
+        obj.roi = sigima.objects.create_image_roi(
+            "rectangle", [30.0, 40.0, 20.0, 20.0], inverse=False
+        )
+
+        # Function returns pixel (5, 8) relative to the cropped data.
+        # Absolute pixel = (5+30, 8+40) = (35, 48) → same physical coords.
+        def _detect(data):
+            return np.array([[5.0, 8.0]])
+
+        result = compute_geometry_from_obj("pts", KindShape.POINT, obj, _detect)
+        assert result is not None
+        np.testing.assert_allclose(result.coords[0], [35.0, 48.0])
 
 
 if __name__ == "__main__":
