@@ -16,8 +16,9 @@ import numpy as np
 import pytest
 
 import sigima.objects
-from sigima.objects import ImageObj
+from sigima.objects import ImageObj, KindShape
 from sigima.objects.image.roi import CircularROI, PolygonalROI, RectangularROI
+from sigima.proc.image.base import compute_geometry_from_obj
 
 
 def create_test_image(
@@ -633,6 +634,7 @@ class TestInverseROIBoundingBox:
         roi_inverse = RectangularROI(
             [20.0, 20.0, 30.0, 30.0], indices=False, inverse=True
         )
+        # pylint: disable=protected-access
         assert roi_normal._shape_circumscribed_rect(
             obj
         ) == roi_inverse._shape_circumscribed_rect(obj)
@@ -691,9 +693,6 @@ class TestInverseROIBoundingBox:
     def test_compute_geometry_inverse_roi_no_offset(self):
         """With an inverse ROI the coordinates returned by the computation
         function are already absolute, so no offset must be added."""
-        from sigima.objects import KindShape
-        from sigima.proc.image.base import compute_geometry_from_obj
-
         obj = self._img()
         obj.roi = sigima.objects.create_image_roi(
             "rectangle", [30.0, 40.0, 20.0, 20.0], inverse=True
@@ -702,7 +701,7 @@ class TestInverseROIBoundingBox:
         # Simulated detection: returns pixel (10, 20) relative to received data.
         # With inverse ROI the received data IS the full image, so (10, 20) is
         # the absolute pixel → physical coordinate = (10, 20) (dx=dy=x0=y0=0/1).
-        def _detect(data):
+        def _detect(_data):
             return np.array([[10.0, 20.0]])
 
         result = compute_geometry_from_obj("pts", KindShape.POINT, obj, _detect)
@@ -712,9 +711,6 @@ class TestInverseROIBoundingBox:
     def test_compute_geometry_normal_roi_offset_applied(self):
         """With a normal ROI the pixel coordinates are relative to the crop,
         so the ROI origin offset must be added to recover absolute coordinates."""
-        from sigima.objects import KindShape
-        from sigima.proc.image.base import compute_geometry_from_obj
-
         obj = self._img()
         obj.roi = sigima.objects.create_image_roi(
             "rectangle", [30.0, 40.0, 20.0, 20.0], inverse=False
@@ -722,7 +718,7 @@ class TestInverseROIBoundingBox:
 
         # Function returns pixel (5, 8) relative to the cropped data.
         # Absolute pixel = (5+30, 8+40) = (35, 48) → same physical coords.
-        def _detect(data):
+        def _detect(_data):
             return np.array([[5.0, 8.0]])
 
         result = compute_geometry_from_obj("pts", KindShape.POINT, obj, _detect)
