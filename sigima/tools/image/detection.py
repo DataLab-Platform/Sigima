@@ -26,7 +26,7 @@ from numpy import ma
 from skimage import exposure, feature, measure, transform
 
 from sigima.enums import ContourShape
-from sigima.tools.checks import check_2d_array
+from sigima.tools.checks import check_2d_array, warn_if_masked
 from sigima.tools.image.preprocessing import (
     distance_matrix,
     fit_circle_model,
@@ -35,9 +35,10 @@ from sigima.tools.image.preprocessing import (
 )
 
 
+@warn_if_masked
 @check_2d_array(non_constant=True)
 def get_2d_peaks_coords(
-    data: np.ndarray, size: int | None = None, level: float = 0.5
+    data: np.ndarray | ma.MaskedArray, size: int | None = None, level: float = 0.5
 ) -> np.ndarray:
     """Detect peaks in image data, return coordinates.
 
@@ -133,9 +134,10 @@ def get_contour_shapes(
     return np.array(coords)
 
 
+@warn_if_masked
 @check_2d_array(non_constant=True)
 def get_hough_circle_peaks(
-    data: np.ndarray,
+    data: np.ndarray | ma.MaskedArray,
     min_radius: float | None = None,
     max_radius: float | None = None,
     nb_radius: int | None = None,
@@ -183,9 +185,10 @@ def __blobs_to_coords(blobs: np.ndarray) -> np.ndarray:
     return coords
 
 
+@warn_if_masked
 @check_2d_array(non_constant=True)
 def find_blobs_dog(
-    data: np.ndarray,
+    data: np.ndarray | ma.MaskedArray,
     min_sigma: float = 1,
     max_sigma: float = 30,
     overlap: float = 0.5,
@@ -225,9 +228,10 @@ def find_blobs_dog(
     return __blobs_to_coords(blobs)
 
 
+@warn_if_masked
 @check_2d_array(non_constant=True)
 def find_blobs_doh(
-    data: np.ndarray,
+    data: np.ndarray | ma.MaskedArray,
     min_sigma: float = 1,
     max_sigma: float = 30,
     overlap: float = 0.5,
@@ -269,9 +273,10 @@ def find_blobs_doh(
     return __blobs_to_coords(blobs)
 
 
+@warn_if_masked
 @check_2d_array(non_constant=True)
 def find_blobs_log(
-    data: np.ndarray,
+    data: np.ndarray | ma.MaskedArray,
     min_sigma: float = 1,
     max_sigma: float = 30,
     overlap: float = 0.5,
@@ -347,9 +352,10 @@ def remove_overlapping_disks(coords: np.ndarray) -> np.ndarray:
 
 
 # pylint: disable=too-many-positional-arguments
+@warn_if_masked
 @check_2d_array(non_constant=True)
 def find_blobs_opencv(
-    data: np.ndarray,
+    data: np.ndarray | ma.MaskedArray,
     min_threshold: float | None = None,
     max_threshold: float | None = None,
     min_repeatability: int | None = None,
