@@ -1,5 +1,11 @@
 # Version 1.1 #
 
+## Sigima Version 1.1.6 ##
+
+### 🛠️ Bug Fixes since version 1.1.5 ###
+
+* **Color image import (JPEG, PNG, BMP, TIFF)**: Fixed pixel values being rescaled to the `[0, 1]` range when opening a color (RGB/RGBA) image, which made the imported data unusable for quantitative analysis. Color images are now converted to grayscale while keeping their original value range (e.g. `0`–`255` for 8-bit images), matching the behavior of tools such as ImageJ. Grayscale images stored as RGB are read back with their exact original values. This closes [Issue #37](https://github.com/DataLab-Platform/Sigima/issues/37).
+
 ## Sigima Version 1.1.5 ##
 
 ### 🛠️ Bug Fixes since version 1.1.4 ###

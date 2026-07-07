@@ -111,7 +111,29 @@ class ClassicsImageFormat(SingleImageFormatBase):
         Returns:
             Image array data
         """
-        return skimage.io.imread(filename, as_gray=True)
+        data = skimage.io.imread(filename)
+        if data.ndim == 3:
+            # Color image (e.g. RGB/RGBA JPEG or PNG): convert to grayscale while
+            # *preserving the original value range*. This is intentionally not
+            # done with skimage's ``as_gray=True`` option, which returns a float
+            # image normalized to [0, 1] (via ``rgb2gray``): that scaling made
+            # the imported values unusable for quantitative analysis (all values
+            # <= 1). The conversion below mirrors ImageJ's default behavior: an
+            # unweighted mean of the color channels, kept in the source integer
+            # range (0-255 for 8-bit, 0-65535 for 16-bit, etc.).
+            nchannels = data.shape[2]
+            if nchannels == 2:
+                # Grayscale + alpha: keep the grayscale channel only
+                data = data[:, :, 0]
+            else:
+                # RGB or RGBA: drop the alpha channel (if any) and average R, G, B
+                rgb = data[:, :, :3]
+                src_dtype = rgb.dtype
+                gray = rgb.mean(axis=2)
+                if np.issubdtype(src_dtype, np.integer):
+                    gray = np.round(gray)
+                data = gray.astype(src_dtype)
+        return data
 
     @staticmethod
     def write_data(filename: str, data: np.ndarray) -> None:
