@@ -65,6 +65,9 @@ class OptionField:
         container: Options container instance to which this option belongs.
         name: Name of the option (used for introspection or errors).
         default: Default value of the option.
+        description: Human-readable description of the option.
+        category: Optional grouping id for the option (e.g. used as an INI
+         section name or a settings-dialog tab by GUI applications).
     """
 
     def __init__(
@@ -73,12 +76,14 @@ class OptionField:
         name: str,
         default: Any,
         description: str = "",
+        category: str = "",
     ) -> None:
         self._container = container
         self.name = name
         self.check(default)  # Validate the default value
         self._value = default
         self.description = description
+        self.category = category
 
     def check(self, value: Any) -> None:  # pylint: disable=unused-argument
         """Check if the value is valid for this option.
@@ -157,9 +162,10 @@ class TypedOptionField(OptionField):
         default: Any,
         expected_type: type,
         description: str = "",
+        category: str = "",
     ) -> None:
         self.expected_type = expected_type
-        super().__init__(container, name, default, description)
+        super().__init__(container, name, default, description, category)
 
     def check(self, value: Any) -> None:
         """Check if the value is of the expected type.
