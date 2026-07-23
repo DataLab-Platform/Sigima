@@ -139,6 +139,10 @@ def test_peak_detection_rois_merged_with_existing():
         "Detected ROIs must be appended to existing ROIs"
     )
 
+    roi_count = len(obj.roi)
+    assert not sigima.proc.image.apply_detection_rois(obj, geometry)
+    assert len(obj.roi) == roi_count
+
 
 @pytest.mark.gui
 def test_peak2d_interactive():

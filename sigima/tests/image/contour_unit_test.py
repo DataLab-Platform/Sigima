@@ -4,9 +4,10 @@
 Contour finding test
 """
 
+from __future__ import annotations
+
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
 # pylint: disable=duplicate-code
-
 import sys
 import time
 
@@ -162,6 +163,9 @@ def test_contour_roi_polygon() -> None:
     assert image.roi is not None
     for roi in image.roi.single_rois:
         assert isinstance(roi, PolygonalROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
     execenv.print(f"Polygon ROIs created: {len(image.roi.single_rois)}")
 
 
@@ -179,6 +183,9 @@ def test_contour_roi_ellipse() -> None:
     # Ellipses are approximated as polygon ROIs
     for roi in image.roi.single_rois:
         assert isinstance(roi, PolygonalROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
     execenv.print(f"Polygon ROIs from ellipses: {len(image.roi.single_rois)}")
 
 
@@ -195,6 +202,9 @@ def test_contour_roi_circle() -> None:
     assert image.roi is not None
     for roi in image.roi.single_rois:
         assert isinstance(roi, CircularROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
     execenv.print(f"Circle ROIs created: {len(image.roi.single_rois)}")
 
 

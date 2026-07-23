@@ -283,6 +283,10 @@ class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
         super().__init__(coords, indices, title)
         self.inverse = inverse
 
+    def __eq__(self, other: base.BaseSingleROI | None) -> bool:
+        """Test equality with another single image ROI."""
+        return super().__eq__(other) and self.inverse == other.inverse
+
     def to_dict(self) -> dict:
         """Convert ROI to dictionary
 
