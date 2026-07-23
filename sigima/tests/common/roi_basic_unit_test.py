@@ -67,7 +67,29 @@ def test_image_roi_modification() -> None:
     assert len(obj.roi.single_rois) == nb_single_rois
 
 
+def test_object_add_roi() -> None:
+    """Test BaseObj.add_roi (non-destructive merge of ROIs into an object)"""
+    obj = create_multigaussian_image()
+
+    # Case 1: object has no ROI yet -> the ROI is simply assigned
+    assert obj.roi is None
+    roi1 = sigima.objects.create_image_roi("rectangle", [10, 10, 50, 50])
+    obj.add_roi(roi1)
+    assert obj.roi is not None
+    assert len(obj.roi.single_rois) == 1
+
+    # Case 2: adding a different ROI appends it, preserving the existing one
+    roi2 = sigima.objects.create_image_roi("circle", [80, 80, 20])
+    obj.add_roi(roi2)
+    assert len(obj.roi.single_rois) == 2
+
+    # Case 3: adding an identical single ROI is ignored (deduplicated)
+    obj.add_roi(sigima.objects.create_image_roi("circle", [80, 80, 20]))
+    assert len(obj.roi.single_rois) == 2
+
+
 if __name__ == "__main__":
     test_signal_roi_creation()
     test_image_roi_creation()
     test_image_roi_modification()
+    test_object_add_roi()

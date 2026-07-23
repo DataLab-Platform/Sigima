@@ -181,7 +181,7 @@ def apply_detection_rois(
     coords = geometry.centers()
 
     try:
-        obj.roi = create_image_roi_around_points(coords, roi_geometry=roi_geometry)
+        obj.add_roi(create_image_roi_around_points(coords, roi_geometry=roi_geometry))
         return True
     except ValueError:
         return False
@@ -254,7 +254,7 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
                 polygon_coords.append(valid.tolist())
         if not polygon_coords:
             return False
-        obj.roi = create_image_roi("polygon", polygon_coords)
+        obj.add_roi(create_image_roi("polygon", polygon_coords))
         return True
 
     if kind == KindShape.ELLIPSE:
@@ -266,7 +266,7 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
             polygon_coords.append(poly.tolist())
         if not polygon_coords:
             return False
-        obj.roi = create_image_roi("polygon", polygon_coords)
+        obj.add_roi(create_image_roi("polygon", polygon_coords))
         return True
 
     if kind == KindShape.CIRCLE:
@@ -274,7 +274,7 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
         circle_coords = coords.tolist()
         if not circle_coords:
             return False
-        obj.roi = create_image_roi("circle", circle_coords)
+        obj.add_roi(create_image_roi("circle", circle_coords))
         return True
 
     return False

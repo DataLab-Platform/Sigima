@@ -384,6 +384,22 @@ class BaseObj(Generic[TypeROI], metaclass=BaseObjMeta):
             self.metadata[ROI_KEY] = roi.to_dict()
         self.__roi_changed = True
 
+    def add_roi(self, roi: TypeROI) -> None:
+        """Add regions of interest, preserving any existing ones.
+
+        The provided ROI object is merged into the object's current ROI: existing
+        single ROIs are kept and the new ones are appended. Duplicate single ROIs
+        are ignored (see :meth:`sigima.objects.base.BaseROI.combine_with`). If the
+        object has no ROI yet, the given ROI is simply assigned.
+
+        Args:
+            roi: regions of interest object to merge into this object
+        """
+        if self.roi is None or self.roi.is_empty():
+            self.roi = roi
+        else:
+            self.roi = self.roi.combine_with(roi)
+
     @property
     def maskdata(self) -> np.ndarray | None:
         """Return masked data (areas outside defined regions of interest)
