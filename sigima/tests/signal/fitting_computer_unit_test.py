@@ -189,6 +189,61 @@ def test_multi_lorentzian_evaluate_one_peak() -> None:
     assert out.shape == x.shape
 
 
+@pytest.mark.parametrize(
+    ("fit_type", "computer"),
+    [
+        ("multigaussian", fit_mod.MultiGaussianFitComputer),
+        ("multilorentzian", fit_mod.MultiLorentzianFitComputer),
+    ],
+)
+def test_multi_peak_fit_params_reproduce_model_on_arbitrary_axis(
+    fit_type, computer
+) -> None:
+    """Canonical multi-peak metadata includes centers and reproduces the model."""
+    values = {
+        "amplitude_1": 2.0,
+        "sigma_1": 0.6,
+        "x0_1": -1.5,
+        "amplitude_2": -0.75,
+        "sigma_2": 0.9,
+        "x0_2": 1.25,
+        "y0": 0.2,
+    }
+    params = fit_mod.create_fit_params(
+        fit_type, values, residual_rms=0.01, interactive=True
+    )
+
+    assert params["fit_params_version"] == fit_mod.FIT_PARAMS_VERSION
+    assert params["peak_parameterization"] == fit_mod.PEAK_PARAMETERIZATION
+    assert params["interactive"] is True
+    assert params["x0_1"] == values["x0_1"]
+    assert params["x0_2"] == values["x0_2"]
+    for x in (np.linspace(-5.0, 5.0, 201), np.linspace(-8.0, 8.0, 321)):
+        np.testing.assert_allclose(
+            fit_mod.evaluate_fit(x, **params), computer.evaluate(x, **values)
+        )
+
+
+def test_multi_peak_fit_schema_rejects_missing_center() -> None:
+    """Every multi-peak component requires its detected center coordinate."""
+    params = fit_mod.create_fit_params(
+        "multigaussian",
+        {
+            "amplitude_1": 2.0,
+            "sigma_1": 0.6,
+            "x0_1": -1.5,
+            "amplitude_2": 0.75,
+            "sigma_2": 0.9,
+            "x0_2": 1.25,
+            "y0": 0.2,
+        },
+    )
+    params.pop("x0_2")
+
+    with pytest.raises(ValueError, match="x0_2"):
+        fit_mod.validate_fit_params(params)
+
+
 # ===========================================================================
 # Module-level helpers: evaluate_fit, infer_param_names
 # ===========================================================================
