@@ -6,14 +6,36 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-07-25 11:32+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
 
 msgid "Version 1.1"
 msgstr "Version 1.1"
+
+msgid "Sigima Version 1.1.6"
+msgstr "Sigima Version 1.1.6"
+
+msgid "🛠️ Bug Fixes since version 1.1.5"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.5"
+
+msgid "**Gaussian, Lorentzian and Voigt peak amplitude**: Corrected the `amplitude` parameter so it consistently represents signed peak height above the baseline, in the same Y units as the signal, instead of an integrated area whose scale changed with peak width. Fit and signal-creation parameters now carry explicit schema and parameterization markers; historical unversioned area-based parameters are rejected until explicitly converted, preventing silent reinterpretation while preserving the generated or fitted X/Y data."
+msgstr "**Amplitude des pics gaussiens, lorentziens et de Voigt** : Correction du paramètre `amplitude` afin qu'il représente systématiquement la hauteur signée du pic au-dessus de la ligne de base, dans les mêmes unités Y que le signal, au lieu d'une aire intégrée dont l'échelle variait avec la largeur du pic. Les paramètres d'ajustement et de création de signal comportent désormais des marqueurs explicites de schéma et de paramétrisation ; les paramètres historiques non versionnés fondés sur l'aire sont rejetés jusqu'à leur conversion explicite, ce qui évite toute réinterprétation silencieuse tout en préservant les données X/Y générées ou ajustées."
+
+msgid "**Multi-peak fit metadata**: Multi-Gaussian and multi-Lorentzian results now persist each detected `x0_i` center alongside the corresponding `amplitude_i` and `sigma_i`, allowing the complete versioned model to be exported and evaluated on any X axis."
+msgstr "**Métadonnées d'ajustement multi-pic** : Les résultats multi-gaussiens et multi-lorentziens conservent désormais chaque centre `x0_i` détecté avec les paramètres `amplitude_i` et `sigma_i` correspondants, ce qui permet d'exporter le modèle versionné complet et de l'évaluer sur n'importe quel axe X."
+
+msgid "**Color image import (JPEG, PNG, BMP, TIFF)**: Fixed pixel values being rescaled to the `[0, 1]` range when opening a color (RGB/RGBA) image, which made the imported data unusable for quantitative analysis. Color images are now converted to grayscale while keeping their original value range (e.g. `0`–`255` for 8-bit images), matching the behavior of tools such as ImageJ. Grayscale images stored as RGB are read back with their exact original values. This closes [Issue #37](https://github.com/DataLab-Platform/Sigima/issues/37)."
+msgstr "**Importation d'images couleur (JPEG, PNG, BMP, TIFF)** : Correction de la remise à l'échelle des valeurs de pixels dans la plage `[0, 1]` lors de l'ouverture d'une image couleur (RVB/RVBA), ce qui rendait les données importées inutilisables pour l'analyse quantitative. Les images couleur sont désormais converties en niveaux de gris tout en conservant leur plage de valeurs d'origine (par ex. `0`–`255` pour les images 8 bits), conformément au comportement d'outils tels qu'ImageJ. Les images en niveaux de gris stockées en RVB sont relues avec leurs valeurs d'origine exactes. Cela clôt [Issue #37](https://github.com/DataLab-Platform/Sigima/issues/37)."
 
 msgid "Sigima Version 1.1.5"
 msgstr "Sigima Version 1.1.5 (23/06/2026)"
