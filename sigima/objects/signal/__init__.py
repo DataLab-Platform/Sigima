@@ -20,7 +20,9 @@ will continue to work.
 # Import all public classes and functions from submodules
 from .creation import (
     # Constants
+    CREATION_PARAMS_VERSION,
     DEFAULT_TITLE,
+    PEAK_PARAMETERIZATION,
     # Mathematical function parameter classes
     BaseGaussLorentzVoigtParam,
     BasePeriodicParam,
@@ -61,6 +63,7 @@ from .creation import (
     # Distribution parameter classes
     ZeroParam,
     check_all_signal_parameters_classes,
+    convert_legacy_peak_creation_params,
     # Core creation functions
     create_signal,
     create_signal_from_param,
@@ -70,6 +73,7 @@ from .creation import (
     # Registration functions
     register_signal_parameters_class,
     triangle_func,
+    validate_peak_creation_params,
 )
 from .object import (
     # Main signal class
@@ -86,7 +90,9 @@ from .roi import (
 
 # Define __all__ for explicit public API
 __all__ = [
+    "CREATION_PARAMS_VERSION",
     "DEFAULT_TITLE",
+    "PEAK_PARAMETERIZATION",
     "BaseGaussLorentzVoigtParam",
     "BasePeriodicParam",
     "BasePulseParam",
@@ -123,6 +129,7 @@ __all__ = [
     "VoigtParam",
     "ZeroParam",
     "check_all_signal_parameters_classes",
+    "convert_legacy_peak_creation_params",
     "create_signal",
     "create_signal_from_param",
     "create_signal_parameters",
@@ -130,4 +137,5 @@ __all__ = [
     "get_next_signal_number",
     "register_signal_parameters_class",
     "triangle_func",
+    "validate_peak_creation_params",
 ]

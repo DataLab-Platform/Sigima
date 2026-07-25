@@ -91,7 +91,9 @@ def test_signal_peak_detection() -> None:
         assert np.all(dst_minimal.x <= simple_signal.x.max())
 
     # Test 4: Single peak signal
-    param_single = GaussParam.create(size=200, xmin=-5, xmax=5, a=1, sigma=1, mu=0)
+    param_single = GaussParam.create(
+        size=200, xmin=-5, xmax=5, amplitude=1, sigma=1, mu=0
+    )
     single_peak_signal = create_signal_from_param(param_single)
 
     param = sigima.params.PeakDetectionParam.create(threshold=30, min_dist=10)
