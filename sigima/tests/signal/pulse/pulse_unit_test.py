@@ -166,7 +166,7 @@ def create_test_gaussian_params() -> GaussParam:
     params.xmin = -10.0
     params.xmax = 10.0
     params.size = 1000
-    params.a = 5.0
+    params.amplitude = 5.0
     params.y0 = 0.0
     params.sigma = 2.0
     params.mu = 0.0
@@ -247,7 +247,7 @@ def _test_shape_recognition_case(
     else:  # gaussian
         gaussian_params = create_test_gaussian_params()
         gaussian_params.y0 = y_initial
-        gaussian_params.a = y_final_or_high - y_initial
+        gaussian_params.amplitude = y_final_or_high - y_initial
         x, y_noisy = gaussian_params.generate_1d_data()
 
     # Create title
@@ -373,7 +373,7 @@ def _test_polarity_detection_case(
     else:  # gaussian
         gaussian_params = create_test_gaussian_params()
         gaussian_params.y0 = y_initial
-        gaussian_params.a = y_final_or_high - y_initial
+        gaussian_params.amplitude = y_final_or_high - y_initial
         x, y_noisy = gaussian_params.generate_1d_data()
 
     # Create title
@@ -502,7 +502,7 @@ def _test_amplitude_case(
     else:  # gaussian
         gaussian_params = create_test_gaussian_params()
         gaussian_params.y0 = y_initial
-        gaussian_params.a = y_final_or_high - y_initial
+        gaussian_params.amplitude = y_final_or_high - y_initial
         x, y_noisy = gaussian_params.generate_1d_data()
         expected_features = gaussian_params.get_expected_features()
         expected_amp = expected_features.amplitude
@@ -690,7 +690,7 @@ def _test_crossing_ratio_time_case(
     else:  # gaussian
         gaussian_params = create_test_gaussian_params()
         gaussian_params.y0 = y_initial
-        gaussian_params.a = y_final_or_high - y_initial
+        gaussian_params.amplitude = y_final_or_high - y_initial
         x, y_noisy = gaussian_params.generate_1d_data()
         # Calculate crossing time for the specific ratio
         expected_ct = gaussian_params.get_crossing_time("rise", ratio)
@@ -802,7 +802,7 @@ def _test_rise_time_case(
     else:  # gaussian
         gaussian_params = create_test_gaussian_params()
         gaussian_params.y0 = y_initial
-        gaussian_params.a = y_final_or_high - y_initial
+        gaussian_params.amplitude = y_final_or_high - y_initial
         x, y_noisy = gaussian_params.generate_1d_data()
         expected_features = gaussian_params.get_expected_features(
             start_ratio, stop_ratio
@@ -1031,7 +1031,7 @@ def _test_fall_time_case(
     else:  # gaussian
         gaussian_params = create_test_gaussian_params()
         gaussian_params.y0 = y_initial
-        gaussian_params.a = y_final_or_high - y_initial
+        gaussian_params.amplitude = y_final_or_high - y_initial
         x, y_noisy = gaussian_params.generate_1d_data()
         expected_features = gaussian_params.get_expected_features(
             start_ratio, stop_ratio

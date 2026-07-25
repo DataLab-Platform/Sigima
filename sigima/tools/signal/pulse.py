@@ -22,106 +22,186 @@ from sigima.enums import SignalShape
 from sigima.tools.checks import check_1d_arrays
 from sigima.tools.signal import features, filtering, peakdetection
 
+PEAK_PARAMETERIZATION = "height"
+
+
+class LegacyPeakParameterizationError(ValueError):
+    """Raised when the historical area-based peak API is used."""
+
 
 class PulseFitModel(abc.ABC):
     """Base class for 1D pulse fit models"""
 
     @classmethod
     @abc.abstractmethod
-    def func(cls, x, amp, sigma, x0, y0):
-        """Return fitting function"""
-
-    # pylint: disable=unused-argument
-    @classmethod
-    def get_amp_from_amplitude(cls, amplitude, sigma):
-        """Return amp from function amplitude and sigma"""
-        return amplitude
-
-    @classmethod
-    def amplitude(cls, amp, sigma):
-        """Return function amplitude"""
-        return cls.func(0, amp, sigma, 0, 0)
+    def evaluate(cls, x, amplitude, sigma, x0, y0):
+        """Evaluate the peak model parameterized by its signed height."""
 
     @classmethod
     @abc.abstractmethod
-    def fwhm(cls, amp, sigma):
-        """Return function FWHM"""
+    def area_from_amplitude(cls, amplitude, sigma):
+        """Return the integrated area corresponding to a peak height."""
 
     @classmethod
-    def half_max_segment(cls, amp, sigma, x0, y0):
+    @abc.abstractmethod
+    def amplitude_from_area(cls, area, sigma):
+        """Return the peak height corresponding to an integrated area."""
+
+    @classmethod
+    @abc.abstractmethod
+    def fwhm(cls, sigma):
+        """Return function FWHM"""
+
+    @staticmethod
+    def _validate_relative_level(sigma: float, ratio: float) -> None:
+        """Validate inputs used to locate a relative peak level."""
+        if sigma <= 0:
+            raise ValueError("Sigma must be positive")
+        if not 0.0 < ratio < 1.0:
+            raise ValueError("Ratio must be between 0 and 1")
+
+    @classmethod
+    @abc.abstractmethod
+    def relative_level_offset(cls, sigma: float, ratio: float) -> float:
+        """Return the positive center offset at a relative peak level."""
+
+    @classmethod
+    def half_max_segment(cls, amplitude, sigma, x0, y0):
         """Return segment coordinates for y=half-maximum intersection"""
-        hwhm = 0.5 * cls.fwhm(amp, sigma)
-        yhm = 0.5 * cls.amplitude(amp, sigma) + y0
+        hwhm = 0.5 * cls.fwhm(sigma)
+        yhm = 0.5 * amplitude + y0
         return x0 - hwhm, yhm, x0 + hwhm, yhm
+
+    @classmethod
+    def func(cls, *args, **kwargs):
+        """Reject the historical area-based evaluation API."""
+        raise LegacyPeakParameterizationError(
+            "PeakModel.func() used the ambiguous area-based 'amp' parameter. "
+            "Use evaluate(..., amplitude, ...) with a peak height, or convert "
+            "the old value with amplitude_from_area(area, sigma)."
+        )
+
+    @classmethod
+    def get_amp_from_amplitude(cls, *args, **kwargs):
+        """Reject the historical ambiguous area conversion helper."""
+        raise LegacyPeakParameterizationError(
+            "get_amp_from_amplitude() returned an integrated area. "
+            "Use area_from_amplitude(amplitude, sigma)."
+        )
+
+    @classmethod
+    def amplitude(cls, *args, **kwargs):
+        """Reject the historical ambiguous height conversion helper."""
+        raise LegacyPeakParameterizationError(
+            "amplitude(amp, sigma) interpreted 'amp' as an integrated area. "
+            "Use amplitude_from_area(area, sigma)."
+        )
 
 
 class GaussianModel(PulseFitModel):
     """1-dimensional Gaussian fit model"""
 
     @classmethod
-    def func(cls, x, amp, sigma, x0, y0):
-        """Return fitting function"""
-        return (
-            amp / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x - x0) / sigma) ** 2)
-            + y0
-        )
+    def evaluate(cls, x, amplitude, sigma, x0, y0):
+        """Evaluate a Gaussian with signed peak height ``amplitude``."""
+        return amplitude * np.exp(-0.5 * ((x - x0) / sigma) ** 2) + y0
 
     @classmethod
-    def get_amp_from_amplitude(cls, amplitude, sigma):
-        """Return amp from function amplitude and sigma"""
+    def area_from_amplitude(cls, amplitude, sigma):
+        """Return the Gaussian area for a peak height and standard deviation."""
         return amplitude * (sigma * np.sqrt(2 * np.pi))
 
     @classmethod
-    def amplitude(cls, amp, sigma):
-        """Return function amplitude"""
-        return amp / (sigma * np.sqrt(2 * np.pi))
+    def amplitude_from_area(cls, area, sigma):
+        """Return the Gaussian peak height for an integrated area."""
+        return area / (sigma * np.sqrt(2 * np.pi))
 
     @classmethod
-    def fwhm(cls, amp, sigma):
+    def fwhm(cls, sigma):
         """Return function FWHM"""
         return 2 * sigma * np.sqrt(2 * np.log(2))
+
+    @classmethod
+    def relative_level_offset(cls, sigma: float, ratio: float) -> float:
+        """Return the positive center offset at a relative peak level."""
+        cls._validate_relative_level(sigma, ratio)
+        return sigma * np.sqrt(-2 * np.log(ratio))
 
 
 class LorentzianModel(PulseFitModel):
     """1-dimensional Lorentzian fit model"""
 
     @classmethod
-    def func(cls, x, amp, sigma, x0, y0):
-        """Return fitting function"""
-        return (amp / (sigma * np.pi)) / (1 + ((x - x0) / sigma) ** 2) + y0
+    def evaluate(cls, x, amplitude, sigma, x0, y0):
+        """Evaluate a Lorentzian with signed peak height ``amplitude``."""
+        return amplitude / (1 + ((x - x0) / sigma) ** 2) + y0
 
     @classmethod
-    def get_amp_from_amplitude(cls, amplitude, sigma):
-        """Return amp from function amplitude and sigma"""
+    def area_from_amplitude(cls, amplitude, sigma):
+        """Return the Lorentzian area for a peak height and scale."""
         return amplitude * (sigma * np.pi)
 
     @classmethod
-    def amplitude(cls, amp, sigma):
-        """Return function amplitude"""
-        return amp / (sigma * np.pi)
+    def amplitude_from_area(cls, area, sigma):
+        """Return the Lorentzian peak height for an integrated area."""
+        return area / (sigma * np.pi)
 
     @classmethod
-    def fwhm(cls, amp, sigma):
+    def fwhm(cls, sigma):
         """Return function FWHM"""
         return 2 * sigma
+
+    @classmethod
+    def relative_level_offset(cls, sigma: float, ratio: float) -> float:
+        """Return the positive center offset at a relative peak level."""
+        cls._validate_relative_level(sigma, ratio)
+        return sigma * np.sqrt(1.0 / ratio - 1.0)
 
 
 class VoigtModel(PulseFitModel):
     """1-dimensional Voigt fit model"""
 
     @classmethod
-    def func(cls, x, amp, sigma, x0, y0):
-        """Return fitting function"""
+    def evaluate(cls, x, amplitude, sigma, x0, y0):
+        """Evaluate an equal-width Voigt with signed peak height ``amplitude``."""
         # pylint: disable=no-member
         z = (x - x0 + 1j * sigma) / (sigma * np.sqrt(2.0))
-        return y0 + amp * scipy.special.wofz(z).real / (sigma * np.sqrt(2 * np.pi))
+        center = scipy.special.wofz(1j / np.sqrt(2.0)).real
+        return y0 + amplitude * scipy.special.wofz(z).real / center
 
     @classmethod
-    def fwhm(cls, amp, sigma):
-        """Return function FWHM"""
-        wg = GaussianModel.fwhm(amp, sigma)
-        wl = LorentzianModel.fwhm(amp, sigma)
-        return 0.5346 * wl + np.sqrt(0.2166 * wl**2 + wg**2)
+    def area_from_amplitude(cls, amplitude, sigma):
+        """Return the equal-width Voigt area for a peak height and scale."""
+        center = scipy.special.wofz(1j / np.sqrt(2.0)).real
+        return amplitude * sigma * np.sqrt(2 * np.pi) / center
+
+    @classmethod
+    def amplitude_from_area(cls, area, sigma):
+        """Return the equal-width Voigt peak height for an integrated area."""
+        center = scipy.special.wofz(1j / np.sqrt(2.0)).real
+        return area * center / (sigma * np.sqrt(2 * np.pi))
+
+    @classmethod
+    def fwhm(cls, sigma):
+        """Return the exact full width at half maximum."""
+        return 2.0 * cls.relative_level_offset(sigma, 0.5)
+
+    @classmethod
+    def relative_level_offset(cls, sigma: float, ratio: float) -> float:
+        """Return the positive center offset at a relative peak level."""
+        cls._validate_relative_level(sigma, ratio)
+
+        def difference(scaled_offset: float) -> float:
+            value = cls.evaluate(np.array([scaled_offset]), 1.0, 1.0, 0.0, 0.0)[0]
+            return float(value) - ratio
+
+        upper = 1.0
+        for _index in range(64):
+            if difference(upper) <= 0.0:
+                root = scipy.optimize.brentq(difference, 0.0, upper)
+                return sigma * root
+            upper *= 2.0
+        raise RuntimeError("Unable to bracket the requested Voigt relative level")
 
 
 # MARK: Pulse analysis -----------------------------------------------------------------
@@ -1423,13 +1503,13 @@ def fwhm(
     def func(params) -> np.ndarray:
         """Fitting model function"""
         # pylint: disable=cell-var-from-loop
-        return y - fit_model_class.func(x, *params)
+        return y - fit_model_class.evaluate(x, *params)
 
-    amp = fit_model_class.get_amp_from_amplitude(dy, sigma)
-    (amp, sigma, mu, base), _ier = scipy.optimize.leastsq(
-        func, np.array([amp, sigma, mu, base])
+    amplitude = dy
+    (amplitude, sigma, mu, base), _ier = scipy.optimize.leastsq(
+        func, np.array([amplitude, sigma, mu, base])
     )
-    return fit_model_class.half_max_segment(amp, sigma, mu, base)
+    return fit_model_class.half_max_segment(amplitude, sigma, mu, base)
 
 
 @check_1d_arrays(x_sorted=True)
@@ -1445,18 +1525,17 @@ def fw1e2(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
     """
     dx, dy, base = np.max(x) - np.min(x), np.max(y) - np.min(y), np.min(y)
     sigma, mu = dx * 0.1, peakdetection.xpeak(x, y)
-    amp = GaussianModel.get_amp_from_amplitude(dy, sigma)
-    p_in = np.array([amp, sigma, mu, base])
+    p_in = np.array([dy, sigma, mu, base])
 
     def func(params):
         """Fitting model function"""
         # pylint: disable=cell-var-from-loop
-        return y - GaussianModel.func(x, *params)
+        return y - GaussianModel.evaluate(x, *params)
 
     p_out, _ier = scipy.optimize.leastsq(func, p_in)
-    amp, sigma, mu, base = p_out
+    amplitude, sigma, mu, base = p_out
     hw = 2 * sigma
-    yhm = GaussianModel.amplitude(amp, sigma) / np.e**2 + base
+    yhm = amplitude / np.e**2 + base
     return mu - hw, yhm, mu + hw, yhm
 
 

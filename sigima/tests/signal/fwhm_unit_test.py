@@ -95,7 +95,7 @@ def test_signal_fwhm() -> None:
         gauss_param.xmax = 10.0
         gauss_param.sigma = sigma
         gauss_param.mu = 0.0
-        gauss_param.a = 1.0
+        gauss_param.amplitude = 1.0
         gauss_param.y0 = 0.0
 
         sig = sigima.objects.create_signal_from_param(gauss_param)

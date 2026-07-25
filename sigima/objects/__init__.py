@@ -113,7 +113,9 @@ Images
 """
 
 __all__ = [
+    "CREATION_PARAMS_VERSION",
     "NO_ROI",
+    "PEAK_PARAMETERIZATION",
     "Checkerboard2DParam",
     "CircularROI",
     "CosineParam",
@@ -178,6 +180,7 @@ __all__ = [
     "calc_table_from_data",
     "concat_geometries",
     "concat_tables",
+    "convert_legacy_peak_creation_params",
     "create_image",
     "create_image_from_param",
     "create_image_parameters",
@@ -189,6 +192,7 @@ __all__ = [
     "create_signal_roi",
     "filter_geometry_by_roi",
     "filter_table_by_roi",
+    "validate_peak_creation_params",
 ]
 
 from sigima.objects.base import (
@@ -241,6 +245,8 @@ from sigima.objects.scalar import (
     filter_table_by_roi,
 )
 from sigima.objects.signal import (
+    CREATION_PARAMS_VERSION,
+    PEAK_PARAMETERIZATION,
     CosineParam,
     CustomSignalParam,
     ExponentialParam,
@@ -270,8 +276,10 @@ from sigima.objects.signal import (
     UniformDistribution1DParam,
     VoigtParam,
     ZeroParam,
+    convert_legacy_peak_creation_params,
     create_signal,
     create_signal_from_param,
     create_signal_parameters,
     create_signal_roi,
+    validate_peak_creation_params,
 )

@@ -148,23 +148,23 @@ def test_planckian_evaluate_with_negative_x_returns_baseline() -> None:
 # ===========================================================================
 
 
-def test_multi_peak_infer_param_names_no_amp_raises() -> None:
+def test_multi_peak_infer_param_names_no_amplitude_raises() -> None:
     """Multi-peak ``infer_param_names_from_kwargs`` requires at least one
-    ``amp_*`` key (peak amplitude); a kwargs dict without any is rejected."""
+    ``amplitude_*`` key; a kwargs dict without any is rejected."""
     with pytest.raises(ValueError):
         fit_mod.MultiGaussianFitComputer.infer_param_names_from_kwargs({"y0": 0.0})
 
 
 def test_multi_gaussian_evaluate_two_peaks() -> None:
     """``MultiGaussianFitComputer.evaluate`` produces a sum of Gaussians,
-    each with its own ``amp_i``/``sigma_i``/``x0_i``, plus a baseline."""
+    each with its own height, width and center, plus a baseline."""
     x = np.linspace(-5.0, 5.0, 300)
     out = fit_mod.MultiGaussianFitComputer.evaluate(
         x,
-        amp_1=1.0,
+        amplitude_1=1.0,
         sigma_1=0.5,
         x0_1=-2.0,
-        amp_2=0.5,
+        amplitude_2=0.5,
         sigma_2=0.7,
         x0_2=2.0,
         y0=0.1,
@@ -181,7 +181,7 @@ def test_multi_lorentzian_evaluate_one_peak() -> None:
     x = np.linspace(-5.0, 5.0, 200)
     out = fit_mod.MultiLorentzianFitComputer.evaluate(
         x,
-        amp_1=1.0,
+        amplitude_1=1.0,
         sigma_1=0.5,
         x0_1=0.0,
         y0=0.0,
@@ -199,6 +199,69 @@ def test_fitting_evaluate_fit_unknown_type_raises() -> None:
     ``fit_type`` values rather than silently returning zeros."""
     with pytest.raises(ValueError):
         fit_mod.evaluate_fit(np.linspace(0, 1, 10), fit_type="not_a_real_fit")
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"fit_params_version": None},
+        {"fit_params_version": fit_mod.FIT_PARAMS_VERSION + 1},
+        {"peak_parameterization": "area"},
+        {"amp": 1.0},
+        {"amplitude": True},
+        {"sigma": np.nan},
+    ],
+)
+def test_peak_fit_schema_rejects_incoherent_metadata(updates: dict) -> None:
+    """Peak fit evaluation rejects absent, future or contradictory schemas."""
+    params = fit_mod.create_fit_params(
+        "gaussian",
+        {"amplitude": 1.0, "sigma": 0.5, "x0": 0.0, "y0": 0.1},
+    )
+    params.update(updates)
+    with pytest.raises(ValueError):
+        fit_mod.evaluate_fit(np.linspace(-1.0, 1.0, 10), **params)
+
+
+def test_unversioned_legacy_peak_fit_schema_has_dedicated_error() -> None:
+    """An unversioned area key is identified as historical, not malformed v2."""
+    params = {"fit_type": "gaussian", "amp": 1.0, "sigma": 0.5, "x0": 0.0, "y0": 0.1}
+    with pytest.raises(fit_mod.pulse.LegacyPeakParameterizationError):
+        fit_mod.evaluate_fit(np.linspace(-1.0, 1.0, 10), **params)
+
+
+def test_multi_peak_fit_schema_rejects_non_contiguous_indices() -> None:
+    """Multi-peak parameter indices must form a contiguous sequence from one."""
+    params = {
+        "fit_type": "multigaussian",
+        "fit_params_version": fit_mod.FIT_PARAMS_VERSION,
+        "peak_parameterization": fit_mod.PEAK_PARAMETERIZATION,
+        "amplitude_1": 1.0,
+        "sigma_1": 0.5,
+        "x0_1": -1.0,
+        "amplitude_3": 0.5,
+        "sigma_3": 0.7,
+        "x0_3": 1.0,
+        "y0": 0.1,
+    }
+    with pytest.raises(ValueError, match="missing=.*amplitude_2"):
+        fit_mod.evaluate_fit(np.linspace(-2.0, 2.0, 20), **params)
+
+
+@pytest.mark.parametrize(
+    ("values", "metadata"),
+    [
+        ({"amplitude": True, "sigma": 0.5, "x0": 0.0, "y0": 0.0}, {}),
+        (
+            {"amplitude": 1.0, "sigma": 0.5, "x0": 0.0, "y0": 0.0},
+            {"residual_rms": np.nan},
+        ),
+    ],
+)
+def test_create_fit_params_rejects_invalid_numbers(values, metadata) -> None:
+    """The canonical builder validates values before float coercion."""
+    with pytest.raises(ValueError):
+        fit_mod.create_fit_params("gaussian", values, **metadata)
 
 
 def test_fitting_infer_param_names_from_kwargs_default() -> None:
