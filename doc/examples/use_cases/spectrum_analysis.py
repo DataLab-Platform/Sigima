@@ -217,7 +217,7 @@ peaks_roi_bounds = np.zeros((num_peaks, 2))
 
 for i in range(num_peaks):
     # Extract parameters for each Gaussian (amplitude, center, sigma)
-    amplitude = params[f"amp_{i + 1}"]
+    amplitude = params[f"amplitude_{i + 1}"]
     center = params[f"x0_{i + 1}"]
     sigma = params[f"sigma_{i + 1}"]
     peak_params.append([amplitude, center, sigma])
