@@ -142,6 +142,63 @@ msgstr "Chaque signal devient une colonne"
 msgid "Rectangle"
 msgstr "Rectangle"
 
+msgid "Do nothing"
+msgstr "Ne rien faire"
+
+msgid "Replace with zero"
+msgstr "Remplacer par zéro"
+
+msgid "Replace with constant"
+msgstr "Remplacer par une constante"
+
+msgid "Replace with minimum"
+msgstr "Remplacer par le minimum"
+
+msgid "Replace with maximum"
+msgstr "Remplacer par le maximum"
+
+msgid "Replace with mean"
+msgstr "Remplacer par la moyenne"
+
+msgid "Replace with median"
+msgstr "Remplacer par la médiane"
+
+msgid "Delete points"
+msgstr "Supprimer les points"
+
+msgid "Forward fill (previous value)"
+msgstr "Propagation avant (valeur précédente)"
+
+msgid "Backward fill (next value)"
+msgstr "Propagation arrière (valeur suivante)"
+
+msgid "Interpolation: Linear"
+msgstr "Interpolation : linéaire"
+
+msgid "Interpolation: Spline"
+msgstr "Interpolation : spline"
+
+msgid "Interpolation: Quadratic"
+msgstr "Interpolation : quadratique"
+
+msgid "Interpolation: Cubic"
+msgstr "Interpolation : cubique"
+
+msgid "Interpolation: PCHIP"
+msgstr "Interpolation : PCHIP"
+
+msgid "N-neighbor minimum"
+msgstr "Minimum des N voisins"
+
+msgid "N-neighbor maximum"
+msgstr "Maximum des N voisins"
+
+msgid "N-neighbor mean"
+msgstr "Moyenne des N voisins"
+
+msgid "N-neighbor median"
+msgstr "Médiane des N voisins"
+
 msgid "All supported files"
 msgstr "Tous les fichiers pris en charge"
 
@@ -408,14 +465,14 @@ msgstr "Métadonnées"
 msgid "Annotations"
 msgstr "Annotations"
 
+msgid "Uniform coordinates"
+msgstr "Coordonnées uniformes"
+
 msgid "Origin"
 msgstr "Origine"
 
 msgid "Pixel spacing"
 msgstr "Taille des pixels"
-
-msgid "Uniform coordinates"
-msgstr "Coordonnées uniformes"
 
 msgid "Extent"
 msgstr "Bornes"
@@ -757,11 +814,38 @@ msgstr "Méthode de normalisation"
 msgid "Method used for normalization"
 msgstr "Méthode utilisée pour la normalisation"
 
-msgid "rows"
-msgstr "lignes"
+msgid "Number of neighboring points used when a neighbor-based strategy is selected"
+msgstr "Nombre de points voisins utilisés lorsqu'une stratégie fondée sur le voisinage est sélectionnée"
+
+msgid "Value used when a 'Replace with constant' strategy is selected"
+msgstr "Valeur utilisée lorsque la stratégie « Remplacer par une constante » est sélectionnée"
+
+msgid "Replace special values (signal)"
+msgstr "Remplacer les valeurs spéciales (signal)"
+
+msgid "NaN"
+msgstr "NaN"
+
+msgid "Strategy"
+msgstr "Stratégie"
+
+msgid "Neighbor size"
+msgstr "Taille du voisinage"
+
+msgid "+ Infinity"
+msgstr "+ Infini"
+
+msgid "- Infinity"
+msgstr "- Infini"
+
+msgid "Replace special values (image)"
+msgstr "Remplacer les valeurs spéciales (image)"
 
 msgid "columns"
 msgstr "colonnes"
+
+msgid "rows"
+msgstr "lignes"
 
 msgid "Distribute over"
 msgstr "Distribuer selon les"
@@ -1031,6 +1115,9 @@ msgstr "Seuil"
 msgid "Counts"
 msgstr "Coups"
 
+msgid "Replace special values is not applicable to integer images because they cannot contain NaN or infinite values."
+msgstr "Le remplacement des valeurs spéciales ne s'applique pas aux images entières, car elles ne peuvent pas contenir de valeurs NaN ou infinies."
+
 msgid "increasing"
 msgstr "croissant"
 
@@ -1043,24 +1130,8 @@ msgstr "Translation en X"
 msgid "Y translation"
 msgstr "Translation en Y"
 
-#, fuzzy
-msgid "column size"
-msgstr "Colonnes"
-
-#, fuzzy
-msgid "row size"
-msgstr "Taille"
-
-#, fuzzy
-msgid "column spacing"
-msgstr "Espace entre chaque colonne"
-
 msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
 msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
-
-#, fuzzy
-msgid "row spacing"
-msgstr "Espace entre chaque ligne"
 
 msgid "Vertical spacing between ROI centers, as a percentage of the automatically computed cell height (100% = evenly distributed grid)"
 msgstr "Espacement vertical entre les centres des ROI, en pourcentage de la hauteur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
@@ -1172,9 +1243,6 @@ msgstr "Comment retourner le résultat de la FFT inverse"
 
 msgid "Frequency"
 msgstr "Fréquence"
-
-msgid "Angle"
-msgstr "Angle"
 
 msgid "cval"
 msgstr "cval"
@@ -1426,6 +1494,9 @@ msgstr "Détection de pics"
 msgid "Minimum distance"
 msgstr "Distance minimale"
 
+msgid "Peak positions"
+msgstr "Positions des pics"
+
 msgid "FWHM"
 msgstr "FWHM"
 
@@ -1504,9 +1575,6 @@ msgstr "Ajustement polynomial"
 msgid "Degree"
 msgstr "Degré"
 
-msgid "Strategy"
-msgstr "Stratégie"
-
 msgid "Location"
 msgstr "Emplacement"
 
@@ -1521,6 +1589,9 @@ msgstr "Convertir le type de données"
 
 msgid "Power"
 msgstr "Puissance"
+
+msgid "Angle"
+msgstr "Angle"
 
 msgid "x"
 msgstr "x"
@@ -1615,5 +1686,3 @@ msgstr "Nombre de colonnes"
 msgid "Centroid"
 msgstr "Barycentre"
 
-msgid "Plot dialog"
-msgstr "Fenêtre de tracé"
