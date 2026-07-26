@@ -153,6 +153,27 @@ def rotate(src: ImageObj, p: RotateParam) -> ImageObj:
     return dst
 
 
+def __swap_axes(src: ImageObj, dst: ImageObj) -> None:
+    """Exchange the X and Y axes of ``dst``, which holds transposed ``src`` data.
+
+    Pixel sizes, origins, labels and units all belong to a given axis: when the data
+    array is transposed, they must follow, otherwise an anisotropic image is silently
+    rescaled and the axis annotations describe the wrong direction.
+
+    Args:
+        src: input image object
+        dst: output image object, whose data is already transposed
+    """
+    dst.xlabel = src.ylabel
+    dst.ylabel = src.xlabel
+    dst.xunit = src.yunit
+    dst.yunit = src.xunit
+    if src.is_uniform_coords:
+        dst.set_uniform_coords(src.dy, src.dx, src.y0, src.x0)
+    else:
+        dst.set_coords(src.ycoords, src.xcoords)
+
+
 @computation_function()
 def rotate90(src: ImageObj) -> ImageObj:
     """Rotate data 90° with :py:func:`numpy.rot90`
@@ -165,7 +186,12 @@ def rotate90(src: ImageObj) -> ImageObj:
     """
     dst = dst_1_to_1(src, "rotate90")
     dst.data = np.rot90(src.data)
-    transformer.transform_roi(dst, "rotate", angle=-np.pi / 2, center=(dst.xc, dst.yc))
+    __swap_axes(src, dst)
+    # ``numpy.rot90(a)`` is ``numpy.flipud(a.T)``: composing the ROI mapping the same
+    # way keeps it aligned with the pixels, which an arbitrary rotation of the ROI
+    # shapes cannot do (a rotated rectangle is no longer a rectangle).
+    transformer.transform_roi(dst, "transpose")
+    transformer.transform_roi(dst, "flipv", cy=dst.yc)
     return dst
 
 
@@ -181,7 +207,10 @@ def rotate270(src: ImageObj) -> ImageObj:
     """
     dst = dst_1_to_1(src, "rotate270")
     dst.data = np.rot90(src.data, 3)
-    transformer.transform_roi(dst, "rotate", angle=np.pi / 2, center=(dst.xc, dst.yc))
+    __swap_axes(src, dst)
+    # ``numpy.rot90(a, 3)`` is ``numpy.fliplr(a.T)`` (see :func:`rotate90`).
+    transformer.transform_roi(dst, "transpose")
+    transformer.transform_roi(dst, "fliph", cx=dst.xc)
     return dst
 
 
@@ -288,14 +317,7 @@ def transpose(src: ImageObj) -> ImageObj:
     """
     dst = dst_1_to_1(src, "transpose")
     dst.data = np.transpose(src.data)
-    dst.xlabel = src.ylabel
-    dst.ylabel = src.xlabel
-    dst.xunit = src.yunit
-    dst.yunit = src.xunit
-    if src.is_uniform_coords:
-        dst.set_uniform_coords(src.dy, src.dx, src.y0, src.x0)
-    else:
-        dst.set_coords(src.ycoords, src.xcoords)
+    __swap_axes(src, dst)
     transformer.transform_roi(dst, "transpose")
     return dst
 

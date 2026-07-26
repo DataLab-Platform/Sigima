@@ -138,6 +138,86 @@ def test_roi_rotate270() -> None:
     __check_roi_properties(ima, rotated)
 
 
+def __get_anisotropic_image_with_roi() -> sigima.objects.ImageObj:
+    """Get a non-square test image with anisotropic pixels and a physical ROI.
+
+    Square images with square pixels are the degenerate case where a rotation about
+    the image center happens to agree with the correct axis exchange, so they cannot
+    reveal coordinate handling defects."""
+    ima = sigima.objects.create_image("aniso", np.arange(15, dtype=float).reshape(3, 5))
+    ima.set_uniform_coords(1.0, 10.0, 0.0, 0.0)
+    ima.xlabel, ima.ylabel = "position", "time"
+    ima.xunit, ima.yunit = "mm", "s"
+    ima.roi = sigima.objects.create_image_roi(
+        "rectangle", [1.0, 10.0, 2.0, 10.0], indices=False
+    )
+    return ima
+
+
+@pytest.mark.parametrize(
+    "func", [sigima.proc.image.rotate90, sigima.proc.image.rotate270]
+)
+def test_rotate90_swaps_pixel_sizes_and_axis_metadata(func: Callable) -> None:
+    """A 90° rotation exchanges the two axes, so pixel sizes, labels and units follow.
+
+    Keeping the source pixel sizes silently rescales anisotropic images: a 5 mm × 30 s
+    image would be reported as 3 mm × 50 s instead of 30 s × 5 mm."""
+    src = __get_anisotropic_image_with_roi()
+    dst = func(src)
+    check_scalar_result("Rotated pixel width", dst.dx, src.dy)
+    check_scalar_result("Rotated pixel height", dst.dy, src.dx)
+    check_scalar_result("Rotated physical width", dst.width, src.height)
+    check_scalar_result("Rotated physical height", dst.height, src.width)
+    assert (dst.xlabel, dst.ylabel) == (src.ylabel, src.xlabel)
+    assert (dst.xunit, dst.yunit) == (src.yunit, src.xunit)
+
+
+@pytest.mark.parametrize(
+    "func,expected",
+    [
+        (sigima.proc.image.rotate90, [10.0, 2.0, 10.0, 2.0]),
+        (sigima.proc.image.rotate270, [10.0, 1.0, 10.0, 2.0]),
+    ],
+)
+def test_rotate90_maps_roi_onto_the_rotated_pixels(
+    func: Callable, expected: list[float]
+) -> None:
+    """The rotated ROI must select the same pixels, hence stay inside the image."""
+    src = __get_anisotropic_image_with_roi()
+    dst = func(src)
+    coords = dst.roi.single_rois[0].coords
+    check_array_result(f"{func.__name__} ROI", coords, np.array(expected))
+    x0, y0, width, height = coords
+    assert dst.x0 <= x0 and x0 + width <= dst.x0 + dst.width, "ROI out of bounds in X"
+    assert dst.y0 <= y0 and y0 + height <= dst.y0 + dst.height, "ROI out of bounds in Y"
+
+
+@pytest.mark.parametrize(
+    "func,flipfunc",
+    [
+        (sigima.proc.image.rotate90, sigima.proc.image.flipv),
+        (sigima.proc.image.rotate270, sigima.proc.image.fliph),
+    ],
+)
+def test_rotate90_is_transpose_then_flip(func: Callable, flipfunc: Callable) -> None:
+    """``numpy.rot90`` is a transpose followed by a flip.
+
+    Coordinates and ROI must follow the very same composition, which is well defined
+    for the two quarter turns -- unlike an arbitrary rotation of the ROI shapes."""
+    src = __get_anisotropic_image_with_roi()
+    dst = func(src)
+    ref = flipfunc(sigima.proc.image.transpose(src))
+    check_array_result(f"{func.__name__} data", dst.data, ref.data)
+    check_array_result(
+        f"{func.__name__} ROI",
+        dst.roi.single_rois[0].coords,
+        ref.roi.single_rois[0].coords,
+    )
+    assert (dst.dx, dst.dy, dst.x0, dst.y0) == (ref.dx, ref.dy, ref.x0, ref.y0)
+    assert (dst.xlabel, dst.ylabel) == (ref.xlabel, ref.ylabel)
+    assert (dst.xunit, dst.yunit) == (ref.xunit, ref.yunit)
+
+
 def test_roi_translation() -> None:
     """Test translation with ROI transformation."""
     ima = __get_test_image_with_roi()
