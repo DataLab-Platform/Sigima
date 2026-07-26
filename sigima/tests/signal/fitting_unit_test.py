@@ -65,6 +65,19 @@ EXPECTED_FIT_PARAMS = {
 }
 
 
+@pytest.fixture(autouse=True)
+def seeded_rng() -> None:
+    """Seed NumPy's global RNG before every test in this module.
+
+    Most tests here add synthetic noise through ``np.random.*`` and then check
+    the recovered parameters against fixed tolerances. Without a seed, each run
+    draws a different realisation, so a marginal test fails intermittently and
+    the failure cannot be reproduced. Tests that need a specific realisation
+    still call ``np.random.seed()`` themselves.
+    """
+    np.random.seed(42)
+
+
 def __check_peak_fit_schema(params: dict) -> None:
     """Check the versioned height-based peak fit schema."""
     assert params["fit_params_version"] == fitting.FIT_PARAMS_VERSION
@@ -881,25 +894,38 @@ def test_fitting_functions_available() -> None:
     execenv.print("Testing availability of fitting functions...")
 
     # Check that expected functions exist and are callable
-    expected_functions = [
-        "linear_fit",
-        "gaussian_fit",
-        "lorentzian_fit",
-        "voigt_fit",
+    expected_functions = {
+        "cdf_fit",
         "exponential_fit",
+        "gaussian_fit",
+        "linear_fit",
+        "lorentzian_fit",
+        "multigaussian_fit",
+        "multilorentzian_fit",
         "piecewiseexponential_fit",
         "planckian_fit",
-        "cdf_fit",
+        "polynomial_fit",
         "sigmoid_fit",
-        "twohalfgaussian_fit",
-        "multilorentzian_fit",
         "sinusoidal_fit",
-    ]
+        "twohalfgaussian_fit",
+        "voigt_fit",
+    }
 
     for func_name in expected_functions:
         assert hasattr(fitting, func_name), f"Function {func_name} should exist"
         func = getattr(fitting, func_name)
         assert callable(func), f"Function {func_name} should be callable"
+
+    # Guard against drift: a new public fitting function must be added above so
+    # that it is covered by the availability check.
+    actual_functions = {
+        name
+        for name in dir(fitting)
+        if name.endswith("_fit")
+        and name != "evaluate_fit"  # Not a model fitter
+        and callable(getattr(fitting, name))
+    }
+    assert actual_functions == expected_functions
 
 
 @pytest.mark.validation
