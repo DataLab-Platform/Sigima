@@ -343,3 +343,54 @@ def test_fitting_exponential_growth_initial_params() -> None:
     fc = fit_mod.ExponentialFitComputer(x, y)
     p = fc.compute_initial_params()
     assert "a" in p and "b" in p and "y0" in p
+
+
+# ===========================================================================
+# Initial parameter estimates — transition models (CDF, sigmoid)
+# ===========================================================================
+
+
+def _erf_transition() -> tuple[np.ndarray, np.ndarray]:
+    """Return an erf transition: amplitude 2, mu 0.5, sigma 1.2, baseline 1."""
+    x = np.linspace(-5.0, 5.0, 201)
+    y = fit_mod.CDFFitComputer.evaluate(x, 2.0, 0.5, 1.2, 1.0)
+    return x, y
+
+
+def _logistic_transition() -> tuple[np.ndarray, np.ndarray]:
+    """Return a logistic transition: amplitude 4, k 2, x0 -1, offset 1."""
+    x = np.linspace(-5.0, 5.0, 201)
+    y = fit_mod.SigmoidFitComputer.evaluate(x, 4.0, 2.0, -1.0, 1.0)
+    return x, y
+
+
+@pytest.mark.parametrize(
+    ("computer_cls", "data_func", "center_name"),
+    [
+        (fit_mod.CDFFitComputer, _erf_transition, "mu"),
+        (fit_mod.SigmoidFitComputer, _logistic_transition, "x0"),
+    ],
+)
+def test_transition_initial_params_lie_strictly_inside_bounds(
+    computer_cls, data_func, center_name
+) -> None:
+    """Seeds must be usable starting points, not values sitting on a bound.
+
+    ``(x_max + abs(x_min)) / 2`` used to pin the centre seed on the upper
+    bound of its own admissible interval for any range symmetric about zero.
+    """
+    x, y = data_func()
+    fc = computer_cls(x, y)
+    initial = fc.compute_initial_params()
+    bounds = fc.compute_bounds(**initial)
+    for name, (low, high) in zip(computer_cls.PARAMS_NAMES, bounds):
+        assert low < initial[name] < high, f"{name}={initial[name]} on bound"
+    assert initial[center_name] == pytest.approx(0.0)
+
+
+def test_cdf_initial_params_match_amplitude_and_baseline_scales() -> None:
+    """``amplitude * erf(...)`` spans ``2 * amplitude`` peak-to-peak."""
+    x, y = _erf_transition()
+    initial = fit_mod.CDFFitComputer(x, y).compute_initial_params()
+    assert initial["amplitude"] == pytest.approx(2.0, rel=0.05)
+    assert initial["baseline"] == pytest.approx(1.0, rel=0.05)

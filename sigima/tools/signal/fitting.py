@@ -1021,10 +1021,12 @@ class CDFFitComputer(FitComputer):
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return {
-            "amplitude": dy,
-            "mu": (x_max + np.abs(x_min)) / 2,
+            # `amplitude * erf(...)` spans `2 * amplitude` peak-to-peak:
+            "amplitude": dy / 2,
+            "mu": (x_min + x_max) / 2,
             "sigma": dx / 10,
-            "baseline": dy / 2,
+            # `baseline` is a level, not a range:
+            "baseline": y_min + dy / 2,
         }
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
@@ -1062,7 +1064,7 @@ class SigmoidFitComputer(FitComputer):
         return {
             "amplitude": dy,
             "k": 4.0 / dx,
-            "x0": (x_max + np.abs(x_min)) / 2,
+            "x0": (x_min + x_max) / 2,
             "offset": y_min,
         }
 
