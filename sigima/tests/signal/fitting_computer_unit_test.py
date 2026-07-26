@@ -415,3 +415,34 @@ def test_transition_fits_recover_descending_step(computer_cls, data_func) -> Non
         y_fitted, _params = computer_cls(x, data).fit()
         residual = np.sqrt(np.mean((data - y_fitted) ** 2))
         assert residual < 1e-3 * (data.max() - data.min())
+
+
+# ===========================================================================
+# Planckian model — documented degeneracy
+# ===========================================================================
+
+
+@pytest.mark.parametrize("k", [0.5, 2.0, 3.0])
+def test_planckian_model_is_scale_degenerate(k: float) -> None:
+    """``(amp, x0, sigma)`` are not separately identifiable.
+
+    The model is strictly invariant under ``x0 -> k*x0``, ``sigma -> k*sigma``,
+    ``amp -> amp/k**5``. This test pins the degeneracy down so that any future
+    reparameterization is a deliberate decision, not an accident.
+    """
+    x = np.linspace(0.1, 10.0, 500)
+    ref = fit_mod.PlanckianFitComputer.evaluate(x, 1.0, 2.0, 1.5, 0.3)
+    alt = fit_mod.PlanckianFitComputer.evaluate(x, 1.0 / k**5, k * 2.0, k * 1.5, 0.3)
+    assert np.allclose(alt, ref, rtol=1e-12, atol=0.0)
+
+
+@pytest.mark.parametrize("sigma", [0.5, 1.0, 2.0])
+def test_planckian_peak_is_not_at_x0(sigma: float) -> None:
+    """``x0`` is a scale parameter, not the peak abscissa.
+
+    The maximum sits at approximately ``1.007 * x0 / sigma``; it coincides
+    with ``x0`` only when ``sigma == 1``.
+    """
+    x = np.linspace(0.05, 20.0, 20001)
+    y = fit_mod.PlanckianFitComputer.evaluate(x, 1.0, 1.0, sigma, 0.0)
+    assert x[np.argmax(y)] == pytest.approx(1.007 / sigma, rel=0.01)

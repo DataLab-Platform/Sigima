@@ -552,7 +552,21 @@ class ExponentialFitComputer(FitComputer):
 
 
 class PlanckianFitComputer(FitComputer):
-    """Planckian fit computer"""
+    """Planckian fit computer.
+
+    .. warning::
+
+        This parameterization is **degenerate**: the model is strictly
+        invariant under ``x0 -> k*x0``, ``sigma -> k*sigma``,
+        ``amp -> amp/k**5``. Only the combinations ``x0/sigma`` and
+        ``amp * x0**5`` are determined by the data; the individual values of
+        ``amp``, ``x0`` and ``sigma`` depend on the starting point of the
+        optimiser and must not be interpreted on their own.
+
+        In particular ``x0`` is **not** the peak abscissa: the maximum sits at
+        approximately ``1.007 * x0 / sigma``, so the two coincide only when
+        ``sigma == 1``.
+    """
 
     PARAMS_NAMES = ("amp", "x0", "sigma", "y0")
 
@@ -563,15 +577,15 @@ class PlanckianFitComputer(FitComputer):
         Args:
             x: wavelength values (in nm or other units)
             amp: amplitude scaling factor
-            x0: peak wavelength (Wien's displacement law)
+            x0: scale parameter (see the class-level degeneracy warning: this
+             is *not* the peak wavelength unless ``sigma == 1``)
             sigma: width parameter (larger sigma = wider peak)
             y0: baseline offset
         """
         # pylint: disable=unbalanced-tuple-unpacking
         amp, x0, sigma, y0 = cls.args_kwargs_to_list(*args, **kwargs)
 
-        # Planck-like function with Wien's displacement law behavior
-        # The function peaks at approximately x0 when properly parameterized
+        # Planck-like function: the maximum is located at ~1.007 * x0 / sigma
 
         x = np.asarray(x, dtype=float)
         y = np.full_like(x, y0, dtype=float)
