@@ -167,6 +167,37 @@ msgid "Delete points"
 msgstr "Supprimer les points"
 
 msgid "Forward fill (previous value)"
+msgstr "Propagation avant (valeur précédente)"
+
+msgid "Backward fill (next value)"
+msgstr "Propagation arrière (valeur suivante)"
+
+msgid "Interpolation: Linear"
+msgstr "Interpolation : linéaire"
+
+msgid "Interpolation: Spline"
+msgstr "Interpolation : spline"
+
+msgid "Interpolation: Quadratic"
+msgstr "Interpolation : quadratique"
+
+msgid "Interpolation: Cubic"
+msgstr "Interpolation : cubique"
+
+msgid "Interpolation: PCHIP"
+msgstr "Interpolation : PCHIP"
+
+msgid "N-neighbor minimum"
+msgstr "Minimum des N voisins"
+
+msgid "N-neighbor maximum"
+msgstr "Maximum des N voisins"
+
+msgid "N-neighbor mean"
+msgstr "Moyenne des N voisins"
+
+msgid "N-neighbor median"
+msgstr "Médiane des N voisins"
 msgstr "Remplissage vers l'avant (valeur précédente)"
 
 msgid "Backward fill (next value)"
@@ -465,14 +496,14 @@ msgstr "Métadonnées"
 msgid "Annotations"
 msgstr "Annotations"
 
+msgid "Uniform coordinates"
+msgstr "Coordonnées uniformes"
+
 msgid "Origin"
 msgstr "Origine"
 
 msgid "Pixel spacing"
 msgstr "Taille des pixels"
-
-msgid "Uniform coordinates"
-msgstr "Coordonnées uniformes"
 
 msgid "Extent"
 msgstr "Bornes"
@@ -815,10 +846,10 @@ msgid "Method used for normalization"
 msgstr "Méthode utilisée pour la normalisation"
 
 msgid "Number of neighboring points used when a neighbor-based strategy is selected"
-msgstr "Nombre de points voisins utilisés lorsqu'une stratégie basée sur les voisins est sélectionnée"
+msgstr "Nombre de points voisins utilisés lorsqu'une stratégie fondée sur le voisinage est sélectionnée"
 
 msgid "Value used when a 'Replace with constant' strategy is selected"
-msgstr "Valeur utilisée lorsqu'une stratégie 'Remplacer par une constante' est sélectionnée"
+msgstr "Valeur utilisée lorsque la stratégie « Remplacer par une constante » est sélectionnée"
 
 msgid "Replace special values (signal)"
 msgstr "Remplacer les valeurs spéciales (signal)"
@@ -846,6 +877,9 @@ msgstr "lignes"
 
 msgid "columns"
 msgstr "colonnes"
+
+msgid "rows"
+msgstr "lignes"
 
 msgid "Distribute over"
 msgstr "Distribuer selon les"
@@ -1129,7 +1163,7 @@ msgid "Counts"
 msgstr "Coups"
 
 msgid "Replace special values is not applicable to integer images because they cannot contain NaN or infinite values."
-msgstr "Le remplacement des valeurs spéciales n'est pas applicable aux images de type entier car elles ne peuvent pas contenir de valeurs NaN ou infinies."
+msgstr "Le remplacement des valeurs spéciales ne s'applique pas aux images entières, car elles ne peuvent pas contenir de valeurs NaN ou infinies."
 
 msgid "increasing"
 msgstr "croissant"
@@ -1142,6 +1176,9 @@ msgstr "Translation en X"
 
 msgid "Y translation"
 msgstr "Translation en Y"
+
+msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
+msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
 
 msgid "column size"
 msgstr "Nombre de colonnes"
@@ -1268,9 +1305,6 @@ msgstr "Comment retourner le résultat de la FFT inverse"
 
 msgid "Frequency"
 msgstr "Fréquence"
-
-msgid "Angle"
-msgstr "Angle"
 
 msgid "cval"
 msgstr "cval"
@@ -1618,6 +1652,9 @@ msgstr "Convertir le type de données"
 msgid "Power"
 msgstr "Puissance"
 
+msgid "Angle"
+msgstr "Angle"
+
 msgid "x"
 msgstr "x"
 
@@ -1713,4 +1750,5 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
+
 
