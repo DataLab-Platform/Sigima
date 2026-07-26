@@ -394,3 +394,24 @@ def test_cdf_initial_params_match_amplitude_and_baseline_scales() -> None:
     initial = fit_mod.CDFFitComputer(x, y).compute_initial_params()
     assert initial["amplitude"] == pytest.approx(2.0, rel=0.05)
     assert initial["baseline"] == pytest.approx(1.0, rel=0.05)
+
+
+@pytest.mark.parametrize(
+    ("computer_cls", "data_func"),
+    [
+        (fit_mod.CDFFitComputer, _erf_transition),
+        (fit_mod.SigmoidFitComputer, _logistic_transition),
+    ],
+)
+def test_transition_fits_recover_descending_step(computer_cls, data_func) -> None:
+    """A falling transition is as fittable as a rising one.
+
+    The amplitude used to be bounded to positive values, which confined the
+    optimiser to the ascending half-space.
+    """
+    x, y = data_func()
+    y_down = y[::-1].copy()
+    for data in (y, y_down):
+        y_fitted, _params = computer_cls(x, data).fit()
+        residual = np.sqrt(np.mean((data - y_fitted) ** 2))
+        assert residual < 1e-3 * (data.max() - data.min())
