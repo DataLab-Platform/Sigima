@@ -1402,7 +1402,9 @@ def full_width_at_ratio(
         start_range = get_start_range(x, fraction)
     if end_range is None:
         end_range = get_end_range(x, fraction)
-    start_baseline = get_range_mean_y(x, y * polarity, start_range)
+    # The baseline must be measured on the raw signal: it is subtracted from `y`
+    # (not from `y * polarity`) and it is the offset of the returned level.
+    start_baseline = get_range_mean_y(x, y, start_range)
 
     if amplitude == 0:
         raise InvalidSignalError(
@@ -1411,7 +1413,7 @@ def full_width_at_ratio(
 
     y_norm = np.asarray(polarity * (y - start_baseline) / amplitude, dtype=y.dtype.type)
 
-    level = y.dtype.type(ratio * polarity * amplitude + start_baseline)
+    level = y.dtype.type(start_baseline + polarity * ratio * amplitude)
 
     tmax_idx = np.argmax(y_norm)
 
