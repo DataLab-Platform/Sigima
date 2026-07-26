@@ -225,6 +225,24 @@ class FitComputer:
         """Compute parameter bounds for fitting."""
         return None
 
+    def transition_sign(self, edge_fraction: float = 0.1) -> float:
+        """Return the direction of a monotonic transition in the data.
+
+        Compares the mean level over the first and last `edge_fraction` of the
+        samples. Used by step-like models (CDF, sigmoid) to seed a signed
+        amplitude, so that descending transitions are reachable.
+
+        Args:
+            edge_fraction: Fraction of the samples used on each side.
+
+        Returns:
+            ``1.0`` for a rising transition, ``-1.0`` for a falling one.
+        """
+        n_edge = max(1, int(round(self.y.size * edge_fraction)))
+        y_start = float(np.mean(self.y[:n_edge]))
+        y_end = float(np.mean(self.y[-n_edge:]))
+        return 1.0 if y_end >= y_start else -1.0
+
     def create_params(self, y_fitted: np.ndarray, **params) -> FitParams:
         """Create a fit parameters dictionary from given parameters."""
         self.check_params(**params)
@@ -1021,8 +1039,9 @@ class CDFFitComputer(FitComputer):
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return {
-            # `amplitude * erf(...)` spans `2 * amplitude` peak-to-peak:
-            "amplitude": dy / 2,
+            # `amplitude * erf(...)` spans `2 * amplitude` peak-to-peak, and is
+            # negative for a descending transition:
+            "amplitude": self.transition_sign() * dy / 2,
             "mu": (x_min + x_max) / 2,
             "sigma": dx / 10,
             # `baseline` is a level, not a range:
@@ -1032,14 +1051,14 @@ class CDFFitComputer(FitComputer):
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for CDF fitting."""
         y_min, y_max = np.min(self.y), np.max(self.y)
-        dy = initial_params["amplitude"]
+        amp = abs(initial_params["amplitude"])
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return [
-            (0.0, dy * 2),  # amplitude
+            (-2 * amp, 2 * amp),  # amplitude (signed: descending transitions)
             (x_min, x_max),  # mu
             (dx * 0.001, dx),  # sigma
-            (y_min - dy, y_max + dy),  # baseline
+            (y_min - amp, y_max + amp),  # baseline
         ]
 
 
@@ -1061,24 +1080,27 @@ class SigmoidFitComputer(FitComputer):
         dy = y_max - y_min
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
+        sign = self.transition_sign()
         return {
-            "amplitude": dy,
+            # A descending transition is described by a negative amplitude
+            # starting from the upper level (`k` stays positive):
+            "amplitude": sign * dy,
             "k": 4.0 / dx,
             "x0": (x_min + x_max) / 2,
-            "offset": y_min,
+            "offset": y_min if sign > 0 else y_max,
         }
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for Sigmoid fitting."""
         y_min, y_max = np.min(self.y), np.max(self.y)
-        dy = initial_params["amplitude"]
+        amp = abs(initial_params["amplitude"])
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return [
-            (0.0, 10 * dy),  # amplitude
+            (-10 * amp, 10 * amp),  # amplitude (signed: descending transitions)
             (0.1 / dx, 100.0 / dx),  # k
             (x_min, x_max),  # x0
-            (y_min - dy, y_max + dy),  # offset
+            (y_min - amp, y_max + amp),  # offset
         ]
 
 
