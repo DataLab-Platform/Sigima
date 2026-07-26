@@ -170,13 +170,25 @@ def get_hough_circle_peaks(
 
 
 def __blobs_to_coords(blobs: np.ndarray) -> np.ndarray:
-    """Convert blobs to coordinates
+    """Convert scikit-image blobs to coordinates
+
+    .. warning::
+
+        The third column returned by scikit-image is the **standard deviation of the
+        Gaussian kernel** that detected the blob, not a blob radius. It is passed
+        through unchanged. For a two-dimensional image the radius of the detected
+        feature is approximately ``sqrt(2) * sigma`` for the LoG and DoG methods, and
+        approximately ``sigma`` for the DoH method. Callers that need a radius must
+        apply that conversion themselves. See
+        `issue #51 <https://github.com/DataLab-Platform/Sigima/issues/51>`_.
 
     Args:
-        blobs: Blobs
+        blobs: Blobs, as returned by scikit-image, in the form of a 2D array (N, 3)
+         where each row is ``(row, col, sigma)``
 
     Returns:
-        Coordinates
+        Coordinates, in the form of a 2D array (N, 3) where each row is
+         ``(x, y, sigma)``
     """
     cy, cx, radii = blobs.T
     coords = np.vstack([cx, cy, radii]).T
@@ -198,20 +210,22 @@ def find_blobs_dog(
 
     Args:
         data: The grayscale input image.
-        min_sigma: The minimum blob radius in pixels.
-        max_sigma: The maximum blob radius in pixels.
-        overlap: The minimum overlap between two blobs in pixels. For instance, if two
-         blobs are detected with radii of 10 and 12 respectively, and the ``overlap``
-         is set to 0.5, then the area of the smaller blob will be ignored and only the
-         area of the larger blob will be returned.
-        threshold_rel: The absolute lower bound for scale space maxima. Local maxima
-         smaller than ``threshold_rel`` are ignored. Reduce this to detect blobs with
-         less intensities.
+        min_sigma: The smallest standard deviation of the Gaussian kernel, in pixels.
+         Keep it low to detect smaller blobs.
+        max_sigma: The largest standard deviation of the Gaussian kernel, in pixels.
+         Keep it high to detect larger blobs.
+        overlap: The maximum fraction of area two blobs may share, between 0 and 1.
+         Above that fraction, the smaller of the two blobs is discarded.
+        threshold_rel: The lower bound for scale space maxima, relative to the highest
+         maximum. Local maxima smaller than ``threshold_rel`` times the highest maximum
+         are ignored. Reduce this to detect fainter blobs.
         exclude_border: If ``True``, exclude blobs from detection if they are too
          close to the border of the image. Border size is ``min_sigma``.
 
     Returns:
-        Coordinates of blobs
+        Coordinates of blobs, in the form of a 2D array (N, 3) where each row is
+         ``(x, y, sigma)``. The third column is a Gaussian standard deviation, not a
+         radius: see :func:`__blobs_to_coords`.
     """
     # Use scikit-image's Difference of Gaussians (DoG) method
     blobs = feature.blob_dog(
@@ -240,20 +254,23 @@ def find_blobs_doh(
 
     Args:
         data: The grayscale input image.
-        min_sigma: The minimum blob radius in pixels.
-        max_sigma: The maximum blob radius in pixels.
-        overlap: The minimum overlap between two blobs in pixels. For instance, if two
-         blobs are detected with radii of 10 and 12 respectively, and the ``overlap``
-         is set to 0.5, then the area of the smaller blob will be ignored and only the
-         area of the larger blob will be returned.
-        log_scale: If ``True``, the radius of each blob is returned as ``sqrt(sigma)``
-         for each detected blob.
-        threshold_rel: The absolute lower bound for scale space maxima. Local maxima
-         smaller than ``threshold_rel`` are ignored. Reduce this to detect blobs with
-         less intensities.
+        min_sigma: The smallest standard deviation of the Gaussian kernel, in pixels.
+         Keep it low to detect smaller blobs.
+        max_sigma: The largest standard deviation of the Gaussian kernel, in pixels.
+         Keep it high to detect larger blobs.
+        overlap: The maximum fraction of area two blobs may share, between 0 and 1.
+         Above that fraction, the smaller of the two blobs is discarded.
+        log_scale: If ``True``, intermediate standard deviations are interpolated on a
+         logarithmic scale instead of a linear one, which covers a wide size range with
+         fewer intermediate values.
+        threshold_rel: The lower bound for scale space maxima, relative to the highest
+         maximum. Local maxima smaller than ``threshold_rel`` times the highest maximum
+         are ignored. Reduce this to detect fainter blobs.
 
     Returns:
-        Coordinates of blobs
+        Coordinates of blobs, in the form of a 2D array (N, 3) where each row is
+         ``(x, y, sigma)``. The third column is a Gaussian standard deviation, not a
+         radius: see :func:`__blobs_to_coords`.
     """
     # Use scikit-image's Determinant of Hessian (DoH) method to detect blobs
     blobs = feature.blob_doh(
@@ -284,22 +301,25 @@ def find_blobs_log(
 
     Args:
         data: The grayscale input image.
-        min_sigma: The minimum blob radius in pixels.
-        max_sigma: The maximum blob radius in pixels.
-        overlap: The minimum overlap between two blobs in pixels. For instance, if
-         two blobs are detected with radii of 10 and 12 respectively, and the
-         ``overlap`` is set to 0.5, then the area of the smaller blob will be ignored
-         and only the area of the larger blob will be returned.
-        log_scale: If ``True``, the radius of each blob is returned as ``sqrt(sigma)``
-         for each detected blob.
-        threshold_rel: The absolute lower bound for scale space maxima. Local maxima
-         smaller than ``threshold_rel`` are ignored. Reduce this to detect blobs with
-         less intensities.
+        min_sigma: The smallest standard deviation of the Gaussian kernel, in pixels.
+         Keep it low to detect smaller blobs.
+        max_sigma: The largest standard deviation of the Gaussian kernel, in pixels.
+         Keep it high to detect larger blobs.
+        overlap: The maximum fraction of area two blobs may share, between 0 and 1.
+         Above that fraction, the smaller of the two blobs is discarded.
+        log_scale: If ``True``, intermediate standard deviations are interpolated on a
+         logarithmic scale instead of a linear one, which covers a wide size range with
+         fewer intermediate values.
+        threshold_rel: The lower bound for scale space maxima, relative to the highest
+         maximum. Local maxima smaller than ``threshold_rel`` times the highest maximum
+         are ignored. Reduce this to detect fainter blobs.
         exclude_border: If ``True``, exclude blobs from detection if they are too
          close to the border of the image. Border size is ``min_sigma``.
 
     Returns:
-        Coordinates of blobs
+        Coordinates of blobs, in the form of a 2D array (N, 3) where each row is
+         ``(x, y, sigma)``. The third column is a Gaussian standard deviation, not a
+         radius: see :func:`__blobs_to_coords`.
     """
     # Use scikit-image's Laplacian of Gaussian (LoG) method to detect blobs
     blobs = feature.blob_log(
