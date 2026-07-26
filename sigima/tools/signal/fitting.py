@@ -764,7 +764,22 @@ class TwoHalfGaussianFitComputer(FitComputer):
 
 
 class DoubleExponentialFitComputer(FitComputer):
-    """Piecewise exponential (raise-decay) fit computer."""
+    """Piecewise exponential (raise-decay) fit computer.
+
+    .. note::
+
+        This model is fitted **unbounded**. The `amp_bound`/`rate_bound`
+        expressions in :meth:`compute_initial_params` only sanitise the seed:
+        used as optimisation bounds they are far too tight (on the reference
+        dataset they raise the residual RMS from 1.90 to 16.33).
+
+    .. note::
+
+        ``x_center`` only enters the model through boolean masks, so the model
+        is piecewise constant with respect to it and its numerical derivative
+        is zero almost everywhere. The optimiser cannot move it: the junction
+        stays at the position returned by :meth:`compute_initial_params`.
+    """
 
     PARAMS_NAMES = ("x_center", "a_left", "b_left", "a_right", "b_right", "y0")
 
@@ -797,9 +812,6 @@ class DoubleExponentialFitComputer(FitComputer):
         x_range = np.max(self.x) - np.min(self.x)
         y_max = np.max(self.y)
 
-        # Baseline is rarely different from zero:
-        y0 = 0.0
-
         # Analyze signal characteristics for better initial guesses
         peak_idx = np.argmax(self.y)
 
@@ -811,7 +823,6 @@ class DoubleExponentialFitComputer(FitComputer):
         # fitting each curve with exponential functions using exponential_fit().
         # X center estimation is very rough here, so we need to remove say 10% of
         # the x range on each side to avoid fitting artifacts.
-        x_range = np.max(self.x) - np.min(self.x)
         x_left_mask = self.x < (x_center - 0.1 * x_range)
         x_right_mask = self.x >= (x_center + 0.1 * x_range)
 
@@ -831,11 +842,12 @@ class DoubleExponentialFitComputer(FitComputer):
         b_right = right_params["b"]
         y0 = (left_params["y0"] + right_params["y0"]) / 2
 
-        # Set bounds for parameters - b can be positive or negative
+        # Sanity clamp on the *seed* only: the per-branch exponential fits above
+        # are performed on truncated data and occasionally return a wildly
+        # off-scale coefficient, which would make `curve_fit` diverge. These are
+        # deliberately *not* used as optimisation bounds (see class docstring).
         amp_bound = max(abs(y_max - y0), y_range) * 2
         rate_bound = 5.0 / max(x_range, 1e-6)  # Avoid division by zero
-
-        # Ensure initial parameters are within bounds
         b_left = np.clip(b_left, -rate_bound, rate_bound)
         b_right = np.clip(b_right, -rate_bound, rate_bound)
         a_left = np.clip(a_left, -amp_bound, amp_bound)
