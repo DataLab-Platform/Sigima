@@ -16,6 +16,7 @@
   * The time deviation is now derived from the modified Allan deviation, as its definition requires, instead of the Allan deviation — a factor of √3 at the shortest τ
   * All estimators are now defined at the shortest averaging time τ = dt, where they previously returned `NaN`, and they consistently reject τ shorter than the sampling interval
   * Estimator definitions are documented with their reference (IEEE Std 1139, NIST SP 1065), and validated against exact analytical expectations rather than order-of-magnitude bounds
+* **90° and 270° image rotation (⚠️ results change)**: Fixed rotated images keeping the pixel size, axis label and axis unit of the axis they no longer represent. A 5 mm × 30 s image was reported as 3 mm × 50 s instead of 30 s × 5 mm, so every subsequent measurement on a rotated image with non-square pixels was scaled by the wrong factor. Regions of interest were also mapped through a rotation whose center was computed from those inconsistent coordinates, which could place them entirely outside the image. Both quarter turns now exchange the axes and map regions of interest so that they keep selecting the same pixels. Images with square pixels were unaffected. This closes [Issue #48](https://github.com/DataLab-Platform/Sigima/issues/48).
 
 ## Sigima Version 1.1.5 ##
 
@@ -185,4 +186,5 @@
   * `BaseCoordinates` and derived classes display point coordinates
   * `TableResult` and `GeometryResult` display result data with source object information
   * Centralized CSS styling in `HTML_TABLE_CSS` constant for consistent appearance
+
 
