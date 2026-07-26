@@ -319,7 +319,7 @@ def __get_signal_parameters_class(stype: SignalTypes) -> Type[NewSignalParam]:
         return SIGNAL_TYPE_PARAM_CLASSES[stype]
     except KeyError as exc:
         raise ValueError(
-            f"Image type {stype} has no parameters class registered"
+            f"Signal type {stype} has no parameters class registered"
         ) from exc
 
 
