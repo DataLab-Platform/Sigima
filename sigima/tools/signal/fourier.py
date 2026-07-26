@@ -18,6 +18,31 @@ from sigima.tools.checks import check_1d_arrays, normalize_kernel
 from sigima.tools.signal.dynamic import sampling_rate
 
 
+def _to_decibel(values: np.ndarray, factor: float) -> np.ndarray:
+    """Convert non-negative spectral values to a decibel scale.
+
+    Spectral values are exactly zero wherever the signal has no content at a given
+    frequency -- a synthetic signal, a zero-padded segment or a notch filter all
+    produce them. Taking the logarithm as-is yields ``-inf`` samples, which propagate
+    to autoscaling, statistics and file export, and emit a divide-by-zero warning.
+    Values are therefore floored at the machine epsilon of the peak value, i.e. about
+    313 dB below the peak for the amplitude convention: far below any physically
+    meaningful level, yet finite.
+
+    Args:
+        values: Non-negative spectral values.
+        factor: 20 for amplitude quantities, 10 for power quantities.
+
+    Returns:
+        Values expressed in decibel.
+    """
+    peak = np.max(values)
+    if peak <= 0.0:
+        # Identically zero spectrum: there is no dynamic range to represent
+        return np.full(values.shape, -np.inf)
+    return factor * np.log10(np.maximum(values, peak * np.finfo(float).eps))
+
+
 @check_1d_arrays(x_evenly_spaced=True)
 def zero_padding(
     x: np.ndarray, y: np.ndarray, n_prepend: int = 0, n_append: int = 0
@@ -55,6 +80,10 @@ def fft1d(
     x: np.ndarray, y: np.ndarray, shift: bool = True
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute the Fast Fourier Transform (FFT) of a 1D real signal.
+
+    The transform is unnormalized, following NumPy's ``backward`` convention: the
+    returned values scale with the number of samples, and the round trip through
+    :func:`ifft1d` restores the original amplitudes.
 
     Args:
         x: Time domain axis (evenly spaced).
@@ -121,6 +150,9 @@ def magnitude_spectrum(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute magnitude spectrum.
 
+    The magnitude is the modulus of the unnormalized FFT (see :func:`fft1d`), so it
+    scales with the number of samples. Only ratios and relative levels are meaningful.
+
     Args:
         x: X data.
         y: Y data.
@@ -132,7 +164,7 @@ def magnitude_spectrum(
     f, spectrum = fft1d(x, y)
     mag_spectrum = np.abs(spectrum)
     if decibel:
-        mag_spectrum = 20 * np.log10(mag_spectrum)
+        mag_spectrum = _to_decibel(mag_spectrum, 20.0)
     return f, mag_spectrum
 
 
@@ -158,6 +190,11 @@ def psd(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Estimate the Power Spectral Density (PSD) using Welch's method.
 
+    The estimate is a power *density*, expressed in squared signal units per hertz,
+    computed by :func:`scipy.signal.welch` with its default Hann window and default
+    segment length. Signals shorter than that segment length are processed as a single
+    segment, which trades frequency resolution for variance.
+
     Args:
         x: X data.
         y: Y data.
@@ -168,7 +205,7 @@ def psd(
     """
     f, welch_psd = scipy.signal.welch(y, fs=sampling_rate(x))
     if decibel:
-        welch_psd = 10 * np.log10(welch_psd)
+        welch_psd = _to_decibel(welch_psd, 10.0)
     return f, welch_psd
 
 

@@ -39,10 +39,12 @@ def fit_circle_model(contour: np.ndarray) -> tuple[float, float, float] | None:
     """Fit circle model to contour with version compatibility.
 
     Args:
-        contour: Contour coordinates array (N, 2)
+        contour: Contour coordinates array (N, 2), in scikit-image's ``(row, col)``
+         order -- i.e. ``(y, x)`` -- as returned by
+         :func:`skimage.measure.find_contours`
 
     Returns:
-        Tuple (xc, yc, radius) or None if fitting fails
+        Tuple (xc, yc, radius) in ``(x, y)`` order, or None if fitting fails
     """
     # pylint: disable=no-member
     if _USE_NEW_SHAPE_API:
@@ -181,10 +183,12 @@ def fit_ellipse_model(
     exercised, so working environments keep using the library unchanged.
 
     Args:
-        contour: Contour coordinates array (N, 2)
+        contour: Contour coordinates array (N, 2), in scikit-image's ``(row, col)``
+         order -- i.e. ``(y, x)`` -- as returned by
+         :func:`skimage.measure.find_contours`
 
     Returns:
-        Tuple (xc, yc, a, b, theta) or None if fitting fails,
+        Tuple (xc, yc, a, b, theta) in ``(x, y)`` order, or None if fitting fails,
         where a and b are semi-major and semi-minor axes
     """
     # pylint: disable=no-member
