@@ -416,7 +416,7 @@ class Gauss2DParam(
         """Generate a title based on current parameters."""
         return (
             f"Gauss(a={self.a:g},μ={self.mu:g},"
-            f"σ={self.sigma:g}),x0={self.x0:g},y0={self.y0:g})"
+            f"σ={self.sigma:g},x0={self.x0:g},y0={self.y0:g})"
         )
 
     def generate_2d_data(self, shape: tuple[int, int]) -> np.ndarray:
