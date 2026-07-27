@@ -4,7 +4,19 @@
 
 ### 🛠️ Bug Fixes since version 1.1.5 ###
 
+* **Gaussian, Lorentzian and Voigt peak amplitude**: Corrected the `amplitude` parameter so it consistently represents signed peak height above the baseline, in the same Y units as the signal, instead of an integrated area whose scale changed with peak width. Fit and signal-creation parameters now carry explicit schema and parameterization markers; historical unversioned area-based parameters are rejected until explicitly converted, preventing silent reinterpretation while preserving the generated or fitted X/Y data.
+* **Multi-peak fit metadata**: Multi-Gaussian and multi-Lorentzian results now persist each detected `x0_i` center alongside the corresponding `amplitude_i` and `sigma_i`, allowing the complete versioned model to be exported and evaluated on any X axis.
 * **Color image import (JPEG, PNG, BMP, TIFF)**: Fixed pixel values being rescaled to the `[0, 1]` range when opening a color (RGB/RGBA) image, which made the imported data unusable for quantitative analysis. Color images are now converted to grayscale while keeping their original value range (e.g. `0`–`255` for 8-bit images), matching the behavior of tools such as ImageJ. Grayscale images stored as RGB are read back with their exact original values. This closes [Issue #37](https://github.com/DataLab-Platform/Sigima/issues/37).
+* **Decibel spectra**: Fixed magnitude spectra and power spectral densities returning `-inf` samples wherever the signal has no content at a given frequency — a synthetic signal, a zero-padded segment or a notch filter all produce such lines. Those samples made the whole curve unusable for autoscaling, statistics and export. Levels are now floored far below the peak, so the curve stays finite.
+* **Documentation accuracy**: Corrected several docstrings that described a different behavior from the one implemented — the error message raised for an unknown signal type mentioned an image type; the blob detection `overlap` and `threshold_rel` arguments were documented with the wrong meaning and unit; the blob "radius" returned by the LoG, DoG and DoH methods is in fact the Gaussian standard deviation of the detecting kernel (see [Issue #51](https://github.com/DataLab-Platform/Sigima/issues/51)); the contour fitting functions expect scikit-image's `(row, col)` coordinate order.
+* **Stability analysis (⚠️ results change)**: Fixed five of the six frequency-stability estimators, which returned values that were wrong by a factor growing with the averaging time τ — so the *shape* of the plotted curve was wrong, not merely its scale. **Any stability figure produced with an earlier version must be recomputed.** This closes [Issue #49](https://github.com/DataLab-Platform/Sigima/issues/49).
+  * The overlapping Allan variance and the Hadamard variance compared averages one sample apart instead of one *averaging interval* apart, under-estimating the result by a factor of about τ
+  * The modified Allan variance was not the modified Allan variance at all, and was further divided by τ², under-estimating the result by a factor of about τ²
+  * The total variance was missing its factor of 1/2, over-estimating the result by a factor of 2; it is now the genuine TOTVAR estimator computed on the reflected phase data, instead of a duplicate of the Allan variance
+  * The time deviation is now derived from the modified Allan deviation, as its definition requires, instead of the Allan deviation — a factor of √3 at the shortest τ
+  * All estimators are now defined at the shortest averaging time τ = dt, where they previously returned `NaN`, and they consistently reject τ shorter than the sampling interval
+  * Estimator definitions are documented with their reference (IEEE Std 1139, NIST SP 1065), and validated against exact analytical expectations rather than order-of-magnitude bounds
+* **90° and 270° image rotation (⚠️ results change)**: Fixed rotated images keeping the pixel size, axis label and axis unit of the axis they no longer represent. A 5 mm × 30 s image was reported as 3 mm × 50 s instead of 30 s × 5 mm, so every subsequent measurement on a rotated image with non-square pixels was scaled by the wrong factor. Regions of interest were also mapped through a rotation whose center was computed from those inconsistent coordinates, which could place them entirely outside the image. Both quarter turns now exchange the axes and map regions of interest so that they keep selecting the same pixels. Images with square pixels were unaffected. This closes [Issue #48](https://github.com/DataLab-Platform/Sigima/issues/48).
 
 ## Sigima Version 1.1.5 ##
 
@@ -35,6 +47,7 @@
   * This bug only affected scikit-image ≥ 0.26.0; older versions were handled correctly
 * **Ellipse visualization**: Fixed incorrect minor axis direction in `ellipse_to_diameters` coordinate conversion
   * The minor axis endpoints were computed with a wrong sign, making the minor axis non-perpendicular to the major axis for rotated ellipses (e.g., at θ=45° both axes pointed in the same direction). This caused distorted ellipse overlays in DataLab when displaying detected or annotated ellipses at non-trivial rotation angles
+  * ⚠️ **This particular change was reverted in v1.1.4** while fixing the axis orientation regression, and the minor axis is therefore still non-perpendicular for rotated ellipses. The issue is tracked by [Issue #47](https://github.com/DataLab-Platform/Sigima/issues/47)
 * **Circle/ellipse detection with calibrated images**: Fixed radius and semi-axes not being converted from pixel units to physical units
   * When an image had non-default pixel calibration (e.g., dx=2 mm/pixel), center coordinates were correctly converted to physical units but the radius and semi-axes remained in pixels, causing values to be wrong by a factor equal to the pixel size
 * **Custom signal XY preservation**: Fixed user-edited XY values being silently discarded when regenerating a custom signal from its creation parameters. `generate_1d_data()` now initializes the XY array only on first use and preserves user-edited contents on subsequent calls. This closes [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25).
@@ -173,3 +186,5 @@
   * `BaseCoordinates` and derived classes display point coordinates
   * `TableResult` and `GeometryResult` display result data with source object information
   * Centralized CSS styling in `HTML_TABLE_CSS` constant for consistent appearance
+
+

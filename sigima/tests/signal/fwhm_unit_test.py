@@ -19,6 +19,7 @@ import sigima.tests.data
 import sigima.tests.helpers
 from sigima.tests import guiutils
 from sigima.tests.env import execenv
+from sigima.tools.signal import pulse
 
 
 def __test_fwhm_interactive(obj: sigima.objects.SignalObj, method: str) -> None:
@@ -95,7 +96,7 @@ def test_signal_fwhm() -> None:
         gauss_param.xmax = 10.0
         gauss_param.sigma = sigma
         gauss_param.mu = 0.0
-        gauss_param.a = 1.0
+        gauss_param.amplitude = 1.0
         gauss_param.y0 = 0.0
 
         sig = sigima.objects.create_signal_from_param(gauss_param)
@@ -140,6 +141,34 @@ def test_signal_fw1e2() -> None:
     sigima.tests.helpers.check_scalar_result("FW1E2", length, exp, rtol=0.005)
 
 
+def __square_pulse(baseline: float, height: float) -> tuple[np.ndarray, np.ndarray]:
+    """Return a 4-unit wide square pulse of signed `height` above `baseline`."""
+    x = np.linspace(0.0, 10.0, 1001)
+    y = np.full_like(x, baseline)
+    y[(x >= 3.0) & (x <= 7.0)] = baseline + height
+    return x, y
+
+
+@pytest.mark.parametrize("baseline", [0.0, 5.0])
+@pytest.mark.parametrize("height", [2.0, -2.0])
+def test_full_width_at_ratio_polarity_and_baseline(
+    baseline: float, height: float
+) -> None:
+    """Validation test for `full_width_at_ratio` on shifted and inverted pulses.
+
+    The half-maximum width of a square pulse depends neither on its polarity nor
+    on its baseline, and the returned level is always `baseline + height / 2`.
+    """
+    x, y = __square_pulse(baseline, height)
+    x1, level1, x2, level2 = pulse.full_width_at_ratio(x, y, 0.5)
+    assert level1 == level2
+    tag = f"[baseline={baseline:g},height={height:g}]"
+    sigima.tests.helpers.check_scalar_result(
+        f"level{tag}", level1, baseline + height / 2, rtol=0.01
+    )
+    sigima.tests.helpers.check_scalar_result(f"width{tag}", x2 - x1, 4.0, rtol=0.01)
+
+
 @pytest.mark.validation
 def test_signal_full_width_at_y() -> None:
     """Validation test for the full width at y computation."""
@@ -155,4 +184,7 @@ if __name__ == "__main__":
     test_signal_fwhm_interactive()
     test_signal_fwhm()
     test_signal_fw1e2()
+    for __baseline in (0.0, 5.0):
+        for __height in (2.0, -2.0):
+            test_full_width_at_ratio_polarity_and_baseline(__baseline, __height)
     test_signal_full_width_at_y()

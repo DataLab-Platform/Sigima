@@ -69,12 +69,12 @@ def test_allan_variance_n_zero_returns_nan() -> None:
 )
 def test_variance_tau_branches(func) -> None:
     """All four variance estimators share the same tau coverage matrix:
-    too-small (NaN), too-large (NaN), and a valid intermediate tau
-    yielding a finite-shape result without raising."""
+    too-small (``ValueError``, consistently with ``allan_variance``), too-large
+    (NaN), and a valid intermediate tau yielding a finite-shape result."""
     x, y = _make_xy(60)
     dt = x[1] - x[0]
-    r1 = func(x, y, np.array([0.5 * dt]))
-    assert np.isnan(r1[0])
+    with pytest.raises(ValueError):
+        func(x, y, np.array([0.1 * dt]))
     r2 = func(x, y, np.array([dt * len(y)]))
     assert np.isnan(r2[0])
     r3 = func(x, y, np.array([3 * dt]))

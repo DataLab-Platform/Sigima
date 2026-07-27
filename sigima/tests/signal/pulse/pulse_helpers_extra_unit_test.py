@@ -13,9 +13,71 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from scipy.integrate import quad
 
 from sigima.tools.signal import pulse as p_mod
 from sigima.tools.signal.pulse import SignalShape
+
+
+@pytest.mark.parametrize(
+    "model",
+    [p_mod.GaussianModel, p_mod.LorentzianModel, p_mod.VoigtModel],
+)
+def test_peak_model_height_area_and_width_contract(model) -> None:
+    """Peak models use signed height and expose exact area conversions."""
+    amplitude, sigma, x0, y0 = -2.3, 1.7, 0.4, 0.8
+    center = model.evaluate(np.array([x0]), amplitude, sigma, x0, y0)[0]
+    assert center == pytest.approx(y0 + amplitude)
+
+    area = model.area_from_amplitude(amplitude, sigma)
+    assert model.amplitude_from_area(area, sigma) == pytest.approx(amplitude)
+    integrated, _error = quad(
+        lambda value: float(
+            model.evaluate(np.array([value]), amplitude, sigma, x0, 0.0)[0]
+        ),
+        -np.inf,
+        np.inf,
+    )
+    assert integrated == pytest.approx(area, rel=1e-10)
+
+    half_width = 0.5 * model.fwhm(sigma)
+    half_height = model.evaluate(
+        np.array([x0 - half_width, x0 + half_width]),
+        amplitude,
+        sigma,
+        x0,
+        y0,
+    )
+    np.testing.assert_allclose(half_height, y0 + 0.5 * amplitude, rtol=2e-4)
+
+
+@pytest.mark.parametrize("sigma", [1e-9, 1.0, 1e9])
+@pytest.mark.parametrize("ratio", [1e-6, 0.1, 0.5, 0.9, 1.0 - 1e-10])
+def test_voigt_relative_level_offset_is_scale_invariant(
+    sigma: float, ratio: float
+) -> None:
+    """Voigt relative levels are solved reliably across scales."""
+    offset = p_mod.VoigtModel.relative_level_offset(sigma, ratio)
+    value = p_mod.VoigtModel.evaluate(np.array([offset]), 1.0, sigma, 0.0, 0.0)[0]
+    assert value == pytest.approx(ratio, rel=1e-8, abs=1e-12)
+
+
+@pytest.mark.parametrize("sigma", [1e-9, 0.3, 1.0, 1e9])
+def test_voigt_fwhm_uses_relative_half_height(sigma: float) -> None:
+    """Voigt FWHM and relative-level geometry share one definition."""
+    expected = 2.0 * p_mod.VoigtModel.relative_level_offset(sigma, 0.5)
+    assert p_mod.VoigtModel.fwhm(sigma) == expected
+
+
+@pytest.mark.parametrize(
+    "model",
+    [p_mod.GaussianModel, p_mod.LorentzianModel, p_mod.VoigtModel],
+)
+@pytest.mark.parametrize("method_name", ["func", "get_amp_from_amplitude", "amplitude"])
+def test_legacy_peak_model_api_is_rejected(model, method_name: str) -> None:
+    """Historical area APIs cannot silently reinterpret their arguments."""
+    with pytest.raises(p_mod.LegacyPeakParameterizationError):
+        getattr(model, method_name)(1.0, 1.0)
 
 
 def _square_pulse(n: int = 200) -> tuple[np.ndarray, np.ndarray]:

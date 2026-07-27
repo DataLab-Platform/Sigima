@@ -229,7 +229,7 @@ def sinusoidal_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.sinusoidal_fit)
 
 
-def extract_fit_params(signal: SignalObj) -> dict[str, float | str]:
+def extract_fit_params(signal: SignalObj) -> fitting.FitParams:
     """Extract fit parameters from a fitted signal.
 
     Args:
@@ -240,8 +240,10 @@ def extract_fit_params(signal: SignalObj) -> dict[str, float | str]:
     """
     if "fit_params" not in signal.metadata:
         raise ValueError("Signal does not contain fit parameters")
-    fit_params_dict: dict[str, float | str] = signal.metadata["fit_params"]
-    assert "fit_type" in fit_params_dict, "No valid fit parameters found"
+    fit_params_dict = signal.metadata["fit_params"]
+    if not isinstance(fit_params_dict, dict):
+        raise ValueError("Signal fit parameters must be a dictionary")
+    fitting.validate_fit_params(fit_params_dict)
     return fit_params_dict
 
 

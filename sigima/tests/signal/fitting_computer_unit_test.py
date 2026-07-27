@@ -148,23 +148,23 @@ def test_planckian_evaluate_with_negative_x_returns_baseline() -> None:
 # ===========================================================================
 
 
-def test_multi_peak_infer_param_names_no_amp_raises() -> None:
+def test_multi_peak_infer_param_names_no_amplitude_raises() -> None:
     """Multi-peak ``infer_param_names_from_kwargs`` requires at least one
-    ``amp_*`` key (peak amplitude); a kwargs dict without any is rejected."""
+    ``amplitude_*`` key; a kwargs dict without any is rejected."""
     with pytest.raises(ValueError):
         fit_mod.MultiGaussianFitComputer.infer_param_names_from_kwargs({"y0": 0.0})
 
 
 def test_multi_gaussian_evaluate_two_peaks() -> None:
     """``MultiGaussianFitComputer.evaluate`` produces a sum of Gaussians,
-    each with its own ``amp_i``/``sigma_i``/``x0_i``, plus a baseline."""
+    each with its own height, width and center, plus a baseline."""
     x = np.linspace(-5.0, 5.0, 300)
     out = fit_mod.MultiGaussianFitComputer.evaluate(
         x,
-        amp_1=1.0,
+        amplitude_1=1.0,
         sigma_1=0.5,
         x0_1=-2.0,
-        amp_2=0.5,
+        amplitude_2=0.5,
         sigma_2=0.7,
         x0_2=2.0,
         y0=0.1,
@@ -181,12 +181,67 @@ def test_multi_lorentzian_evaluate_one_peak() -> None:
     x = np.linspace(-5.0, 5.0, 200)
     out = fit_mod.MultiLorentzianFitComputer.evaluate(
         x,
-        amp_1=1.0,
+        amplitude_1=1.0,
         sigma_1=0.5,
         x0_1=0.0,
         y0=0.0,
     )
     assert out.shape == x.shape
+
+
+@pytest.mark.parametrize(
+    ("fit_type", "computer"),
+    [
+        ("multigaussian", fit_mod.MultiGaussianFitComputer),
+        ("multilorentzian", fit_mod.MultiLorentzianFitComputer),
+    ],
+)
+def test_multi_peak_fit_params_reproduce_model_on_arbitrary_axis(
+    fit_type, computer
+) -> None:
+    """Canonical multi-peak metadata includes centers and reproduces the model."""
+    values = {
+        "amplitude_1": 2.0,
+        "sigma_1": 0.6,
+        "x0_1": -1.5,
+        "amplitude_2": -0.75,
+        "sigma_2": 0.9,
+        "x0_2": 1.25,
+        "y0": 0.2,
+    }
+    params = fit_mod.create_fit_params(
+        fit_type, values, residual_rms=0.01, interactive=True
+    )
+
+    assert params["fit_params_version"] == fit_mod.FIT_PARAMS_VERSION
+    assert params["peak_parameterization"] == fit_mod.PEAK_PARAMETERIZATION
+    assert params["interactive"] is True
+    assert params["x0_1"] == values["x0_1"]
+    assert params["x0_2"] == values["x0_2"]
+    for x in (np.linspace(-5.0, 5.0, 201), np.linspace(-8.0, 8.0, 321)):
+        np.testing.assert_allclose(
+            fit_mod.evaluate_fit(x, **params), computer.evaluate(x, **values)
+        )
+
+
+def test_multi_peak_fit_schema_rejects_missing_center() -> None:
+    """Every multi-peak component requires its detected center coordinate."""
+    params = fit_mod.create_fit_params(
+        "multigaussian",
+        {
+            "amplitude_1": 2.0,
+            "sigma_1": 0.6,
+            "x0_1": -1.5,
+            "amplitude_2": 0.75,
+            "sigma_2": 0.9,
+            "x0_2": 1.25,
+            "y0": 0.2,
+        },
+    )
+    params.pop("x0_2")
+
+    with pytest.raises(ValueError, match="x0_2"):
+        fit_mod.validate_fit_params(params)
 
 
 # ===========================================================================
@@ -199,6 +254,69 @@ def test_fitting_evaluate_fit_unknown_type_raises() -> None:
     ``fit_type`` values rather than silently returning zeros."""
     with pytest.raises(ValueError):
         fit_mod.evaluate_fit(np.linspace(0, 1, 10), fit_type="not_a_real_fit")
+
+
+@pytest.mark.parametrize(
+    "updates",
+    [
+        {"fit_params_version": None},
+        {"fit_params_version": fit_mod.FIT_PARAMS_VERSION + 1},
+        {"peak_parameterization": "area"},
+        {"amp": 1.0},
+        {"amplitude": True},
+        {"sigma": np.nan},
+    ],
+)
+def test_peak_fit_schema_rejects_incoherent_metadata(updates: dict) -> None:
+    """Peak fit evaluation rejects absent, future or contradictory schemas."""
+    params = fit_mod.create_fit_params(
+        "gaussian",
+        {"amplitude": 1.0, "sigma": 0.5, "x0": 0.0, "y0": 0.1},
+    )
+    params.update(updates)
+    with pytest.raises(ValueError):
+        fit_mod.evaluate_fit(np.linspace(-1.0, 1.0, 10), **params)
+
+
+def test_unversioned_legacy_peak_fit_schema_has_dedicated_error() -> None:
+    """An unversioned area key is identified as historical, not malformed v2."""
+    params = {"fit_type": "gaussian", "amp": 1.0, "sigma": 0.5, "x0": 0.0, "y0": 0.1}
+    with pytest.raises(fit_mod.pulse.LegacyPeakParameterizationError):
+        fit_mod.evaluate_fit(np.linspace(-1.0, 1.0, 10), **params)
+
+
+def test_multi_peak_fit_schema_rejects_non_contiguous_indices() -> None:
+    """Multi-peak parameter indices must form a contiguous sequence from one."""
+    params = {
+        "fit_type": "multigaussian",
+        "fit_params_version": fit_mod.FIT_PARAMS_VERSION,
+        "peak_parameterization": fit_mod.PEAK_PARAMETERIZATION,
+        "amplitude_1": 1.0,
+        "sigma_1": 0.5,
+        "x0_1": -1.0,
+        "amplitude_3": 0.5,
+        "sigma_3": 0.7,
+        "x0_3": 1.0,
+        "y0": 0.1,
+    }
+    with pytest.raises(ValueError, match="missing=.*amplitude_2"):
+        fit_mod.evaluate_fit(np.linspace(-2.0, 2.0, 20), **params)
+
+
+@pytest.mark.parametrize(
+    ("values", "metadata"),
+    [
+        ({"amplitude": True, "sigma": 0.5, "x0": 0.0, "y0": 0.0}, {}),
+        (
+            {"amplitude": 1.0, "sigma": 0.5, "x0": 0.0, "y0": 0.0},
+            {"residual_rms": np.nan},
+        ),
+    ],
+)
+def test_create_fit_params_rejects_invalid_numbers(values, metadata) -> None:
+    """The canonical builder validates values before float coercion."""
+    with pytest.raises(ValueError):
+        fit_mod.create_fit_params("gaussian", values, **metadata)
 
 
 def test_fitting_infer_param_names_from_kwargs_default() -> None:
@@ -225,3 +343,106 @@ def test_fitting_exponential_growth_initial_params() -> None:
     fc = fit_mod.ExponentialFitComputer(x, y)
     p = fc.compute_initial_params()
     assert "a" in p and "b" in p and "y0" in p
+
+
+# ===========================================================================
+# Initial parameter estimates — transition models (CDF, sigmoid)
+# ===========================================================================
+
+
+def _erf_transition() -> tuple[np.ndarray, np.ndarray]:
+    """Return an erf transition: amplitude 2, mu 0.5, sigma 1.2, baseline 1."""
+    x = np.linspace(-5.0, 5.0, 201)
+    y = fit_mod.CDFFitComputer.evaluate(x, 2.0, 0.5, 1.2, 1.0)
+    return x, y
+
+
+def _logistic_transition() -> tuple[np.ndarray, np.ndarray]:
+    """Return a logistic transition: amplitude 4, k 2, x0 -1, offset 1."""
+    x = np.linspace(-5.0, 5.0, 201)
+    y = fit_mod.SigmoidFitComputer.evaluate(x, 4.0, 2.0, -1.0, 1.0)
+    return x, y
+
+
+@pytest.mark.parametrize(
+    ("computer_cls", "data_func", "center_name"),
+    [
+        (fit_mod.CDFFitComputer, _erf_transition, "mu"),
+        (fit_mod.SigmoidFitComputer, _logistic_transition, "x0"),
+    ],
+)
+def test_transition_initial_params_lie_strictly_inside_bounds(
+    computer_cls, data_func, center_name
+) -> None:
+    """Seeds must be usable starting points, not values sitting on a bound.
+
+    ``(x_max + abs(x_min)) / 2`` used to pin the centre seed on the upper
+    bound of its own admissible interval for any range symmetric about zero.
+    """
+    x, y = data_func()
+    fc = computer_cls(x, y)
+    initial = fc.compute_initial_params()
+    bounds = fc.compute_bounds(**initial)
+    for name, (low, high) in zip(computer_cls.PARAMS_NAMES, bounds):
+        assert low < initial[name] < high, f"{name}={initial[name]} on bound"
+    assert initial[center_name] == pytest.approx(0.0)
+
+
+def test_cdf_initial_params_match_amplitude_and_baseline_scales() -> None:
+    """``amplitude * erf(...)`` spans ``2 * amplitude`` peak-to-peak."""
+    x, y = _erf_transition()
+    initial = fit_mod.CDFFitComputer(x, y).compute_initial_params()
+    assert initial["amplitude"] == pytest.approx(2.0, rel=0.05)
+    assert initial["baseline"] == pytest.approx(1.0, rel=0.05)
+
+
+@pytest.mark.parametrize(
+    ("computer_cls", "data_func"),
+    [
+        (fit_mod.CDFFitComputer, _erf_transition),
+        (fit_mod.SigmoidFitComputer, _logistic_transition),
+    ],
+)
+def test_transition_fits_recover_descending_step(computer_cls, data_func) -> None:
+    """A falling transition is as fittable as a rising one.
+
+    The amplitude used to be bounded to positive values, which confined the
+    optimiser to the ascending half-space.
+    """
+    x, y = data_func()
+    y_down = y[::-1].copy()
+    for data in (y, y_down):
+        y_fitted, _params = computer_cls(x, data).fit()
+        residual = np.sqrt(np.mean((data - y_fitted) ** 2))
+        assert residual < 1e-3 * (data.max() - data.min())
+
+
+# ===========================================================================
+# Planckian model — documented degeneracy
+# ===========================================================================
+
+
+@pytest.mark.parametrize("k", [0.5, 2.0, 3.0])
+def test_planckian_model_is_scale_degenerate(k: float) -> None:
+    """``(amp, x0, sigma)`` are not separately identifiable.
+
+    The model is strictly invariant under ``x0 -> k*x0``, ``sigma -> k*sigma``,
+    ``amp -> amp/k**5``. This test pins the degeneracy down so that any future
+    reparameterization is a deliberate decision, not an accident.
+    """
+    x = np.linspace(0.1, 10.0, 500)
+    ref = fit_mod.PlanckianFitComputer.evaluate(x, 1.0, 2.0, 1.5, 0.3)
+    alt = fit_mod.PlanckianFitComputer.evaluate(x, 1.0 / k**5, k * 2.0, k * 1.5, 0.3)
+    assert np.allclose(alt, ref, rtol=1e-12, atol=0.0)
+
+
+@pytest.mark.parametrize("sigma", [0.5, 1.0, 2.0])
+def test_planckian_peak_is_not_at_x0(sigma: float) -> None:
+    """``x0`` is a scale parameter, not the peak abscissa.
+
+    The maximum sits at approximately ``1.007 * x0 / sigma``; it coincides
+    with ``x0`` only when ``sigma == 1``.
+    """
+    x = np.linspace(0.05, 20.0, 20001)
+    y = fit_mod.PlanckianFitComputer.evaluate(x, 1.0, 1.0, sigma, 0.0)
+    assert x[np.argmax(y)] == pytest.approx(1.007 / sigma, rel=0.01)

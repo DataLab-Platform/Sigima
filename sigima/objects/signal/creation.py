@@ -27,7 +27,9 @@ These utilities support creating signals from various sources:
 from __future__ import annotations
 
 import enum
+from collections.abc import Mapping
 from dataclasses import dataclass
+from numbers import Real
 from typing import Literal, Type
 
 import guidata.dataset as gds
@@ -39,7 +41,14 @@ from sigima.config import _
 from sigima.enums import SignalShape
 from sigima.objects import base
 from sigima.objects.signal.object import SignalObj
-from sigima.tools.signal.pulse import GaussianModel, LorentzianModel, VoigtModel
+from sigima.tools.signal.pulse import (
+    PEAK_PARAMETERIZATION,
+    GaussianModel,
+    LegacyPeakParameterizationError,
+    LorentzianModel,
+    PulseFitModel,
+    VoigtModel,
+)
 
 
 def create_signal(
@@ -132,6 +141,106 @@ class SignalTypes(gds.LabeledEnum):
 
 
 DEFAULT_TITLE = _("Untitled signal")
+CREATION_PARAMS_VERSION = 2
+
+
+def _is_finite_real(value: object) -> bool:
+    """Return whether a serialized value is a finite, non-boolean real number."""
+    return (
+        isinstance(value, Real) and not isinstance(value, bool) and np.isfinite(value)
+    )
+
+
+def _get_peak_model_from_creation_params(
+    params: Mapping[str, object],
+) -> Type[PulseFitModel]:
+    """Return the peak model identified by raw serialized parameters."""
+    class_module = params.get("class_module")
+    if class_module != __name__:
+        raise ValueError(
+            f"Unsupported peak creation parameter module: {class_module!r}"
+        )
+    class_name = params.get("class_name")
+    model_by_class_name: dict[str, Type[PulseFitModel]] = {
+        "GaussParam": GaussianModel,
+        "LorentzParam": LorentzianModel,
+        "VoigtParam": VoigtModel,
+    }
+    if not isinstance(class_name, str) or class_name not in model_by_class_name:
+        raise ValueError(f"Unsupported peak creation parameter class: {class_name!r}")
+    return model_by_class_name[class_name]
+
+
+def validate_peak_creation_params(params: Mapping[str, object]) -> None:
+    """Validate raw serialized peak creation parameters before deserialization.
+
+    Args:
+        params: Mapping obtained by decoding a ``dataset_to_json`` payload.
+
+    Raises:
+        LegacyPeakParameterizationError: If unversioned area parameters are found.
+        ValueError: If the version, marker or required fields are invalid.
+    """
+    _get_peak_model_from_creation_params(params)
+    version = params.get("creation_params_version")
+    parameterization = params.get("peak_parameterization")
+    if version is None and "a" in params:
+        raise LegacyPeakParameterizationError(
+            "Unversioned area-based peak creation parameters cannot be "
+            "deserialized. Convert them explicitly with "
+            "convert_legacy_peak_creation_params()."
+        )
+    if version != CREATION_PARAMS_VERSION:
+        raise ValueError(f"Unsupported creation_params_version: {version!r}")
+    if parameterization != PEAK_PARAMETERIZATION:
+        raise ValueError(f"Unsupported peak parameterization: {parameterization!r}")
+    if "a" in params:
+        raise ValueError("Legacy area key 'a' is invalid in creation schema version 2")
+    for name in ("amplitude", "sigma", "mu", "y0"):
+        if not _is_finite_real(params.get(name)):
+            raise ValueError(f"Missing or non-numeric peak creation parameter: {name}")
+    if params["sigma"] <= 0:
+        raise ValueError("Peak creation parameter 'sigma' must be positive")
+
+
+def convert_legacy_peak_creation_params(
+    params: Mapping[str, object],
+) -> dict[str, object]:
+    """Convert raw area-based peak creation parameters to schema version 2.
+
+    The input mapping is never mutated. The returned height generates the same
+    curve as the historical area parameter for the identified model.
+
+    Args:
+        params: Historical ``dataset_to_json`` mapping.
+
+    Returns:
+        Converted copy using a signed ``amplitude`` peak height.
+
+    Raises:
+        ValueError: If the payload is incomplete, already versioned or unsupported.
+    """
+    model = _get_peak_model_from_creation_params(params)
+    if "creation_params_version" in params or "peak_parameterization" in params:
+        raise ValueError("Peak creation parameters are already versioned")
+    if "amplitude" in params:
+        raise ValueError("Legacy peak creation parameters mix 'a' and 'amplitude'")
+    area = params.get("a")
+    sigma = params.get("sigma")
+    if not _is_finite_real(area) or not _is_finite_real(sigma):
+        raise ValueError(
+            "Legacy peak creation parameters require numeric 'a' and 'sigma'"
+        )
+    if sigma <= 0:
+        raise ValueError("Peak creation parameter 'sigma' must be positive")
+
+    converted = dict(params)
+    converted.pop("a")
+    converted["amplitude"] = float(model.amplitude_from_area(area, sigma))
+    converted["creation_params_version"] = CREATION_PARAMS_VERSION
+    converted["peak_parameterization"] = PEAK_PARAMETERIZATION
+    validate_peak_creation_params(converted)
+    return converted
 
 
 class NewSignalParam(gds.DataSet):
@@ -210,7 +319,7 @@ def __get_signal_parameters_class(stype: SignalTypes) -> Type[NewSignalParam]:
         return SIGNAL_TYPE_PARAM_CLASSES[stype]
     except KeyError as exc:
         raise ValueError(
-            f"Image type {stype} has no parameters class registered"
+            f"Signal type {stype} has no parameters class registered"
         ) from exc
 
 
@@ -362,16 +471,54 @@ class BaseGaussLorentzVoigtParam(NewSignalParam):
 
     STYPE: Type[SignalTypes] | None = None
 
-    a = gds.FloatItem("A", default=1.0)
+    creation_params_version = gds.IntItem(
+        "Creation parameters version", default=CREATION_PARAMS_VERSION
+    ).set_prop("display", hide=True)
+    peak_parameterization = gds.StringItem(
+        "Peak parameterization", default=PEAK_PARAMETERIZATION
+    ).set_prop("display", hide=True)
+    amplitude = gds.FloatItem("A", default=1.0)
     y0 = gds.FloatItem("y<sub>0</sub>", default=0.0).set_pos(col=1)
     sigma = gds.FloatItem("σ", default=1.0)
     mu = gds.FloatItem("μ", default=0.0).set_pos(col=1)
+
+    @classmethod
+    def create(cls, **kwargs):
+        """Create height-based peak parameters."""
+        if "a" in kwargs:
+            raise LegacyPeakParameterizationError(
+                "The creation parameter 'a' was an integrated area. Use "
+                "'amplitude' for signed peak height, or convert a serialized "
+                "payload with convert_legacy_peak_creation_params()."
+            )
+        return super().create(**kwargs)
+
+    @property
+    def a(self):
+        """Reject access to the historical integrated-area parameter."""
+        raise LegacyPeakParameterizationError(
+            "The creation parameter 'a' was an integrated area. Use 'amplitude'."
+        )
+
+    @a.setter
+    def a(self, value):
+        raise LegacyPeakParameterizationError(
+            "The creation parameter 'a' was an integrated area. Use 'amplitude'."
+        )
+
+    def _get_model(self) -> Type[PulseFitModel]:
+        """Return the peak model selected by this parameter class."""
+        return {
+            SignalTypes.GAUSS: GaussianModel,
+            SignalTypes.LORENTZ: LorentzianModel,
+            SignalTypes.VOIGT: VoigtModel,
+        }[self.STYPE]
 
     def generate_title(self) -> str:
         """Generate a title based on current parameters."""
         assert isinstance(self.STYPE, SignalTypes)
         return (
-            f"{self.STYPE.name.lower()}(A={self.a:.3g},σ={self.sigma:.3g},"
+            f"{self.STYPE.name.lower()}(A={self.amplitude:.3g},σ={self.sigma:.3g},"
             f"μ={self.mu:.3g},y0={self.y0:.3g})"
         )
 
@@ -382,12 +529,7 @@ class BaseGaussLorentzVoigtParam(NewSignalParam):
             Tuple of (x, y) arrays
         """
         x = self.generate_x_data()
-        func = {
-            SignalTypes.GAUSS: GaussianModel.func,
-            SignalTypes.LORENTZ: LorentzianModel.func,
-            SignalTypes.VOIGT: VoigtModel.func,
-        }[self.STYPE]
-        y = func(x, self.a, self.sigma, self.mu, self.y0)
+        y = self._get_model().evaluate(x, self.amplitude, self.sigma, self.mu, self.y0)
         return x, y
 
     def get_expected_features(
@@ -402,73 +544,41 @@ class BaseGaussLorentzVoigtParam(NewSignalParam):
         Returns:
             ExpectedFeatures dataclass with all expected values
         """
-        if self.a is None or self.sigma is None:
-            raise ValueError("Parameters 'a' and 'sigma' must be set")
-        if self.a == 0 or self.sigma <= 0:
-            raise ValueError("Parameter 'a' must be non-zero and 'sigma' positive")
+        if self.amplitude is None or self.sigma is None:
+            raise ValueError("Parameters 'amplitude' and 'sigma' must be set")
+        if self.amplitude == 0 or self.sigma <= 0:
+            raise ValueError(
+                "Parameter 'amplitude' must be non-zero and 'sigma' positive"
+            )
+        if not 0.0 < start_ratio < 1.0 or not 0.0 < stop_ratio < 1.0:
+            raise ValueError("Ratios must be between 0 and 1")
+        if start_ratio == stop_ratio:
+            raise ValueError("Start and stop ratios must differ")
 
-        polarity = 1 if self.a > 0 else -1
-
-        # For Gaussian: peak amplitude is a / (sigma * sqrt(2*pi))
-        # This gives the actual maximum value of the Gaussian function
-        amplitude = abs(self.a) / (self.sigma * np.sqrt(2 * np.pi))
-
-        if self.STYPE == SignalTypes.GAUSS:
-            # Gaussian rise time: t_r = 2.563 * sigma (10% to 90%)
-            rise_time = 2.563 * self.sigma
-        elif self.STYPE == SignalTypes.LORENTZ:
-            # Lorentzian rise time: 2*sigma*sqrt(1/start_ratio - 1/stop_ratio)
-            rise_time = 2 * self.sigma * np.sqrt(1 / start_ratio - 1 / stop_ratio)
-        elif self.STYPE == SignalTypes.VOIGT:
-            # Voigt rise time: approximate as Gaussian for simplicity
-            rise_time = 2.563 * self.sigma
-        else:
-            raise ValueError(f"Unsupported signal type: {self.STYPE}")
-
-        # For Gaussian signals centered at mu
+        polarity = 1 if self.amplitude > 0 else -1
+        amplitude = abs(self.amplitude)
+        model = self._get_model()
         x_center = self.mu if self.mu is not None else 0.0
-
-        # Gaussian-specific calculations
-        if self.STYPE == SignalTypes.GAUSS:
-            # Time at 50% amplitude (FWHM calculation)
-            fwhm = 2.355 * self.sigma  # Full Width at Half Maximum for Gaussian
-            # x50 is the 50% crossing on the rise (left side of peak)
-            x50 = x_center - self.sigma * np.sqrt(-2 * np.log(0.5))  # ~0.833σ
-
-            # Rise time from left 20% to left 80% (one-sided)
-            # For amplitude ratios: x = mu ± sigma * sqrt(-2 * ln(ratio))
-            t_20_left = x_center - self.sigma * np.sqrt(-2 * np.log(0.2))  # ~1.794σ
-            t_80_left = x_center - self.sigma * np.sqrt(-2 * np.log(0.8))  # ~0.668σ
-            actual_rise_time = abs(t_80_left - t_20_left)
-
-            # Fall time (symmetric for Gaussian)
-            fall_time = actual_rise_time
-
-            # Foot duration: For Gaussian, use approximation based on sigma
-            # Since Gaussian has no true flat foot, this is an approximation
-            foot_duration = 1.5 * self.sigma  # Empirically derived approximation
-
-        else:
-            # For Lorentzian and Voigt, use approximations
-            x50 = x_center
-            actual_rise_time = rise_time  # Use calculated rise_time
-            fall_time = rise_time
-            if self.STYPE == SignalTypes.LORENTZ:
-                fwhm = 2 * self.sigma
-            else:
-                fwhm = 2.355 * self.sigma
-            foot_duration = 2 * self.sigma  # Approximation
+        start_offset = model.relative_level_offset(self.sigma, start_ratio)
+        stop_offset = model.relative_level_offset(self.sigma, stop_ratio)
+        half_width = model.relative_level_offset(self.sigma, 0.5)
+        rise_time = abs(start_offset - stop_offset)
+        x50 = x_center - half_width
+        fwhm = 2.0 * half_width
+        foot_duration = (
+            1.5 * self.sigma if self.STYPE == SignalTypes.GAUSS else 2.0 * self.sigma
+        )
 
         return ExpectedFeatures(
             signal_shape=SignalShape.SQUARE,
             polarity=polarity,
             amplitude=amplitude,
-            rise_time=actual_rise_time,
+            rise_time=rise_time,
             offset=self.y0 if self.y0 is not None else 0.0,
             x50=x50,
-            x100=x_center,  # Maximum is at center for Gaussian
+            x100=x_center,
             foot_duration=foot_duration,
-            fall_time=fall_time,
+            fall_time=rise_time,
             fwhm=fwhm,
         )
 
@@ -496,20 +606,15 @@ class BaseGaussLorentzVoigtParam(NewSignalParam):
         Returns:
             Theoretical crossing time for the specified edge and ratio
         """
-        if self.a is None or self.sigma is None or self.mu is None:
-            raise ValueError("Parameters 'a', 'sigma', and 'mu' must be set")
-        if self.a == 0 or self.sigma <= 0:
-            raise ValueError("Parameter 'a' must be non-zero and 'sigma' positive")
+        if self.amplitude is None or self.sigma is None or self.mu is None:
+            raise ValueError("Parameters 'amplitude', 'sigma', and 'mu' must be set")
+        if self.amplitude == 0 or self.sigma <= 0:
+            raise ValueError(
+                "Parameter 'amplitude' must be non-zero and 'sigma' positive"
+            )
         if not 0.0 < ratio < 1.0:
             raise ValueError("Ratio must be between 0.0 and 1.0")
-
-        if self.STYPE != SignalTypes.GAUSS:
-            raise NotImplementedError(
-                "Crossing time calculation is only implemented for Gaussian signals"
-            )
-
-        # For Gaussian: x = mu ± sigma * sqrt(-2 * ln(ratio))
-        delta_x = self.sigma * np.sqrt(-2 * np.log(ratio))
+        delta_x = self._get_model().relative_level_offset(self.sigma, ratio)
         if edge == "rise":
             return self.mu - delta_x
         if edge == "fall":
@@ -520,8 +625,7 @@ class BaseGaussLorentzVoigtParam(NewSignalParam):
 class GaussParam(
     BaseGaussLorentzVoigtParam,
     title=_("Gaussian"),
-    comment="y = y<sub>0</sub> + "
-    "A/(σ √(2π)) exp(-((x - μ)<sup>2</sup>) / (2 σ<sup>2</sup>))",
+    comment="y = y<sub>0</sub> + A exp(-((x - μ)<sup>2</sup>) / (2 σ<sup>2</sup>))",
 ):
     """Parameters for Gaussian function."""
 
@@ -534,7 +638,7 @@ register_signal_parameters_class(SignalTypes.GAUSS, GaussParam)
 class LorentzParam(
     BaseGaussLorentzVoigtParam,
     title=_("Lorentzian"),
-    comment="y = y<sub>0</sub> + A/(π σ (1 + ((x - μ)/σ)<sup>2</sup>))",
+    comment="y = y<sub>0</sub> + A/(1 + ((x - μ)/σ)<sup>2</sup>)",
 ):
     """Parameters for Lorentzian function."""
 
@@ -547,9 +651,9 @@ register_signal_parameters_class(SignalTypes.LORENTZ, LorentzParam)
 class VoigtParam(
     BaseGaussLorentzVoigtParam,
     title=_("Voigt"),
-    comment="y = y<sub>0</sub> + "
-    "A Re[exp(-z<sup>2</sup>) erfc(-j z)] / (σ √(2π)), "
-    "with z = (x - μ - j σ) / (σ √2)",
+    comment="y = y<sub>0</sub> + A Re[w(z)] / Re[w(j/√2)], "
+    "with w(z) = exp(-z<sup>2</sup>) erfc(-j z) and "
+    "z = (x - μ + j σ) / (σ √2)",
 ):
     """Parameters for Voigt function."""
 
@@ -714,7 +818,7 @@ register_signal_parameters_class(SignalTypes.COSINE, CosineParam)
 class SawtoothParam(
     BasePeriodicParam,
     title=_("Sawtooth"),
-    comment="y = y<sub>0</sub> + A (2 (f x + φ/(2π) - |f x + φ/(2π) + 1/2|))",
+    comment="y = y<sub>0</sub> + 2 A (f x + φ/(2π) - ⌊f x + φ/(2π) + 1/2⌋)",
 ):
     """Parameters for sawtooth function."""
 
@@ -753,7 +857,7 @@ register_signal_parameters_class(SignalTypes.SQUARE, SquareParam)
 class SincParam(
     BasePeriodicParam,
     title=_("Cardinal sine"),
-    comment="y = y<sub>0</sub> + A sinc(f x + φ)",
+    comment="y = y<sub>0</sub> + A sinc(2π f x + φ)",
 ):
     """Parameters for cardinal sine function."""
 

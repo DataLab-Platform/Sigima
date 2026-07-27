@@ -15,13 +15,150 @@ from __future__ import annotations
 
 import string
 import warnings
-from typing import Type
+from collections.abc import Mapping
+from numbers import Real
+from typing import Type, Union
 
 import numpy as np
 import scipy.optimize
 import scipy.special
 
-from sigima.tools.signal import peakdetection, pulse
+from sigima.tools.signal import pulse
+
+FIT_PARAMS_VERSION = 2
+PEAK_PARAMETERIZATION = pulse.PEAK_PARAMETERIZATION
+PEAK_FIT_TYPES = frozenset(
+    {"gaussian", "lorentzian", "voigt", "multigaussian", "multilorentzian"}
+)
+FIT_PARAMS_METADATA_KEYS = frozenset(
+    {
+        "fit_type",
+        "residual_rms",
+        "fit_params_version",
+        "peak_parameterization",
+        "interactive",
+    }
+)
+FitParamValue = Union[float, int, str, bool]
+FitParams = dict[str, FitParamValue]
+
+
+def _is_finite_real(value: object) -> bool:
+    """Return whether a value is a finite, non-boolean real number."""
+    return (
+        isinstance(value, Real) and not isinstance(value, bool) and np.isfinite(value)
+    )
+
+
+def _is_legacy_amplitude_key(name: str) -> bool:
+    """Return whether *name* is an old area-based peak parameter."""
+    return name == "amp" or (
+        name.startswith("amp_") and name.removeprefix("amp_").isdigit()
+    )
+
+
+def create_fit_params(
+    fit_type: str,
+    values: Mapping[str, Real],
+    *,
+    residual_rms: Real | None = None,
+    interactive: bool = False,
+) -> FitParams:
+    """Create a canonical fit-parameter dictionary.
+
+    Peak fits carry both a structural version and an explicit scientific
+    parameterization marker. Other fit types retain their historical shape.
+
+    Args:
+        fit_type: Fit type identifier used by :func:`evaluate_fit`.
+        values: Numeric model parameter values.
+        residual_rms: Optional root-mean-square residual.
+        interactive: Whether the fit was committed from an interactive editor.
+
+    Returns:
+        Canonical fit-parameter dictionary.
+    """
+    reserved = FIT_PARAMS_METADATA_KEYS.intersection(values)
+    if reserved:
+        raise ValueError(f"Reserved fit parameter keys: {sorted(reserved)}")
+    invalid_values = [
+        name for name, value in values.items() if not _is_finite_real(value)
+    ]
+    if invalid_values:
+        raise ValueError(f"Non-numeric fit parameters: {sorted(invalid_values)}")
+    if residual_rms is not None and not _is_finite_real(residual_rms):
+        raise ValueError("Residual RMS must be a finite real number")
+    params: FitParams = {name: float(value) for name, value in values.items()}
+    params["fit_type"] = fit_type
+    if residual_rms is not None:
+        params["residual_rms"] = float(residual_rms)
+    if interactive:
+        params["interactive"] = True
+    if fit_type in PEAK_FIT_TYPES:
+        params["fit_params_version"] = FIT_PARAMS_VERSION
+        params["peak_parameterization"] = PEAK_PARAMETERIZATION
+    validate_fit_params(params)
+    return params
+
+
+def convert_legacy_peak_fit_params(
+    fit_params: Mapping[str, FitParamValue],
+) -> FitParams:
+    """Convert an area-based peak fit dictionary to the height-based schema.
+
+    The input mapping is never mutated.
+
+    Args:
+        fit_params: Historical, unversioned peak fit parameters.
+
+    Returns:
+        Converted copy using ``amplitude`` parameter names and schema version 2.
+
+    Raises:
+        ValueError: If the mapping is incomplete, already versioned or not a
+         supported peak fit.
+    """
+    fit_type = fit_params.get("fit_type")
+    if not isinstance(fit_type, str) or fit_type not in PEAK_FIT_TYPES:
+        raise ValueError(f"Unsupported legacy peak fit type: {fit_type!r}")
+    if "fit_params_version" in fit_params or "peak_parameterization" in fit_params:
+        raise ValueError("Fit parameters are already versioned")
+    current_names = [
+        name
+        for name in fit_params
+        if name == "amplitude" or name.startswith("amplitude_")
+    ]
+    if current_names:
+        raise ValueError(
+            f"Legacy peak fit parameters mix old and current keys: {current_names}"
+        )
+
+    model_by_type: dict[str, Type[pulse.PulseFitModel]] = {
+        "gaussian": pulse.GaussianModel,
+        "lorentzian": pulse.LorentzianModel,
+        "voigt": pulse.VoigtModel,
+        "multigaussian": pulse.GaussianModel,
+        "multilorentzian": pulse.LorentzianModel,
+    }
+    model = model_by_type[fit_type]
+    converted = dict(fit_params)
+    legacy_names = sorted(name for name in converted if _is_legacy_amplitude_key(name))
+    if not legacy_names:
+        raise ValueError("No legacy area parameter found")
+    for legacy_name in legacy_names:
+        suffix = legacy_name.removeprefix("amp")
+        sigma_name = f"sigma{suffix}"
+        if sigma_name not in converted:
+            raise ValueError(f"Missing parameter required for conversion: {sigma_name}")
+        area = converted.pop(legacy_name)
+        sigma = converted[sigma_name]
+        if not _is_finite_real(area) or not _is_finite_real(sigma):
+            raise ValueError(f"Non-numeric legacy peak parameters: {legacy_name}")
+        converted[f"amplitude{suffix}"] = float(model.amplitude_from_area(area, sigma))
+    converted["fit_params_version"] = FIT_PARAMS_VERSION
+    converted["peak_parameterization"] = PEAK_PARAMETERIZATION
+    validate_fit_params(converted)
+    return converted
 
 
 class FitComputer:
@@ -88,12 +225,30 @@ class FitComputer:
         """Compute parameter bounds for fitting."""
         return None
 
-    def create_params(self, y_fitted: np.ndarray, **params) -> dict[str, float]:
+    def transition_sign(self, edge_fraction: float = 0.1) -> float:
+        """Return the direction of a monotonic transition in the data.
+
+        Compares the mean level over the first and last `edge_fraction` of the
+        samples. Used by step-like models (CDF, sigmoid) to seed a signed
+        amplitude, so that descending transitions are reachable.
+
+        Args:
+            edge_fraction: Fraction of the samples used on each side.
+
+        Returns:
+            ``1.0`` for a rising transition, ``-1.0`` for a falling one.
+        """
+        n_edge = max(1, int(round(self.y.size * edge_fraction)))
+        y_start = float(np.mean(self.y[:n_edge]))
+        y_end = float(np.mean(self.y[-n_edge:]))
+        return 1.0 if y_end >= y_start else -1.0
+
+    def create_params(self, y_fitted: np.ndarray, **params) -> FitParams:
         """Create a fit parameters dictionary from given parameters."""
         self.check_params(**params)
-        params["fit_type"] = self.__class__.__name__.replace("FitComputer", "").lower()
-        params["residual_rms"] = np.sqrt(np.mean((self.y - y_fitted) ** 2))
-        return params
+        fit_type = self.__class__.__name__.replace("FitComputer", "").lower()
+        residual_rms = np.sqrt(np.mean((self.y - y_fitted) ** 2))
+        return create_fit_params(fit_type, params, residual_rms=residual_rms)
 
     def fit(self) -> tuple[np.ndarray, dict[str, float]]:
         """Fit the model to the data."""
@@ -223,116 +378,126 @@ class PolynomialFitComputer(FitComputer):
         return dict(zip(param_names, coeffs))
 
 
+def _estimate_peak_baseline(y: np.ndarray) -> float:
+    """Estimate a peak signal's baseline from edge samples."""
+    edge_size = max(1, len(y) // 10)
+    return float(np.median(np.concatenate((y[:edge_size], y[-edge_size:]))))
+
+
+def _estimate_signed_peak(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float]:
+    """Estimate signed peak height, center and baseline from edge samples."""
+    baseline = _estimate_peak_baseline(y)
+    deviations = y - baseline
+    positive_index = int(np.argmax(deviations))
+    negative_index = int(np.argmin(deviations))
+    peak_index = (
+        positive_index
+        if deviations[positive_index] >= abs(deviations[negative_index])
+        else negative_index
+    )
+    return float(deviations[peak_index]), float(x[peak_index]), baseline
+
+
 class GaussianFitComputer(FitComputer):
     """Gaussian fit computer"""
 
-    PARAMS_NAMES = ("amp", "sigma", "x0", "y0")
+    PARAMS_NAMES = ("amplitude", "sigma", "x0", "y0")
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Evaluate Gaussian function at given x values."""
         # pylint: disable=unbalanced-tuple-unpacking
-        amp, sigma, x0, y0 = cls.args_kwargs_to_list(*args, **kwargs)
-        return pulse.GaussianModel.func(x, amp, sigma, x0, y0)
+        amplitude, sigma, x0, y0 = cls.args_kwargs_to_list(*args, **kwargs)
+        return pulse.GaussianModel.evaluate(x, amplitude, sigma, x0, y0)
 
     def compute_initial_params(self) -> dict[str, float]:
         """Compute initial parameters for Gaussian fitting."""
         dx = np.max(self.x) - np.min(self.x)
-        dy = np.max(self.y) - np.min(self.y)
-        y_min = np.min(self.y)
-
         sigma = dx * 0.1
-        amp = pulse.GaussianModel.get_amp_from_amplitude(dy, sigma)
-        x0 = peakdetection.xpeak(self.x, self.y)
-        y0 = y_min
+        amplitude, x0, y0 = _estimate_signed_peak(self.x, self.y)
 
-        return {"amp": amp, "sigma": sigma, "x0": x0, "y0": y0}
+        return {"amplitude": amplitude, "sigma": sigma, "x0": x0, "y0": y0}
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for Gaussian fitting."""
         dy = np.max(self.y) - np.min(self.y)
         y_min = np.min(self.y)
+        y_max = np.max(self.y)
 
         return [
-            (0.0, initial_params["amp"] * 2),  # amp
+            (-2.0 * dy, 2.0 * dy),  # amplitude
             (initial_params["sigma"] * 0.1, initial_params["sigma"] * 10),  # sigma
             (np.min(self.x), np.max(self.x)),  # x0
-            (y_min - 0.2 * dy, y_min + 0.2 * dy),  # y0
+            (y_min - 0.2 * dy, y_max + 0.2 * dy),  # y0
         ]
 
 
 class LorentzianFitComputer(FitComputer):
     """Lorentzian fit computer"""
 
-    PARAMS_NAMES = ("amp", "sigma", "x0", "y0")
+    PARAMS_NAMES = ("amplitude", "sigma", "x0", "y0")
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Evaluate Lorentzian function at given x values."""
         # pylint: disable=unbalanced-tuple-unpacking
-        amp, sigma, x0, y0 = cls.args_kwargs_to_list(*args, **kwargs)
-        return pulse.LorentzianModel.func(x, amp, sigma, x0, y0)
+        amplitude, sigma, x0, y0 = cls.args_kwargs_to_list(*args, **kwargs)
+        return pulse.LorentzianModel.evaluate(x, amplitude, sigma, x0, y0)
 
     def compute_initial_params(self) -> dict[str, float]:
         """Compute initial parameters for Lorentzian fitting."""
         dx = np.max(self.x) - np.min(self.x)
-        dy = np.max(self.y) - np.min(self.y)
-        y_min = np.min(self.y)
-
         sigma = dx * 0.1
-        amp = pulse.LorentzianModel.get_amp_from_amplitude(dy, sigma)
-        x0 = peakdetection.xpeak(self.x, self.y)
-        y0 = y_min
+        amplitude, x0, y0 = _estimate_signed_peak(self.x, self.y)
 
-        return {"amp": amp, "sigma": sigma, "x0": x0, "y0": y0}
+        return {"amplitude": amplitude, "sigma": sigma, "x0": x0, "y0": y0}
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for Lorentzian fitting."""
         dy = np.max(self.y) - np.min(self.y)
         y_min = np.min(self.y)
+        y_max = np.max(self.y)
 
         return [
-            (0.0, initial_params["amp"] * 2),  # amp
+            (-2.0 * dy, 2.0 * dy),  # amplitude
             (initial_params["sigma"] * 0.1, initial_params["sigma"] * 10),  # sigma
             (np.min(self.x), np.max(self.x)),  # x0
-            (y_min - 0.2 * dy, y_min + 0.2 * dy),  # y0
+            (y_min - 0.2 * dy, y_max + 0.2 * dy),  # y0
         ]
 
 
 class VoigtFitComputer(FitComputer):
     """Voigt fit computer"""
 
-    PARAMS_NAMES = ("amp", "sigma", "x0", "y0")
+    PARAMS_NAMES = ("amplitude", "sigma", "x0", "y0")
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Evaluate Voigt function at given x values."""
         # pylint: disable=unbalanced-tuple-unpacking
-        amp, sigma, x0, y0 = cls.args_kwargs_to_list(*args, **kwargs)
-        return pulse.VoigtModel.func(x, amp, sigma, x0, y0)
+        amplitude, sigma, x0, y0 = cls.args_kwargs_to_list(*args, **kwargs)
+        return pulse.VoigtModel.evaluate(x, amplitude, sigma, x0, y0)
 
     def compute_initial_params(self) -> dict[str, float]:
         """Compute initial parameters for Voigt fitting."""
         dx = np.max(self.x) - np.min(self.x)
-        dy = np.max(self.y) - np.min(self.y)
-        y_min = np.min(self.y)
-
         sigma = dx * 0.1
-        amp = pulse.VoigtModel.get_amp_from_amplitude(dy, sigma)
-        x0 = peakdetection.xpeak(self.x, self.y)
-        y0 = y_min
+        amplitude, x0, y0 = _estimate_signed_peak(self.x, self.y)
 
-        return {"amp": amp, "sigma": sigma, "x0": x0, "y0": y0}
+        return {"amplitude": amplitude, "sigma": sigma, "x0": x0, "y0": y0}
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for Voigt fitting."""
         sigma = initial_params["sigma"]
-        amp = initial_params["amp"]
+        dy = np.max(self.y) - np.min(self.y)
         return [
-            (0.0, 10 * amp),  # amp
+            (-10.0 * dy, 10.0 * dy),  # amplitude
             (sigma * 0.01, sigma * 10),  # sigma
             (np.min(self.x), np.max(self.x)),  # x0
-            (initial_params["y0"] - amp, initial_params["y0"] + amp),  # y0
+            (
+                np.min(self.y) - dy,
+                np.max(self.y) + dy,
+            ),  # y0
         ]
 
 
@@ -387,7 +552,21 @@ class ExponentialFitComputer(FitComputer):
 
 
 class PlanckianFitComputer(FitComputer):
-    """Planckian fit computer"""
+    """Planckian fit computer.
+
+    .. warning::
+
+        This parameterization is **degenerate**: the model is strictly
+        invariant under ``x0 -> k*x0``, ``sigma -> k*sigma``,
+        ``amp -> amp/k**5``. Only the combinations ``x0/sigma`` and
+        ``amp * x0**5`` are determined by the data; the individual values of
+        ``amp``, ``x0`` and ``sigma`` depend on the starting point of the
+        optimiser and must not be interpreted on their own.
+
+        In particular ``x0`` is **not** the peak abscissa: the maximum sits at
+        approximately ``1.007 * x0 / sigma``, so the two coincide only when
+        ``sigma == 1``.
+    """
 
     PARAMS_NAMES = ("amp", "x0", "sigma", "y0")
 
@@ -398,15 +577,15 @@ class PlanckianFitComputer(FitComputer):
         Args:
             x: wavelength values (in nm or other units)
             amp: amplitude scaling factor
-            x0: peak wavelength (Wien's displacement law)
+            x0: scale parameter (see the class-level degeneracy warning: this
+             is *not* the peak wavelength unless ``sigma == 1``)
             sigma: width parameter (larger sigma = wider peak)
             y0: baseline offset
         """
         # pylint: disable=unbalanced-tuple-unpacking
         amp, x0, sigma, y0 = cls.args_kwargs_to_list(*args, **kwargs)
 
-        # Planck-like function with Wien's displacement law behavior
-        # The function peaks at approximately x0 when properly parameterized
+        # Planck-like function: the maximum is located at ~1.007 * x0 / sigma
 
         x = np.asarray(x, dtype=float)
         y = np.full_like(x, y0, dtype=float)
@@ -599,7 +778,22 @@ class TwoHalfGaussianFitComputer(FitComputer):
 
 
 class DoubleExponentialFitComputer(FitComputer):
-    """Piecewise exponential (raise-decay) fit computer."""
+    """Piecewise exponential (raise-decay) fit computer.
+
+    .. note::
+
+        This model is fitted **unbounded**. The `amp_bound`/`rate_bound`
+        expressions in :meth:`compute_initial_params` only sanitise the seed:
+        used as optimisation bounds they are far too tight (on the reference
+        dataset they raise the residual RMS from 1.90 to 16.33).
+
+    .. note::
+
+        ``x_center`` only enters the model through boolean masks, so the model
+        is piecewise constant with respect to it and its numerical derivative
+        is zero almost everywhere. The optimiser cannot move it: the junction
+        stays at the position returned by :meth:`compute_initial_params`.
+    """
 
     PARAMS_NAMES = ("x_center", "a_left", "b_left", "a_right", "b_right", "y0")
 
@@ -632,9 +826,6 @@ class DoubleExponentialFitComputer(FitComputer):
         x_range = np.max(self.x) - np.min(self.x)
         y_max = np.max(self.y)
 
-        # Baseline is rarely different from zero:
-        y0 = 0.0
-
         # Analyze signal characteristics for better initial guesses
         peak_idx = np.argmax(self.y)
 
@@ -646,7 +837,6 @@ class DoubleExponentialFitComputer(FitComputer):
         # fitting each curve with exponential functions using exponential_fit().
         # X center estimation is very rough here, so we need to remove say 10% of
         # the x range on each side to avoid fitting artifacts.
-        x_range = np.max(self.x) - np.min(self.x)
         x_left_mask = self.x < (x_center - 0.1 * x_range)
         x_right_mask = self.x >= (x_center + 0.1 * x_range)
 
@@ -666,11 +856,12 @@ class DoubleExponentialFitComputer(FitComputer):
         b_right = right_params["b"]
         y0 = (left_params["y0"] + right_params["y0"]) / 2
 
-        # Set bounds for parameters - b can be positive or negative
+        # Sanity clamp on the *seed* only: the per-branch exponential fits above
+        # are performed on truncated data and occasionally return a wildly
+        # off-scale coefficient, which would make `curve_fit` diverge. These are
+        # deliberately *not* used as optimisation bounds (see class docstring).
         amp_bound = max(abs(y_max - y0), y_range) * 2
         rate_bound = 5.0 / max(x_range, 1e-6)  # Avoid division by zero
-
-        # Ensure initial parameters are within bounds
         b_left = np.clip(b_left, -rate_bound, rate_bound)
         b_right = np.clip(b_right, -rate_bound, rate_bound)
         a_left = np.clip(a_left, -amp_bound, amp_bound)
@@ -702,22 +893,22 @@ class BaseMultiPeakFitComputer(FitComputer):
         n_peaks = len(self.peak_indices)
         names = []
         for i in range(n_peaks):
-            names.extend([f"amp_{i + 1}", f"sigma_{i + 1}", f"x0_{i + 1}"])
+            names.extend([f"amplitude_{i + 1}", f"sigma_{i + 1}", f"x0_{i + 1}"])
         names.append("y0")
         return tuple(names)
 
     @classmethod
     def infer_param_names_from_kwargs(cls, kwargs: dict) -> tuple[str, ...]:
         """Infer parameter names for multi-gaussian from kwargs."""
-        # Find all amp_X parameters to count peaks
-        amp_params = [k for k in kwargs.keys() if k.startswith("amp_")]
-        n_peaks = len(amp_params)
+        # Find all amplitude_X parameters to count peaks
+        amplitude_params = [k for k in kwargs.keys() if k.startswith("amplitude_")]
+        n_peaks = len(amplitude_params)
         if n_peaks == 0:
-            raise ValueError("No amp parameters found")
+            raise ValueError("No amplitude parameters found")
 
         names = []
         for i in range(1, n_peaks + 1):
-            names.extend([f"amp_{i}", f"sigma_{i}", f"x0_{i}"])
+            names.extend([f"amplitude_{i}", f"sigma_{i}", f"x0_{i}"])
         names.append("y0")
         return tuple(names)
 
@@ -732,13 +923,14 @@ class BaseMultiPeakFitComputer(FitComputer):
         ) // 3  # -1 for y0, then divide by 3 params per peak
         y_result = np.zeros_like(x) + paramlist[-1]
         for i in range(n_peaks):
-            amp, sigma, x0 = paramlist[3 * i : 3 * i + 3]
-            y_result += cls.PULSE_MODEL.func(x, amp, sigma, x0, 0.0)
+            amplitude, sigma, x0 = paramlist[3 * i : 3 * i + 3]
+            y_result += cls.PULSE_MODEL.evaluate(x, amplitude, sigma, x0, 0.0)
         return y_result
 
     def compute_initial_params(self) -> dict[str, float]:
         """Compute initial parameters for Multi Gaussian fitting."""
         params = {}
+        baseline = _estimate_peak_baseline(self.y)
         for i, peak_idx in enumerate(self.peak_indices):
             if i > 0:
                 istart = (self.peak_indices[i - 1] + peak_idx) // 2
@@ -749,16 +941,15 @@ class BaseMultiPeakFitComputer(FitComputer):
             else:
                 iend = len(self.x) - 1
             local_dx = 0.5 * (self.x[iend] - self.x[istart])
-            local_dy = np.max(self.y[istart:iend]) - np.min(self.y[istart:iend])
-            amp = self.PULSE_MODEL.get_amp_from_amplitude(local_dy, local_dx * 0.1)
+            amplitude = self.y[peak_idx] - baseline
             sigma = local_dx * 0.1
             x0 = self.x[peak_idx]
 
-            params[f"amp_{i + 1}"] = amp
+            params[f"amplitude_{i + 1}"] = amplitude
             params[f"sigma_{i + 1}"] = sigma
             params[f"x0_{i + 1}"] = x0
 
-        params["y0"] = np.min(self.y)
+        params["y0"] = baseline
         return params
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
@@ -774,9 +965,13 @@ class BaseMultiPeakFitComputer(FitComputer):
             else:
                 iend = len(self.x) - 1
             local_dx = 0.5 * (self.x[iend] - self.x[istart])
+            local_dy = np.max(self.y[istart:iend]) - np.min(self.y[istart:iend])
+            amplitude_range = 10.0 * max(
+                local_dy, abs(initial_params[f"amplitude_{i + 1}"])
+            )
             bounds.extend(
                 [
-                    (0.0, initial_params[f"amp_{i + 1}"] * 10.0),  # amp
+                    (-amplitude_range, amplitude_range),  # amplitude
                     (local_dx * 0.001, local_dx * 10.0),  # sigma
                     (self.x[istart], self.x[iend]),  # x0
                 ]
@@ -785,13 +980,6 @@ class BaseMultiPeakFitComputer(FitComputer):
         dy = np.max(self.y) - np.min(self.y)
         bounds.append((y0 - dy, y0 + dy))
         return bounds
-
-    def create_params(self, y_fitted: np.ndarray, **params) -> dict[str, float]:
-        """Create a flat fit parameters dictionary."""
-        self.check_params(**params)
-        params["fit_type"] = self.__class__.__name__.replace("FitComputer", "").lower()
-        params["residual_rms"] = np.sqrt(np.mean((self.y - y_fitted) ** 2))
-        return params
 
 
 class MultiGaussianFitComputer(BaseMultiPeakFitComputer):
@@ -877,23 +1065,26 @@ class CDFFitComputer(FitComputer):
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return {
-            "amplitude": dy,
-            "mu": (x_max + np.abs(x_min)) / 2,
+            # `amplitude * erf(...)` spans `2 * amplitude` peak-to-peak, and is
+            # negative for a descending transition:
+            "amplitude": self.transition_sign() * dy / 2,
+            "mu": (x_min + x_max) / 2,
             "sigma": dx / 10,
-            "baseline": dy / 2,
+            # `baseline` is a level, not a range:
+            "baseline": y_min + dy / 2,
         }
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for CDF fitting."""
         y_min, y_max = np.min(self.y), np.max(self.y)
-        dy = initial_params["amplitude"]
+        amp = abs(initial_params["amplitude"])
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return [
-            (0.0, dy * 2),  # amplitude
+            (-2 * amp, 2 * amp),  # amplitude (signed: descending transitions)
             (x_min, x_max),  # mu
             (dx * 0.001, dx),  # sigma
-            (y_min - dy, y_max + dy),  # baseline
+            (y_min - amp, y_max + amp),  # baseline
         ]
 
 
@@ -915,24 +1106,27 @@ class SigmoidFitComputer(FitComputer):
         dy = y_max - y_min
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
+        sign = self.transition_sign()
         return {
-            "amplitude": dy,
+            # A descending transition is described by a negative amplitude
+            # starting from the upper level (`k` stays positive):
+            "amplitude": sign * dy,
             "k": 4.0 / dx,
-            "x0": (x_max + np.abs(x_min)) / 2,
-            "offset": y_min,
+            "x0": (x_min + x_max) / 2,
+            "offset": y_min if sign > 0 else y_max,
         }
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for Sigmoid fitting."""
         y_min, y_max = np.min(self.y), np.max(self.y)
-        dy = initial_params["amplitude"]
+        amp = abs(initial_params["amplitude"])
         x_min, x_max = np.min(self.x), np.max(self.x)
         dx = x_max - x_min
         return [
-            (0.0, 10 * dy),  # amplitude
+            (-10 * amp, 10 * amp),  # amplitude (signed: descending transitions)
             (0.1 / dx, 100.0 / dx),  # k
             (x_min, x_max),  # x0
-            (y_min - dy, y_max + dy),  # offset
+            (y_min - amp, y_max + amp),  # offset
         ]
 
 
@@ -1153,6 +1347,80 @@ FIT_TYPE_MAPPING = {
 }
 
 
+def validate_fit_params(fit_params: Mapping[str, FitParamValue]) -> None:
+    """Validate a fit-parameter dictionary before numerical evaluation.
+
+    Args:
+        fit_params: Fit parameters and metadata.
+
+    Raises:
+        ValueError: If the fit type, schema or parameter names are invalid.
+        pulse.LegacyPeakParameterizationError: If an unversioned area-based peak
+         dictionary is detected.
+    """
+    fit_type = fit_params.get("fit_type")
+    if not isinstance(fit_type, str) or fit_type not in FIT_TYPE_MAPPING:
+        raise ValueError(f"Unsupported fit type: {fit_type!r}")
+
+    if fit_type in PEAK_FIT_TYPES:
+        version = fit_params.get("fit_params_version")
+        parameterization = fit_params.get("peak_parameterization")
+        legacy_keys = [name for name in fit_params if _is_legacy_amplitude_key(name)]
+        if version is None and legacy_keys:
+            raise pulse.LegacyPeakParameterizationError(
+                "Unversioned area-based peak fit parameters cannot be evaluated. "
+                "Convert them explicitly with convert_legacy_peak_fit_params()."
+            )
+        if version != FIT_PARAMS_VERSION:
+            raise ValueError(
+                f"Unsupported fit_params_version for {fit_type}: {version!r}"
+            )
+        if parameterization != PEAK_PARAMETERIZATION:
+            raise ValueError(
+                f"Unsupported peak parameterization for {fit_type}: "
+                f"{parameterization!r}"
+            )
+        if legacy_keys:
+            raise ValueError(f"Legacy peak parameter keys in version 2: {legacy_keys}")
+
+    residual_rms = fit_params.get("residual_rms")
+    if residual_rms is not None and not _is_finite_real(residual_rms):
+        raise ValueError("Residual RMS must be a finite real number")
+    interactive = fit_params.get("interactive")
+    if interactive is not None and not isinstance(interactive, bool):
+        raise ValueError("Interactive fit marker must be a boolean")
+
+    values = {
+        name: value
+        for name, value in fit_params.items()
+        if name not in FIT_PARAMS_METADATA_KEYS
+    }
+    fit_class = FIT_TYPE_MAPPING[fit_type]
+    expected_names = (
+        fit_class.PARAMS_NAMES
+        if fit_class.PARAMS_NAMES
+        else fit_class.infer_param_names_from_kwargs(values)
+    )
+    missing = set(expected_names).difference(values)
+    unexpected = set(values).difference(expected_names)
+    if missing or unexpected:
+        raise ValueError(
+            f"Invalid parameters for {fit_type}: missing={sorted(missing)}, "
+            f"unexpected={sorted(unexpected)}"
+        )
+    non_numeric = [name for name, value in values.items() if not _is_finite_real(value)]
+    if non_numeric:
+        raise ValueError(f"Non-numeric fit parameters: {sorted(non_numeric)}")
+    if fit_type in PEAK_FIT_TYPES:
+        invalid_widths = [
+            name
+            for name, value in values.items()
+            if (name == "sigma" or name.startswith("sigma_")) and value <= 0
+        ]
+        if invalid_widths:
+            raise ValueError(f"Non-positive fit widths: {sorted(invalid_widths)}")
+
+
 def evaluate_fit(x: np.ndarray, **fit_params) -> np.ndarray:
     """Evaluate fit function with given parameters at x values.
 
@@ -1163,9 +1431,11 @@ def evaluate_fit(x: np.ndarray, **fit_params) -> np.ndarray:
     Returns:
         Y values computed from the fit function
     """
-    params = fit_params.copy()
-    params.pop("residual_rms", None)
-    fcclass: Type[FitComputer] = FIT_TYPE_MAPPING.get(params.pop("fit_type", None))
-    if fcclass is None:
-        raise ValueError(f"Unsupported fit type: {fit_params.get('fit_type')}")
+    validate_fit_params(fit_params)
+    params = {
+        name: value
+        for name, value in fit_params.items()
+        if name not in FIT_PARAMS_METADATA_KEYS
+    }
+    fcclass: Type[FitComputer] = FIT_TYPE_MAPPING[fit_params["fit_type"]]
     return fcclass.evaluate(x, **params)

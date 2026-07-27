@@ -56,6 +56,27 @@ def test_psd_decibel_branch() -> None:
     assert f.shape == p_db.shape
 
 
+def test_decibel_conversion_is_finite_on_null_spectral_lines() -> None:
+    """A spectrum with exactly zero lines must stay finite in dB.
+
+    A constant signal has zero content at every non-zero frequency, so the naive
+    ``log10`` yields ``-inf`` samples that propagate to autoscaling and export."""
+    x = np.linspace(0.0, 1.0, 64)
+    y = np.ones_like(x)
+    _f, mag_db = f_mod.magnitude_spectrum(x, y, decibel=True)
+    assert np.all(np.isfinite(mag_db))
+    # The floor must stay far below the peak, so it cannot be mistaken for signal:
+    assert np.min(mag_db) < np.max(mag_db) - 300.0
+
+
+def test_decibel_conversion_of_identically_zero_spectrum() -> None:
+    """An identically zero signal has no dynamic range: -inf is the honest answer."""
+    x = np.linspace(0.0, 1.0, 64)
+    y = np.zeros_like(x)
+    _f, mag_db = f_mod.magnitude_spectrum(x, y, decibel=True)
+    assert np.all(np.isneginf(mag_db))
+
+
 def test_ifft1d_validation_errors() -> None:
     """``ifft1d`` rejects single-sample inputs and all-zero spectra with
     ``ValueError`` (degenerate cases)."""

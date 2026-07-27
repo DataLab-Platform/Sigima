@@ -29,11 +29,13 @@ from sigima.tools.signal import fitting, peakdetection, pulse
 
 EXPECTED_FIT_PARAMS = {
     "gaussian_fit": {
-        "amp": 151.5516963005346,
+        "amplitude": 5.989788714804054,
         "sigma": 10.093908516282582,
         "x0": 49.98522207721181,
         "y0": 0.14038830988167578,
         "fit_type": "gaussian",
+        "fit_params_version": fitting.FIT_PARAMS_VERSION,
+        "peak_parameterization": fitting.PEAK_PARAMETERIZATION,
     },
     "exponential_fit": {
         "a": 23299.374597935774,
@@ -61,6 +63,27 @@ EXPECTED_FIT_PARAMS = {
         "fit_type": "doubleexponential",
     },
 }
+
+
+@pytest.fixture(autouse=True)
+def seeded_rng() -> None:
+    """Seed NumPy's global RNG before every test in this module.
+
+    Most tests here add synthetic noise through ``np.random.*`` and then check
+    the recovered parameters against fixed tolerances. Without a seed, each run
+    draws a different realisation, so a marginal test fails intermittently and
+    the failure cannot be reproduced. Tests that need a specific realisation
+    still call ``np.random.seed()`` themselves.
+    """
+    np.random.seed(42)
+
+
+def __check_peak_fit_schema(params: dict) -> None:
+    """Check the versioned height-based peak fit schema."""
+    assert params["fit_params_version"] == fitting.FIT_PARAMS_VERSION
+    assert params["peak_parameterization"] == fitting.PEAK_PARAMETERIZATION
+    assert "amp" not in params
+    assert not any(name.startswith("amp_") for name in params)
 
 
 def __check_tools_proc_interface(
@@ -206,16 +229,14 @@ def test_signal_gaussian_fit() -> None:
 
     _fitted_y, params = fitting.gaussian_fit(x, y)
 
-    # Convert fitted amp to peak amplitude for comparison
-    fitted_peak_amplitude = pulse.GaussianModel.amplitude(
-        params["amp"], params["sigma"]
-    )
+    fitted_peak_amplitude = params["amplitude"]
     check_scalar_result(
         "Gaussian peak amplitude", fitted_peak_amplitude, peak_amplitude_true, rtol=1e-3
     )
     check_scalar_result("Gaussian sigma", params["sigma"], sigma_true, rtol=1e-3)
     check_scalar_result("Gaussian center", params["x0"], x0_true, rtol=1e-3)
     check_scalar_result("Gaussian offset", params["y0"], y0_true, rtol=1e-3)
+    __check_peak_fit_schema(params)
 
     execenv.print("Testing Gaussian fitting with noisy synthetic data...")
 
@@ -252,10 +273,7 @@ def test_signal_lorentzian_fit() -> None:
         fitting.lorentzian_fit, sigima.proc.signal.lorentzian_fit, x, y
     )
 
-    # Convert fitted amp to peak amplitude for comparison
-    fitted_peak_amplitude = pulse.LorentzianModel.amplitude(
-        params["amp"], params["sigma"]
-    )
+    fitted_peak_amplitude = params["amplitude"]
     check_scalar_result(
         "Lorentzian peak amplitude",
         fitted_peak_amplitude,
@@ -267,6 +285,7 @@ def test_signal_lorentzian_fit() -> None:
     )
     assert np.abs(params["x0"] - x0_true) < 0.1, "Center should be accurate"
     assert np.abs(params["y0"] - y0_true) < 0.1, "Offset should be accurate"
+    __check_peak_fit_schema(params)
 
 
 @pytest.mark.validation
@@ -294,15 +313,42 @@ def test_signal_voigt_fit() -> None:
     assert fitted_y.shape == y.shape, "Fitted y should have same shape as input"
 
     # Check parameter structure
-    assert "amp" in params, "Should have amplitude parameter"
+    assert "amplitude" in params, "Should have amplitude parameter"
     assert "sigma" in params, "Should have sigma parameter"
     assert "x0" in params, "Should have x0 parameter"
     assert "y0" in params, "Should have y0 parameter"
 
     # Parameters should be reasonable (within factor of 5 of true values)
-    assert 0.1 * amplitude_true < params["amp"] < 5 * amplitude_true
+    assert 0.1 * amplitude_true < params["amplitude"] < 5 * amplitude_true
     assert 0.1 * sigma_true < params["sigma"] < 5 * sigma_true
     assert x0_true - 2 * sigma_true < params["x0"] < x0_true + 2 * sigma_true
+    __check_peak_fit_schema(params)
+
+
+@pytest.mark.parametrize(
+    ("fit_func", "model"),
+    [
+        (fitting.gaussian_fit, pulse.GaussianModel),
+        (fitting.lorentzian_fit, pulse.LorentzianModel),
+        (fitting.voigt_fit, pulse.VoigtModel),
+    ],
+)
+def test_signed_peak_fit_recovers_negative_amplitude(fit_func, model) -> None:
+    """Peak fit computers recover a negative dip instead of forcing a peak."""
+    x = np.linspace(-10.0, 10.0, 400)
+    expected = {
+        "amplitude": -3.0,
+        "sigma": 1.5,
+        "x0": 0.75,
+        "y0": 2.0,
+    }
+    y = model.evaluate(x, **expected)
+
+    _fitted_y, params = fit_func(x, y)
+
+    for name, value in expected.items():
+        assert params[name] == pytest.approx(value, rel=1e-3, abs=1e-3)
+    __check_peak_fit_schema(params)
 
 
 @pytest.mark.validation
@@ -610,10 +656,33 @@ def test_multigaussian_single_peak() -> None:
 
     # Check results - expect at least one peak
     assert len(peaks) >= 1, "Should detect at least one peak"
-    assert "amp_1" in params, "Should have amplitude for first peak"
+    assert "amplitude_1" in params, "Should have amplitude for first peak"
     assert "sigma_1" in params, "Should have sigma for first peak"
     assert "x0_1" in params, "Should have x0 for first peak"
     assert "y0" in params, "Should have y0 baseline parameter"
+    __check_peak_fit_schema(params)
+
+
+@pytest.mark.parametrize(
+    ("fit_func", "model"),
+    [
+        (fitting.multigaussian_fit, pulse.GaussianModel),
+        (fitting.multilorentzian_fit, pulse.LorentzianModel),
+    ],
+)
+def test_multi_peak_fit_preserves_negative_amplitude(fit_func, model) -> None:
+    """An explicitly indexed multi-peak component may be a negative dip."""
+    x = np.linspace(-10.0, 10.0, 400)
+    y = model.evaluate(x, -3.0, 1.5, 0.75, 2.0)
+    dip_index = int(np.argmin(y))
+
+    _fitted_y, params = fit_func(x, y, peak_indices=[dip_index])
+
+    assert params["amplitude_1"] == pytest.approx(-3.0, rel=1e-3)
+    assert params["sigma_1"] == pytest.approx(1.5, rel=1e-3)
+    assert params["x0_1"] == pytest.approx(0.75, rel=1e-3)
+    assert params["y0"] == pytest.approx(2.0, rel=1e-3)
+    __check_peak_fit_schema(params)
 
 
 # This is not a validation test as there is no computation function for multi
@@ -649,13 +718,14 @@ def test_multigaussian_double_peak() -> None:
 
         # Check that we detected two peaks and got results
         assert len(peaks) >= 2, "Should detect at least two peaks"
-        assert "amp_1" in params, "Should have amplitude for first peak"
-        assert "amp_2" in params, "Should have amplitude for second peak"
+        assert "amplitude_1" in params, "Should have amplitude for first peak"
+        assert "amplitude_2" in params, "Should have amplitude for second peak"
         assert "sigma_1" in params, "Should have sigma for first peak"
         assert "sigma_2" in params, "Should have sigma for second peak"
         assert "x0_1" in params, "Should have x0 for first peak"
         assert "x0_2" in params, "Should have x0 for second peak"
         assert "y0" in params, "Should have y0 baseline parameter"
+        __check_peak_fit_schema(params)
     except ValueError as e:
         if "infeasible" in str(e):
             execenv.print(
@@ -694,10 +764,11 @@ def test_multilorentzian_single_peak() -> None:
 
     # Check results - expect at least one peak
     assert len(peaks) >= 1, "Should detect at least one peak"
-    assert "amp_1" in params, "Should have amplitude for first peak"
+    assert "amplitude_1" in params, "Should have amplitude for first peak"
     assert "sigma_1" in params, "Should have sigma for first peak"
     assert "x0_1" in params, "Should have x0 for first peak"
     assert "y0" in params, "Should have y0 baseline parameter"
+    __check_peak_fit_schema(params)
 
 
 # This is not a validation test as there is no computation function for multi
@@ -733,13 +804,14 @@ def test_multilorentzian_double_peak() -> None:
 
         # Check that we detected two peaks and got results
         assert len(peaks) >= 2, "Should detect at least two peaks"
-        assert "amp_1" in params, "Should have amplitude for first peak"
-        assert "amp_2" in params, "Should have amplitude for second peak"
+        assert "amplitude_1" in params, "Should have amplitude for first peak"
+        assert "amplitude_2" in params, "Should have amplitude for second peak"
         assert "sigma_1" in params, "Should have sigma for first peak"
         assert "sigma_2" in params, "Should have sigma for second peak"
         assert "x0_1" in params, "Should have x0 for first peak"
         assert "x0_2" in params, "Should have x0 for second peak"
         assert "y0" in params, "Should have y0 baseline parameter"
+        __check_peak_fit_schema(params)
     except ValueError as e:
         if "infeasible" in str(e):
             execenv.print(
@@ -822,25 +894,38 @@ def test_fitting_functions_available() -> None:
     execenv.print("Testing availability of fitting functions...")
 
     # Check that expected functions exist and are callable
-    expected_functions = [
-        "linear_fit",
-        "gaussian_fit",
-        "lorentzian_fit",
-        "voigt_fit",
+    expected_functions = {
+        "cdf_fit",
         "exponential_fit",
+        "gaussian_fit",
+        "linear_fit",
+        "lorentzian_fit",
+        "multigaussian_fit",
+        "multilorentzian_fit",
         "piecewiseexponential_fit",
         "planckian_fit",
-        "cdf_fit",
+        "polynomial_fit",
         "sigmoid_fit",
-        "twohalfgaussian_fit",
-        "multilorentzian_fit",
         "sinusoidal_fit",
-    ]
+        "twohalfgaussian_fit",
+        "voigt_fit",
+    }
 
     for func_name in expected_functions:
         assert hasattr(fitting, func_name), f"Function {func_name} should exist"
         func = getattr(fitting, func_name)
         assert callable(func), f"Function {func_name} should be callable"
+
+    # Guard against drift: a new public fitting function must be added above so
+    # that it is covered by the availability check.
+    actual_functions = {
+        name
+        for name in dir(fitting)
+        if name.endswith("_fit")
+        and name != "evaluate_fit"  # Not a model fitter
+        and callable(getattr(fitting, name))
+    }
+    assert actual_functions == expected_functions
 
 
 @pytest.mark.validation
@@ -884,6 +969,51 @@ def test_signal_evaluate_fit() -> None:
     del result.metadata["fit_params"]
     with pytest.raises(ValueError, match="Signal does not contain fit parameters"):
         sigima.proc.signal.extract_fit_params(result)
+
+
+def test_legacy_peak_fit_params_conversion() -> None:
+    """Legacy peak areas require explicit conversion before evaluation."""
+    x = np.linspace(-5.0, 5.0, 100)
+    amplitude, sigma, x0, y0 = -3.0, 1.5, 0.5, 0.2
+    legacy_params = {
+        "fit_type": "gaussian",
+        "amp": pulse.GaussianModel.area_from_amplitude(amplitude, sigma),
+        "sigma": sigma,
+        "x0": x0,
+        "y0": y0,
+        "residual_rms": 0.01,
+        "interactive": True,
+    }
+    original_params = legacy_params.copy()
+
+    with pytest.raises(
+        pulse.LegacyPeakParameterizationError,
+        match="convert_legacy_peak_fit_params",
+    ):
+        fitting.evaluate_fit(x, **legacy_params)
+
+    converted = fitting.convert_legacy_peak_fit_params(legacy_params)
+    assert legacy_params == original_params
+    assert converted["amplitude"] == pytest.approx(amplitude)
+    assert converted["residual_rms"] == pytest.approx(0.01)
+    assert converted["interactive"] is True
+    __check_peak_fit_schema(converted)
+    expected = pulse.GaussianModel.evaluate(x, amplitude, sigma, x0, y0)
+    np.testing.assert_allclose(fitting.evaluate_fit(x, **converted), expected)
+
+
+def test_legacy_peak_fit_conversion_rejects_mixed_keys() -> None:
+    """Explicit conversion never overwrites an existing height silently."""
+    params = {
+        "fit_type": "gaussian",
+        "amp": 1.0,
+        "amplitude": 2.0,
+        "sigma": 0.5,
+        "x0": 0.0,
+        "y0": 0.0,
+    }
+    with pytest.raises(ValueError, match="mix"):
+        fitting.convert_legacy_peak_fit_params(params)
 
 
 def test_fitting_user_experience() -> None:

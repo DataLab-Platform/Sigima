@@ -15,20 +15,20 @@ msgstr ""
 msgid "Various Features"
 msgstr "Fonctionnalités diverses"
 
-msgid ":doc:`/auto_examples/features/convolution`"
-msgstr ":doc:`/auto_examples/features/convolution`"
+msgid ":ref:`sphx_glr_auto_examples_features_convolution.py`"
+msgstr ":ref:`sphx_glr_auto_examples_features_convolution.py`"
 
-msgid ":doc:`/auto_examples/features/datalab_client`"
-msgstr ":doc:`/auto_examples/features/datalab_client`"
+msgid ":ref:`sphx_glr_auto_examples_features_datalab_client.py`"
+msgstr ":ref:`sphx_glr_auto_examples_features_datalab_client.py`"
 
-msgid ":doc:`/auto_examples/features/datetime_signals`"
-msgstr ":doc:`/auto_examples/features/datetime_signals`"
+msgid ":ref:`sphx_glr_auto_examples_features_datetime_signals.py`"
+msgstr ":ref:`sphx_glr_auto_examples_features_datetime_signals.py`"
 
-msgid ":doc:`/auto_examples/features/roi_grid`"
-msgstr ":doc:`/auto_examples/features/roi_grid`"
+msgid ":ref:`sphx_glr_auto_examples_features_roi_grid.py`"
+msgstr ":ref:`sphx_glr_auto_examples_features_roi_grid.py`"
 
-msgid ":doc:`/auto_examples/features/coordinate_systems`"
-msgstr ":doc:`/auto_examples/features/coordinate_systems`"
+msgid ":ref:`sphx_glr_auto_examples_features_coordinate_systems.py`"
+msgstr ":ref:`sphx_glr_auto_examples_features_coordinate_systems.py`"
 
-msgid ":doc:`/auto_examples/features/zero_padding`"
-msgstr ":doc:`/auto_examples/features/zero_padding`"
+msgid ":ref:`sphx_glr_auto_examples_features_zero_padding.py`"
+msgstr ":ref:`sphx_glr_auto_examples_features_zero_padding.py`"

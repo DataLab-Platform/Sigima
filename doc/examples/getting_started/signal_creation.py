@@ -62,7 +62,7 @@ gaussian_param = sigima.create_signal_parameters(
     yunit="a.u.",
     xmin=400.0,  # Minimum x value (wavelength)
     xmax=700.0,  # Maximum x value
-    a=2.5,  # Amplitude
+    amplitude=2.5,  # Signed peak height above the baseline
     mu=550.0,  # Center wavelength (green light)
     sigma=25.0,  # Peak width
 )
@@ -80,7 +80,7 @@ lorentzian_param = sigima.create_signal_parameters(
     yunit="a.u.",
     xmin=400.0,
     xmax=700.0,
-    a=1.8,  # Amplitude
+    amplitude=1.8,  # Signed peak height above the baseline
     mu=480.0,  # Center wavelength (blue light)
     sigma=15.0,  # Peak width
 )
