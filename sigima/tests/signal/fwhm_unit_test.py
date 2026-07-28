@@ -67,6 +67,7 @@ def test_signal_fwhm() -> None:
     1. Real signal data (fwhm.txt) - validates against manual measurement
     2. Synthetic Gaussian signals - validates against theoretical values
     3. Multi-peak signal - validates warning behavior
+    4. User-reported signal (fwhm.csv) - non-regression guard against past regressions
     """
     # Test 1: Real signal data (original validation test)
     obj = sigima.tests.data.get_test_signal("fwhm.txt")
@@ -129,6 +130,20 @@ def test_signal_fwhm() -> None:
         sigima.proc.signal.fwhm(
             obj, sigima.params.FWHMParam.create(method="zero-crossing")
         )
+
+    # Test 4: Non-regression guard on a user-reported signal.
+    # DataLab v0.20.1 returned an aberrant (far too small) width on this signal, while
+    # v0.18 and v1.2.1 returned the correct one. See DataLab-Platform/DataLab#356.
+    # The expected value below is the ground truth: it must not drift.
+    obj = sigima.tests.data.get_test_signal("fwhm.csv")
+    param = sigima.params.FWHMParam.create(method="zero-crossing")
+    # This signal has several crossing points, hence the expected warnings:
+    with pytest.warns(UserWarning):
+        geometry = sigima.proc.signal.fwhm(obj, param)
+    length = geometry.segments_lengths()[0]
+    sigima.tests.helpers.check_scalar_result(
+        "FWHM[zero-crossing, fwhm.csv]", length, 1.75636, rtol=1e-4
+    )
 
 
 @pytest.mark.validation
