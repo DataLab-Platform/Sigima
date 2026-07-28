@@ -514,6 +514,7 @@
 
     ```python
     import sigima.objects as sio
+
     param = sio.Ramp2DParam.create(width=100, height=100, a=1.0, b=2.0)
     image = sio.create_image_from_param(param)
     ```
