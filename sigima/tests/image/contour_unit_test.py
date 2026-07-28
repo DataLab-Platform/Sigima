@@ -4,9 +4,10 @@
 Contour finding test
 """
 
+from __future__ import annotations
+
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
 # pylint: disable=duplicate-code
-
 import sys
 import time
 
@@ -162,6 +163,9 @@ def test_contour_roi_polygon() -> None:
     assert image.roi is not None
     for roi in image.roi.single_rois:
         assert isinstance(roi, PolygonalROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
     execenv.print(f"Polygon ROIs created: {len(image.roi.single_rois)}")
 
 
@@ -179,6 +183,9 @@ def test_contour_roi_ellipse() -> None:
     # Ellipses are approximated as polygon ROIs
     for roi in image.roi.single_rois:
         assert isinstance(roi, PolygonalROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
     execenv.print(f"Polygon ROIs from ellipses: {len(image.roi.single_rois)}")
 
 
@@ -195,7 +202,44 @@ def test_contour_roi_circle() -> None:
     assert image.roi is not None
     for roi in image.roi.single_rois:
         assert isinstance(roi, CircularROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
     execenv.print(f"Circle ROIs created: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_merged_with_existing() -> None:
+    """Detected contour ROIs are appended to existing ROIs, not replacing them."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+
+    # Run detection on the clean image first
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.CIRCLE, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+
+    # Pre-define a ROI on the image (as if the user had defined it beforehand)
+    image.roi = sigima.objects.create_image_roi("circle", [50, 50, 20])
+    n_existing = len(image.roi.single_rois)
+    existing_rois = list(image.roi.single_rois)
+
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+
+    # The pre-existing ROI must still be present
+    for roi in existing_rois:
+        assert roi in image.roi.single_rois, (
+            "Existing ROI must be preserved after detection"
+        )
+    # New ROIs must have been appended (strictly more than before)
+    assert len(image.roi.single_rois) > n_existing, (
+        "Detected ROIs must be appended to existing ROIs"
+    )
+    execenv.print(
+        f"Merged ROIs: {n_existing} existing -> {len(image.roi.single_rois)} total"
+    )
 
 
 def test_contour_roi_disabled() -> None:

@@ -21,6 +21,7 @@
 
 ### 🛠️ Bug Fixes since version 1.1.5 ###
 
+* **Detected ROIs preserve existing ones**: Detection algorithms (peak, blob, Hough and contour detection) with `create_rois=True` now append the newly detected ROIs to any ROIs already defined on the image, instead of replacing them. Previously defined regions of interest are no longer lost. This closes [Issue #36](https://github.com/DataLab-Platform/Sigima/issues/36).
 * **ROI physical coordinates**: Fixed `create_image_roi_around_points` using pixel indices instead of physical coordinates (`indices=False`), causing misplaced ROIs on calibrated images
 * **Ellipse-to-polygon conversion**: Fixed shearing in polygon approximation of ellipse ROIs caused by incorrect trigonometric decomposition of rotation and semi-axes
 * **Custom signal XY preservation**: Fixed user-edited XY values being silently discarded when regenerating a custom signal from its creation parameters. This closes [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25).
@@ -28,6 +29,7 @@
 ### 🔧 Other changes since version 1.1.5 ###
 
 * **Remote control client**: Added `get_current_object_uuid()` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`
+* **New `BaseObj.add_roi()` method**: Non-destructive helper that merges a ROI object into an object's existing ROIs (keeping existing regions and deduplicating identical single ROIs); used by the detection ROI creation path
 * **API cleanup**: `store_contour_roi_metadata` made private (`_store_contour_roi_metadata`) — internal helper only used by `contour_shape()`
 * **`peak_detection` deprecated**: Use `extract_peak_positions` + `markers_table_to_signal` for new code
 * **Test coverage**: Added unit tests for contour ROI metadata handling, detection with non-unit pixel spacing, and non-uniform coordinate geometry operations

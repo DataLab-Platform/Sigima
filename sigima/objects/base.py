@@ -384,6 +384,26 @@ class BaseObj(Generic[TypeROI], metaclass=BaseObjMeta):
             self.metadata[ROI_KEY] = roi.to_dict()
         self.__roi_changed = True
 
+    def add_roi(self, roi: TypeROI) -> None:
+        """Add regions of interest, preserving any existing ones.
+
+        The provided ROI object is merged into the object's current ROI: existing
+        single ROIs are kept and the new ones are appended. Duplicate single ROIs
+        are ignored (see :meth:`sigima.objects.base.BaseROI.combine_with`). If the
+        object has no ROI yet, the given ROI is simply assigned.
+
+        Args:
+            roi: regions of interest object to merge into this object
+
+        Raises:
+            TypeError: if roi is incompatible with this object
+        """
+        roi_class = self.get_roi_class()
+        if not isinstance(roi, roi_class):
+            raise TypeError(f"Expected {roi_class}, got {type(roi)}")
+        current_roi = self.roi if self.roi is not None else roi_class()
+        self.roi = current_roi.combine_with(roi)
+
     @property
     def maskdata(self) -> np.ndarray | None:
         """Return masked data (areas outside defined regions of interest)
@@ -742,7 +762,9 @@ class BaseSingleROI(Generic[TypeObj, TypeROIParam], abc.ABC):  # type: ignore
         if not isinstance(other, BaseSingleROI):
             raise TypeError(f"Cannot compare {type(self)} with {type(other)}")
         return (
-            np.array_equal(self.coords, other.coords) and self.indices == other.indices
+            type(self) is type(other)
+            and np.array_equal(self.coords, other.coords)
+            and self.indices == other.indices
         )
 
     def get_physical_coords(self, obj: TypeObj) -> list[float]:
@@ -1024,7 +1046,7 @@ class BaseROI(Generic[TypeObj, TypeSingleROI, TypeROIParam], abc.ABC):  # type: 
             raise TypeError(f"Cannot combine {type(self)} with {type(other)}")
         combined_roi = self.copy()
         for roi in other.single_rois:
-            if all(s_roi != roi for s_roi in self.single_rois):
+            if all(s_roi != roi for s_roi in combined_roi.single_rois):
                 combined_roi.single_rois.append(roi)
         return combined_roi
 

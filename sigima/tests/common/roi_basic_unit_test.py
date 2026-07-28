@@ -9,6 +9,8 @@ ROI basic unit tests
 
 from __future__ import annotations
 
+import pytest
+
 import sigima.objects
 from sigima.tests.data import (
     create_multigaussian_image,
@@ -67,7 +69,68 @@ def test_image_roi_modification() -> None:
     assert len(obj.roi.single_rois) == nb_single_rois
 
 
+def test_object_add_roi() -> None:
+    """Test BaseObj.add_roi (non-destructive merge of ROIs into an object)"""
+    obj = create_multigaussian_image()
+
+    # Case 1: object has no ROI yet -> the ROI is simply assigned
+    assert obj.roi is None
+    roi1 = sigima.objects.create_image_roi("rectangle", [10, 10, 50, 50])
+    obj.add_roi(roi1)
+    assert obj.roi is not None
+    assert len(obj.roi.single_rois) == 1
+
+    # Case 2: adding a different ROI appends it, preserving the existing one
+    roi2 = sigima.objects.create_image_roi("circle", [80, 80, 20])
+    obj.add_roi(roi2)
+    assert len(obj.roi.single_rois) == 2
+
+    # Case 3: adding an identical single ROI is ignored (deduplicated)
+    obj.add_roi(sigima.objects.create_image_roi("circle", [80, 80, 20]))
+    assert len(obj.roi.single_rois) == 2
+
+
+def test_object_add_roi_rejects_incompatible_type() -> None:
+    """Test BaseObj.add_roi rejects incompatible ROI types."""
+    image = create_multigaussian_image()
+    signal = create_paracetamol_signal()
+
+    with pytest.raises(TypeError):
+        image.add_roi(sigima.objects.create_signal_roi([0, 1]))
+    with pytest.raises(TypeError):
+        signal.add_roi(sigima.objects.create_image_roi("rectangle", [0, 0, 1, 1]))
+
+    assert image.roi is None
+    assert signal.roi is None
+
+
+def test_object_add_roi_deduplicates_incoming_batch() -> None:
+    """Test BaseObj.add_roi deduplicates ROIs within the incoming batch."""
+    obj = create_paracetamol_signal()
+    obj.add_roi(sigima.objects.create_signal_roi([[1, 2], [1, 2]]))
+
+    assert obj.roi is not None
+    assert len(obj.roi.single_rois) == 1
+
+
+def test_image_roi_equality_includes_inverse() -> None:
+    """Test image ROI equality and deduplication include inverse logic."""
+    obj = create_multigaussian_image()
+    coords = [[10, 10, 50, 50], [10, 10, 50, 50]]
+    obj.add_roi(
+        sigima.objects.create_image_roi("rectangle", coords, inverse=[False, True])
+    )
+
+    assert obj.roi is not None
+    assert len(obj.roi.single_rois) == 2
+    assert obj.roi.single_rois[0] != obj.roi.single_rois[1]
+
+
 if __name__ == "__main__":
     test_signal_roi_creation()
     test_image_roi_creation()
     test_image_roi_modification()
+    test_object_add_roi()
+    test_object_add_roi_rejects_incompatible_type()
+    test_object_add_roi_deduplicates_incoming_batch()
+    test_image_roi_equality_includes_inverse()

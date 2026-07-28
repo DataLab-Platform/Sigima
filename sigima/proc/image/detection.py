@@ -181,8 +181,9 @@ def apply_detection_rois(
     coords = geometry.centers()
 
     try:
-        obj.roi = create_image_roi_around_points(coords, roi_geometry=roi_geometry)
-        return True
+        roi_count = len(obj.roi) if obj.roi is not None else 0
+        obj.add_roi(create_image_roi_around_points(coords, roi_geometry=roi_geometry))
+        return obj.roi is not None and len(obj.roi) > roi_count
     except ValueError:
         return False
 
@@ -243,6 +244,7 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
     """
     kind = geometry.kind
     coords = geometry.coords
+    roi_count = len(obj.roi) if obj.roi is not None else 0
 
     if kind == KindShape.POLYGON:
         # Each row is [x0, y0, x1, y1, ...] possibly NaN-padded
@@ -254,8 +256,8 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
                 polygon_coords.append(valid.tolist())
         if not polygon_coords:
             return False
-        obj.roi = create_image_roi("polygon", polygon_coords)
-        return True
+        obj.add_roi(create_image_roi("polygon", polygon_coords))
+        return obj.roi is not None and len(obj.roi) > roi_count
 
     if kind == KindShape.ELLIPSE:
         # Each row is [xc, yc, a, b, theta] → approximate as polygon
@@ -266,16 +268,16 @@ def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
             polygon_coords.append(poly.tolist())
         if not polygon_coords:
             return False
-        obj.roi = create_image_roi("polygon", polygon_coords)
-        return True
+        obj.add_roi(create_image_roi("polygon", polygon_coords))
+        return obj.roi is not None and len(obj.roi) > roi_count
 
     if kind == KindShape.CIRCLE:
         # Each row is [xc, yc, r]
         circle_coords = coords.tolist()
         if not circle_coords:
             return False
-        obj.roi = create_image_roi("circle", circle_coords)
-        return True
+        obj.add_roi(create_image_roi("circle", circle_coords))
+        return obj.roi is not None and len(obj.roi) > roi_count
 
     return False
 
