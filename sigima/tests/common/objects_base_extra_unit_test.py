@@ -18,11 +18,35 @@ import numpy as np
 import pytest
 
 from sigima.objects import (
+    ImageObj,
+    SignalObj,
     create_image,
     create_image_roi,
     create_signal,
     create_signal_roi,
 )
+
+
+def test_object_title_layout_is_consistent() -> None:
+    """Signal and image titles are the first field of their data group."""
+    signal_items = SignalObj._items  # pylint: disable=protected-access
+    image_items = ImageObj._items  # pylint: disable=protected-access
+
+    assert [item.get_name() for item in signal_items[:3]] == [
+        "_tabs",
+        "_datag",
+        "title",
+    ]
+    assert [item.get_name() for item in image_items[:3]] == [
+        "_tabs",
+        "_datag",
+        "title",
+    ]
+    assert image_items[1].get_prop("display", "label") == signal_items[1].get_prop(
+        "display", "label"
+    )
+    assert sum(item.get_name() == "title" for item in image_items) == 1
+
 
 # ===========================================================================
 # Metadata options API
