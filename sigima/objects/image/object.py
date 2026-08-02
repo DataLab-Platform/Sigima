@@ -150,14 +150,15 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
 
     _tabs = gds.BeginTabGroup("all")
 
-    _datag = gds.BeginGroup(_("Data"))
+    _datag = gds.BeginGroup(_("Data and metadata"))
+    title = gds.StringItem(_("Image title"), default=_("Untitled"))
     data = gds.FloatArrayItem(_("Data"))  # type: ignore[assignment]
     metadata = gds.DictItem(_("Metadata"), default={})  # type: ignore[assignment]
     annotations = gds.StringItem(_("Annotations"), default="").set_prop(
         "display",
         hide=True,
     )  # Annotations (JSON). Use get/set_annotations() API  # type: ignore[assignment]
-    _e_datag = gds.EndGroup(_("Data"))
+    _e_datag = gds.EndGroup(_("Data and metadata"))
 
     def _compute_xmin(self) -> float:
         """Compute Xmin"""
@@ -303,7 +304,6 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
             self.set_coords(xcoords, ycoords)
 
     _unitsg = gds.BeginGroup(_("Titles / Units"))
-    title = gds.StringItem(_("Image title"), default=_("Untitled"))
     _tabs_u = gds.BeginTabGroup("units")
     _unitsx = gds.BeginGroup(_("X-axis"))
     xlabel = gds.StringItem(_("Title"), default="")

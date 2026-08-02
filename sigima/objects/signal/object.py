@@ -82,7 +82,6 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
     _e_datag = gds.EndGroup(_("Data and metadata"))
 
     _unitsg = gds.BeginGroup(_("Titles / Units"))
-    title = gds.StringItem(_("Signal title"), default=_("Untitled"))
     _tabs_u = gds.BeginTabGroup("units")
     _unitsx = gds.BeginGroup(_("X-axis"))
     xlabel = gds.StringItem(_("Title"), default="")
