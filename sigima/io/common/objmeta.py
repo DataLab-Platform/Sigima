@@ -8,7 +8,14 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from guidata.io import JSONHandler, JSONReader, JSONWriter
 
-from sigima.objects import ImageROI, SignalROI
+from sigima.objects import (
+    GraphicalAnnotation,
+    ImageROI,
+    SignalROI,
+    annotation_from_dict,
+    annotation_to_dict,
+    is_graphical_annotation_dict,
+)
 
 if TYPE_CHECKING:
     from sigima.params import ROIGridParam
@@ -210,3 +217,41 @@ def read_annotations(filepath: str) -> list[dict[str, Any]]:
     json_dict = read_dict(filepath)
     _check_tag(json_dict, expected_format="annotations")
     return json_dict["annotations"]
+
+
+def write_graphical_annotations(
+    filepath: str, annotations: list[GraphicalAnnotation]
+) -> None:
+    """Write canonical graphical annotations to a ``.dlabann`` JSON file.
+
+    Args:
+        filepath: The file path to write the annotations to.
+        annotations: Canonical graphical annotations to serialize.
+
+    Raises:
+        TypeError: If annotations is not a list of GraphicalAnnotation objects.
+    """
+    if not isinstance(annotations, list) or not all(
+        isinstance(item, GraphicalAnnotation) for item in annotations
+    ):
+        raise TypeError("annotations must be a list of GraphicalAnnotation objects")
+    write_annotations(filepath, [annotation_to_dict(item) for item in annotations])
+
+
+def read_graphical_annotations(filepath: str) -> list[GraphicalAnnotation]:
+    """Read canonical graphical annotations from a ``.dlabann`` JSON file.
+
+    Opaque entries remain available through :func:`read_annotations` and are ignored
+    by this typed convenience function.
+
+    Args:
+        filepath: The file path to read the annotations from.
+
+    Returns:
+        Canonical graphical annotations in storage order.
+    """
+    return [
+        annotation_from_dict(item)
+        for item in read_annotations(filepath)
+        if is_graphical_annotation_dict(item)
+    ]

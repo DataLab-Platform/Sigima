@@ -68,6 +68,7 @@ if TYPE_CHECKING:
         maximized: bool = False,
         results: list[GeometryResult] | GeometryResult | None = None,
         show_roi: bool = True,
+        show_annotations: bool = True,
         object_name: str = "",
         **kwargs,
     ) -> None:
@@ -80,6 +81,7 @@ if TYPE_CHECKING:
         maximized: bool = False,
         results: list[GeometryResult] | GeometryResult | None = None,
         show_roi: bool = True,
+        show_annotations: bool = True,
         object_name: str = "",
         **kwargs,
     ) -> None:
@@ -94,6 +96,7 @@ if TYPE_CHECKING:
         title: str | None = None,
         results: list[GeometryResult] | GeometryResult | None = None,
         show_roi: bool = True,
+        show_annotations: bool = True,
         object_name: str = "",
         **kwargs,
     ) -> None:
@@ -108,6 +111,7 @@ if TYPE_CHECKING:
         maximized: bool = False,
         results: list[GeometryResult] | GeometryResult | None = None,
         show_roi: bool = True,
+        show_annotations: bool = True,
         object_name: str = "",
         **kwargs,
     ) -> None:

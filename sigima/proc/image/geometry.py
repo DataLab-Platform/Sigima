@@ -88,6 +88,7 @@ def translate(src: ImageObj, p: TranslateParam) -> ImageObj:
     else:
         dst.set_coords(src.xcoords + p.dx, src.ycoords + p.dy)
     transformer.transform_roi(dst, "translate", dx=p.dx, dy=p.dy)
+    transformer.transform_annotations(dst, "translate", dx=p.dx, dy=p.dy)
     return dst
 
 
@@ -150,6 +151,7 @@ def rotate(src: ImageObj, p: RotateParam) -> ImageObj:
         prefilter=p.prefilter,
     )
     dst.roi = None  # Reset ROI as it may change after rotation
+    dst.clear_graphical_annotations()
     return dst
 
 
@@ -192,6 +194,8 @@ def rotate90(src: ImageObj) -> ImageObj:
     # shapes cannot do (a rotated rectangle is no longer a rectangle).
     transformer.transform_roi(dst, "transpose")
     transformer.transform_roi(dst, "flipv", cy=dst.yc)
+    transformer.transform_annotations(dst, "transpose")
+    transformer.transform_annotations(dst, "flipv", cy=dst.yc)
     return dst
 
 
@@ -211,6 +215,8 @@ def rotate270(src: ImageObj) -> ImageObj:
     # ``numpy.rot90(a, 3)`` is ``numpy.fliplr(a.T)`` (see :func:`rotate90`).
     transformer.transform_roi(dst, "transpose")
     transformer.transform_roi(dst, "fliph", cx=dst.xc)
+    transformer.transform_annotations(dst, "transpose")
+    transformer.transform_annotations(dst, "fliph", cx=dst.xc)
     return dst
 
 
@@ -227,6 +233,7 @@ def fliph(src: ImageObj) -> ImageObj:
     dst = dst_1_to_1(src, "fliph")
     dst.data = np.fliplr(src.data)
     transformer.transform_roi(dst, "fliph", cx=dst.xc)
+    transformer.transform_annotations(dst, "fliph", cx=dst.xc)
     return dst
 
 
@@ -243,6 +250,7 @@ def flipv(src: ImageObj) -> ImageObj:
     dst = dst_1_to_1(src, "flipv")
     dst.data = np.flipud(src.data)
     transformer.transform_roi(dst, "flipv", cy=dst.yc)
+    transformer.transform_annotations(dst, "flipv", cy=dst.yc)
     return dst
 
 
@@ -319,6 +327,7 @@ def transpose(src: ImageObj) -> ImageObj:
     dst.data = np.transpose(src.data)
     __swap_axes(src, dst)
     transformer.transform_roi(dst, "transpose")
+    transformer.transform_annotations(dst, "transpose")
     return dst
 
 

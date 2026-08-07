@@ -5,7 +5,13 @@
 import tempfile
 from pathlib import Path
 
-from sigima.io import read_annotations, write_annotations
+from sigima.io import (
+    read_annotations,
+    read_graphical_annotations,
+    write_annotations,
+    write_graphical_annotations,
+)
+from sigima.objects import PointAnnotation, SegmentAnnotation, annotation_to_dict
 from sigima.objects.signal.creation import create_signal
 
 
@@ -76,6 +82,31 @@ def test_write_read_annotations_with_object():
     finally:
         # Clean up
         Path(filepath).unlink(missing_ok=True)
+
+
+def test_write_read_graphical_annotations(tmp_path):
+    """Test typed graphical annotation file round-trip."""
+    filepath = str(tmp_path / "canonical.dlabann")
+    annotations = [
+        PointAnnotation(x=1, y=2, title="Peak"),
+        SegmentAnnotation(x0=0, y0=1, x1=2, y1=3),
+    ]
+
+    write_graphical_annotations(filepath, annotations)
+
+    assert read_graphical_annotations(filepath) == annotations
+    assert len(read_annotations(filepath)) == 2
+
+
+def test_read_graphical_annotations_ignores_opaque_entries(tmp_path):
+    """Test that typed file reads leave opaque entries to the raw API."""
+    filepath = str(tmp_path / "mixed.dlabann")
+    annotation = PointAnnotation(x=1, y=2)
+    opaque = {"type": "plotpy_item", "plotpy_json": "{}"}
+    write_annotations(filepath, [opaque, annotation_to_dict(annotation)])
+
+    assert read_graphical_annotations(filepath) == [annotation]
+    assert read_annotations(filepath)[0] == opaque
 
 
 if __name__ == "__main__":

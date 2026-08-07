@@ -21,6 +21,9 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
     * - :mod:`sigima.objects`
       - Object model for signals and images (:class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`), scalar results (:class:`sigima.objects.GeometryResult` and :class:`sigima.objects.TableResult`), and related functions
 
+    * - :mod:`sigima.objects.annotations`
+      - Renderer-independent graphical annotation model, serialization, and transformations (see :doc:`annotations`)
+
     * - :mod:`sigima.proc`
       - Computation functions, which operate on signal and image objects (:class:`sigima.objects.SignalObj` or :class:`sigima.objects.ImageObj`) and return signal or image objects, or scalar results (:class:`sigima.objects.GeometryResult` or :class:`sigima.objects.TableResult`).
 

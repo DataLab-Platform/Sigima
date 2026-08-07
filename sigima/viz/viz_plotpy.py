@@ -63,6 +63,10 @@ from sigima.objects import (
     SignalObj,
 )
 from sigima.tools import coordinates
+from sigima.viz.annotation_plotpy import (
+    annotations_to_plotpy_items,
+    load_legacy_plotpy_items,
+)
 
 
 # Optional imports for test environment integration
@@ -996,6 +1000,7 @@ def view_curves(
     xunit: str | None = None,
     yunit: str | None = None,
     show_roi: bool = True,
+    show_annotations: bool = True,
     object_name: str = "",
 ) -> None:
     """Create a curve dialog and plot curves
@@ -1011,6 +1016,8 @@ def view_curves(
         yunit: Unit for the y-axis, or None for no unit
         show_roi: Whether to show ROIs defined in `SignalObj` instances, default is True
          (ignored if `data_or_objs` is not a `SignalObj`)
+        show_annotations: Whether to show canonical and historical annotations,
+         default is True
         object_name: Object name for the dialog (for screenshot functionality)
     """
     __ensure_qapp()
@@ -1038,6 +1045,11 @@ def view_curves(
         if isinstance(data_or_obj, SignalObj) and show_roi:
             items.extend(__create_curve_roi_items(data_or_obj))
         items.append(item)
+        if isinstance(data_or_obj, SignalObj) and show_annotations:
+            items.extend(
+                annotations_to_plotpy_items(data_or_obj.get_graphical_annotations())
+            )
+            items.extend(load_legacy_plotpy_items(data_or_obj))
     view_curve_items(
         items,
         name=name,
@@ -1177,6 +1189,7 @@ def view_images(
     zunit: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
+    show_annotations: bool = True,
     object_name: str = "",
     **kwargs,
 ) -> None:
@@ -1196,6 +1209,8 @@ def view_images(
          if no overlay is needed.
         show_roi: Whether to show ROIs defined in `ImageObj` instances, default is True
          (ignored if `data_or_objs` is not a `ImageObj`)
+        show_annotations: Whether to show canonical and historical annotations,
+         default is True
         object_name: Object name for the dialog (for screenshot functionality)
         **kwargs: Additional keyword arguments to pass to `make.maskedimage()`
     """
@@ -1242,6 +1257,11 @@ def view_images(
             )
         if isinstance(data_or_obj, ImageObj) and show_roi:
             items.extend(__create_image_roi_items(data_or_obj))
+        if isinstance(data_or_obj, ImageObj) and show_annotations:
+            items.extend(
+                annotations_to_plotpy_items(data_or_obj.get_graphical_annotations())
+            )
+            items.extend(load_legacy_plotpy_items(data_or_obj))
     if results is not None:
         if isinstance(results, GeometryResult):
             results = [results]
@@ -1274,6 +1294,7 @@ def view_curves_and_images(
     yunit: str | None = None,
     zunit: str | None = None,
     object_name: str = "",
+    show_annotations: bool = True,
 ) -> None:
     """View signals, then images in two successive dialogs
 
@@ -1288,6 +1309,8 @@ def view_curves_and_images(
         yunit: Unit for the y-axis, or None for no unit
         zunit: Unit for the z-axis (color scale), or None for no unit
         object_name: Object name for the dialog (for screenshot functionality)
+        show_annotations: Whether to show canonical and historical annotations,
+         default is True
     """
     __ensure_qapp()
     if isinstance(data_or_objs, (tuple, list)):
@@ -1305,6 +1328,7 @@ def view_curves_and_images(
             xunit=xunit,
             yunit=yunit,
             object_name=f"{object_name}_curves",
+            show_annotations=show_annotations,
         )
     ima_objs = [obj for obj in objs if isinstance(obj, (ImageObj, np.ndarray))]
     if ima_objs:
@@ -1319,6 +1343,7 @@ def view_curves_and_images(
             yunit=yunit,
             zunit=zunit,
             object_name=f"{object_name}_images",
+            show_annotations=show_annotations,
         )
 
 
@@ -1353,6 +1378,7 @@ def view_images_side_by_side(
     title: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
+    show_annotations: bool = True,
     object_name: str = "",
     **kwargs,
 ) -> None:
@@ -1369,6 +1395,8 @@ def view_images_side_by_side(
          if no overlay is needed.
         show_roi: Whether to show ROIs defined in `ImageObj` instances, default is True
          (ignored if `images` do not contain `ImageObj` instances)
+        show_annotations: Whether to show canonical and historical annotations,
+         default is True
         object_name: Object name for the dialog widget (used for screenshot filename)
         **kwargs: Additional keyword arguments to pass to `make.maskedimage()`
     """
@@ -1401,6 +1429,11 @@ def view_images_side_by_side(
             item = __create_image_item(img, title=imtitle, **imparameters)
             if isinstance(img, ImageObj) and show_roi:
                 other_items.extend(__create_image_roi_items(img))
+            if isinstance(img, ImageObj) and show_annotations:
+                other_items.extend(
+                    annotations_to_plotpy_items(img.get_graphical_annotations())
+                )
+                other_items.extend(load_legacy_plotpy_items(img))
         plot.add_item(item)
         for other_item in other_items:
             plot.add_item(other_item)
