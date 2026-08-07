@@ -19,6 +19,8 @@
 
 * **Curve-clipped ROI rendering**: Signal ROI visualization now supports curve-clipped fill rendering with a consistent color palette
 
+* **Option field categories**: `OptionField` (and its subclasses) now accept an optional `category` attribute, letting client applications (such as SigimaX) group configuration options, for example into settings-dialog tabs or INI sections
+
 ### 🛠️ Bug Fixes since version 1.1.5 ###
 
 * **Detected ROIs preserve existing ones**: Detection algorithms (peak, blob, Hough and contour detection) with `create_rois=True` now append the newly detected ROIs to any ROIs already defined on the image, instead of replacing them. Previously defined regions of interest are no longer lost. This closes [Issue #36](https://github.com/DataLab-Platform/Sigima/issues/36).
@@ -33,3 +35,4 @@
 * **API cleanup**: `store_contour_roi_metadata` made private (`_store_contour_roi_metadata`) — internal helper only used by `contour_shape()`
 * **`peak_detection` deprecated**: Use `extract_peak_positions` + `markers_table_to_signal` for new code
 * **Test coverage**: Added unit tests for contour ROI metadata handling, detection with non-unit pixel spacing, and non-uniform coordinate geometry operations
+* **`OptionField.get()`/`.set()` `sync_env` made keyword-only**: Calling either method with `sync_env` as a positional argument now raises `TypeError` instead of silently being misinterpreted, preventing accidental misuse
