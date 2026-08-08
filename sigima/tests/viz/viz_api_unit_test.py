@@ -8,6 +8,7 @@ Test viz API compatibility between backends
 
 from __future__ import annotations
 
+import importlib.util
 import inspect
 import sys
 
@@ -22,6 +23,9 @@ def _has_matplotlib() -> bool:
         return True
     except ImportError:
         return False
+
+
+HAS_PLOTLY = importlib.util.find_spec("plotly") is not None
 
 
 def get_public_functions(module) -> set[str]:
@@ -75,9 +79,23 @@ def test_matplotlib_backend_has_all_plotpy_functions():
         )
 
 
+@pytest.mark.skipif(not HAS_PLOTLY, reason="Plotly not available")
+def test_plotly_backend_has_all_plotpy_functions() -> None:
+    """Test that the Plotly backend implements the public PlotPy API."""
+    from sigima.viz import viz_plotly, viz_plotpy
+
+    missing_funcs = get_public_functions(viz_plotpy) - get_public_functions(viz_plotly)
+
+    if missing_funcs:
+        missing_list = "\n  - ".join(sorted(missing_funcs))
+        pytest.fail(
+            f"Plotly backend is missing the following functions:\n  - {missing_list}"
+        )
+
+
 def test_annotation_visibility_parameter_has_backend_parity() -> None:
-    """Check the public annotation visibility switch on both backends."""
-    from sigima.viz import viz_mpl, viz_plotpy
+    """Check the public annotation visibility switch on every backend."""
+    from sigima.viz import viz_mpl, viz_plotly, viz_plotpy
 
     for function_name in (
         "view_curves",
@@ -85,7 +103,7 @@ def test_annotation_visibility_parameter_has_backend_parity() -> None:
         "view_images_side_by_side",
         "view_curves_and_images",
     ):
-        for backend in (viz_mpl, viz_plotpy):
+        for backend in (viz_mpl, viz_plotly, viz_plotpy):
             parameter = inspect.signature(getattr(backend, function_name)).parameters[
                 "show_annotations"
             ]

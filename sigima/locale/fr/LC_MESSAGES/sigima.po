@@ -42,11 +42,12 @@ msgstr ""
 msgid ""
 "Backend library for visualization (sigima.viz module).\n"
 "\n"
-"Valid values: ``\"auto\"``, ``\"plotpy\"``, ``\"matplotlib\"``.\n"
+"Valid values: ``\"auto\"``, ``\"plotpy\"``, ``\"matplotlib\"``, ``\"plotly\"``.\n"
 "\n"
 "- ``\"auto\"`` (default): Automatically select PlotPy if available, otherwise Matplotlib\n"
 "- ``\"plotpy\"``: Use PlotPy for interactive visualizations (requires PlotPy and Qt)\n"
 "- ``\"matplotlib\"``: Use Matplotlib for visualizations (simpler, view-only)\n"
+"- ``\"plotly\"``: Use Plotly for browser-based interactive visualizations\n"
 "\n"
 "This setting can also be overridden using the ``SIGIMA_VIZ_BACKEND`` environment\n"
 "variable. Note that Matplotlib backend does not support all features of PlotPy\n"
@@ -54,11 +55,12 @@ msgid ""
 msgstr ""
 "Bibliothèque backend pour la visualisation des tests (tests interactifs uniquement).\n"
 "\n"
-"Valeurs valides : ``\"auto\"``, ``\"plotpy\"``, ``\"matplotlib\"``.\n"
+"Valeurs valides : ``\"auto\"``, ``\"plotpy\"``, ``\"matplotlib\"``, ``\"plotly\"``.\n"
 "\n"
 "- ``\"auto\"`` (par défaut) : Sélectionner automatiquement PlotPy si disponible, sinon Matplotlib\n"
 "- ``\"plotpy\"`` : Utiliser PlotPy pour les visualisations interactives (nécessite PlotPy et Qt)\n"
 "- ``\"matplotlib\"`` : Utiliser Matplotlib pour les visualisations (plus simple, statique)\n"
+"- ``\"plotly\"`` : Utiliser Plotly pour les visualisations interactives dans un navigateur\n"
 "\n"
 "Ce paramètre peut également être remplacé en utilisant la variable d'environnement ``SIGIMA_VIZ_BACKEND``.\n"
 "Notez que le backend Matplotlib ne prend pas en charge toutes les fonctionnalités de PlotPy\n"
@@ -198,37 +200,6 @@ msgstr "Moyenne des N voisins"
 
 msgid "N-neighbor median"
 msgstr "Médiane des N voisins"
-msgstr "Remplissage vers l'avant (valeur précédente)"
-
-msgid "Backward fill (next value)"
-msgstr "Remplissage vers l'arrière (valeur suivante)"
-
-msgid "Interpolation: Linear"
-msgstr "Interpolation linéaire"
-
-msgid "Interpolation: Spline"
-msgstr "Interpolation spline"
-
-msgid "Interpolation: Quadratic"
-msgstr "Interpolation quadratique"
-
-msgid "Interpolation: Cubic"
-msgstr "Interpolation cubique"
-
-msgid "Interpolation: PCHIP"
-msgstr "Interpolation PCHIP"
-
-msgid "N-neighbor minimum"
-msgstr "Plus proche voisin minimum"
-
-msgid "N-neighbor maximum"
-msgstr "Plus proche voisin maximum"
-
-msgid "N-neighbor mean"
-msgstr "Plus proche voisin moyenne"
-
-msgid "N-neighbor median"
-msgstr "Plus proche voisin médiane"
 
 msgid "All supported files"
 msgstr "Tous les fichiers pris en charge"
@@ -346,17 +317,17 @@ msgstr "Image sans titre"
 msgid "Title"
 msgstr "Titre"
 
-msgid "Height"
-msgstr "Hauteur"
-
 msgid "Image height: number of rows"
 msgstr "Hauteur de l'image : nombre de lignes"
 
-msgid "Width"
-msgstr "Largeur"
+msgid "Height"
+msgstr "Hauteur"
 
 msgid "Image width: number of columns"
 msgstr "Largeur de l'image : nombre de colonnes"
+
+msgid "Width"
+msgstr "Largeur"
 
 msgid "Type"
 msgstr "Type"
@@ -403,17 +374,17 @@ msgstr "Décalage X"
 msgid "Y offset"
 msgstr "Décalage Y"
 
-msgid "Minimum value"
-msgstr "Minimum"
-
 msgid "Value for dark squares"
 msgstr "Valeur des carrés foncés"
 
-msgid "Maximum value"
-msgstr "Maximum"
+msgid "Minimum value"
+msgstr "Minimum"
 
 msgid "Value for light squares"
 msgstr "Valeur des carrés clairs"
+
+msgid "Maximum value"
+msgstr "Maximum"
 
 msgid "Amplitude and offset"
 msgstr "Amplitude et décalage"
@@ -487,6 +458,15 @@ msgstr "Centre et échelle"
 msgid "Scale factor"
 msgstr "Facteur d'échelle"
 
+msgid "Data and metadata"
+msgstr "Données et métadonnées"
+
+msgid "Image title"
+msgstr "Titre de l'image"
+
+msgid "Untitled"
+msgstr "Sans titre"
+
 msgid "Data"
 msgstr "Données"
 
@@ -519,12 +499,6 @@ msgstr "Coordonnées Y"
 
 msgid "Titles / Units"
 msgstr "Titres / Unités"
-
-msgid "Untitled"
-msgstr "Sans titre"
-
-msgid "Image title"
-msgstr "Titre de l'image"
 
 msgid "X-axis"
 msgstr "Axe des X"
@@ -707,9 +681,6 @@ msgstr "Temps de descente total"
 msgid "Custom signal"
 msgstr "Signal personnalisé"
 
-msgid "Data and metadata"
-msgstr "Données et métadonnées"
-
 msgid "Signal title"
 msgstr "Titre du signal"
 
@@ -871,9 +842,6 @@ msgstr "- Infini"
 
 msgid "Replace special values (image)"
 msgstr "Remplacer les valeurs spéciales (image)"
-
-msgid "rows"
-msgstr "lignes"
 
 msgid "columns"
 msgstr "colonnes"
@@ -1179,21 +1147,6 @@ msgstr "Translation en Y"
 
 msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
 msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
-
-msgid "column size"
-msgstr "Nombre de colonnes"
-
-msgid "row size"
-msgstr "Nombre de lignes"
-
-msgid "column spacing"
-msgstr "Espace entre chaque colonne"
-
-msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
-msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
-
-msgid "row spacing"
-msgstr "Espace entre chaque ligne"
 
 msgid "Vertical spacing between ROI centers, as a percentage of the automatically computed cell height (100% = evenly distributed grid)"
 msgstr "Espacement vertical entre les centres des ROI, en pourcentage de la hauteur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
@@ -1747,8 +1700,4 @@ msgstr "Nombre de colonnes"
 
 msgid "Centroid"
 msgstr "Barycentre"
-
-msgid "Plot dialog"
-msgstr "Fenêtre de tracé"
-
 

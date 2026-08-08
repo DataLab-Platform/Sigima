@@ -22,7 +22,8 @@ import pytest
 
 HAS_PLOTPY = importlib.util.find_spec("plotpy") is not None
 HAS_MPL = importlib.util.find_spec("matplotlib") is not None
-HAS_ANY_BACKEND = HAS_PLOTPY or HAS_MPL
+HAS_PLOTLY = importlib.util.find_spec("plotly") is not None
+HAS_ANY_BACKEND = HAS_PLOTPY or HAS_MPL or HAS_PLOTLY
 
 
 # ===========================================================================
@@ -57,6 +58,16 @@ def test_select_backend_via_env_matplotlib(monkeypatch):
     assert name == "matplotlib"
 
 
+@pytest.mark.skipif(not HAS_PLOTLY, reason="Plotly not installed")
+def test_select_backend_via_env_plotly(monkeypatch):
+    """Setting ``SIGIMA_VIZ_BACKEND=plotly`` selects the Plotly backend."""
+    monkeypatch.setenv("SIGIMA_VIZ_BACKEND", "plotly")
+    viz = _reload_viz()
+    name, source = viz._select_backend()  # pylint: disable=protected-access
+    assert source == "env"
+    assert name == "plotly"
+
+
 @pytest.mark.skipif(not HAS_ANY_BACKEND, reason="No viz backend installed")
 def test_select_backend_via_env_auto(monkeypatch):
     """``SIGIMA_VIZ_BACKEND=auto`` is a recognised value that triggers detection."""
@@ -64,7 +75,7 @@ def test_select_backend_via_env_auto(monkeypatch):
     viz = _reload_viz()
     name, source = viz._select_backend()  # pylint: disable=protected-access
     assert source == "env"
-    assert name in ("plotpy", "matplotlib")
+    assert name in ("plotpy", "matplotlib", "plotly")
 
 
 @pytest.mark.skipif(not HAS_ANY_BACKEND, reason="No viz backend installed")
@@ -76,7 +87,7 @@ def test_select_backend_unrecognized_env_falls_back(monkeypatch):
     viz = _reload_viz()
     name, source = viz._select_backend()  # pylint: disable=protected-access
     assert source in ("config", "auto")
-    assert name in ("plotpy", "matplotlib")
+    assert name in ("plotpy", "matplotlib", "plotly")
 
 
 def test_dunder_attribute_raises(monkeypatch):
@@ -120,7 +131,7 @@ def test_lazy_attribute_access_initializes_backend(monkeypatch):
     func = viz.view_curves
     assert callable(func)
     # Now BACKEND_NAME should be populated.
-    assert viz.BACKEND_NAME in ("plotpy", "matplotlib")
+    assert viz.BACKEND_NAME in ("plotpy", "matplotlib", "plotly")
     assert viz.BACKEND_SOURCE in ("env", "config", "auto")
 
 
