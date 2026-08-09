@@ -1694,6 +1694,27 @@ def test_square_feature_extraction() -> None:
             _extract_and_validate_square_features_from_data(test_data)
 
 
+def test_negative_square_feature_extraction() -> None:
+    """Feature extraction locates the peak according to detected polarity."""
+    x = np.linspace(0.0, 10.0, 101)
+    noise = np.where(np.arange(x.size) % 2 == 0, 0.1, -0.1)
+    y = noise - 4.0 * ((x >= 3.0) & (x <= 7.0))
+
+    features = pulse.extract_pulse_features(
+        x,
+        y,
+        (0.0, 1.0),
+        (9.0, 10.0),
+        signal_shape=SignalShape.SQUARE,
+        denoise=False,
+    )
+
+    assert features.signal_shape is SignalShape.SQUARE
+    assert features.polarity == -1
+    assert features.amplitude == pytest.approx(4.0, abs=0.02)
+    assert features.x100 == pytest.approx(3.0, abs=0.2)
+
+
 def test_gaussian_feature_extraction() -> None:
     """Test feature extraction for Gaussian signals.
 

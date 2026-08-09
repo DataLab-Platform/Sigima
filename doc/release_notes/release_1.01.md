@@ -1,5 +1,11 @@
 # Version 1.1 #
 
+## Sigima Version 1.1.7 ##
+
+### 🛠️ Bug Fixes since version 1.1.6 ###
+
+* **Negative pulse features**: Fixed square pulses with negative polarity using a baseline sample as their peak, which could make full pulse-feature extraction fail instead of returning timing and amplitude measurements.
+
 ## Sigima Version 1.1.6 ##
 
 ### 🛠️ Bug Fixes since version 1.1.5 ###
