@@ -24,6 +24,7 @@ result = sips.normalize(obj, sigima.params.NormalizeParam.create(method="minmax"
 
 # Example: Using low-level tools directly (NumPy arrays)
 from sigima.tools.signal import filtering
+
 filtered_y = filtering.apply_moving_average(y, n=5)
 ```
 
@@ -151,6 +152,7 @@ python scripts/run_with_env.py python -m guidata.utils.translations compile \
 from sigima.proc.decorator import computation_function
 import sigima.params
 
+
 @computation_function()
 def my_processing(src: SignalObj, p: MyParam) -> SignalObj:
     """Process signal with my algorithm.
@@ -189,21 +191,21 @@ result = my_processing(src, param1=10, param2="value")
 
 ```python
 # SignalObj
-signal.x           # X coordinates (1D NumPy array, float64)
-signal.y           # Y data (1D NumPy array, float64)
+signal.x  # X coordinates (1D NumPy array, float64)
+signal.y  # Y data (1D NumPy array, float64)
 signal.dx, signal.dy  # Optional uncertainties
-signal.xydata      # Property returning (x, y) tuple
+signal.xydata  # Property returning (x, y) tuple
 signal.set_xydata(x, y, dx=None, dy=None)
 
 # ImageObj
-image.data         # 2D NumPy array (various dtypes)
+image.data  # 2D NumPy array (various dtypes)
 image.x0, image.y0, image.dx, image.dy  # Pixel coordinates
-image.metadata     # Dict for labels, units, etc.
+image.metadata  # Dict for labels, units, etc.
 
 # Common to both
-obj.roi            # List of ROI objects (SegmentROI, RectangularROI, etc.)
+obj.roi  # List of ROI objects (SegmentROI, RectangularROI, etc.)
 obj.get_data(roi_index=None)  # Extract data with optional ROI mask
-obj.copy()         # Deep copy with metadata
+obj.copy()  # Deep copy with metadata
 ```
 
 **Data type enforcement**:
@@ -216,6 +218,7 @@ obj.copy()         # Deep copy with metadata
 
 ```python
 import guidata.dataset as gds
+
 
 class MyParam(gds.DataSet):
     """My processing parameters."""
@@ -241,12 +244,14 @@ class MyParam(gds.DataSet):
 ```python
 from sigima.proc.title_formatting import TitleFormatter, FormatResultTitle
 
+
 class MyParam(gds.DataSet):
     # ... parameter definitions ...
 
     def generate_title(self) -> str:
         """Generate human-readable title for this computation."""
         return f"my_processing(p1={self.param1}, p2={self.param2})"
+
 
 # In computation function
 @computation_function()
@@ -287,8 +292,7 @@ from sigima.objects import create_image_roi_around_points
 
 # Automatically create ROIs around detected features
 coords = detect_peaks(image.data)  # Returns N×2 array
-rois = create_image_roi_around_points(coords, image,
-                                       relative_size=1.5)
+rois = create_image_roi_around_points(coords, image, relative_size=1.5)
 result.roi = rois  # Attach to result
 ```
 
@@ -303,6 +307,7 @@ result.roi = rois  # Attach to result
 ```python
 from sigima.proc.decorator import computation_function
 import sigima.params
+
 
 @computation_function()
 def my_feature(src: SignalObj, p: MyFeatureParam) -> SignalObj:
@@ -327,6 +332,7 @@ def my_feature(src: SignalObj, p: MyFeatureParam) -> SignalObj:
 ```python
 class MyFeatureParam(gds.DataSet):
     """Parameters for my feature."""
+
     threshold = gds.FloatItem("Threshold", default=0.5, min=0, max=1)
 
     @staticmethod
@@ -367,6 +373,7 @@ import sigima.proc.signal as sips
 import sigima.params
 from sigima.tests.data import get_test_signal
 
+
 @pytest.mark.validation
 def test_my_feature():
     """Test my_feature processing."""
@@ -399,6 +406,7 @@ def test_my_feature():
 import numpy as np
 from sigima.tools.checks import check_1d_array
 
+
 def my_numpy_function(y: np.ndarray, threshold: float) -> np.ndarray:
     """Low-level algorithm operating on NumPy arrays.
 
@@ -424,12 +432,12 @@ def my_numpy_function(y: np.ndarray, threshold: float) -> np.ndarray:
 
 ```python
 # This is handled automatically now
-signal = SignalObj.create(x=np.array([1, 2, 3]),
-                          y=np.array([10, 20, 30]))  # int arrays
+signal = SignalObj.create(x=np.array([1, 2, 3]), y=np.array([10, 20, 30]))  # int arrays
 # Internally converted to float64
 
 # Validation: If you need strict float checks
 from sigima.tools.checks import check_1d_array
+
 check_1d_array(y)  # Allows float dtypes, raises for invalid types
 ```
 
@@ -459,6 +467,7 @@ from __future__ import annotations
 
 import numpy as np
 from sigima.objects import SignalObj
+
 
 def process(src: SignalObj, threshold: float) -> SignalObj:
     """Use forward references via __future__ import."""

@@ -23,6 +23,8 @@ This module provides feature extraction and analysis functions for signal object
 
 from __future__ import annotations
 
+import warnings
+
 import guidata.dataset as gds
 import numpy as np
 import scipy.integrate as spt
@@ -37,6 +39,7 @@ from sigima.objects import (
     TableResult,
     TableResultBuilder,
 )
+from sigima.objects.signal.creation import create_signal
 from sigima.proc.base import dst_1_to_1
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import compute_geometry_from_obj
@@ -55,6 +58,15 @@ def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     """Peak detection with
     :py:func:`sigima.tools.signal.peakdetection.peak_indices`
 
+    .. deprecated::
+        Use :py:func:`extract_peak_positions` to detect peaks (returns a
+        :class:`~sigima.objects.TableResult` of XY markers, suitable for
+        graphical overlay), then :py:func:`markers_table_to_signal` if you
+        also need a child signal with sticks. This two-step workflow makes
+        the user intent explicit and aligns the signal API with the image
+        API (which is analysis-only via
+        :class:`~sigima.objects.GeometryResult`).
+
     Args:
         src: source signal
         p: parameters
@@ -62,6 +74,13 @@ def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     Returns:
         Result signal object
     """
+    warnings.warn(
+        "sigima.proc.signal.peak_detection is deprecated and will be removed in a "
+        "future release: use extract_peak_positions to detect peaks, then "
+        "markers_table_to_signal if a sticks signal is also needed.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     dst = dst_1_to_1(
         src, "peak_detection", f"threshold={p.threshold}%, min_dist={p.min_dist}pts"
     )
@@ -72,6 +91,151 @@ def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     dst.set_xydata(x[indices], y[indices])
     dst.set_metadata_option("curvestyle", "Sticks")
     return dst
+
+
+def _resolve_xy_columns(table: TableResult) -> tuple[int, int]:
+    """Locate the ``x`` and ``y`` column indices in an XY-markers table.
+
+    Falls back to the first two columns when explicit ``x`` / ``y`` headers
+    are missing, mirroring the tolerance of DataLab's PlotPy adapter.
+
+    Args:
+        table: source table
+
+    Returns:
+        Tuple ``(x_index, y_index)``.
+
+    Raises:
+        ValueError: when the table has fewer than 2 columns.
+    """
+    headers = list(table.headers)
+    if len(headers) < 2:
+        raise ValueError("XY-markers table must have at least 2 columns")
+    lowered = [h.strip().lower() for h in headers]
+    try:
+        ix = lowered.index("x")
+    except ValueError:
+        ix = 0
+    try:
+        iy = lowered.index("y")
+    except ValueError:
+        iy = 1 if ix != 1 else 0
+    if ix == iy:
+        raise ValueError("XY-markers table x and y columns must differ")
+    return ix, iy
+
+
+def markers_table_to_signal(
+    table: TableResult, ref: SignalObj | None = None
+) -> SignalObj:
+    """Convert an XY-markers table to a sticks signal.
+
+    Builds a new :class:`~sigima.objects.SignalObj` from the ``(x, y)``
+    rows of an :attr:`~sigima.objects.TableKind.XY_MARKERS` table. The
+    resulting signal carries ``curvestyle="Sticks"`` so that it is
+    rendered as delta functions, matching the historical output of the
+    deprecated :py:func:`peak_detection`.
+
+    The table's ``x`` and ``y`` columns are located by header name (case
+    and whitespace insensitive); the first two columns are used as a
+    fallback when explicit headers are missing. Extra columns are ignored.
+
+    Args:
+        table: source XY-markers table (typically produced by
+         :py:func:`extract_peak_positions`).
+        ref: optional reference signal whose ``xlabel`` / ``ylabel`` /
+         ``xunit`` / ``yunit`` are inherited by the new signal.
+
+    Returns:
+        New signal whose samples are the table's ``(x, y)`` couples,
+        rendered as sticks.
+
+    Raises:
+        ValueError: when ``table`` is not an XY-markers table or has fewer
+         than 2 columns / valid x/y columns.
+    """
+    if not isinstance(table, TableResult):
+        raise TypeError("table must be a TableResult instance")
+    if not table.is_xy_markers():
+        raise ValueError(
+            f"table must be an XY-markers TableResult (got kind={table.kind!r})"
+        )
+    ix, iy = _resolve_xy_columns(table)
+    rows = table.data
+    if rows:
+        x = np.asarray([row[ix] for row in rows], dtype=float)
+        y = np.asarray([row[iy] for row in rows], dtype=float)
+    else:
+        x = np.empty(0, dtype=float)
+        y = np.empty(0, dtype=float)
+    headers = list(table.headers)
+    if ref is not None:
+        labels = (ref.xlabel, ref.ylabel)
+        units = (ref.xunit, ref.yunit)
+    else:
+        labels = (headers[ix], headers[iy])
+        units = ("", "")
+    title = f"{table.title} \u2192 sticks"
+    if ref is not None and ref.title:
+        title = f"{table.title}({ref.title}) \u2192 sticks"
+    signal = create_signal(title, x=x, y=y, labels=labels, units=units)
+    signal.set_metadata_option("curvestyle", "Sticks")
+    return signal
+
+
+@computation_function()
+def extract_peak_positions(obj: SignalObj, p: PeakDetectionParam) -> TableResult:
+    """Extract peak positions as an XY-markers table.
+
+    Detects peaks with
+    :py:func:`sigima.tools.signal.peakdetection.peak_indices` and returns a
+    :class:`~sigima.objects.TableResult` of kind
+    :attr:`~sigima.objects.TableKind.XY_MARKERS`. Each row holds the
+    ``(x, y)`` coordinates of a detected peak. Suitable for highlighting
+    remarkable points such as spectral lines (e.g. gamma-ray spectra) or
+    pulse positions: DataLab renders such tables as cross markers at the
+    corresponding ``(x, y)`` positions.
+
+    Args:
+        obj: source signal
+        p: peak detection parameters
+
+    Returns:
+        Table result with columns ``x`` and ``y``, one row per detected peak.
+    """
+    rows: list[list] = []
+    roi_idx: list[int] = []
+    for i_roi in obj.iterate_roi_indices():
+        x, y = obj.get_data(i_roi)
+        indices = peakdetection.peak_indices(
+            y, thres=p.threshold * 0.01, min_dist=p.min_dist
+        )
+        for idx in indices:
+            rows.append([float(x[idx]), float(y[idx])])
+            roi_idx.append(-1 if i_roi is None else int(i_roi))
+
+    def _axis_header(default: str, label: str, unit: str) -> str:
+        """Build a column header from a signal axis label/unit pair."""
+        text = label or default
+        if unit:
+            text = f"{text} ({unit})"
+        return text
+
+    return TableResult.from_rows(
+        title=_("Peak positions"),
+        headers=[
+            _axis_header("x", obj.xlabel, obj.xunit),
+            _axis_header("y", obj.ylabel, obj.yunit),
+        ],
+        rows=rows,
+        roi_indices=roi_idx if rows else None,
+        kind=TableKind.XY_MARKERS,
+        attrs={
+            "threshold": p.threshold,
+            "min_dist": p.min_dist,
+            "show_row_index": True,
+        },
+    )
 
 
 class FWHMParam(

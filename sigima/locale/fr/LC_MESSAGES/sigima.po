@@ -456,6 +456,15 @@ msgstr "Centre et échelle"
 msgid "Scale factor"
 msgstr "Facteur d'échelle"
 
+msgid "Data and metadata"
+msgstr "Données et métadonnées"
+
+msgid "Untitled"
+msgstr "Sans titre"
+
+msgid "Image title"
+msgstr "Titre de l'image"
+
 msgid "Data"
 msgstr "Données"
 
@@ -465,14 +474,14 @@ msgstr "Métadonnées"
 msgid "Annotations"
 msgstr "Annotations"
 
-msgid "Uniform coordinates"
-msgstr "Coordonnées uniformes"
-
 msgid "Origin"
 msgstr "Origine"
 
 msgid "Pixel spacing"
 msgstr "Taille des pixels"
+
+msgid "Uniform coordinates"
+msgstr "Coordonnées uniformes"
 
 msgid "Extent"
 msgstr "Bornes"
@@ -488,12 +497,6 @@ msgstr "Coordonnées Y"
 
 msgid "Titles / Units"
 msgstr "Titres / Unités"
-
-msgid "Untitled"
-msgstr "Sans titre"
-
-msgid "Image title"
-msgstr "Titre de l'image"
 
 msgid "X-axis"
 msgstr "Axe des X"
@@ -676,9 +679,6 @@ msgstr "Temps de descente total"
 msgid "Custom signal"
 msgstr "Signal personnalisé"
 
-msgid "Data and metadata"
-msgstr "Données et métadonnées"
-
 msgid "Signal title"
 msgstr "Titre du signal"
 
@@ -841,11 +841,11 @@ msgstr "- Infini"
 msgid "Replace special values (image)"
 msgstr "Remplacer les valeurs spéciales (image)"
 
-msgid "columns"
-msgstr "colonnes"
-
 msgid "rows"
 msgstr "lignes"
+
+msgid "columns"
+msgstr "colonnes"
 
 msgid "Distribute over"
 msgstr "Distribuer selon les"
@@ -892,6 +892,19 @@ msgstr "Taille de la fenêtre glissante utilisée dans l'algorithme de filtrage 
 
 msgid "Shape"
 msgstr "Forme"
+
+msgid ""
+"Regions of interest will be created from detected contours.\n"
+"ROI geometry is determined by the selected contour shape:\n"
+"  • Polygon → polygon ROIs\n"
+"  • Ellipse → polygon ROIs (approximated)\n"
+"  • Circle → circular ROIs"
+msgstr ""
+"Des régions d'intérêt seront créées à partir des contours détectés.\n"
+"La géométrie de la ROI est déterminée par la forme de contour sélectionnée :\n"
+"  • Polygone → ROIs polygonales\n"
+"  • Ellipse → ROIs polygonales (approximées)\n"
+"  • Cercle → ROIs circulaires"
 
 msgid "The minimum standard deviation for Gaussian Kernel. Keep this low to detect smaller blobs."
 msgstr "L'écart-type minimal pour le noyau gaussien. Cette valeur doit être faible pour détecter de petites taches."
@@ -1130,8 +1143,20 @@ msgstr "Translation en X"
 msgid "Y translation"
 msgstr "Translation en Y"
 
+msgid "column size"
+msgstr "Nombre de colonnes"
+
+msgid "row size"
+msgstr "Nombre de lignes"
+
+msgid "column spacing"
+msgstr "Espace entre chaque colonne"
+
 msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
 msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
+
+msgid "row spacing"
+msgstr "Espace entre chaque ligne"
 
 msgid "Vertical spacing between ROI centers, as a percentage of the automatically computed cell height (100% = evenly distributed grid)"
 msgstr "Espacement vertical entre les centres des ROI, en pourcentage de la hauteur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
@@ -1243,6 +1268,9 @@ msgstr "Comment retourner le résultat de la FFT inverse"
 
 msgid "Frequency"
 msgstr "Fréquence"
+
+msgid "Angle"
+msgstr "Angle"
 
 msgid "cval"
 msgstr "cval"
@@ -1590,9 +1618,6 @@ msgstr "Convertir le type de données"
 msgid "Power"
 msgstr "Puissance"
 
-msgid "Angle"
-msgstr "Angle"
-
 msgid "x"
 msgstr "x"
 
@@ -1686,3 +1711,5 @@ msgstr "Nombre de colonnes"
 msgid "Centroid"
 msgstr "Barycentre"
 
+msgid "Plot dialog"
+msgstr "Fenêtre de tracé"

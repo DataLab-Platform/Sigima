@@ -112,6 +112,38 @@ def test_image_peak_detection():
             validate_detection_rois(obj, coords, create_rois, roi_geometry)
 
 
+def test_peak_detection_rois_merged_with_existing():
+    """Detected peak ROIs are appended to existing ROIs, not replacing them."""
+    data, _coords_expected = get_peak2d_data(seed=1, multi=True)
+    obj = sigima.objects.create_image("peak2d_merge_test", data=data)
+
+    # Run detection on the clean image first
+    param = sigima.params.Peak2DDetectionParam.create(create_rois=True)
+    geometry = sigima.proc.image.peak_detection(obj, param)
+
+    # Pre-define a ROI on the image (as if the user had defined it beforehand)
+    obj.roi = sigima.objects.create_image_roi("rectangle", [0, 0, 5, 5])
+    existing_rois = list(obj.roi.single_rois)
+    n_existing = len(existing_rois)
+
+    assert sigima.proc.image.apply_detection_rois(obj, geometry)
+    assert obj.roi is not None
+
+    # The pre-existing ROI must still be present
+    for roi in existing_rois:
+        assert roi in obj.roi.single_rois, (
+            "Existing ROI must be preserved after detection"
+        )
+    # New ROIs must have been appended
+    assert len(obj.roi.single_rois) > n_existing, (
+        "Detected ROIs must be appended to existing ROIs"
+    )
+
+    roi_count = len(obj.roi)
+    assert not sigima.proc.image.apply_detection_rois(obj, geometry)
+    assert len(obj.roi) == roi_count
+
+
 @pytest.mark.gui
 def test_peak2d_interactive():
     """2D peak detection interactive test"""

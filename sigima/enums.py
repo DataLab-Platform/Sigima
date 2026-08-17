@@ -200,3 +200,43 @@ class DetectionROIGeometry(gds.LabeledEnum):
 
     CIRCLE = "circle", _("Circle")
     RECTANGLE = "rectangle", _("Rectangle")
+
+
+class ReplacementStrategySignal(gds.LabeledEnum):
+    """Replacement strategies for special values (NaN/Inf) in signals."""
+
+    NONE = "none", _("Do nothing")
+    ZERO = "zero", _("Replace with zero")
+    CONSTANT = "constant", _("Replace with constant")
+    MIN = "min", _("Replace with minimum")
+    MAX = "max", _("Replace with maximum")
+    MEAN = "mean", _("Replace with mean")
+    MEDIAN = "median", _("Replace with median")
+    DELETE = "delete", _("Delete points")
+    FORWARD_FILL = "ffill", _("Forward fill (previous value)")
+    BACKWARD_FILL = "bfill", _("Backward fill (next value)")
+    INTERP_LINEAR = "interp_linear", _("Interpolation: Linear")
+    INTERP_SPLINE = "interp_spline", _("Interpolation: Spline")
+    INTERP_QUADRATIC = "interp_quadratic", _("Interpolation: Quadratic")
+    INTERP_CUBIC = "interp_cubic", _("Interpolation: Cubic")
+    INTERP_PCHIP = "interp_pchip", _("Interpolation: PCHIP")
+    NEIGHBOR_MIN = "neighbor_min", _("N-neighbor minimum")
+    NEIGHBOR_MAX = "neighbor_max", _("N-neighbor maximum")
+    NEIGHBOR_MEAN = "neighbor_mean", _("N-neighbor mean")
+    NEIGHBOR_MEDIAN = "neighbor_median", _("N-neighbor median")
+
+
+class ReplacementStrategyImage(gds.LabeledEnum):
+    """Replacement strategies for special values (NaN/Inf) in images."""
+
+    NONE = "none", _("Do nothing")
+    ZERO = "zero", _("Replace with zero")
+    CONSTANT = "constant", _("Replace with constant")
+    MIN = "min", _("Replace with minimum")
+    MAX = "max", _("Replace with maximum")
+    MEAN = "mean", _("Replace with mean")
+    MEDIAN = "median", _("Replace with median")
+    NEIGHBOR_MIN = "neighbor_min", _("N-neighbor minimum")
+    NEIGHBOR_MAX = "neighbor_max", _("N-neighbor maximum")
+    NEIGHBOR_MEAN = "neighbor_mean", _("N-neighbor mean")
+    NEIGHBOR_MEDIAN = "neighbor_median", _("N-neighbor median")

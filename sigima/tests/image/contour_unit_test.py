@@ -4,9 +4,10 @@
 Contour finding test
 """
 
+from __future__ import annotations
+
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
 # pylint: disable=duplicate-code
-
 import sys
 import time
 
@@ -17,6 +18,11 @@ import sigima.objects
 import sigima.params
 import sigima.proc.image
 from sigima.enums import ContourShape
+from sigima.objects import KindShape
+from sigima.objects.image.roi import CircularROI, PolygonalROI
+from sigima.objects.scalar import GeometryResult
+from sigima.proc.image import apply_detection_rois
+from sigima.proc.image.detection import _store_contour_roi_metadata
 from sigima.tests import guiutils
 from sigima.tests.data import get_peak2d_data
 from sigima.tests.env import execenv
@@ -144,6 +150,153 @@ def test_contour_shape() -> None:
     execenv.print("All contour shape tests passed!")
 
 
+def test_contour_roi_polygon() -> None:
+    """Test contour detection with polygon shape creates polygon ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.POLYGON, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+    for roi in image.roi.single_rois:
+        assert isinstance(roi, PolygonalROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
+    execenv.print(f"Polygon ROIs created: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_ellipse() -> None:
+    """Test contour detection with ellipse shape creates polygon ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.ELLIPSE, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+    # Ellipses are approximated as polygon ROIs
+    for roi in image.roi.single_rois:
+        assert isinstance(roi, PolygonalROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
+    execenv.print(f"Polygon ROIs from ellipses: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_circle() -> None:
+    """Test contour detection with circle shape creates circle ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.CIRCLE, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+    for roi in image.roi.single_rois:
+        assert isinstance(roi, CircularROI)
+    roi_count = len(image.roi)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert len(image.roi) == roi_count
+    execenv.print(f"Circle ROIs created: {len(image.roi.single_rois)}")
+
+
+def test_contour_roi_merged_with_existing() -> None:
+    """Detected contour ROIs are appended to existing ROIs, not replacing them."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+
+    # Run detection on the clean image first
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.CIRCLE, create_rois=True
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+
+    # Pre-define a ROI on the image (as if the user had defined it beforehand)
+    image.roi = sigima.objects.create_image_roi("circle", [50, 50, 20])
+    n_existing = len(image.roi.single_rois)
+    existing_rois = list(image.roi.single_rois)
+
+    assert sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is not None
+
+    # The pre-existing ROI must still be present
+    for roi in existing_rois:
+        assert roi in image.roi.single_rois, (
+            "Existing ROI must be preserved after detection"
+        )
+    # New ROIs must have been appended (strictly more than before)
+    assert len(image.roi.single_rois) > n_existing, (
+        "Detected ROIs must be appended to existing ROIs"
+    )
+    execenv.print(
+        f"Merged ROIs: {n_existing} existing -> {len(image.roi.single_rois)} total"
+    )
+
+
+def test_contour_roi_disabled() -> None:
+    """Test contour detection with create_rois=False does not create ROIs."""
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+    param = sigima.params.ContourShapeParam.create(
+        shape=ContourShape.POLYGON, create_rois=False
+    )
+    result = sigima.proc.image.contour_shape(image, param)
+    assert not sigima.proc.image.apply_detection_rois(image, result)
+    assert image.roi is None
+
+
+def test_store_contour_roi_metadata_none_geometry() -> None:
+    """_store_contour_roi_metadata must return None when geometry is None."""
+    result = _store_contour_roi_metadata(None, create_rois=True)
+    assert result is None
+
+
+def test_store_contour_roi_metadata_empty_geometry() -> None:
+    """_store_contour_roi_metadata must not set attrs when geometry has 0 rows."""
+    geometry = GeometryResult("test", KindShape.CIRCLE, np.empty((0, 3)))
+    result = _store_contour_roi_metadata(geometry, create_rois=True)
+    # The geometry object is returned but the attrs must NOT be populated because
+    # len(geometry) == 0 < 1 (the guard in store_contour_roi_metadata)
+    assert result is geometry
+    assert not result.attrs.get("contour_rois", False)
+    assert not result.attrs.get("create_rois", False)
+
+
+def test_apply_contour_rois_no_detections_returns_false() -> None:
+    """apply_detection_rois returns False when contour detection found nothing.
+
+    Regression guard: calling apply_detection_rois with a contour-flagged
+    GeometryResult that has no rows must not crash and must return False.
+    """
+    data, _coords = get_peak2d_data()
+    image = sigima.objects.create_image("Test", data=data)
+
+    # Build a geometry that carries the contour_rois flag but has no rows
+    geometry = GeometryResult("test", KindShape.POLYGON, np.empty((0, 6)))
+    geometry.attrs["create_rois"] = True
+    geometry.attrs["contour_rois"] = True
+
+    result = apply_detection_rois(image, geometry)
+    assert result is False
+    assert image.roi is None
+
+
 if __name__ == "__main__":
     test_contour_interactive()
     test_contour_shape()
+    test_contour_roi_polygon()
+    test_contour_roi_ellipse()
+    test_contour_roi_circle()
+    test_contour_roi_disabled()
+    test_store_contour_roi_metadata_none_geometry()
+    test_store_contour_roi_metadata_empty_geometry()
+    test_apply_contour_rois_no_detections_returns_false()

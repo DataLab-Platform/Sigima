@@ -210,7 +210,7 @@ def test_roi_grid_extract_matches_pattern() -> None:
         assert out.shape == (3, 3)
 
         # 3) Physical origin is consistent with bounding box (dx=dy=1, x0=y0=0)
-        px0, py0, _px1, _py1 = rparam.get_bounding_box_physical()
+        px0, py0, _px1, _py1 = rparam.get_shape_circumscribed_rect()
         assert extracted.x0 == px0
         assert extracted.y0 == py0
 

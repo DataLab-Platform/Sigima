@@ -40,6 +40,34 @@ COLORS = ["blue", "red", "green", "orange", "purple", "brown", "pink", "gray", "
 LINESTYLES = ["-", "--", "-.", ":"]
 MASK_OPACITY = 0.35  # Opacity for mask overlay
 
+#: Color palette used to cycle through Signal ROI fill colors when several
+#: ROIs are defined on the same signal. Mirrors the ``tab10``-inspired
+#: palette used by DataLab so that ROI colors stay consistent across the
+#: DataLab GUI, DataLab-Kernel and Sigima viewers.
+ROI_FILL_COLORS = (
+    "#1f77b4",  # blue
+    "#ff7f0e",  # orange
+    "#2ca02c",  # green
+    "#d62728",  # red
+    "#9467bd",  # purple
+    "#8c564b",  # brown
+    "#e377c2",  # pink
+    "#7f7f7f",  # grey
+    "#bcbd22",  # yellow-green
+    "#17becf",  # cyan
+)
+#: Translucency (matplotlib alpha) used for the ROI fill.
+ROI_FILL_ALPHA = 0.35
+
+
+def roi_color_for_index(index: int) -> str:
+    """Return the ROI fill color (hex string) for the given ROI index.
+
+    The index is taken modulo the palette size so colors cycle when more
+    ROIs than palette entries are defined.
+    """
+    return ROI_FILL_COLORS[index % len(ROI_FILL_COLORS)]
+
 
 def _get_image_extent_and_aspect(obj: ImageObj) -> tuple[list[float], float]:
     """Compute matplotlib extent and aspect ratio from image physical coordinates.
@@ -149,6 +177,7 @@ def view_curves(
     x_unit = xunit
     y_unit = yunit
 
+    # pylint: disable=too-many-nested-blocks
     for idx, data_or_obj in enumerate(datalist):
         color, linestyle = _get_next_style(idx)
 
@@ -170,15 +199,50 @@ def view_curves(
 
             # Plot ROIs if requested
             if show_roi and obj.roi:
+                x_arr = np.asarray(xdata, dtype=float)
+                y_arr = np.asarray(ydata, dtype=float)
+                if x_arr.size >= 2 and y_arr.size == x_arr.size:
+                    finite = np.isfinite(x_arr) & np.isfinite(y_arr)
+                    x_arr = x_arr[finite]
+                    y_arr = y_arr[finite]
+                have_curve = x_arr.size >= 2 and y_arr.size == x_arr.size
+                if have_curve:
+                    order = np.argsort(x_arr)
+                    x_arr = x_arr[order]
+                    y_arr = y_arr[order]
                 for roi_idx, single_roi in enumerate(obj.roi):
                     assert isinstance(single_roi, SegmentROI)
                     x0, x1 = single_roi.get_physical_coords(obj)
+                    roi_color = roi_color_for_index(roi_idx)
+                    roi_label = f"{label} ROI {roi_idx + 1}" if roi_idx == 0 else None
+                    if have_curve:
+                        x_lo = max(float(x_arr[0]), min(x0, x1))
+                        x_hi = min(float(x_arr[-1]), max(x0, x1))
+                        if x_hi > x_lo:
+                            mask = (x_arr >= x_lo) & (x_arr <= x_hi)
+                            xs_in = x_arr[mask]
+                            ys_in = y_arr[mask]
+                            y_left = float(np.interp(x_lo, x_arr, y_arr))
+                            y_right = float(np.interp(x_hi, x_arr, y_arr))
+                            xs = np.concatenate(([x_lo], xs_in, [x_hi]))
+                            ys = np.concatenate(([y_left], ys_in, [y_right]))
+                            ax.fill_between(
+                                xs,
+                                ys,
+                                0.0,
+                                color=roi_color,
+                                alpha=ROI_FILL_ALPHA,
+                                linewidth=0,
+                                label=roi_label,
+                            )
+                            continue
+                    # Fallback: full-height vertical strip
                     ax.axvspan(
                         x0,
                         x1,
-                        alpha=0.2,
-                        color=color,
-                        label=f"{label} ROI {roi_idx + 1}" if roi_idx == 0 else None,
+                        alpha=ROI_FILL_ALPHA,
+                        color=roi_color,
+                        label=roi_label,
                     )
 
         elif isinstance(data_or_obj, tuple) and len(data_or_obj) == 2:

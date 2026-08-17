@@ -15,9 +15,22 @@ import pytest
 import sigima.objects
 import sigima.params
 import sigima.proc.signal
-from sigima.objects import GaussParam, SineParam, create_signal_from_param
+from sigima.objects import (
+    GaussParam,
+    SineParam,
+    TableKind,
+    TableResult,
+    create_signal_from_param,
+)
 from sigima.tests.data import create_paracetamol_signal
 from sigima.tests.helpers import check_scalar_result
+
+# `peak_detection` is deprecated in favor of `extract_peak_positions` followed
+# by `markers_table_to_signal`. The legacy behaviour is still validated below;
+# the deprecation warning itself has its own dedicated test.
+pytestmark = pytest.mark.filterwarnings(
+    "ignore:sigima.proc.signal.peak_detection is deprecated:DeprecationWarning"
+)
 
 
 @pytest.mark.validation
@@ -142,6 +155,70 @@ def test_signal_peak_detection_parameters() -> None:
         )
 
 
+def test_signal_peak_detection_deprecation() -> None:
+    """`peak_detection` must emit a DeprecationWarning."""
+    src = create_paracetamol_signal()
+    param = sigima.params.PeakDetectionParam.create(threshold=20, min_dist=5)
+    with pytest.warns(DeprecationWarning, match="peak_detection is deprecated"):
+        sigima.proc.signal.peak_detection(src, param)
+
+
+def _peaks_table(src):
+    """Helper: produce an XY-markers TableResult from a paracetamol signal."""
+    p = sigima.params.PeakDetectionParam.create(threshold=20, min_dist=5)
+    return sigima.proc.signal.extract_peak_positions(src, p)
+
+
+def test_markers_table_to_signal() -> None:
+    """`markers_table_to_signal` must rebuild a sticks signal from a table."""
+    src = create_paracetamol_signal()
+    table = _peaks_table(src)
+    dst = sigima.proc.signal.markers_table_to_signal(table, ref=src)
+
+    assert dst.x.size == len(table.data)
+    assert dst.x.size == dst.y.size
+    expected_x = np.asarray([row[0] for row in table.data], dtype=float)
+    expected_y = np.asarray([row[1] for row in table.data], dtype=float)
+    np.testing.assert_allclose(dst.x, expected_x)
+    np.testing.assert_allclose(dst.y, expected_y)
+    assert dst.get_metadata_option("curvestyle") == "Sticks"
+    # Labels/units inherited from the reference signal
+    assert dst.xlabel == src.xlabel
+    assert dst.ylabel == src.ylabel
+    assert dst.xunit == src.xunit
+    assert dst.yunit == src.yunit
+
+
+def test_markers_table_to_signal_invalid_kind() -> None:
+    """Non XY-markers tables must be rejected."""
+    table = TableResult.from_rows(
+        title="not markers",
+        headers=["a", "b"],
+        rows=[[1.0, 2.0]],
+        kind=TableKind.STATISTICS,
+    )
+    with pytest.raises(ValueError, match="XY-markers"):
+        sigima.proc.signal.markers_table_to_signal(table)
+
+
+def test_markers_table_to_signal_header_fallback() -> None:
+    """When ``x`` / ``y`` headers are missing, the first two columns are used."""
+    table = TableResult.from_rows(
+        title="raw markers",
+        headers=["lambda", "intensity", "ignored"],
+        rows=[[1.0, 10.0, 0.0], [2.0, 20.0, 0.0], [3.0, 30.0, 0.0]],
+        kind=TableKind.XY_MARKERS,
+    )
+    dst = sigima.proc.signal.markers_table_to_signal(table)
+    np.testing.assert_allclose(dst.x, [1.0, 2.0, 3.0])
+    np.testing.assert_allclose(dst.y, [10.0, 20.0, 30.0])
+    assert dst.get_metadata_option("curvestyle") == "Sticks"
+
+
 if __name__ == "__main__":
     test_signal_peak_detection()
     test_signal_peak_detection_parameters()
+    test_signal_peak_detection_deprecation()
+    test_markers_table_to_signal()
+    test_markers_table_to_signal_invalid_kind()
+    test_markers_table_to_signal_header_fallback()

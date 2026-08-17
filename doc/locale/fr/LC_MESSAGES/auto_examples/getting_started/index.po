@@ -15,8 +15,8 @@ msgstr ""
 msgid "Getting Started"
 msgstr "Premiers pas"
 
-msgid ":ref:`sphx_glr_auto_examples_getting_started_image_creation.py`"
-msgstr ":ref:`sphx_glr_auto_examples_getting_started_image_creation.py`"
+msgid ":doc:`/auto_examples/getting_started/image_creation`"
+msgstr ""
 
-msgid ":ref:`sphx_glr_auto_examples_getting_started_signal_creation.py`"
-msgstr ":ref:`sphx_glr_auto_examples_getting_started_signal_creation.py`"
+msgid ":doc:`/auto_examples/getting_started/signal_creation`"
+msgstr ""

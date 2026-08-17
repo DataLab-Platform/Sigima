@@ -320,7 +320,8 @@ def compute_geometry_from_obj(
                     coords[:, 3] *= pixel_scale
                 # Column 4 (theta) is an angle: no scaling needed
             if obj.roi is not None:
-                x0, y0, _x1, _y1 = obj.roi.get_single_roi(i_roi).get_bounding_box(obj)
+                single_roi = obj.roi.get_single_roi(i_roi)
+                x0, y0, _x1, _y1 = single_roi.get_bounding_box(obj)
                 coords[:, colx] += x0 - obj.x0
                 coords[:, coly] += y0 - obj.y0
 

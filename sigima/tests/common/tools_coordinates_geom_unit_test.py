@@ -170,7 +170,7 @@ def test_to_polar_invalid_unit() -> None:
 def test_to_cartesian_invalid_unit() -> None:
     """``to_cartesian`` raises ``ValueError`` for unsupported unit."""
     with pytest.raises(ValueError):
-        to_cartesian(np.array([1.0]), np.array([0.0]), unit="deg")  # type: ignore[arg-type]
+        to_cartesian(np.array([1.0]), np.array([0.0]), unit="deg")
 
 
 def test_to_cartesian_negative_radius() -> None:

@@ -162,6 +162,7 @@ from sigima.proc.image.detection import (
     BlobLOGParam,
     BlobOpenCVParam,
     ContourShapeParam,
+    DetectionROIParam,
     HoughCircleParam,
     Peak2DDetectionParam,
     apply_detection_rois,
@@ -210,6 +211,7 @@ from sigima.proc.image.exposure import (
     histogram,
     normalize,
     offset_correction,
+    replace_special_values,
     rescale_intensity,
 )
 from sigima.proc.image.extraction import (
@@ -347,6 +349,7 @@ __all__ = [
     "DenoiseBilateralParam",
     "DenoiseTVParam",
     "DenoiseWaveletParam",
+    "DetectionROIParam",
     "Direction",
     "EqualizeAdaptHistParam",
     "EqualizeHistParam",
@@ -461,6 +464,7 @@ __all__ = [
     "quadratic_difference",
     "radial_profile",
     "real",
+    "replace_special_values",
     "resampling",
     "rescale_intensity",
     "resize",

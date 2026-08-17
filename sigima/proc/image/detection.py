@@ -25,6 +25,7 @@ enabling automated extraction of regions or features of interest.
 from __future__ import annotations
 
 import guidata.dataset as gds
+import numpy as np
 
 import sigima.enums
 import sigima.tools.image
@@ -33,6 +34,7 @@ from sigima.objects import (
     GeometryResult,
     ImageObj,
     KindShape,
+    create_image_roi,
     create_image_roi_around_points,
 )
 from sigima.proc.decorator import computation_function
@@ -157,7 +159,15 @@ def apply_detection_rois(
     # Check if ROI creation was requested (or forced)
     create_rois = force or geometry.attrs.get("create_rois", False)
 
-    if not create_rois or len(geometry) < 2:
+    if not create_rois:
+        return False
+
+    # Handle contour-based ROIs (polygon, ellipse, circle shapes from contour_shape).
+    # These bypass the len >= 2 check: each contour is already a complete shape.
+    if geometry.attrs.get("contour_rois", False):
+        return _apply_contour_rois(obj, geometry)
+
+    if len(geometry) < 2:
         return False
 
     # Get ROI geometry from parameter, attrs, or use default
@@ -171,10 +181,128 @@ def apply_detection_rois(
     coords = geometry.centers()
 
     try:
-        obj.roi = create_image_roi_around_points(coords, roi_geometry=roi_geometry)
-        return True
+        roi_count = len(obj.roi) if obj.roi is not None else 0
+        obj.add_roi(create_image_roi_around_points(coords, roi_geometry=roi_geometry))
+        return obj.roi is not None and len(obj.roi) > roi_count
     except ValueError:
         return False
+
+
+def _ellipse_to_polygon(
+    xc: float, yc: float, a: float, b: float, theta: float, n_points: int = 64
+) -> np.ndarray:
+    """Convert ellipse parameters to polygon vertex coordinates.
+
+    The ``(xc, yc, a, b, theta)`` parameters come from
+    :func:`sigima.tools.image.preprocessing.fit_ellipse_model`, which fits the
+    contour in scikit-image ``(row, col)`` space and then swaps axes back to
+    ``(x, y)``. Because of that swap, the angle is measured relative to the
+    ``y`` axis and ``a``/``b`` are the semi-axes along ``col``/``row``. Sampling
+    the ellipse therefore uses orthogonal semi-axis vectors
+    ``u = (b*sin(theta), b*cos(theta))`` (cos term) and
+    ``v = (a*cos(theta), -a*sin(theta))`` (sin term), so each vertex is
+    ``center + cos(t)*u + sin(t)*v``. This reproduces the actual fitted ellipse
+    (the polygon ROI follows the contour data), unlike a naive rotation matrix
+    which would shear it for rotated contours.
+
+    Args:
+        xc: center x
+        yc: center y
+        a: semi-axis along the x (col) direction returned by the fit
+        b: semi-axis along the y (row) direction returned by the fit
+        theta: ellipse angle returned by the fit (relative to the y axis)
+        n_points: number of vertices for the polygon approximation
+
+    Returns:
+        1D array [x0, y0, x1, y1, ...] of polygon vertices
+    """
+    t = np.linspace(0, 2 * np.pi, n_points, endpoint=False)
+    cos_th, sin_th = np.cos(theta), np.sin(theta)
+    x = xc + b * np.cos(t) * sin_th + a * np.sin(t) * cos_th
+    y = yc + b * np.cos(t) * cos_th - a * np.sin(t) * sin_th
+    return np.column_stack((x, y)).flatten()
+
+
+def _apply_contour_rois(obj: ImageObj, geometry: GeometryResult) -> bool:
+    # Keep the early returns here: each shape branch is intentionally small and
+    # symmetric, and splitting this dispatch into helper functions would add
+    # indirection without making the code clearer.
+    # pylint: disable=too-many-return-statements
+    """Apply ROI creation from contour-based geometry results.
+
+    Converts contour detection results into ROIs:
+    - POLYGON contours → polygon ROIs
+    - ELLIPSE contours → polygon ROIs (sampled approximation)
+    - CIRCLE contours → circle ROIs
+
+    Args:
+        obj: Image object to modify
+        geometry: Geometry result from contour_shape
+
+    Returns:
+        True if ROIs were created, False otherwise
+    """
+    kind = geometry.kind
+    coords = geometry.coords
+    roi_count = len(obj.roi) if obj.roi is not None else 0
+
+    if kind == KindShape.POLYGON:
+        # Each row is [x0, y0, x1, y1, ...] possibly NaN-padded
+        polygon_coords = []
+        for row in coords:
+            # Strip NaN padding
+            valid = row[~np.isnan(row)]
+            if len(valid) >= 6:  # At least 3 vertices
+                polygon_coords.append(valid.tolist())
+        if not polygon_coords:
+            return False
+        obj.add_roi(create_image_roi("polygon", polygon_coords))
+        return obj.roi is not None and len(obj.roi) > roi_count
+
+    if kind == KindShape.ELLIPSE:
+        # Each row is [xc, yc, a, b, theta] → approximate as polygon
+        polygon_coords = []
+        for row in coords:
+            xc, yc, a, b, theta = row
+            poly = _ellipse_to_polygon(xc, yc, a, b, theta)
+            polygon_coords.append(poly.tolist())
+        if not polygon_coords:
+            return False
+        obj.add_roi(create_image_roi("polygon", polygon_coords))
+        return obj.roi is not None and len(obj.roi) > roi_count
+
+    if kind == KindShape.CIRCLE:
+        # Each row is [xc, yc, r]
+        circle_coords = coords.tolist()
+        if not circle_coords:
+            return False
+        obj.add_roi(create_image_roi("circle", circle_coords))
+        return obj.roi is not None and len(obj.roi) > roi_count
+
+    return False
+
+
+def _store_contour_roi_metadata(
+    geometry: GeometryResult | None,
+    create_rois: bool,
+) -> GeometryResult | None:
+    """Store ROI creation metadata for contour detection results.
+
+    Unlike the standard store_roi_creation_metadata (which stores ROI geometry for
+    point-based detections), this marks the result for contour-specific ROI conversion
+    where the contour shape itself determines the ROI geometry.
+
+    Args:
+        geometry: Geometry result from contour detection
+        create_rois: Whether to create ROIs from the contours
+
+    Returns:
+        The same geometry object (for chaining), or None if geometry is None
+    """
+    if geometry is not None and create_rois and len(geometry) >= 1:
+        geometry.attrs["create_rois"] = True
+        geometry.attrs["contour_rois"] = True
+    return geometry
 
 
 class GenericDetectionParam(gds.DataSet):
@@ -240,6 +368,17 @@ class ContourShapeParam(GenericDetectionParam):
         set(item.name for item in KindShape)
     )
     shape = gds.ChoiceItem(_("Shape"), sigima.enums.ContourShape)
+    create_rois = gds.BoolItem(
+        _("Create regions of interest"),
+        default=False,
+        help=_(
+            "Regions of interest will be created from detected contours.\n"
+            "ROI geometry is determined by the selected contour shape:\n"
+            "  • Polygon → polygon ROIs\n"
+            "  • Ellipse → polygon ROIs (approximated)\n"
+            "  • Circle → circular ROIs"
+        ),
+    )
 
 
 @computation_function()
@@ -255,7 +394,7 @@ def contour_shape(image: ImageObj, p: ContourShapeParam) -> GeometryResult | Non
         shape,
         p.threshold,
     )
-    return geometry
+    return _store_contour_roi_metadata(geometry, p.create_rois)
 
 
 class BaseBlobParam(gds.DataSet):

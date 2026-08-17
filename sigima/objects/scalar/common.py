@@ -298,7 +298,21 @@ class ResultHtmlGenerator:
            - `roi_indices` reference ROIs that no longer exist in `obj.roi`
              (e.g., if HTML rendering happens before result recomputation after
              ROI deletion)
+
+           When ``result.attrs["show_row_index"]`` is truthy, row headers are
+           formatted as ``"#0"``, ``"#1"``, ... regardless of ROI indices.
+           This is typically used for markers tables (XY/X/Y) where each row
+           represents an independent marker rather than a per-ROI aggregate.
         """
+        # Resolve number of rows once (used by both branches below)
+        df = result.to_dataframe()
+        if "roi_index" in df.columns:
+            df = df.drop(columns=["roi_index"])
+        n_rows = len(df)
+
+        if getattr(result, "attrs", {}).get("show_row_index"):
+            return [f"#{i}" for i in range(n_rows)]
+
         row_headers = []
         if roi_indices is not None:
             for roi_idx in roi_indices:
@@ -314,9 +328,5 @@ class ResultHtmlGenerator:
                         # else: keep default "ROI {roi_idx}" for out-of-bounds indices
                 row_headers.append(header)
         else:
-            # Need to get DataFrame to know the number of rows
-            df = result.to_dataframe()
-            if "roi_index" in df.columns:
-                df = df.drop(columns=["roi_index"])
-            row_headers = [""] * len(df)
+            row_headers = [""] * n_rows
         return row_headers
