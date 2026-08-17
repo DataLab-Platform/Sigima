@@ -23,6 +23,7 @@
 
 ### 🛠️ Bug Fixes since version 1.1.5 ###
 
+* **Masked array warning in detection functions**: Detection functions (`get_2d_peaks_coords`, `get_hough_circle_peaks`, `find_blobs_dog`, `find_blobs_doh`, `find_blobs_log`, `find_blobs_opencv`) now emit a warning when called with a masked array (e.g. when using a non-rectangular ROI): the underlying libraries (scikit-image, OpenCV, SciPy) do not support masked arrays, so the mask is ignored and results may be unexpected inside or near masked areas
 * **Detected ROIs preserve existing ones**: Detection algorithms (peak, blob, Hough and contour detection) with `create_rois=True` now append the newly detected ROIs to any ROIs already defined on the image, instead of replacing them. Previously defined regions of interest are no longer lost. This closes [Issue #36](https://github.com/DataLab-Platform/Sigima/issues/36).
 * **ROI physical coordinates**: Fixed `create_image_roi_around_points` using pixel indices instead of physical coordinates (`indices=False`), causing misplaced ROIs on calibrated images
 * **Ellipse-to-polygon conversion**: Fixed shearing in polygon approximation of ellipse ROIs caused by incorrect trigonometric decomposition of rotation and semi-axes
