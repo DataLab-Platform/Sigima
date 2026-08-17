@@ -198,37 +198,6 @@ msgstr "Moyenne des N voisins"
 
 msgid "N-neighbor median"
 msgstr "Médiane des N voisins"
-msgstr "Remplissage vers l'avant (valeur précédente)"
-
-msgid "Backward fill (next value)"
-msgstr "Remplissage vers l'arrière (valeur suivante)"
-
-msgid "Interpolation: Linear"
-msgstr "Interpolation linéaire"
-
-msgid "Interpolation: Spline"
-msgstr "Interpolation spline"
-
-msgid "Interpolation: Quadratic"
-msgstr "Interpolation quadratique"
-
-msgid "Interpolation: Cubic"
-msgstr "Interpolation cubique"
-
-msgid "Interpolation: PCHIP"
-msgstr "Interpolation PCHIP"
-
-msgid "N-neighbor minimum"
-msgstr "Plus proche voisin minimum"
-
-msgid "N-neighbor maximum"
-msgstr "Plus proche voisin maximum"
-
-msgid "N-neighbor mean"
-msgstr "Plus proche voisin moyenne"
-
-msgid "N-neighbor median"
-msgstr "Plus proche voisin médiane"
 
 msgid "All supported files"
 msgstr "Tous les fichiers pris en charge"
@@ -487,6 +456,15 @@ msgstr "Centre et échelle"
 msgid "Scale factor"
 msgstr "Facteur d'échelle"
 
+msgid "Data and metadata"
+msgstr "Données et métadonnées"
+
+msgid "Untitled"
+msgstr "Sans titre"
+
+msgid "Image title"
+msgstr "Titre de l'image"
+
 msgid "Data"
 msgstr "Données"
 
@@ -496,14 +474,14 @@ msgstr "Métadonnées"
 msgid "Annotations"
 msgstr "Annotations"
 
-msgid "Uniform coordinates"
-msgstr "Coordonnées uniformes"
-
 msgid "Origin"
 msgstr "Origine"
 
 msgid "Pixel spacing"
 msgstr "Taille des pixels"
+
+msgid "Uniform coordinates"
+msgstr "Coordonnées uniformes"
 
 msgid "Extent"
 msgstr "Bornes"
@@ -519,12 +497,6 @@ msgstr "Coordonnées Y"
 
 msgid "Titles / Units"
 msgstr "Titres / Unités"
-
-msgid "Untitled"
-msgstr "Sans titre"
-
-msgid "Image title"
-msgstr "Titre de l'image"
 
 msgid "X-axis"
 msgstr "Axe des X"
@@ -707,9 +679,6 @@ msgstr "Temps de descente total"
 msgid "Custom signal"
 msgstr "Signal personnalisé"
 
-msgid "Data and metadata"
-msgstr "Données et métadonnées"
-
 msgid "Signal title"
 msgstr "Titre du signal"
 
@@ -877,9 +846,6 @@ msgstr "lignes"
 
 msgid "columns"
 msgstr "colonnes"
-
-msgid "rows"
-msgstr "lignes"
 
 msgid "Distribute over"
 msgstr "Distribuer selon les"
@@ -1177,9 +1143,6 @@ msgstr "Translation en X"
 msgid "Y translation"
 msgstr "Translation en Y"
 
-msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
-msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
-
 msgid "column size"
 msgstr "Nombre de colonnes"
 
@@ -1305,6 +1268,9 @@ msgstr "Comment retourner le résultat de la FFT inverse"
 
 msgid "Frequency"
 msgstr "Fréquence"
+
+msgid "Angle"
+msgstr "Angle"
 
 msgid "cval"
 msgstr "cval"
@@ -1652,9 +1618,6 @@ msgstr "Convertir le type de données"
 msgid "Power"
 msgstr "Puissance"
 
-msgid "Angle"
-msgstr "Angle"
-
 msgid "x"
 msgstr "x"
 
@@ -1750,5 +1713,3 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
-
-

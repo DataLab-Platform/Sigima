@@ -1,0 +1,112 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Version 1.2"
+msgstr "Version 1.2"
+
+msgid "Sigima Version 1.2.0"
+msgstr "Sigima Version 1.2.0"
+
+msgid "✨ New features since version 1.1.6"
+msgstr "✨ Nouvelles fonctionnalités depuis la version 1.1.6"
+
+msgid "**Contour-to-ROI creation**: Contour detection (`contour_shape`) can now automatically generate ROIs from detected shapes. This closes [Issue #20](https://github.com/DataLab-Platform/Sigima/issues/20)."
+msgstr "**Création de ROI à partir de contours** : La détection de contours (`contour_shape`) peut désormais générer automatiquement des ROIs à partir des formes détectées. Cela résout [Issue #20](https://github.com/DataLab-Platform/Sigima/issues/20)."
+
+msgid "New `create_rois` parameter on `ContourShapeParam` enables ROI creation from detected contours (circles, ellipses, polygons)"
+msgstr "Nouveau paramètre `create_rois` sur `ContourShapeParam` permet la création de ROIs à partir des contours détectés (cercles, ellipses, polygones)"
+
+msgid "Detected contour geometries are converted to `CircularROI` or `PolygonalROI` objects that downstream applications (DataLab) can display and edit"
+msgstr "Les géométries de contours détectées sont converties en objets `CircularROI` ou `PolygonalROI` que les applications en aval (DataLab) peuvent afficher et modifier"
+
+msgid "Ellipse contours are approximated as polygonal ROIs using a dedicated ellipse-to-polygon conversion that correctly handles rotation angles and semi-axes in physical coordinates"
+msgstr "Les contours elliptiques sont approximés par des ROIs polygonaux à l'aide d'une conversion ellipse-vers-polygone dédiée qui gère correctement les angles de rotation et les demi-axes en coordonnées physiques"
+
+msgid "**ROI creation with physical coordinates**: `create_image_roi_around_points` now generates ROIs in physical coordinates instead of pixel indices, ensuring correct placement on images with non-unit pixel spacing or non-zero origin"
+msgstr "**Création de ROI avec coordonnées physiques** : `create_image_roi_around_points` génère désormais des ROIs en coordonnées physiques au lieu des indices de pixels, garantissant un placement correct sur les images avec un espacement de pixels non unitaire ou une origine non nulle"
+
+msgid "**Replace special values**: Added the `replace_special_values` processing function for both signals and images, allowing NaN and infinite values to be replaced with a configurable strategy (zero, constant, minimum, maximum, mean, median, neighborhood statistics, and — for signals only — point deletion, forward/backward fill and linear, spline, quadratic, cubic or PCHIP interpolation). Strategies are exposed as the `ReplacementStrategySignal` and `ReplacementStrategyImage` enumerations, with the `ReplaceSpecialValuesSignalParam` and `ReplaceSpecialValuesImageParam` parameter classes. This closes [Issue #30](https://github.com/DataLab-Platform/Sigima/issues/30)."
+msgstr "**Remplacer les valeurs spéciales** : Ajout de la fonction de traitement `replace_special_values` pour les signaux et les images, permettant de remplacer les valeurs NaN et infinies par une stratégie configurable (zéro, constante, minimum, maximum, moyenne, médiane, statistiques du voisinage et — pour les signaux uniquement — suppression de points, remplissage avant/arrière et interpolation linéaire, spline, quadratique, cubique ou PCHIP). Les stratégies sont exposées sous forme d'énumérations `ReplacementStrategySignal` et `ReplacementStrategyImage`, avec les classes de paramètres `ReplaceSpecialValuesSignalParam` et `ReplaceSpecialValuesImageParam`. Cela résout [Issue #30](https://github.com/DataLab-Platform/Sigima/issues/30)."
+
+msgid "**Extract peak positions**: Added `extract_peak_positions` function to extract XY marker coordinates from peak detection results as a new signal object"
+msgstr "**Extraire les positions des pics** : Ajout de la fonction `extract_peak_positions` pour extraire les coordonnées XY des marqueurs à partir des résultats de détection de pics en tant que nouvel objet signal"
+
+msgid "**Signal markers to signal**: Added `markers_table_to_signal` function to convert marker tables (from peak detection or other analyses) into signal objects"
+msgstr "**Marqueurs de signal vers signal** : Ajout de la fonction `markers_table_to_signal` pour convertir les tables de marqueurs (issues de la détection de pics ou d'autres analyses) en objets signal"
+
+msgid "**Marker result tables**: `TableKind` gained the `XY_MARKERS`, `X_MARKERS` and `Y_MARKERS` kinds, along with the matching `TableResult.is_xy_markers()`, `is_x_markers()` and `is_y_markers()` predicates. Marker tables describe remarkable points to be displayed as crosses or as vertical/horizontal cursors, and — like pulse features — are computed on the regions of interest only when the object defines any. Setting `show_row_index` in the result attributes numbers the rows `#0`, `#1`, … instead of labelling them by ROI. These building blocks support spectral line analysis, as requested in [Issue #17](https://github.com/DataLab-Platform/Sigima/issues/17)."
+msgstr "**Tables de résultats de marqueurs** : `TableKind` a gagné les types `XY_MARKERS`, `X_MARKERS` et `Y_MARKERS`, ainsi que les prédicats correspondants `TableResult.is_xy_markers()`, `is_x_markers()` et `is_y_markers()`. Les tables de marqueurs décrivent des points remarquables à afficher sous forme de croix ou de curseurs verticaux/horizontaux, et — comme les caractéristiques d'impulsion — ne sont calculées sur les régions d'intérêt que lorsque l'objet en définit. Le paramètre `show_row_index` dans les attributs de résultat numérote les lignes `#0`, `#1`, … au lieu de les étiqueter par ROI. Ces blocs de construction prennent en charge l'analyse des raies spectrales, comme demandé dans [Issue #17](https://github.com/DataLab-Platform/Sigima/issues/17)."
+
+msgid "**Curve-clipped ROI rendering**: Signal ROI visualization now supports curve-clipped fill rendering with a consistent color palette. This closes [Issue #18](https://github.com/DataLab-Platform/Sigima/issues/18)."
+msgstr "**Rendu de ROI découpé par courbe** : La visualisation des ROI de signal prend désormais en charge le rendu de remplissage découpé par courbe avec une palette de couleurs cohérente. Cela résout [Issue #18](https://github.com/DataLab-Platform/Sigima/issues/18)."
+
+msgid "**Option field categories**: `OptionField` (and its subclasses) now accept an optional `category` attribute, letting client applications (such as SigimaX) group configuration options, for example into settings-dialog tabs or INI sections"
+msgstr "**Catégories de champs d'option** : `OptionField` (et ses sous-classes) accepte désormais un attribut `category` optionnel, permettant aux applications clientes (telles que SigimaX) de regrouper les options de configuration, par exemple dans des onglets de dialogue de paramètres ou des sections INI."
+
+msgid "🛠️ Bug Fixes since version 1.1.6"
+msgstr "🛠️ Corrections de bugs depuis la version 1.1.6"
+
+msgid "**Inverse regions of interest**: Fixed inverse ROIs being processed through the excluded shape's bounding box instead of the whole image. Extracting an inverse ROI returned an image cropped to the very area that was meant to be excluded, coordinates reported by detection functions run on an inverse ROI were shifted by the shape origin, and an inverse rectangle was drawn covering the entire image instead of its own outline. Data read through a non-rectangular or inverse ROI now has the pixels lying outside the region set to `NaN` — which implies a conversion to floating point, so an extracted region no longer keeps the integer type of the source image. This closes [Issue #34](https://github.com/DataLab-Platform/Sigima/issues/34)."
+msgstr "**Régions d'intérêt inversées** : Correction des ROIs inversés traités à travers la boîte englobante de la forme exclue au lieu de l'image entière. L'extraction d'un ROI inversé renvoyait une image recadrée à la zone même qui était censée être exclue, les coordonnées signalées par les fonctions de détection exécutées sur un ROI inversé étaient décalées par l'origine de la forme, et un rectangle inversé était dessiné couvrant toute l'image au lieu de son propre contour. Les données lues à travers un ROI non rectangulaire ou inversé ont désormais les pixels situés en dehors de la région définis sur `NaN` — ce qui implique une conversion en flottant, donc une région extraite ne conserve plus le type entier de l'image source. Cela résout [Issue #34]("
+
+msgid "**Masked array warning in detection functions**: Detection functions (`get_2d_peaks_coords`, `get_hough_circle_peaks`, `find_blobs_dog`, `find_blobs_doh`, `find_blobs_log`, `find_blobs_opencv`) now emit a warning when called with a masked array (e.g. when using a non-rectangular ROI): the underlying libraries (scikit-image, OpenCV, SciPy) do not support masked arrays, so the mask is ignored and results may be unexpected inside or near masked areas. This closes [Issue #35](https://github.com/DataLab-Platform/Sigima/issues/35)."
+msgstr "**Avertissement de tableau masqué dans les fonctions de détection** : Les fonctions de détection (`get_2d_peaks_coords`, `get_hough_circle_peaks`, `find_blobs_dog`, `find_blobs_doh`, `find_blobs_log`, `find_blobs_opencv`) émettent désormais un avertissement lorsqu'elles sont appelées avec un tableau masqué (par exemple lors de l'utilisation d'un ROI non rectangulaire) : les bibliothèques sous-jacentes (scikit-image, OpenCV, SciPy) ne prennent pas en charge les tableaux masqués, donc le masque est ignoré et les résultats peuvent être inattendus à l'intérieur ou à proximité des zones masquées. Cela résout [Issue #35]("
+
+msgid "**Detected ROIs preserve existing ones**: Detection algorithms (peak, blob, Hough and contour detection) with `create_rois=True` now append the newly detected ROIs to any ROIs already defined on the image, instead of replacing them. Previously defined regions of interest are no longer lost. This closes [Issue #36](https://github.com/DataLab-Platform/Sigima/issues/36)."
+msgstr "**Les ROIs détectés conservent les existants** : Les algorithmes de détection (détection de pics, blobs, Hough et contours) avec `create_rois=True` ajoutent désormais les ROIs nouvellement détectés à tous les ROIs déjà définis sur l'image, au lieu de les remplacer. Les régions d'intérêt précédemment définies ne sont plus perdues. Cela résout [Issue #36]("
+
+msgid "**Region of interest comparison**: Fixed two regions of interest of different geometries being considered equal as soon as their coordinate arrays matched — a circle and a rectangle sharing the same numbers, for instance. Merging regions of interest also compared the incoming ones against the original list instead of the list being built, so duplicates within a single merge slipped through."
+msgstr "**Comparaison des régions d'intérêt** : Correction de deux régions d'intérêt de géométries différentes considérées comme égales dès que leurs tableaux de coordonnées correspondaient — un cercle et un rectangle partageant les mêmes nombres, par exemple. La fusion des régions d'intérêt comparait également les nouvelles régions avec la liste originale au lieu de la liste en cours de construction, de sorte que les doublons dans une seule fusion passaient inaperçus."
+
+msgid "**ROI physical coordinates**: Fixed `create_image_roi_around_points` using pixel indices instead of physical coordinates (`indices=False`), causing misplaced ROIs on calibrated images"
+msgstr "**Coordonnées physiques des ROI** : Correction de `create_image_roi_around_points` utilisant les indices de pixels au lieu des coordonnées physiques (`indices=False`), entraînant un mauvais placement des ROIs sur les images calibrées"
+
+msgid "**Ellipse-to-polygon conversion**: Fixed shearing in polygon approximation of ellipse ROIs caused by incorrect trigonometric decomposition of rotation and semi-axes"
+msgstr "**Conversion ellipse-vers-polygone** : Correction du cisaillement dans l'approximation polygonale des ROIs elliptiques causé par une décomposition trigonométrique incorrecte de la rotation et des demi-axes"
+
+msgid "**Custom signal XY preservation**: Fixed user-edited XY values being silently discarded when regenerating a custom signal from its creation parameters. This closes [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25)."
+msgstr "**Conservation des coordonnées XY des signaux personnalisés** : Correction des valeurs XY modifiées par l'utilisateur étant silencieusement ignorées lors de la régénération d'un signal personnalisé à partir de ses paramètres de création. Cela résout [Issue #25](https://github.com/DataLab-Platform/Sigima/issues/25)."
+
+msgid "**Negative pulse features**: Fixed square pulses with negative polarity using a baseline sample as their peak, which could make full pulse-feature extraction fail instead of returning timing and amplitude measurements."
+msgstr "**Caractéristiques des impulsions négatives** : Correction des impulsions carrées de polarité négative utilisant un échantillon de référence comme leur pic, ce qui pouvait faire échouer l'extraction complète des caractéristiques de l'impulsion au lieu de renvoyer les mesures de temps et d'amplitude."
+
+msgid "🔧 Other changes since version 1.1.6"
+msgstr "🔧 Autres changements depuis la version 1.1.6"
+
+msgid "**Object title moved next to the data**: The `title` field of `SignalObj` and `ImageObj` now belongs to the *Data and metadata* group instead of *Titles / Units*, so both object types present their parameters consistently. Applications displaying these objects in a parameter dialog will see the title in its new location."
+msgstr "**Le titre de l'objet déplacé à côté des données** : Le champ `title` de `SignalObj` et `ImageObj` appartient désormais au groupe *Données et métadonnées* au lieu de *Titres / Unités*, de sorte que les deux types d'objets présentent leurs paramètres de manière cohérente. Les applications affichant ces objets dans une boîte de dialogue de paramètres verront le titre à son nouvel emplacement."
+
+msgid "**New `DetectionROIParam` parameter class**: Publicly exported from `sigima.proc.image` and `sigima.params`, it groups the ROI creation options shared by the detection functions"
+msgstr "**Nouvelle classe de paramètres `DetectionROIParam`** : Exportée publiquement depuis `sigima.proc.image` et `sigima.params`, elle regroupe les options de création de ROI partagées par les fonctions de détection"
+
+msgid "**`ROI2DParam.get_bounding_box_physical()` renamed to `get_shape_circumscribed_rect()`**: The former name suggested an extraction bounding box, whereas the method returns the rectangle circumscribing the ROI shape — which, unlike the bounding box, does not depend on the inverse flag"
+msgstr "**`ROI2DParam.get_bounding_box_physical()` renommé en `get_shape_circumscribed_rect()`** : L'ancien nom suggérait une boîte englobante d'extraction, alors que la méthode renvoie le rectangle circonscrivant la forme du ROI — qui, contrairement à la boîte englobante, ne dépend pas du drapeau inverse"
+
+msgid "**Remote control client**: Added `get_current_object_uuid()` method to `SimpleRemoteProxy` and `SimpleAbstractDLControl`"
+msgstr "**Client de contrôle à distance** : Ajout de la méthode `get_current_object_uuid()` à `SimpleRemoteProxy` et `SimpleAbstractDLControl`"
+
+msgid "**New `BaseObj.add_roi()` method**: Non-destructive helper that merges a ROI object into an object's existing ROIs (keeping existing regions and deduplicating identical single ROIs); used by the detection ROI creation path"
+msgstr "**Nouvelle méthode `BaseObj.add_roi()`** : Assistant non destructif qui fusionne un objet ROI dans les ROIs existants d'un objet (en conservant les régions existantes et en dédupliquant les ROIs simples identiques) ; utilisé par le chemin de création de ROI de détection"
+
+msgid "**API cleanup**: `store_contour_roi_metadata` made private (`_store_contour_roi_metadata`) — internal helper only used by `contour_shape()`"
+msgstr "**Nettoyage de l'API** : `store_contour_roi_metadata` rendu privé (`_store_contour_roi_metadata`) — assistant interne utilisé uniquement par `contour_shape()`"
+
+msgid "**`peak_detection` deprecated**: Use `extract_peak_positions` + `markers_table_to_signal` for new code"
+msgstr "**`peak_detection` obsolète** : Utilisez `extract_peak_positions` + `markers_table_to_signal` pour le nouveau code"
+
+msgid "**Test coverage**: Added unit tests for contour ROI metadata handling, detection with non-unit pixel spacing, and non-uniform coordinate geometry operations"
+msgstr "**Couverture des tests** : Ajout de tests unitaires pour la gestion des métadonnées des ROI de contour, la détection avec un espacement de pixels non unitaire et les opérations de géométrie de coordonnées non uniformes"
+
+msgid "**`OptionField.get()`/`.set()` `sync_env` made keyword-only**: Calling either method with `sync_env` as a positional argument now raises `TypeError` instead of silently being misinterpreted, preventing accidental misuse"
+msgstr "**`OptionField.get()`/`.set()` `sync_env` rendu uniquement mot-clé** : Appeler l'une ou l'autre méthode avec `sync_env` comme argument positionnel lève désormais `TypeError` au lieu d'être interprété silencieusement, empêchant une utilisation accidentelle"

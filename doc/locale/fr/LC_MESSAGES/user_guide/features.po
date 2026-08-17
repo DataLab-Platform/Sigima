@@ -1273,7 +1273,7 @@ msgid "Zero-padding for images"
 msgstr "Remplissage de zéros pour les images"
 
 msgid "Measurements and Analysis"
-msgstr ""
+msgstr "Mesures et analyse"
 
 msgid ":func:`centroid <sigima.proc.image.centroid>`"
 msgstr ""
