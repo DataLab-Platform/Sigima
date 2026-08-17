@@ -663,6 +663,33 @@ class TestInverseROIBoundingBox:
         assert ir == pytest.approx(15.0)
 
     # ------------------------------------------------------------------
+    # get_physical_coords: contract consumed by the rendering backends, which
+    # must draw the shape itself and never the extraction bounding box
+    # ------------------------------------------------------------------
+
+    def test_rectangular_physical_coords_unaffected_by_inverse_flag(self):
+        """An inverse RectangularROI keeps the rectangle's own physical coords."""
+        obj = self._img()
+        coords = [20.0, 30.0, 40.0, 25.0]
+        roi_normal = RectangularROI(coords, indices=False, inverse=False)
+        roi_inverse = RectangularROI(coords, indices=False, inverse=True)
+        np.testing.assert_allclose(roi_inverse.get_physical_coords(obj), coords)
+        np.testing.assert_allclose(
+            roi_inverse.get_physical_coords(obj), roi_normal.get_physical_coords(obj)
+        )
+
+    def test_circular_physical_coords_unaffected_by_inverse_flag(self):
+        """An inverse CircularROI keeps the circle's own physical coords."""
+        obj = self._img()
+        coords = [50.0, 50.0, 15.0]
+        roi_normal = CircularROI(coords, indices=False, inverse=False)
+        roi_inverse = CircularROI(coords, indices=False, inverse=True)
+        np.testing.assert_allclose(roi_inverse.get_physical_coords(obj), coords)
+        np.testing.assert_allclose(
+            roi_inverse.get_physical_coords(obj), roi_normal.get_physical_coords(obj)
+        )
+
+    # ------------------------------------------------------------------
     # ImageObj.get_data: inverse ROI must return full-image data
     # ------------------------------------------------------------------
 
