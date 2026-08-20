@@ -73,6 +73,7 @@ doc = [
 ]
 test = ["pytest", "pytest-xvfb", "jsonschema >= 4"]
 qt = ["qtpy", "PyQt5", "plotpy"]
+plotly = ["plotly >= 5.0"]
 
 [tool.setuptools.packages.find]
 include = ["sigima*"]
