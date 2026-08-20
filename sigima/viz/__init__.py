@@ -215,11 +215,6 @@ if TYPE_CHECKING:
         return object()
 
 
-# Determine which backend to use
-_BACKEND_NAME: str | None = None
-_BACKEND_SOURCE: str = "auto"
-
-
 def _select_backend() -> tuple[str, str]:
     """Select visualization backend based on configuration and availability.
 
@@ -300,8 +295,8 @@ def _select_backend() -> tuple[str, str]:
 
 # Lazy backend initialization - deferred until first attribute access
 _BACKEND_MODULE = None
-_BACKEND_NAME = None
-_BACKEND_SOURCE = None
+_BACKEND_NAME: str | None = None
+_BACKEND_SOURCE: str | None = None
 _INITIALIZING = False  # Flag to prevent recursion
 
 # Public API: Set default values for BACKEND_NAME and BACKEND_SOURCE

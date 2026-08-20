@@ -124,9 +124,7 @@ python scripts/run_with_env.py python -m ruff format
 python scripts/run_with_env.py python -m ruff check --fix
 
 # Pylint
-python scripts/run_with_env.py python -m pylint sigima \
-    --disable=duplicate-code,fixme,too-many-arguments, \
-    too-many-branches,too-many-instance-attributes
+python scripts/run_with_env.py python -m pylint sigima
 ```
 
 ### Translations

@@ -4,10 +4,23 @@
 max-line-length=88
 
 [TYPECHECK]
-ignored-modules=qtpy.QtWidgets,qtpy.QtCore,qtpy.QtGui,cv2,plotpy._scaler,skimage.restoration,skimage.feature
+# NumPy's floating-point limits are populated dynamically.
+ignored-classes=finfo
+ignored-modules=qtpy.QtWidgets,qtpy.QtCore,qtpy.QtGui,cv2,plotpy._scaler,scipy.special,skimage.draw,skimage.restoration,skimage.feature
 
 [MESSAGES CONTROL]
-disable=wrong-import-order
+# Ruff owns import ordering. The remaining exclusions reflect accepted complexity in
+# numerical algorithms, compatibility layers, and parallel object APIs.
+disable=duplicate-code,
+	fixme,
+	too-many-arguments,
+	too-many-branches,
+	too-many-instance-attributes,
+	too-many-lines,
+	too-many-locals,
+	too-many-public-methods,
+	too-many-statements,
+	wrong-import-order
 
 [DESIGN]
 max-args=10  # default: 5

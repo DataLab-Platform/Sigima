@@ -114,6 +114,42 @@ msgstr "``doc/user-guide``"
 msgid "This naming convention improves clarity by clearly separating documentation efforts from code-related development (features, fixes, etc.)."
 msgstr "Cette convention de nommage améliore la clarté en séparant clairement les efforts de documentation du développement lié au code (fonctionnalités, corrections, etc.)."
 
+msgid "Commit Message Convention"
+msgstr "Convention des messages de commit"
+
+msgid "New commits and pull request titles should follow the `Conventional Commits <https://www.conventionalcommits.org/>`_ format::"
+msgstr "Les nouveaux commits et les titres de demandes d'extraction doivent suivre le format `Conventional Commits <https://www.conventionalcommits.org/>`_::"
+
+msgid "Use the type that best describes the change:"
+msgstr "Utiliser le type qui décrit le mieux la modification :"
+
+msgid "``feat`` for a new capability;"
+msgstr "``feat`` pour une nouvelle fonctionnalité ;"
+
+msgid "``fix`` for a bug fix;"
+msgstr "``fix`` pour une correction d'anomalie ;"
+
+msgid "``test`` for test-only changes;"
+msgstr "``test`` pour des modifications concernant uniquement les tests ;"
+
+msgid "``docs`` for documentation;"
+msgstr "``docs`` pour la documentation ;"
+
+msgid "``ci`` for continuous-integration configuration;"
+msgstr "``ci`` pour la configuration de l'intégration continue ;"
+
+msgid "``refactor`` for a behavior-preserving code change;"
+msgstr "``refactor`` pour une modification de code qui préserve le comportement ;"
+
+msgid "``chore`` for maintenance work not covered above."
+msgstr "``chore`` pour les travaux de maintenance non couverts ci-dessus."
+
+msgid "For example::"
+msgstr "Par exemple::"
+
+msgid "Merge commits and annotated release tags are exceptions: keep their explicit Git messages, such as ``Merge branch 'feature/feature_name'`` and ``Release version 1.2.0``. Do not rewrite published history solely to change old messages."
+msgstr "Les commits de fusion et les tags de version annotés font exception : conserver leurs messages Git explicites, tels que ``Merge branch 'feature/feature_name'`` et ``Release version 1.2.0``. Ne pas réécrire l'historique publié uniquement pour modifier d'anciens messages."
+
 msgid "Workflow for New Features"
 msgstr "Workflow pour les nouvelles fonctionnalités"
 
@@ -159,8 +195,8 @@ msgstr "Créer une branche de correction d'anomalie à partir de ``release`` :"
 msgid "Merge the fix branch back into ``release``:"
 msgstr "Fusionner la branche de correction de nouveau dans ``release`` :"
 
-msgid "Do not create a ``fix/xxx`` branch from a ``develop/feature_name`` branch. Always branch from ``develop`` or ``release`` to ensure fixes are correctly propagated."
-msgstr "Ne pas créer une branche ``fix/xxx`` à partir d'une branche ``develop/feature_name``. Toujours créer une branche à partir de ``develop`` ou ``release`` pour garantir que les corrections sont correctement propagées."
+msgid "Do not create a ``fix/xxx`` branch from a ``feature/feature_name`` branch. Always branch from ``develop`` or ``release`` to ensure fixes are correctly propagated."
+msgstr "Ne pas créer une branche ``fix/xxx`` à partir d'une branche ``feature/feature_name``. Toujours créer une branche à partir de ``develop`` ou ``release`` pour garantir que les corrections sont correctement propagées."
 
 msgid "Workflow for Critical Hotfixes"
 msgstr "Workflow pour les correctifs urgents"
@@ -206,6 +242,12 @@ msgstr "Lorsque vous êtes prêt à publier une nouvelle version mineure ou maje
 
 msgid "Merge ``develop`` into ``main``:"
 msgstr "Fusionner ``develop`` dans ``main`` :"
+
+msgid "Fast-forward ``develop`` to the released ``main`` commit:"
+msgstr "Avancer ``develop`` en fast-forward jusqu'au commit publié de ``main`` :"
+
+msgid "This makes the release merge commit, its conflict resolutions, and the tag reachable from ``develop`` without creating a redundant merge commit. If the fast-forward fails, stop and reconcile ``main`` and ``develop`` through a reviewed merge; never rebase or force-push either shared branch."
+msgstr "Cette opération rend le commit de fusion de la version, ses résolutions de conflits et le tag accessibles depuis ``develop`` sans créer de commit de fusion redondant. Si le fast-forward échoue, arrêter l'opération et réconcilier ``main`` et ``develop`` au moyen d'une fusion revue ; ne jamais rebaser ni forcer la publication de l'une de ces branches partagées."
 
 msgid "Delete the old ``release`` branch (if exists):"
 msgstr "Supprimer l'ancienne branche ``release`` (si elle existe) :"
