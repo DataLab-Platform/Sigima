@@ -6,11 +6,13 @@
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass
 from functools import wraps
 from typing import Any, Callable
 
 import numpy as np
+from numpy import ma
 
 
 @dataclass(frozen=True)
@@ -267,6 +269,47 @@ def check_2d_array(
         return decorator(func)
     # Usage: `@check_2d_array(...)`
     return decorator
+
+
+def warn_if_masked(func: Callable[..., Any]) -> Callable[..., Any]:
+    """Decorator warning when the input array is a masked array.
+
+    Some algorithms rely on underlying libraries (scikit-image, OpenCV, SciPy)
+    that do not support :class:`numpy.ma.MaskedArray` inputs: the mask is
+    silently ignored, so results may be unexpected inside or near masked areas.
+
+    If the first positional argument of the decorated function is a masked
+    array containing at least one masked value, a :class:`UserWarning` is
+    emitted. The array is passed unchanged to the decorated function.
+
+    Args:
+        func: Function to decorate. Its first positional argument must be a
+         NumPy array (possibly masked).
+
+    Returns:
+        Decorated function emitting a warning on masked array input.
+    """
+
+    @wraps(func)
+    def wrapper(data: np.ndarray, *args: Any, **kwargs: Any) -> Any:
+        if (
+            isinstance(data, ma.MaskedArray)
+            and data.mask is not ma.nomask
+            and np.any(data.mask)
+        ):
+            warnings.warn(
+                f"{func.__name__} does not support masked arrays (often "
+                "produced by ROIs): the mask is ignored, so results may be "
+                "unexpected inside or near masked areas.\n"
+                "Workaround: extract the ROI data and replace masked/NaN "
+                "values with a neutral value (e.g., 0) before calling this "
+                "function.",
+                UserWarning,
+                stacklevel=2,
+            )
+        return func(data, *args, **kwargs)
+
+    return wrapper
 
 
 def normalize_kernel(kernel: np.ndarray) -> np.ndarray:

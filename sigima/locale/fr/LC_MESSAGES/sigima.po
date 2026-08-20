@@ -461,11 +461,11 @@ msgstr "Facteur d'échelle"
 msgid "Data and metadata"
 msgstr "Données et métadonnées"
 
-msgid "Image title"
-msgstr "Titre de l'image"
-
 msgid "Untitled"
 msgstr "Sans titre"
+
+msgid "Image title"
+msgstr "Titre de l'image"
 
 msgid "Data"
 msgstr "Données"
@@ -476,14 +476,14 @@ msgstr "Métadonnées"
 msgid "Annotations"
 msgstr "Annotations"
 
-msgid "Uniform coordinates"
-msgstr "Coordonnées uniformes"
-
 msgid "Origin"
 msgstr "Origine"
 
 msgid "Pixel spacing"
 msgstr "Taille des pixels"
+
+msgid "Uniform coordinates"
+msgstr "Coordonnées uniformes"
 
 msgid "Extent"
 msgstr "Bornes"
@@ -846,9 +846,6 @@ msgstr "Remplacer les valeurs spéciales (image)"
 msgid "columns"
 msgstr "colonnes"
 
-msgid "rows"
-msgstr "lignes"
-
 msgid "Distribute over"
 msgstr "Distribuer selon les"
 
@@ -1145,8 +1142,20 @@ msgstr "Translation en X"
 msgid "Y translation"
 msgstr "Translation en Y"
 
+msgid "column size"
+msgstr "Nombre de colonnes"
+
+msgid "row size"
+msgstr "Nombre de lignes"
+
+msgid "column spacing"
+msgstr "Espace entre chaque colonne"
+
 msgid "Horizontal spacing between ROI centers, as a percentage of the automatically computed cell width (100% = evenly distributed grid)"
 msgstr "Espacement horizontal entre les centres des ROI, en pourcentage de la largeur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
+
+msgid "row spacing"
+msgstr "Espace entre chaque ligne"
 
 msgid "Vertical spacing between ROI centers, as a percentage of the automatically computed cell height (100% = evenly distributed grid)"
 msgstr "Espacement vertical entre les centres des ROI, en pourcentage de la hauteur de cellule automatiquement calculée (100% = grille uniformément distribuée)"
@@ -1258,6 +1267,9 @@ msgstr "Comment retourner le résultat de la FFT inverse"
 
 msgid "Frequency"
 msgstr "Fréquence"
+
+msgid "Angle"
+msgstr "Angle"
 
 msgid "cval"
 msgstr "cval"
@@ -1605,9 +1617,6 @@ msgstr "Convertir le type de données"
 msgid "Power"
 msgstr "Puissance"
 
-msgid "Angle"
-msgstr "Angle"
-
 msgid "x"
 msgstr "x"
 
@@ -1701,3 +1710,5 @@ msgstr "Nombre de colonnes"
 msgid "Centroid"
 msgstr "Barycentre"
 
+msgid "Plot dialog"
+msgstr "Fenêtre de tracé"

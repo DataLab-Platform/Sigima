@@ -1643,7 +1643,7 @@ def extract_pulse_features(
         )
     amplitude = get_amplitude(x, y, start_range, end_range, plateau_range, signal_shape)
 
-    ymax_idx = np.argmax(y)
+    ymax_idx = np.argmax(y * polarity)
 
     if signal_shape == SignalShape.STEP:
         rise_time = get_rise_time(x, y, start_ratio, stop_ratio, start_range, end_range)

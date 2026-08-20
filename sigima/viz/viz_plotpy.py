@@ -835,8 +835,10 @@ def __create_image_roi_items(obj: ImageObj) -> list[AnnotatedShape]:
     if obj.roi is not None and not obj.roi.is_empty():
         for single_roi in obj.roi:
             if isinstance(single_roi, RectangularROI):
-                x0, y0, x1, y1 = single_roi.get_bounding_box(obj)
-                roi_item = make.annotated_rectangle(x0, y0, x1, y1, single_roi.title)
+                x0, y0, dx, dy = single_roi.get_physical_coords(obj)
+                roi_item = make.annotated_rectangle(
+                    x0, y0, x0 + dx, y0 + dy, single_roi.title
+                )
             elif isinstance(single_roi, CircularROI):
                 xc, yc, r = single_roi.get_physical_coords(obj)
                 x0, y0, x1, y1 = coordinates.circle_to_diameter(xc, yc, r)
