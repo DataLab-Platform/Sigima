@@ -2,23 +2,13 @@
 
 """Unit tests for canonical annotation integration with PlotPy."""
 
+# pylint: disable=import-outside-toplevel
+
+import importlib.util
 import math
 
 import numpy as np
-from guidata.io import JSONWriter
-from plotpy.builder import make
-from plotpy.io import save_items
-from plotpy.items import (
-    AnnotatedCircle,
-    AnnotatedEllipse,
-    AnnotatedObliqueRectangle,
-    AnnotatedPoint,
-    AnnotatedPolygon,
-    AnnotatedSegment,
-    AnnotatedXRange,
-    LabelItem,
-    Marker,
-)
+import pytest
 
 import sigima.objects
 from sigima.objects import (
@@ -37,16 +27,31 @@ from sigima.objects import (
     SegmentAnnotation,
     TextAnnotation,
 )
-from sigima.viz.annotation_plotpy import (
-    AxesLabelItem,
-    annotations_to_plotpy_items,
-    load_legacy_plotpy_items,
-    migrate_legacy_plotpy_annotations,
+
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("plotpy") is None, reason="PlotPy not installed"
 )
 
 
 def test_all_annotation_primitives_create_native_items() -> None:
     """Check conversion of every canonical primitive to a PlotPy item."""
+    from plotpy.items import (
+        AnnotatedCircle,
+        AnnotatedEllipse,
+        AnnotatedObliqueRectangle,
+        AnnotatedPoint,
+        AnnotatedPolygon,
+        AnnotatedSegment,
+        AnnotatedXRange,
+        LabelItem,
+        Marker,
+    )
+
+    from sigima.viz.annotation_plotpy import (
+        AxesLabelItem,
+        annotations_to_plotpy_items,
+    )
+
     annotations = [
         PointAnnotation(x=1, y=2),
         SegmentAnnotation(x0=0, y0=0, x1=1, y1=1),
@@ -82,6 +87,8 @@ def test_all_annotation_primitives_create_native_items() -> None:
 
 def test_all_canonical_marker_symbols_create_valid_plotpy_markers() -> None:
     """Check that every portable marker name maps to a valid PlotPy symbol."""
+    from sigima.viz.annotation_plotpy import annotations_to_plotpy_items
+
     expected_markers = {
         "circle": "Ellipse",
         "square": "Rect",
@@ -104,6 +111,16 @@ def test_all_canonical_marker_symbols_create_valid_plotpy_markers() -> None:
 
 def test_legacy_plotpy_payload_load_and_migration() -> None:
     """Check explicit migration of a known historical PlotPy payload."""
+    from guidata.io import JSONWriter
+    from plotpy.builder import make
+    from plotpy.io import save_items
+    from plotpy.items import AnnotatedPoint
+
+    from sigima.viz.annotation_plotpy import (
+        load_legacy_plotpy_items,
+        migrate_legacy_plotpy_annotations,
+    )
+
     source_item = make.annotated_point(3.0, 4.0, title="Legacy point")
     writer = JSONWriter(None)
     save_items(writer, [source_item])
@@ -136,6 +153,12 @@ def test_legacy_plotpy_payload_load_and_migration() -> None:
 
 def test_all_known_legacy_plotpy_types_are_migrated() -> None:
     """Check migration coverage for the historical DataLab PlotPy surface."""
+    from guidata.io import JSONWriter
+    from plotpy.builder import make
+    from plotpy.io import save_items
+
+    from sigima.viz.annotation_plotpy import migrate_legacy_plotpy_annotations
+
     items = [
         make.annotated_point(1, 2),
         make.annotated_segment(0, 0, 1, 1),
@@ -183,6 +206,12 @@ def test_all_known_legacy_plotpy_types_are_migrated() -> None:
 
 def test_unknown_legacy_item_is_preserved() -> None:
     """Check that migration leaves unsupported PlotPy items untouched."""
+    from guidata.io import JSONWriter
+    from plotpy.builder import make
+    from plotpy.io import save_items
+
+    from sigima.viz.annotation_plotpy import migrate_legacy_plotpy_annotations
+
     writer = JSONWriter(None)
     save_items(writer, [make.curve([0, 1], [1, 2])])
     payload = {"type": "plotpy_item", "plotpy_json": writer.get_json()}

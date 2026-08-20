@@ -2,12 +2,12 @@
 
 """Unit tests for canonical annotation rendering with Matplotlib."""
 
+# pylint: disable=import-outside-toplevel
+
+import importlib.util
 from collections import Counter
 
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-from matplotlib.patches import Circle, Ellipse, Polygon, Rectangle
-from matplotlib.text import Text
+import pytest
 
 from sigima.objects import (
     Axis,
@@ -23,11 +23,21 @@ from sigima.objects import (
     SegmentAnnotation,
     TextAnnotation,
 )
-from sigima.viz.annotation_mpl import add_annotations_to_axes
+
+pytestmark = pytest.mark.skipif(
+    importlib.util.find_spec("matplotlib") is None, reason="Matplotlib not installed"
+)
 
 
 def test_all_annotation_primitives_create_expected_artists() -> None:
     """Check structural rendering of every canonical primitive."""
+    import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Circle, Ellipse, Polygon, Rectangle
+    from matplotlib.text import Text
+
+    from sigima.viz.annotation_mpl import add_annotations_to_axes
+
     figure, axes = plt.subplots()
     annotations = [
         PointAnnotation(x=1, y=2, z_index=1),
@@ -62,6 +72,10 @@ def test_all_annotation_primitives_create_expected_artists() -> None:
 
 def test_axes_text_uses_normalized_transform() -> None:
     """Check that overlay text uses the normalized axes coordinate system."""
+    import matplotlib.pyplot as plt
+
+    from sigima.viz.annotation_mpl import add_annotations_to_axes
+
     figure, axes = plt.subplots()
     annotation = TextAnnotation(text="Overlay", x=0.1, y=0.9, coordinate_space="axes")
 
@@ -74,6 +88,10 @@ def test_axes_text_uses_normalized_transform() -> None:
 
 def test_hidden_annotation_creates_no_artist() -> None:
     """Check annotation visibility at the renderer boundary."""
+    import matplotlib.pyplot as plt
+
+    from sigima.viz.annotation_mpl import add_annotations_to_axes
+
     figure, axes = plt.subplots()
 
     artists = add_annotations_to_axes(axes, [PointAnnotation(visible=False)])
