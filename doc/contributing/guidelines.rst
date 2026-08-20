@@ -10,7 +10,7 @@ We follow the `PEP 8 <https://www.python.org/dev/peps/pep-0008/>`_ coding style.
 
 In particular, we are especially strict about the following guidelines:
 
-- Limit all lines to a maximum of 79 characters.
+- Limit all lines to a maximum of 88 characters.
 - Respect the naming conventions (classes, functions, variables, etc.).
 - Use specific exceptions instead of the generic :class:`Exception`.
 
@@ -23,26 +23,31 @@ ruff
 ^^^^
 
 If you are using `Visual Studio Code <https://code.visualstudio.com/>`_,
-the project settings will automatically format your code with `ruff` on save
-(you may also run the task "Run Ruff" to run `ruff` on the project).
+the project settings will automatically format your code with `ruff` on save.
+You may also run the Ruff tasks on the project.
 
-To run `ruff`, run the following command::
+To format and check the code with `ruff`, run the following commands from the
+repository root::
 
-    ruff check
+  python scripts/run_with_env.py python -m ruff format
+  python scripts/run_with_env.py python -m ruff check
 
 pylint
 ^^^^^^
 
-To run `pylint`, run the following command::
+To run `pylint`, run the following command from the repository root::
 
-    pylint sigima
+  python scripts/run_with_env.py python -m pylint sigima
 
 If you are using `Visual Studio Code <https://code.visualstudio.com/>`_
-on Windows, you may run the task "Run Pylint" to run `pylint` on the project.
+on Windows, you may run the "Pylint" task on the project. The enabled checks
+and accepted exclusions are defined in the repository's ``.pylintrc`` file.
 
 .. note::
 
-    A `pylint` rating greater than 9/10 is required to merge a pull request.
+  The Ruff and Pylint checks must both exit successfully before a pull request
+  may be merged. Pylint's numeric rating is informative only: the merge gate is
+  based on the absence of diagnostics from the enabled checks.
 
 Specific coding guidelines
 --------------------------

@@ -45,8 +45,8 @@ import pytest
 import sigima.objects
 import sigima.params
 import sigima.proc.signal
-import sigima.tools.signal.stability as stability
 from sigima.tests.helpers import check_array_result
+from sigima.tools.signal import stability
 
 #: Number of samples used by the exact-expectation references. Kept small on purpose:
 #: the trace is accumulated by looping over the canonical basis, so the cost is O(N²).

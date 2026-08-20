@@ -227,8 +227,8 @@ def interpolate_masked(
     if interp_method == Interpolation1DMethod.LINEAR:
         y[mask] = np.interp(x_masked, x_valid, y_valid)
     elif interp_method == Interpolation1DMethod.SPLINE:
-        knots, coeffs, degree = scipy.interpolate.splrep(x_valid, y_valid, s=0)
-        y[mask] = scipy.interpolate.splev(x_masked, (knots, coeffs, degree), der=0)
+        spline = scipy.interpolate.splrep(x_valid, y_valid, s=0)
+        y[mask] = scipy.interpolate.splev(x_masked, spline, der=0)
     elif interp_method == Interpolation1DMethod.QUADRATIC:
         coeffs = np.polyfit(x_valid, y_valid, min(2, len(x_valid) - 1))
         y[mask] = np.polyval(coeffs, x_masked)
