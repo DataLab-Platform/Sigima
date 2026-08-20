@@ -4,6 +4,8 @@
 max-line-length=88
 
 [TYPECHECK]
+# NumPy's floating-point limits are populated dynamically.
+ignored-classes=finfo
 ignored-modules=qtpy.QtWidgets,qtpy.QtCore,qtpy.QtGui,cv2,plotpy._scaler,scipy.special,skimage.draw,skimage.restoration,skimage.feature
 
 [MESSAGES CONTROL]

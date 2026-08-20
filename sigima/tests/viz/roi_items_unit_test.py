@@ -12,13 +12,13 @@ bounding box (which, for an inverse ROI, covers the whole image).
 
 from __future__ import annotations
 
+import importlib.util
+
 import numpy as np
 import pytest
 
 import sigima.objects
 from sigima.objects import ImageObj
-
-pytest.importorskip("plotpy")
 
 
 def _make_image() -> ImageObj:
@@ -48,6 +48,9 @@ class _RecordingBuilder:
         return object()
 
 
+@pytest.mark.skipif(
+    importlib.util.find_spec("plotpy") is None, reason="PlotPy not installed"
+)
 @pytest.mark.parametrize("inverse", [False, True])
 def test_rectangular_roi_item_uses_shape_not_extraction_box(
     monkeypatch: pytest.MonkeyPatch, inverse: bool
