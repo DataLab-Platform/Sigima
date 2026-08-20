@@ -239,6 +239,91 @@ def test_roi_translation() -> None:
     __check_roi_properties(ima, translated)
 
 
+def __get_image_with_annotations() -> sigima.objects.ImageObj:
+    """Create a calibrated image with canonical and opaque annotations."""
+    image = sigima.objects.create_image(
+        "annotations", np.arange(15, dtype=float).reshape(3, 5)
+    )
+    image.set_uniform_coords(1.0, 2.0, 0.0, 0.0)
+    image.set_annotations([{"type": "plotpy_item", "plotpy_json": "{}"}])
+    image.add_graphical_annotation(sigima.objects.PointAnnotation(x=1.0, y=2.0))
+    return image
+
+
+def test_annotation_translation() -> None:
+    """Canonical annotations follow physical image translations."""
+    source = __get_image_with_annotations()
+    result = sigima.proc.image.translate(
+        source, sigima.params.TranslateParam.create(dx=3.0, dy=-1.0)
+    )
+
+    annotation = result.get_graphical_annotations()[0]
+    assert isinstance(annotation, sigima.objects.PointAnnotation)
+    assert (annotation.x, annotation.y) == (4.0, 1.0)
+    assert result.get_annotations()[0]["type"] == "plotpy_item"
+
+
+@pytest.mark.parametrize(
+    "operation,expected",
+    [
+        (sigima.proc.image.fliph, lambda image: (2 * image.xc - 1.0, 2.0)),
+        (sigima.proc.image.flipv, lambda image: (1.0, 2 * image.yc - 2.0)),
+        (sigima.proc.image.transpose, lambda _image: (2.0, 1.0)),
+    ],
+)
+def test_annotation_exact_geometry_operations(operation, expected) -> None:
+    """Canonical annotations follow exact flips and transposition."""
+    source = __get_image_with_annotations()
+    expected_point = expected(source)
+
+    result = operation(source)
+    annotation = result.get_graphical_annotations()[0]
+
+    assert isinstance(annotation, sigima.objects.PointAnnotation)
+    assert (annotation.x, annotation.y) == pytest.approx(expected_point)
+
+
+@pytest.mark.parametrize(
+    "operation,flip_operation",
+    [
+        (sigima.proc.image.rotate90, sigima.proc.image.flipv),
+        (sigima.proc.image.rotate270, sigima.proc.image.fliph),
+    ],
+)
+def test_annotation_quarter_turn_composition(operation, flip_operation) -> None:
+    """Quarter-turn annotations follow the same transpose/flip composition."""
+    source = __get_image_with_annotations()
+
+    result = operation(source)
+    reference = flip_operation(sigima.proc.image.transpose(source))
+
+    assert result.get_graphical_annotations() == reference.get_graphical_annotations()
+
+
+def test_arbitrary_rotation_clears_only_canonical_annotations() -> None:
+    """Arbitrary image rotation preserves opaque data but clears unsafe geometry."""
+    source = __get_image_with_annotations()
+
+    result = sigima.proc.image.rotate(
+        source, sigima.params.RotateParam.create(angle=30.0)
+    )
+
+    assert not result.has_graphical_annotations()
+    assert result.get_annotations() == [{"type": "plotpy_item", "plotpy_json": "{}"}]
+
+
+def test_resize_preserves_data_coordinate_annotations() -> None:
+    """Resizing does not move annotations expressed in calibrated coordinates."""
+    source = __get_image_with_annotations()
+    annotation = source.get_graphical_annotations()[0]
+
+    result = sigima.proc.image.resize(
+        source, sigima.params.ResizeParam.create(zoom=2.0)
+    )
+
+    assert result.get_graphical_annotations() == [annotation]
+
+
 @pytest.mark.validation
 def test_image_rotate() -> None:
     """Image rotation test."""

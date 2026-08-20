@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from sigima.objects.annotations import transform_annotation
 from sigima.objects.scalar import GeometryResult, KindShape
 from sigima.objects.shape import (
     CircleCoordinates,
@@ -213,6 +214,27 @@ class GeometryTransformer:
             new_roi.add_roi(new_single_roi)
 
         image.roi = new_roi
+
+    def transform_annotations(
+        self, image: ImageObj, operation: str, **kwargs: Any
+    ) -> None:
+        """Transform all canonical annotations of an image inplace.
+
+        Opaque application-specific annotation payloads are preserved unchanged.
+
+        Args:
+            image: Image object whose canonical annotations will be transformed.
+            operation: Operation name.
+            **kwargs: Operation-specific parameters.
+        """
+        annotations = image.get_graphical_annotations()
+        if not annotations:
+            return
+        transformed = [
+            transform_annotation(annotation, operation, **kwargs)
+            for annotation in annotations
+        ]
+        image.set_graphical_annotations(transformed, preserve_opaque=True)
 
     def _apply_operation(
         self,

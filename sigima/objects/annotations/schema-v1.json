@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datalab-platform.com/schemas/sigima/annotation-v1.json",
+  "title": "Sigima graphical annotation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "id",
+    "kind",
+    "visible",
+    "locked",
+    "z_index",
+    "title",
+    "style",
+    "label",
+    "metadata",
+    "extensions"
+  ],
+  "properties": {
+    "format": { "const": "sigima.annotation" },
+    "version": { "const": "1.0" },
+    "id": { "type": "string", "format": "uuid" },
+    "kind": {
+      "enum": [
+        "point",
+        "segment",
+        "rectangle",
+        "circle",
+        "ellipse",
+        "polyline",
+        "polygon",
+        "text",
+        "cursor",
+        "range"
+      ]
+    },
+    "visible": { "type": "boolean" },
+    "locked": { "type": "boolean" },
+    "z_index": { "type": "integer" },
+    "title": { "type": "string" },
+    "style": { "$ref": "#/$defs/style" },
+    "label": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/label" }
+      ]
+    },
+    "metadata": { "$ref": "#/$defs/jsonObject" },
+    "extensions": { "$ref": "#/$defs/jsonObject" },
+    "x": { "type": "number" },
+    "y": { "type": "number" },
+    "x0": { "type": "number" },
+    "y0": { "type": "number" },
+    "x1": { "type": "number" },
+    "y1": { "type": "number" },
+    "width": { "type": "number", "minimum": 0 },
+    "height": { "type": "number", "minimum": 0 },
+    "angle": { "type": "number" },
+    "cx": { "type": "number" },
+    "cy": { "type": "number" },
+    "radius": { "type": "number", "minimum": 0 },
+    "radius_x": { "type": "number", "minimum": 0 },
+    "radius_y": { "type": "number", "minimum": 0 },
+    "points": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/point" }
+    },
+    "text": { "type": "string" },
+    "coordinate_space": { "enum": ["data", "axes"] },
+    "anchor": { "$ref": "#/$defs/anchor" },
+    "offset": { "$ref": "#/$defs/point" },
+    "orientation": { "enum": ["horizontal", "vertical", "crosshair"] },
+    "position": {
+      "oneOf": [
+        { "type": "number" },
+        { "$ref": "#/$defs/point" }
+      ]
+    },
+    "axis": { "enum": ["x", "y"] },
+    "start": { "type": "number" },
+    "end": { "type": "number" }
+  },
+  "oneOf": [
+    {
+      "properties": { "kind": { "const": "point" } },
+      "required": ["x", "y"]
+    },
+    {
+      "properties": { "kind": { "const": "segment" } },
+      "required": ["x0", "y0", "x1", "y1"]
+    },
+    {
+      "properties": { "kind": { "const": "rectangle" } },
+      "required": ["x", "y", "width", "height", "angle"]
+    },
+    {
+      "properties": { "kind": { "const": "circle" } },
+      "required": ["cx", "cy", "radius"]
+    },
+    {
+      "properties": { "kind": { "const": "ellipse" } },
+      "required": ["cx", "cy", "radius_x", "radius_y", "angle"]
+    },
+    {
+      "properties": {
+        "kind": { "const": "polyline" },
+        "points": { "minItems": 2 }
+      },
+      "required": ["points"]
+    },
+    {
+      "properties": {
+        "kind": { "const": "polygon" },
+        "points": { "minItems": 3 }
+      },
+      "required": ["points"]
+    },
+    {
+      "properties": { "kind": { "const": "text" } },
+      "required": ["text", "x", "y", "coordinate_space", "anchor", "offset"]
+    },
+    {
+      "properties": { "kind": { "const": "cursor" } },
+      "required": ["orientation", "position"]
+    },
+    {
+      "properties": { "kind": { "const": "range" } },
+      "required": ["axis", "start", "end"]
+    }
+  ],
+  "$defs": {
+    "jsonValue": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/$defs/jsonValue" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+        }
+      ]
+    },
+    "jsonObject": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/jsonValue" }
+    },
+    "point": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number" },
+        { "type": "number" }
+      ],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "anchor": {
+      "enum": [
+        "top-left",
+        "top",
+        "top-right",
+        "left",
+        "center",
+        "right",
+        "bottom-left",
+        "bottom",
+        "bottom-right"
+      ]
+    },
+    "style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stroke", "fill", "marker", "text"],
+      "properties": {
+        "stroke": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["color", "width", "opacity", "dash"],
+          "properties": {
+            "color": { "type": ["string", "null"] },
+            "width": { "type": "number", "minimum": 0 },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+            "dash": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": { "type": "number", "minimum": 0 }
+                }
+              ]
+            }
+          }
+        },
+        "fill": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["color", "opacity"],
+          "properties": {
+            "color": { "type": ["string", "null"] },
+            "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        },
+        "marker": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["symbol", "size", "color"],
+          "properties": {
+            "symbol": { "type": "string", "minLength": 1 },
+            "size": { "type": "number", "minimum": 0 },
+            "color": { "type": ["string", "null"] }
+          }
+        },
+        "text": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "family",
+            "size",
+            "bold",
+            "italic",
+            "color",
+            "background_color",
+            "background_opacity"
+          ],
+          "properties": {
+            "family": { "type": ["string", "null"] },
+            "size": { "type": "number", "minimum": 0 },
+            "bold": { "type": "boolean" },
+            "italic": { "type": "boolean" },
+            "color": { "type": "string" },
+            "background_color": { "type": ["string", "null"] },
+            "background_opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    },
+    "label": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "visible", "anchor", "offset"],
+      "properties": {
+        "text": { "type": "string" },
+        "visible": { "type": "boolean" },
+        "anchor": { "$ref": "#/$defs/anchor" },
+        "offset": { "$ref": "#/$defs/point" }
+      }
+    }
+  }
+}

@@ -94,6 +94,20 @@ These functions display Sigima objects (:class:`~sigima.objects.SignalObj` and :
 
 .. autofunction:: view_curves_and_images
 
+Canonical annotations
+---------------------
+
+Object viewing functions render canonical graphical annotations by default.
+Pass ``show_annotations=False`` to hide them independently from regions of
+interest.  Both backends support all canonical primitives, styles, attached
+labels, and layer order.  Text may be positioned in data coordinates or in
+normalized axes coordinates.
+
+PlotPy also displays valid historical ``plotpy_json`` payloads without changing
+the object.  Matplotlib ignores those opaque renderer-specific payloads.  Use
+the explicit migration described in :ref:`api_annotations` to make historical
+annotations portable.
+
 Low-Level Viewing Functions
 ---------------------------
 
@@ -153,6 +167,12 @@ The two backends have different capabilities:
    * - Geometry results
      - ✅ Shape annotations
      - ✅ Markers/lines
+   * - Canonical annotations
+     - ✅ Native interactive items
+     - ✅ Read-only artists
+   * - Historical PlotPy annotations
+     - ✅ View-only compatibility
+     - ❌ Opaque payload ignored
    * - Linked axes
      - ✅ Native
      - ✅ via ``sharex``/``sharey``

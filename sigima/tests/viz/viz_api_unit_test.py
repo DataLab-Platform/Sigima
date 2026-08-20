@@ -8,6 +8,8 @@ Test viz API compatibility between backends
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
 import inspect
 import sys
 
@@ -44,8 +46,9 @@ def get_public_functions(module) -> set[str]:
 
 
 @pytest.mark.skipif(
-    "matplotlib" not in sys.modules and not _has_matplotlib(),
-    reason="matplotlib not available",
+    ("matplotlib" not in sys.modules and not _has_matplotlib())
+    or importlib.util.find_spec("plotpy") is None,
+    reason="Matplotlib or PlotPy not available",
 )
 def test_matplotlib_backend_has_all_plotpy_functions():
     """Test that matplotlib backend implements stubs for all PlotPy functions.
@@ -75,10 +78,31 @@ def test_matplotlib_backend_has_all_plotpy_functions():
         )
 
 
+def test_annotation_visibility_parameter_has_backend_parity() -> None:
+    """Check the public annotation visibility switch on available backends."""
+    backends = []
+    if importlib.util.find_spec("matplotlib") is not None:
+        backends.append(importlib.import_module("sigima.viz.viz_mpl"))
+    if importlib.util.find_spec("plotpy") is not None:
+        backends.append(importlib.import_module("sigima.viz.viz_plotpy"))
+    if not backends:
+        pytest.skip("No visualization backend available")
+
+    for function_name in (
+        "view_curves",
+        "view_images",
+        "view_images_side_by_side",
+        "view_curves_and_images",
+    ):
+        for backend in backends:
+            parameter = inspect.signature(getattr(backend, function_name)).parameters[
+                "show_annotations"
+            ]
+            assert parameter.default is True
+
+
 def test_backend_selection_env_var(monkeypatch):
     """Test that SIGIMA_VIZ_BACKEND environment variable works."""
-    import importlib
-
     # Check if matplotlib is available
     try:
         import matplotlib  # noqa: F401  # pylint: disable=unused-import
@@ -102,8 +126,6 @@ def test_backend_selection_env_var(monkeypatch):
 
 def test_backend_selection_option(monkeypatch):
     """Test that configuration option viz_backend works."""
-    import importlib
-
     # Check if matplotlib is available
     try:
         import matplotlib  # noqa: F401  # pylint: disable=unused-import

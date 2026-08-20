@@ -71,7 +71,7 @@ doc = [
     "matplotlib",
     "opencv-python-headless >= 4.8.1.78",
 ]
-test = ["pytest", "pytest-xvfb"]
+test = ["pytest", "pytest-xvfb", "jsonschema >= 4"]
 qt = ["qtpy", "PyQt5", "plotpy"]
 
 [tool.setuptools.packages.find]

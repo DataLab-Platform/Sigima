@@ -79,10 +79,12 @@ from __future__ import annotations
 
 from sigima.io.common.objmeta import (
     read_annotations,
+    read_graphical_annotations,
     read_metadata,
     read_roi,
     read_roi_grid,
     write_annotations,
+    write_graphical_annotations,
     write_metadata,
     write_roi,
     write_roi_grid,
@@ -106,6 +108,7 @@ __all__ = [
     "ImageIORegistry",
     "SignalIORegistry",
     "read_annotations",
+    "read_graphical_annotations",
     "read_image",
     "read_images",
     "read_metadata",
@@ -114,6 +117,7 @@ __all__ = [
     "read_signal",
     "read_signals",
     "write_annotations",
+    "write_graphical_annotations",
     "write_image",
     "write_images",
     "write_metadata",

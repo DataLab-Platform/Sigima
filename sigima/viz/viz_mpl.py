@@ -34,6 +34,7 @@ from sigima.objects import (
     SegmentROI,
     SignalObj,
 )
+from sigima.viz.annotation_mpl import add_annotations_to_axes
 
 # Style configuration
 COLORS = ["blue", "red", "green", "orange", "purple", "brown", "pink", "gray", "olive"]
@@ -143,6 +144,7 @@ def view_curves(
     xunit: str | None = None,
     yunit: str | None = None,
     show_roi: bool = True,
+    show_annotations: bool = True,
     object_name: str = "",  # Qt-specific  # pylint: disable=unused-argument
 ) -> None:
     """Create a matplotlib figure and plot curves.
@@ -159,6 +161,7 @@ def view_curves(
         yunit: Unit for the y-axis, or None for no unit
         show_roi: Whether to show ROIs defined in `SignalObj` instances, default is True
          (ignored if `data_or_objs` is not a `SignalObj`)
+        show_annotations: Whether to show canonical annotations, default is True
         object_name: Object name for screenshot functionality (unused in matplotlib -
          kept for API compatibility with PlotPy version)
     """
@@ -244,6 +247,8 @@ def view_curves(
                         color=roi_color,
                         label=roi_label,
                     )
+            if show_annotations:
+                add_annotations_to_axes(ax, obj.get_graphical_annotations())
 
         elif isinstance(data_or_obj, tuple) and len(data_or_obj) == 2:
             # Tuple of (x, y) arrays
@@ -288,6 +293,7 @@ def view_images(
     zunit: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
+    show_annotations: bool = True,
     object_name: str = "",  # Qt-specific  # pylint: disable=unused-argument
     **kwargs,
 ) -> None:
@@ -308,6 +314,7 @@ def view_images(
          if no overlay is needed.
         show_roi: Whether to show ROIs defined in `ImageObj` instances, default is True
          (ignored if `data_or_objs` is not a `ImageObj`)
+        show_annotations: Whether to show canonical annotations, default is True
         object_name: Object name for screenshot functionality (unused in matplotlib -
          kept for API compatibility with PlotPy version)
         **kwargs: Additional keyword arguments (e.g., colormap settings)
@@ -414,6 +421,8 @@ def view_images(
         if show_roi and isinstance(data_or_obj, ImageObj) and data_or_obj.roi:
             for single_roi in data_or_obj.roi.single_rois:
                 _add_single_roi_to_axes(ax, single_roi)
+        if show_annotations and isinstance(data_or_obj, ImageObj):
+            add_annotations_to_axes(ax, data_or_obj.get_graphical_annotations())
 
         # Overlay geometry results
         if results is not None:
@@ -564,6 +573,7 @@ def view_images_side_by_side(
     title: str | None = None,
     results: list[GeometryResult] | GeometryResult | None = None,
     show_roi: bool = True,
+    show_annotations: bool = True,
     object_name: str = "",  # Qt-specific  # pylint: disable=unused-argument
     **kwargs,
 ) -> None:
@@ -580,6 +590,7 @@ def view_images_side_by_side(
         results: Single `GeometryResult` or list of these to overlay on images, or None
          if no overlay is needed.
         show_roi: Whether to show ROIs defined in `ImageObj` instances, default is True
+        show_annotations: Whether to show canonical annotations, default is True
         object_name: Object name for screenshot functionality (unused in matplotlib -
          kept for API compatibility with PlotPy version)
         **kwargs: Additional keyword arguments (e.g., colormap settings)
@@ -677,6 +688,8 @@ def view_images_side_by_side(
         if show_roi and is_image_obj and img.roi:
             for roi in img.roi:
                 _add_single_roi_to_axes(ax, roi)
+        if show_annotations and is_image_obj:
+            add_annotations_to_axes(ax, img.get_graphical_annotations())
 
         # Overlay geometry results
         if result is not None:
@@ -701,6 +714,7 @@ def view_curves_and_images(
     yunit: str | None = None,
     zunit: str | None = None,
     object_name: str = "",  # Qt-specific: unused in matplotlib implementation
+    show_annotations: bool = True,
 ) -> None:
     """View signals, then images in two successive matplotlib figures.
 
@@ -717,6 +731,7 @@ def view_curves_and_images(
         zunit: Unit for the z-axis (color scale), or None for no unit
         object_name: Object name for screenshot functionality (unused in matplotlib -
          kept for API compatibility with PlotPy version)
+        show_annotations: Whether to show canonical annotations, default is True
     """
     if isinstance(data_or_objs, (tuple, list)):
         objs = data_or_objs
@@ -750,6 +765,7 @@ def view_curves_and_images(
             xunit=xunit,
             yunit=yunit,
             object_name=f"{object_name}_curves",
+            show_annotations=show_annotations,
         )
 
     # Display images
@@ -765,6 +781,7 @@ def view_curves_and_images(
             yunit=yunit,
             zunit=zunit,
             object_name=f"{object_name}_images",
+            show_annotations=show_annotations,
         )
 
 
