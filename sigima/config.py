@@ -343,11 +343,12 @@ additional formats. Each entry should be a tuple of (file extension, description
             description=_(
                 """Backend library for visualization (sigima.viz module).
 
-Valid values: ``"auto"``, ``"plotpy"``, ``"matplotlib"``.
+Valid values: ``"auto"``, ``"plotpy"``, ``"matplotlib"``, ``"plotly"``.
 
 - ``"auto"`` (default): Automatically select PlotPy if available, otherwise Matplotlib
 - ``"plotpy"``: Use PlotPy for interactive visualizations (requires PlotPy and Qt)
 - ``"matplotlib"``: Use Matplotlib for visualizations (simpler, view-only)
+- ``"plotly"``: Use Plotly for browser-based interactive visualizations
 
 This setting can also be overridden using the ``SIGIMA_VIZ_BACKEND`` environment
 variable. Note that Matplotlib backend does not support all features of PlotPy

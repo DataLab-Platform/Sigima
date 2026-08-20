@@ -111,9 +111,11 @@ jobs:
           --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background \
           --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
         python -m pip install --upgrade pip
-        python -m pip install -e ".[dev,test,qt]" matplotlib
-    - name: Verify PlotPy backend
-      run: python -c "import plotpy; print(f'PlotPy loaded from {plotpy.__file__}')"
+        python -m pip install -e ".[dev,test,qt,plotly]" matplotlib
+    - name: Verify optional visualization backends
+      run: |
+        python -c "import plotpy; print(f'PlotPy loaded from {plotpy.__file__}')"
+        python -c "import plotly; print(f'Plotly loaded from {plotly.__file__}')"
     - name: Test visualization backends
       run: python -m pytest -o addopts="--import-mode=importlib" sigima/tests/viz -vv
     - name: Lint with Pylint

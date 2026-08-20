@@ -2,6 +2,11 @@
 
 """Renderer-independent graphical annotations."""
 
+from sigima.objects.annotations.legacy_plotpy import (
+    LegacyPlotPyMigrationReport,
+    legacy_plotpy_payload_to_annotations,
+    migrate_legacy_plotpy_annotations,
+)
 from sigima.objects.annotations.model import (
     AnnotationKind,
     AnnotationLabel,
@@ -59,6 +64,7 @@ __all__ = [
     "EllipseAnnotation",
     "FillStyle",
     "GraphicalAnnotation",
+    "LegacyPlotPyMigrationReport",
     "MarkerStyle",
     "PointAnnotation",
     "PolygonAnnotation",
@@ -75,6 +81,8 @@ __all__ = [
     "flip_annotation_horizontally",
     "flip_annotation_vertically",
     "is_graphical_annotation_dict",
+    "legacy_plotpy_payload_to_annotations",
+    "migrate_legacy_plotpy_annotations",
     "rotate_annotation",
     "scale_annotation",
     "transform_annotation",
