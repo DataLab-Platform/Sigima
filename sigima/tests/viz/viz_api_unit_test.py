@@ -75,6 +75,23 @@ def test_matplotlib_backend_has_all_plotpy_functions():
         )
 
 
+def test_annotation_visibility_parameter_has_backend_parity() -> None:
+    """Check the public annotation visibility switch on both backends."""
+    from sigima.viz import viz_mpl, viz_plotpy
+
+    for function_name in (
+        "view_curves",
+        "view_images",
+        "view_images_side_by_side",
+        "view_curves_and_images",
+    ):
+        for backend in (viz_mpl, viz_plotpy):
+            parameter = inspect.signature(getattr(backend, function_name)).parameters[
+                "show_annotations"
+            ]
+            assert parameter.default is True
+
+
 def test_backend_selection_env_var(monkeypatch):
     """Test that SIGIMA_VIZ_BACKEND environment variable works."""
     import importlib

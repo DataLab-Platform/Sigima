@@ -4,8 +4,11 @@
 
 import json
 
+import numpy as np
 import pytest
 
+import sigima.io
+from sigima.objects import PointAnnotation
 from sigima.objects.image.creation import create_image
 from sigima.objects.signal.creation import create_signal
 
@@ -144,6 +147,79 @@ def test_malformed_json_structure():
     obj = create_signal("Test")
     obj.annotations = json.dumps({"wrong": "structure"})
     assert obj.get_annotations() == []
+
+
+def test_graphical_annotation_api_preserves_opaque_entries():
+    """Test that typed replacement keeps application-specific payloads."""
+    obj = create_signal("Test")
+    opaque = {"type": "plotpy_item", "plotpy_json": "{}"}
+    first = PointAnnotation(x=1, y=2, title="First")
+    second = PointAnnotation(x=3, y=4, title="Second")
+    obj.set_annotations([opaque])
+
+    obj.set_graphical_annotations([first])
+    obj.add_graphical_annotation(second)
+
+    assert obj.get_annotations()[0] == opaque
+    assert obj.get_graphical_annotations() == [first, second]
+    assert obj.has_graphical_annotations()
+
+
+def test_clear_graphical_annotations_preserves_opaque_entries():
+    """Test selective clearing of canonical annotations."""
+    obj = create_signal("Test")
+    opaque = {"type": "future_application_payload"}
+    obj.set_annotations([opaque])
+    obj.add_graphical_annotation(PointAnnotation(x=1, y=2))
+
+    obj.clear_graphical_annotations()
+
+    assert obj.get_annotations() == [opaque]
+    assert not obj.has_graphical_annotations()
+
+
+def test_graphical_annotation_api_rejects_invalid_canonical_entry():
+    """Test that future canonical versions are not silently ignored."""
+    obj = create_signal("Test")
+    obj.set_annotations([{"format": "sigima.annotation", "version": "2.0"}])
+
+    with pytest.raises(ValueError, match="Unsupported annotation version"):
+        obj.get_graphical_annotations()
+
+
+def test_graphical_annotation_persistence_through_copy():
+    """Test that typed annotations and identifiers persist through copies."""
+    obj = create_image("Test")
+    annotation = PointAnnotation(x=1, y=2)
+    obj.set_graphical_annotations([annotation])
+
+    assert obj.copy().get_graphical_annotations() == [annotation]
+
+
+def test_signal_graphical_annotation_hdf5_round_trip(tmp_path):
+    """Test canonical annotations through the native signal HDF5 format."""
+    obj = create_signal("Test", x=np.array([0.0, 1.0]), y=np.array([2.0, 3.0]))
+    annotation = PointAnnotation(x=1, y=2, extensions={"test": [1, 2]})
+    obj.set_graphical_annotations([annotation])
+    filepath = str(tmp_path / "annotated.h5sig")
+
+    sigima.io.write_signal(filepath, obj)
+    restored = sigima.io.read_signal(filepath)
+
+    assert restored.get_graphical_annotations() == [annotation]
+
+
+def test_image_graphical_annotation_hdf5_round_trip(tmp_path):
+    """Test canonical annotations through the native image HDF5 format."""
+    obj = create_image("Test", data=np.arange(4).reshape(2, 2))
+    annotation = PointAnnotation(x=1, y=2, metadata={"author": "Sigima"})
+    obj.set_graphical_annotations([annotation])
+    filepath = str(tmp_path / "annotated.h5ima")
+
+    sigima.io.write_image(filepath, obj)
+    restored = sigima.io.read_image(filepath)
+
+    assert restored.get_graphical_annotations() == [annotation]
 
 
 if __name__ == "__main__":

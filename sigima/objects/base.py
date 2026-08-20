@@ -21,6 +21,12 @@ import numpy as np
 from numpy import ma
 
 from sigima.config import _
+from sigima.objects.annotations import (
+    GraphicalAnnotation,
+    annotation_from_dict,
+    annotation_to_dict,
+    is_graphical_annotation_dict,
+)
 
 if sys.version_info >= (3, 11):
     # Use Self from typing module in Python 3.11+
@@ -68,8 +74,7 @@ def deepcopy_metadata(
     special_keys: set[str] | None = None,
     all_metadata: bool = False,
 ) -> dict[str, Any]:
-    """Deepcopy metadata, except keys starting with "_" (private keys)
-    with the exception of "_roi_" and "_ann_" keys.
+    """Deepcopy metadata, except private keys and explicitly preserved keys.
 
     Args:
         metadata: Metadata dictionary to deepcopy.
@@ -710,6 +715,86 @@ class BaseObj(Generic[TypeROI], metaclass=BaseObjMeta):
             True
         """
         return bool(self.get_annotations())
+
+    def get_graphical_annotations(self) -> list[GraphicalAnnotation]:
+        """Return canonical graphical annotations stored on the object.
+
+        Opaque application-specific entries are ignored. Entries declaring the
+        canonical Sigima format are strictly validated and raise an exception when
+        malformed or unsupported, preventing silent reinterpretation.
+
+        Returns:
+            Canonical graphical annotations in storage order.
+        """
+        return [
+            annotation_from_dict(item)
+            for item in self.get_annotations()
+            if is_graphical_annotation_dict(item)
+        ]
+
+    def set_graphical_annotations(
+        self,
+        annotations: list[GraphicalAnnotation],
+        preserve_opaque: bool = True,
+    ) -> None:
+        """Set canonical graphical annotations on the object.
+
+        Args:
+            annotations: Canonical graphical annotations to store.
+            preserve_opaque: Preserve non-canonical entries already stored on the
+             object. Defaults to True.
+
+        Raises:
+            TypeError: If annotations is not a list of GraphicalAnnotation objects.
+        """
+        if not isinstance(annotations, list):
+            raise TypeError(
+                f"Graphical annotations must be a list, got {type(annotations)}"
+            )
+        if not all(isinstance(item, GraphicalAnnotation) for item in annotations):
+            raise TypeError(
+                "Graphical annotations must contain GraphicalAnnotation objects"
+            )
+        stored = []
+        if preserve_opaque:
+            stored.extend(
+                item
+                for item in self.get_annotations()
+                if not is_graphical_annotation_dict(item)
+            )
+        stored.extend(annotation_to_dict(item) for item in annotations)
+        if stored:
+            self.set_annotations(stored)
+        else:
+            self.clear_annotations()
+
+    def add_graphical_annotation(self, annotation: GraphicalAnnotation) -> None:
+        """Append a canonical graphical annotation without altering opaque entries.
+
+        Args:
+            annotation: Canonical graphical annotation to append.
+        """
+        if not isinstance(annotation, GraphicalAnnotation):
+            raise TypeError("annotation must be a GraphicalAnnotation")
+        stored = self.get_annotations()
+        stored.append(annotation_to_dict(annotation))
+        self.set_annotations(stored)
+
+    def clear_graphical_annotations(self) -> None:
+        """Remove canonical graphical annotations while preserving opaque entries."""
+        opaque = [
+            item
+            for item in self.get_annotations()
+            if not is_graphical_annotation_dict(item)
+        ]
+        if opaque:
+            self.set_annotations(opaque)
+        else:
+            self.clear_annotations()
+
+    def has_graphical_annotations(self) -> bool:
+        """Return whether the object stores canonical graphical annotations."""
+        return bool(self.get_graphical_annotations())
 
 
 class BaseROIParamMeta(abc.ABCMeta, gds.DataSetMeta):
