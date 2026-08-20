@@ -87,6 +87,36 @@ This naming convention improves clarity by clearly separating
 documentation efforts from code-related development (features, fixes, etc.).
 
 
+Commit Message Convention
+-------------------------
+
+New commits and pull request titles should follow the `Conventional Commits
+<https://www.conventionalcommits.org/>`_ format::
+
+      <type>[optional scope]: <description>
+
+Use the type that best describes the change:
+
+- ``feat`` for a new capability;
+- ``fix`` for a bug fix;
+- ``test`` for test-only changes;
+- ``docs`` for documentation;
+- ``ci`` for continuous-integration configuration;
+- ``refactor`` for a behavior-preserving code change;
+- ``chore`` for maintenance work not covered above.
+
+For example::
+
+      fix(roi): preserve inverse ROI rendering
+      test(viz): cover PlotPy ROI coordinates
+      ci: add Pylint quality gate
+
+Merge commits and annotated release tags are exceptions: keep their explicit Git
+messages, such as ``Merge branch 'feature/feature_name'`` and
+``Release version 1.2.0``. Do not rewrite published history solely to change old
+messages.
+
+
 Workflow for New Features
 -------------------------
 
@@ -95,7 +125,7 @@ Workflow for New Features
    .. code-block:: sh
 
          git checkout develop
-         git checkout -b develop/feature_name
+         git checkout -b feature/feature_name
 
 2. Develop the feature and commit changes.
 
@@ -104,13 +134,13 @@ Workflow for New Features
    .. code-block:: sh
 
          git checkout develop
-         git merge --no-ff develop/feature_name
+         git merge --no-ff feature/feature_name
 
 4. Delete the feature branch:
 
    .. code-block:: sh
 
-         git branch -d develop/feature_name
+         git branch -d feature/feature_name
 
 .. warning::
 
@@ -170,13 +200,13 @@ For current maintenance release (target: ``release``):
 
 .. warning::
 
-      Do not create a ``fix/xxx`` branch from a ``develop/feature_name`` branch.
+      Do not create a ``fix/xxx`` branch from a ``feature/feature_name`` branch.
       Always branch from ``develop`` or ``release`` to ensure fixes are correctly propagated.
 
       .. code-block:: sh
 
             # Incorrect:
-            git checkout develop/feature_name
+            git checkout feature/feature_name
             git checkout -b fix/wrong_branch
 
       .. code-block:: sh
@@ -264,14 +294,27 @@ When ready to release a new minor or major version (e.g., 1.1.0, 2.0.0):
          git tag -a v1.1.0 -m "Release version 1.1.0"
          git push origin main --tags
 
-3. Delete the old ``release`` branch (if exists):
+3. Fast-forward ``develop`` to the released ``main`` commit:
+
+   .. code-block:: sh
+
+         git checkout develop
+         git merge --ff-only main
+         git push origin develop
+
+   This makes the release merge commit, its conflict resolutions, and the tag
+   reachable from ``develop`` without creating a redundant merge commit. If the
+   fast-forward fails, stop and reconcile ``main`` and ``develop`` through a
+   reviewed merge; never rebase or force-push either shared branch.
+
+4. Delete the old ``release`` branch (if exists):
 
    .. code-block:: sh
 
          git branch -d release
          git push origin --delete release
 
-4. Create a new ``release`` branch from ``main`` when the first patch for 1.1.1 is needed:
+5. Create a new ``release`` branch from ``main`` when the first patch for 1.1.1 is needed:
 
    .. code-block:: sh
 
@@ -286,8 +329,8 @@ Best Practices
 
   .. code-block:: sh
 
-        git checkout develop/feature_name
-        git rebase develop
+      git checkout feature/feature_name
+                  git rebase develop
 
 - Avoid long-lived branches to minimize merge conflicts.
 
