@@ -14,10 +14,12 @@ from sigima.io.image.export import (
     get_supported_export_dtypes,
     prepare_image_for_export,
 )
+from sigima.io.image.raw import RawImageImportParam
 
 __all__ = [
     "ImageExportParam",
     "ImageIORegistry",
+    "RawImageImportParam",
     "get_supported_export_dtypes",
     "prepare_image_for_export",
 ]

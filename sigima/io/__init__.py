@@ -102,6 +102,7 @@ from sigima.io.convenience import (
 from sigima.io.image import (
     ImageExportParam,
     ImageIORegistry,
+    RawImageImportParam,
     get_supported_export_dtypes,
     prepare_image_for_export,
 )
@@ -112,6 +113,7 @@ __all__ = [
     "SIGNAL_FORMAT_INFO",
     "ImageExportParam",
     "ImageIORegistry",
+    "RawImageImportParam",
     "SignalIORegistry",
     "get_supported_export_dtypes",
     "prepare_image_for_export",

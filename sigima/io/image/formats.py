@@ -12,6 +12,7 @@ import datetime
 import os.path as osp
 import re
 
+import guidata.dataset as gds
 import imageio.v3 as iio
 import numpy as np
 import pandas as pd
@@ -48,17 +49,23 @@ class HDF5ImageFormat(ImageFormatBase):
 
     # pylint: disable=unused-argument
     def read(
-        self, filename: str, worker: CallbackWorkerProtocol | None = None
+        self,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
     ) -> list[ImageObj]:
         """Read list of image objects from file
 
         Args:
             filename: File name
             worker: Callback worker object
+            param: Optional format-specific read parameters
 
         Returns:
             List of image objects
         """
+        self.validate_read_param(param)
         reader = HDF5Reader(filename)
         try:
             with reader.group(self.GROUP_NAME):
@@ -719,17 +726,23 @@ class TextImageFormat(SingleImageFormatBase):
     )
 
     def read(
-        self, filename: str, worker: CallbackWorkerProtocol | None = None
+        self,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
     ) -> list[ImageObj]:
         """Read list of image objects from file
 
         Args:
             filename: File name
             worker: Callback worker object
+            param: Optional format-specific read parameters
 
         Returns:
             List of image objects
         """
+        self.validate_read_param(param)
         # Try to read as coordinated text format first
         # (for .txt/.csv files with metadata and coordinates)
         if filename.lower().endswith((".txt", ".csv")):
@@ -839,17 +852,23 @@ class MatImageFormat(SingleImageFormatBase):
     )  # pylint: disable=duplicate-code
 
     def read(
-        self, filename: str, worker: CallbackWorkerProtocol | None = None
+        self,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
     ) -> list[ImageObj]:
         """Read list of image objects from file
 
         Args:
             filename: File name
             worker: Callback worker object
+            param: Optional format-specific read parameters
 
         Returns:
             List of image objects
         """
+        self.validate_read_param(param)
         mat = sio.loadmat(filename)
         allimg: list[ImageObj] = []
         for dname, data in mat.items():

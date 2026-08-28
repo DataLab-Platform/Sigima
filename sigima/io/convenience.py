@@ -114,28 +114,34 @@ def write_signals(p: SaveToDirectoryParam, signals: list[SignalObj]) -> None:
         SignalIORegistry.write(filepath, signal)
 
 
-def read_images(filename: str) -> Sequence[ImageObj]:
+def read_images(
+    filename: str, *, param: gds.DataSet | None = None
+) -> Sequence[ImageObj]:
     """Read a list of images from a file.
 
     Args:
         filename: File name.
+        param: Optional format-specific read parameters. Formats without
+         parameter support reject non-None values.
 
     Returns:
         List of images.
     """
-    return ImageIORegistry.read(filename)
+    return ImageIORegistry.read(filename, param=param)
 
 
-def read_image(filename: str) -> ImageObj:
+def read_image(filename: str, *, param: gds.DataSet | None = None) -> ImageObj:
     """Read an image from a file.
 
     Args:
         filename: File name.
+        param: Optional format-specific read parameters. Formats without
+         parameter support reject non-None values.
 
     Returns:
         Image.
     """
-    return read_images(filename)[0]
+    return read_images(filename, param=param)[0]
 
 
 def write_image(

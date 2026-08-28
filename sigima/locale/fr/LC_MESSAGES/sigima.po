@@ -1763,3 +1763,24 @@ msgstr "Remplacer"
 
 msgid "Replacement value"
 msgstr "Valeur de remplacement"
+
+msgid "RAW image import"
+msgstr "Importation d'image RAW"
+
+msgid "Offset to first image"
+msgstr "Décalage avant la première image"
+
+msgid "Number of images"
+msgstr "Nombre d'images"
+
+msgid "Gap between images"
+msgstr "Espace entre les images"
+
+msgid "Little-endian byte order"
+msgstr "Ordre des octets petit-boutiste"
+
+msgid "White is zero"
+msgstr "Le blanc correspond à zéro"
+
+msgid "RAW image"
+msgstr "Image RAW"

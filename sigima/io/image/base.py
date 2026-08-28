@@ -8,12 +8,13 @@ from __future__ import annotations
 
 import abc
 import os.path as osp
-from typing import Sequence
+from typing import Sequence, cast
 
+import guidata.dataset as gds
 import numpy as np
 
 from sigima.config import _
-from sigima.io.base import BaseIORegistry, FormatBase
+from sigima.io.base import BaseIORegistry, FormatBase, IOAction
 from sigima.objects.image import ImageObj, create_image
 from sigima.worker import CallbackWorkerProtocol
 
@@ -24,6 +25,29 @@ class ImageIORegistry(BaseIORegistry):
     REGISTRY_INFO: str = _("Image I/O formats")
 
     _io_format_instances: list[ImageFormatBase] = []
+
+    @classmethod
+    def read(
+        mcs,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
+    ) -> Sequence[ImageObj]:
+        """Read image objects from a file.
+
+        Args:
+            filename: File name
+            worker: Callback worker object
+            param: Optional format-specific read parameters
+
+        Returns:
+            List of image objects
+        """
+        fmt = cast(ImageFormatBase, mcs.get_format(filename, IOAction.LOAD))
+        if param is None:
+            return fmt.read(filename, worker)
+        return fmt.read(filename, worker, param=param)
 
 
 class ImageFormatBaseMeta(ImageIORegistry, abc.ABCMeta):
@@ -38,15 +62,25 @@ class ImageFormatBase(abc.ABC, FormatBase, metaclass=ImageFormatBaseMeta):
     implemented by any image format class.
     """
 
+    def validate_read_param(self, param: gds.DataSet | None) -> None:
+        """Reject read parameters for formats that do not support them."""
+        if param is not None:
+            raise TypeError(f"{self.info.name} does not accept read parameters")
+
     @abc.abstractmethod
     def read(
-        self, filename: str, worker: CallbackWorkerProtocol | None = None
+        self,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
     ) -> Sequence[ImageObj]:
         """Read list of image objects from file
 
         Args:
             filename: File name
             worker: Callback worker object
+            param: Optional format-specific read parameters
 
         Returns:
             List of image objects
@@ -85,17 +119,23 @@ class SingleImageFormatBase(ImageFormatBase):
         return create_image(name, metadata={"source": filename})
 
     def read(
-        self, filename: str, worker: CallbackWorkerProtocol | None = None
+        self,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
     ) -> list[ImageObj]:
         """Read list of image objects from file
 
         Args:
             filename: File name
             worker: Callback worker object
+            param: Optional format-specific read parameters
 
         Returns:
             List of image objects
         """
+        self.validate_read_param(param)
         # Default implementation covers the case of a single image:
         obj = self.create_object(filename)
         obj.data = self.read_data(filename)
@@ -149,17 +189,23 @@ class MultipleImagesFormatBase(SingleImageFormatBase):
     """
 
     def read(
-        self, filename: str, worker: CallbackWorkerProtocol | None = None
+        self,
+        filename: str,
+        worker: CallbackWorkerProtocol | None = None,
+        *,
+        param: gds.DataSet | None = None,
     ) -> list[ImageObj]:
         """Read list of image objects from file
 
         Args:
             filename: File name
             worker: Callback worker object
+            param: Optional format-specific read parameters
 
         Returns:
             List of image objects
         """
+        self.validate_read_param(param)
         data = self.read_data(filename)
         if len(data.shape) == 3:
             objlist = []
