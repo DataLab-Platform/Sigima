@@ -99,14 +99,22 @@ from sigima.io.convenience import (
     write_signal,
     write_signals,
 )
-from sigima.io.image.base import ImageIORegistry
+from sigima.io.image import (
+    ImageExportParam,
+    ImageIORegistry,
+    get_supported_export_dtypes,
+    prepare_image_for_export,
+)
 from sigima.io.signal.base import SignalIORegistry
 
 __all__ = [
     "IMAGE_FORMAT_INFO",
     "SIGNAL_FORMAT_INFO",
+    "ImageExportParam",
     "ImageIORegistry",
     "SignalIORegistry",
+    "get_supported_export_dtypes",
+    "prepare_image_for_export",
     "read_annotations",
     "read_graphical_annotations",
     "read_image",

@@ -1712,3 +1712,54 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
+
+msgid "Image export"
+msgstr "Exportation d'image"
+
+msgid "Normalization"
+msgstr "Normalisation"
+
+msgid "None"
+msgstr "Aucune"
+
+msgid "Min-max"
+msgstr "Min-max"
+
+msgid "Percentile"
+msgstr "Percentile"
+
+msgid "Manual minimum"
+msgstr "Minimum manuel"
+
+msgid "Manual maximum"
+msgstr "Maximum manuel"
+
+msgid "Low percentile"
+msgstr "Percentile inférieur"
+
+msgid "High percentile"
+msgstr "Percentile supérieur"
+
+msgid "Out-of-range behavior"
+msgstr "Comportement hors plage"
+
+msgid "Rescale"
+msgstr "Rééchelonnage"
+
+msgid "Target data type"
+msgstr "Type de données cible"
+
+msgid "Automatic"
+msgstr "Automatique"
+
+msgid "Non-finite values"
+msgstr "Valeurs non finies"
+
+msgid "Raise an error"
+msgstr "Lever une erreur"
+
+msgid "Replace"
+msgstr "Remplacer"
+
+msgid "Replacement value"
+msgstr "Valeur de remplacement"

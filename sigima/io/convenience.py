@@ -9,6 +9,7 @@ I/O system, making common tasks easier to perform.
 
 from __future__ import annotations
 
+import copy
 import os.path as osp
 from typing import Generator, Sequence
 
@@ -17,6 +18,7 @@ import guidata.dataset as gds
 from sigima.config import _
 from sigima.io.common.basename import format_basenames
 from sigima.io.image.base import ImageIORegistry
+from sigima.io.image.export import ImageExportParam, prepare_image_for_export
 from sigima.io.signal.base import SignalIORegistry
 from sigima.objects import ImageObj, SignalObj, TypeObj
 
@@ -136,14 +138,22 @@ def read_image(filename: str) -> ImageObj:
     return read_images(filename)[0]
 
 
-def write_image(filename: str, image: ImageObj) -> None:
+def write_image(
+    filename: str, image: ImageObj, param: ImageExportParam | None = None
+) -> None:
     """Write an image to a file.
 
     Args:
         filename: File name.
         image: Image.
+        param: Optional format-aware export parameters.
     """
-    ImageIORegistry.write(filename, image)
+    if param is None:
+        ImageIORegistry.write(filename, image)
+        return
+    exported_image = copy.deepcopy(image)
+    exported_image.data = prepare_image_for_export(image.data, filename, param)
+    ImageIORegistry.write(filename, exported_image)
 
 
 def write_images(p: SaveToDirectoryParam, images: list[ImageObj]) -> None:
