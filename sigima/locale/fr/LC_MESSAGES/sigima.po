@@ -4,7 +4,6 @@
 #
 msgid ""
 msgstr ""
-"Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -1763,3 +1762,9 @@ msgstr "Remplacer"
 
 msgid "Replacement value"
 msgstr "Valeur de remplacement"
+
+msgid "Invert"
+msgstr "Inverser"
+
+msgid "Format options"
+msgstr "Options de format"

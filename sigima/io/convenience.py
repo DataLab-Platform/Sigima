@@ -16,9 +16,14 @@ from typing import Generator, Sequence
 import guidata.dataset as gds
 
 from sigima.config import _
+from sigima.io.base import IOAction
 from sigima.io.common.basename import format_basenames
 from sigima.io.image.base import ImageIORegistry
-from sigima.io.image.export import ImageExportParam, prepare_image_for_export
+from sigima.io.image.export import (
+    ImageExportParam,
+    prepare_image_for_export,
+    validate_image_export_configuration,
+)
 from sigima.io.signal.base import SignalIORegistry
 from sigima.objects import ImageObj, SignalObj, TypeObj
 
@@ -153,7 +158,14 @@ def write_image(
         return
     exported_image = copy.deepcopy(image)
     exported_image.data = prepare_image_for_export(image.data, filename, param)
-    ImageIORegistry.write(filename, exported_image)
+    writer_options = validate_image_export_configuration(
+        filename,
+        exported_image.data.dtype,
+        param.format_options,
+        exported_image.data.shape,
+    )
+    image_format = ImageIORegistry.get_format(filename, IOAction.SAVE)
+    image_format.write_with_options(filename, exported_image, writer_options)
 
 
 def write_images(p: SaveToDirectoryParam, images: list[ImageObj]) -> None:

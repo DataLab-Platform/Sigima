@@ -13,7 +13,7 @@ from typing import Sequence
 import numpy as np
 
 from sigima.config import _
-from sigima.io.base import BaseIORegistry, FormatBase
+from sigima.io.base import BaseIORegistry, FormatBase, IOAction
 from sigima.objects.image import ImageObj, create_image
 from sigima.worker import CallbackWorkerProtocol
 
@@ -24,6 +24,31 @@ class ImageIORegistry(BaseIORegistry):
     REGISTRY_INFO: str = _("Image I/O formats")
 
     _io_format_instances: list[ImageFormatBase] = []
+
+    @classmethod
+    def get_filters(mcs, action: IOAction) -> str:
+        """Return grouped load filters or format-specific save filters."""
+        if action == IOAction.LOAD:
+            return super().get_filters(action)
+        assert action == IOAction.SAVE
+        classic_format_name = "BMP, JPEG, PNG, TIFF, JPEG2000"
+        classic_save_filters = (
+            "BMP (*.bmp)",
+            "JPEG (*.jpg *.jpeg)",
+            "PNG (*.png)",
+            "TIFF (*.tif *.tiff)",
+            "JPEG 2000 (*.jp2)",
+        )
+        filters = []
+        for fmt in mcs.get_formats():
+            file_filter = fmt.get_filter(action)
+            if file_filter is None:
+                continue
+            if fmt.info.name == classic_format_name:
+                filters.extend(classic_save_filters)
+            else:
+                filters.append(file_filter)
+        return "\n".join(filters)
 
 
 class ImageFormatBaseMeta(ImageIORegistry, abc.ABCMeta):
@@ -63,6 +88,23 @@ class ImageFormatBase(abc.ABC, FormatBase, metaclass=ImageFormatBaseMeta):
         Raises:
             NotImplementedError: if format is not supported
         """
+
+    def write_with_options(
+        self, filename: str, obj: ImageObj, writer_options: dict[str, object]
+    ) -> None:
+        """Write an image with format-specific options.
+
+        Args:
+            filename: File name
+            obj: Image object
+            writer_options: Format-specific writer options
+
+        Raises:
+            ValueError: If this format does not support writer options
+        """
+        if writer_options:
+            raise ValueError(f"{self.info.name} does not support export options")
+        self.write(filename, obj)
 
 
 class SingleImageFormatBase(ImageFormatBase):
