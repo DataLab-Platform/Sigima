@@ -32,6 +32,11 @@ from sigima.io.image.base import (
     MultipleImagesFormatBase,
     SingleImageFormatBase,
 )
+from sigima.io.image.export import (
+    get_image_export_capabilities,
+    validate_image_export_options,
+    write_image_export_data,
+)
 from sigima.objects.image import ImageObj, create_image
 from sigima.worker import CallbackWorkerProtocol
 
@@ -158,6 +163,12 @@ class ClassicsImageFormat(SingleImageFormatBase):
             if data.dtype not in (np.uint8, np.uint16):
                 data = data.astype(np.uint16)
         skimage.io.imsave(filename, data, check_contrast=False)
+
+    def write_with_options(
+        self, filename: str, obj: ImageObj, writer_options: dict[str, object]
+    ) -> None:
+        """Write classic image data with validated format-specific options."""
+        write_image_export_data(filename, obj.data, filename, writer_options)
 
 
 class NumPyImageFormat(SingleImageFormatBase):
@@ -600,6 +611,12 @@ class CoordinatedTextFileReader:
                 )
                 # Drop entirely empty columns introduced by trailing delimiters
                 df = df.dropna(axis=1, how="all")
+                if len(df.columns) != len(columns_header):
+                    last_error = ValueError(
+                        f"Delimiter {delimiter!r} produced {len(df.columns)} "
+                        f"columns instead of {len(columns_header)}"
+                    )
+                    continue
                 return df
 
             except (ValueError, UnicodeDecodeError) as exc:
@@ -642,12 +659,16 @@ class CoordinatedTextFileWriter:
     """Utility class for writing text files with metadata and coordinates"""
 
     @staticmethod
-    def write_image(filename: str, obj: ImageObj) -> None:
+    def write_image(
+        filename: str, obj: ImageObj, delimiter: str = "\t", precision: int = 18
+    ) -> None:
         """Write image object to coordinated text file.
 
         Args:
             filename: File name to write to
             obj: Image object to write
+            delimiter: Data column delimiter
+            precision: Number of digits after the decimal point
 
         Raises:
             ValueError: If image has invalid coordinate system
@@ -699,10 +720,12 @@ class CoordinatedTextFileWriter:
                 f.write(f" ({obj.yunit})")
             f.write("\n")
 
-            f.write(f"# Z: {obj.zlabel}")
-            if obj.zunit:
-                f.write(f" ({obj.zunit})")
-            f.write("\n")
+            z_headers = ("Zre", "Zim") if np.iscomplexobj(obj.data) else ("Z",)
+            for header in z_headers:
+                f.write(f"# {header}: {obj.zlabel}")
+                if obj.zunit:
+                    f.write(f" ({obj.zunit})")
+                f.write("\n")
 
             # Write additional metadata if present
             if obj.metadata:
@@ -711,8 +734,15 @@ class CoordinatedTextFileWriter:
                         f.write(f"# {key}: {value}\n")
 
             # Write data columns
+            number_format = f"%.{precision}e"
             for x, y, z in zip(x_flat, y_flat, z_flat):
-                f.write(f"{x}\t{y}\t{z}\n")
+                values = [x, y]
+                if np.iscomplexobj(obj.data):
+                    values.extend((z.real, z.imag))
+                else:
+                    values.append(z)
+                f.write(delimiter.join(number_format % value for value in values))
+                f.write("\n")
 
 
 class TextImageFormat(SingleImageFormatBase):
@@ -744,8 +774,8 @@ class TextImageFormat(SingleImageFormatBase):
         """
         self.validate_read_param(param)
         # Try to read as coordinated text format first
-        # (for .txt/.csv files with metadata and coordinates)
-        if filename.lower().endswith((".txt", ".csv")):
+        # (for .txt/.csv/.asc files with metadata and coordinates)
+        if filename.lower().endswith((".txt", ".csv", ".asc")):
             try:
                 return CoordinatedTextFileReader.read_images(filename)
             except NotCoordinatedTextFileError:
@@ -826,10 +856,10 @@ class TextImageFormat(SingleImageFormatBase):
         if not isinstance(obj, ImageObj):
             raise ValueError("Object is not an image")
 
-        # Check if object has non-uniform coordinates and filename is TXT or CSV
+        # Check if object has non-uniform coordinates and uses a text extension
         # If so, use coordinated text format
         ext = osp.splitext(filename)[1].lower()
-        if ext in (".txt", ".csv") and not obj.is_uniform_coords:
+        if ext in (".txt", ".csv", ".asc") and not obj.is_uniform_coords:
             try:
                 CoordinatedTextFileWriter.write_image(filename, obj)
                 return
@@ -839,6 +869,41 @@ class TextImageFormat(SingleImageFormatBase):
 
         # Use default text format
         super().write(filename, obj)
+
+    def write_with_options(
+        self, filename: str, obj: ImageObj, writer_options: dict[str, object]
+    ) -> None:
+        """Write text image data with validated delimiter and precision."""
+        validated_options = validate_image_export_options(filename, writer_options)
+        if not validated_options:
+            self.write(filename, obj)
+            return
+        capabilities = get_image_export_capabilities(filename)
+        values = {spec.key: spec.default for spec in capabilities.option_specs}
+        values.update(validated_options)
+        delimiter = {
+            "whitespace": " ",
+            "tab": "\t",
+            "comma": ",",
+            "semicolon": ";",
+        }[values["delimiter"]]
+        ext = osp.splitext(filename)[1].lower()
+        if ext in (".txt", ".csv", ".asc") and not obj.is_uniform_coords:
+            CoordinatedTextFileWriter.write_image(
+                filename, obj, delimiter=delimiter, precision=values["precision"]
+            )
+            return
+        if np.issubdtype(obj.data.dtype, np.integer):
+            fmt = "%d"
+        elif np.issubdtype(obj.data.dtype, np.floating) or np.issubdtype(
+            obj.data.dtype, np.complexfloating
+        ):
+            fmt = f"%.{values['precision']}e"
+        else:
+            raise NotImplementedError(
+                f"Writing data of type {obj.data.dtype} to text file is not supported."
+            )
+        np.savetxt(filename, obj.data, fmt=fmt, delimiter=delimiter)
 
 
 class MatImageFormat(SingleImageFormatBase):
@@ -904,6 +969,20 @@ class MatImageFormat(SingleImageFormatBase):
             data: Image array data
         """
         sio.savemat(filename, {"img": data})
+
+    def write_with_options(
+        self, filename: str, obj: ImageObj, writer_options: dict[str, object]
+    ) -> None:
+        """Write MAT image data with optional compression."""
+        validated_options = validate_image_export_options(filename, writer_options)
+        if not validated_options:
+            self.write(filename, obj)
+            return
+        sio.savemat(
+            filename,
+            {"img": obj.data},
+            do_compression=validated_options.get("do_compression", False),
+        )
 
 
 class DICOMImageFormat(SingleImageFormatBase):
