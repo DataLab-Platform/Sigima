@@ -27,10 +27,10 @@ DataLab may also be controlled remotely from a third-party application, for the
 same purpose.
 
 If the third-party application is written in Python 3, it may directly use
-:py:class:`cdlclient.SimpleRemoteProxy` as mentioned above. From another language,
+:py:class:`sigima.client.SimpleRemoteProxy` as mentioned above. From another language,
 it is also achievable, but it requires to implement a XML-RPC client in this
 language using the same methods of proxy server as in the
-:py:class:`cdlclient.SimpleRemoteProxy` class.
+:py:class:`sigima.client.SimpleRemoteProxy` class.
 
 Data (signals and images) may also be exchanged between DataLab and the remote
 client application, in both directions.
