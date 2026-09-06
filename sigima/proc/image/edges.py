@@ -76,6 +76,18 @@ __all__ = [
 class CannyParam(gds.DataSet):
     """Canny filter parameters."""
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate the hysteresis threshold interval."""
+        del context
+        if self.low_threshold > self.high_threshold:
+            raise ValueError(
+                "low_threshold must be less than or equal to high_threshold"
+            )
+        if self.use_quantiles and (
+            self.low_threshold > 1.0 or self.high_threshold > 1.0
+        ):
+            raise ValueError("quantile thresholds must be less than or equal to 1")
+
     sigma = gds.FloatItem(
         "Sigma",
         default=1.0,

@@ -49,6 +49,7 @@ from sigima.tools.signal.pulse import (
     PulseFitModel,
     VoigtModel,
 )
+from sigima.validation import validate_dataset
 
 
 def create_signal(
@@ -277,6 +278,12 @@ class NewSignalParam(gds.DataSet):
     # or when the NewSignalParam class is used alone).
     sep = gds.SeparatorItem()
 
+    def validate_parameters(self, *context: object) -> None:
+        """Run validators provided by cooperative base classes."""
+        parent_validator = getattr(super(), "validate_parameters", None)
+        if callable(parent_validator):
+            parent_validator(*context)
+
     def generate_x_data(self) -> np.ndarray:
         """Generate x data based on current parameters."""
         return np.linspace(self.xmin, self.xmax, self.size)
@@ -479,7 +486,7 @@ class BaseGaussLorentzVoigtParam(NewSignalParam):
     ).set_prop("display", hide=True)
     amplitude = gds.FloatItem("A", default=1.0)
     y0 = gds.FloatItem("y<sub>0</sub>", default=0.0).set_pos(col=1)
-    sigma = gds.FloatItem("σ", default=1.0)
+    sigma = gds.FloatItem("σ", default=1.0, min=0.0, nonzero=True)
     mu = gds.FloatItem("μ", default=0.0).set_pos(col=1)
 
     @classmethod
@@ -1064,6 +1071,12 @@ class PulseParam(NewSignalParam, title=_("Pulse")):
     offset = gds.FloatItem(_("Offset"), default=10.0)
     stop = gds.FloatItem(_("End"), default=5.0).set_pos(col=1)
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate pulse chronology."""
+        super().validate_parameters(*context)
+        if self.start > self.stop:
+            raise ValueError("start must be less than or equal to stop")
+
     def generate_title(self) -> str:
         """Generate a title based on current parameters."""
         return (
@@ -1131,7 +1144,7 @@ class BasePulseParam(NewSignalParam):
     offset = gds.FloatItem(_("Initial value"), default=0.0)
     amplitude = gds.FloatItem(_("Amplitude"), default=5.0).set_pos(col=1)
     noise_amplitude = gds.FloatItem(_("Noise amplitude"), default=0.2, min=0.0)
-    x_rise_start = gds.FloatItem(_("Rise start time"), default=3.0, min=0.0)
+    x_rise_start = gds.FloatItem(_("Rise start time"), default=3.0)
     total_rise_time = gds.FloatItem(_("Total rise time"), default=2.0, min=0.0).set_pos(
         col=1
     )
@@ -1259,6 +1272,12 @@ class SquarePulseParam(BasePulseParam, title=_("Square pulse with noise")):
     def square_duration(self) -> float:
         """Calculate the square duration from FWHM and total rise/fall times."""
         return self.fwhm - 0.5 * self.total_rise_time - 0.5 * self.total_fall_time
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate square-pulse timing."""
+        super().validate_parameters(*context)
+        if self.square_duration < 0.0:
+            raise ValueError("square pulse plateau duration must be non-negative")
 
     def get_plateau_range(self) -> tuple[float, float]:
         """Get the theoretical plateau range (start, end) for the square signal.
@@ -1547,6 +1566,7 @@ def create_signal_from_param(param: NewSignalParam) -> SignalObj:
     Raises:
         NotImplementedError: if the signal type is not supported
     """
+    validate_dataset(param)
     # Generate data first, as some `generate_title()` methods may depend on it:
     x, y = param.generate_1d_data()
     # Check if user has customized the title or left it as default/empty

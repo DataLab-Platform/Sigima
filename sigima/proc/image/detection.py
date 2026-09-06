@@ -311,8 +311,8 @@ class GenericDetectionParam(gds.DataSet):
     threshold = gds.FloatItem(
         _("Relative threshold"),
         default=0.5,
-        min=0.1,
-        max=0.9,
+        min=0.0,
+        max=1.0,
         help=_(
             "Detection threshold, relative to difference between "
             "data maximum and minimum"
@@ -399,6 +399,14 @@ def contour_shape(image: ImageObj, p: ContourShapeParam) -> GeometryResult | Non
 
 class BaseBlobParam(gds.DataSet):
     """Base class for blob detection parameters"""
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate the Gaussian scale interval."""
+        parent_validator = getattr(super(), "validate_parameters", None)
+        if callable(parent_validator):
+            parent_validator(*context)
+        if self.min_sigma > self.max_sigma:
+            raise ValueError("min_sigma must be less than or equal to max_sigma")
 
     min_sigma = gds.FloatItem(
         "σ<sub>min</sub>",
@@ -557,6 +565,40 @@ def blob_log(image: ImageObj, p: BlobLOGParam) -> GeometryResult | None:
 class BlobOpenCVParam(DetectionROIParam, gds.DataSet):
     """Blob detection using OpenCV"""
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate threshold and enabled filter intervals."""
+        del context
+        if self.min_threshold > self.max_threshold:
+            raise ValueError(
+                "min_threshold must be less than or equal to max_threshold"
+            )
+        filter_intervals = (
+            (self.filter_by_area, self.min_area, self.max_area, "area"),
+            (
+                self.filter_by_circularity,
+                self.min_circularity,
+                self.max_circularity,
+                "circularity",
+            ),
+            (
+                self.filter_by_inertia,
+                self.min_inertia_ratio,
+                self.max_inertia_ratio,
+                "inertia",
+            ),
+            (
+                self.filter_by_convexity,
+                self.min_convexity,
+                self.max_convexity,
+                "convexity",
+            ),
+        )
+        for enabled, lower, upper, name in filter_intervals:
+            if enabled and lower > upper:
+                raise ValueError(
+                    f"minimum {name} must be less than or equal to maximum {name}"
+                )
+
     min_threshold = gds.FloatItem(
         _("Min. threshold"),
         default=10.0,
@@ -607,6 +649,8 @@ class BlobOpenCVParam(DetectionROIParam, gds.DataSet):
     blob_color = gds.IntItem(
         _("Blob color"),
         default=0,
+        min=0,
+        max=255,
         help=_(
             "The color of the blobs to detect (0 for dark blobs, 255 for light blobs)."
         ),
@@ -732,6 +776,12 @@ def blob_opencv(image: ImageObj, p: BlobOpenCVParam) -> GeometryResult | None:
 
 class HoughCircleParam(DetectionROIParam, gds.DataSet):
     """Circle Hough transform parameters"""
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate the radius interval."""
+        del context
+        if self.min_radius >= self.max_radius:
+            raise ValueError("min_radius must be strictly less than max_radius")
 
     min_radius = gds.IntItem(
         _("Radius<sub>min</sub>"), unit="pixels", min=0, nonzero=True

@@ -40,6 +40,7 @@ import sigima.enums
 import sigima.tools.image
 from sigima.config import _
 from sigima.objects import base
+from sigima.validation import validate_dataset
 
 if TYPE_CHECKING:
     from sigima.objects.image.object import ImageObj
@@ -175,6 +176,7 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
         Returns:
             Single ROI
         """
+        validate_dataset(self, obj)
         if self.geometry == "rectangle":
             return RectangularROI.from_param(obj, self)
         if self.geometry == "circle":

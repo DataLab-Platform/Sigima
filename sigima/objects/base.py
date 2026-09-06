@@ -123,6 +123,14 @@ class BaseRandomParam(BaseProcParam):
 class UniformDistributionParam(BaseRandomParam):
     """Uniform-distribution signal/image parameters."""
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate uniform-distribution bounds."""
+        parent_validator = getattr(super(), "validate_parameters", None)
+        if callable(parent_validator):
+            parent_validator(*context)
+        if self.vmin > self.vmax:
+            raise ValueError("vmin must be less than or equal to vmax")
+
     def apply_integer_range(self, vmin, vmax):
         """Do something in case of integer min-max range."""
         self.vmin, self.vmax = float(vmin), float(vmax)

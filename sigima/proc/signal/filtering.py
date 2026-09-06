@@ -217,6 +217,33 @@ class BaseHighLowBandParam(gds.DataSet, title=_("Filter")):
         ),
     )
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate active cutoff frequencies against the filter method."""
+        if not context or not isinstance(context[0], SignalObj):
+            raise ValueError("filter validation requires a source SignalObj")
+        if self.cut0 is None or self.cut0 <= 0.0:
+            raise ValueError("cut0 must be strictly positive")
+
+        is_band_filter = self.TYPE in (FilterType.BANDPASS, FilterType.BANDSTOP)
+        if is_band_filter:
+            if self.cut1 is None or self.cut1 <= 0.0:
+                raise ValueError("cut1 must be strictly positive for band filters")
+            if self.method == FrequencyFilterMethod.BRICKWALL:
+                if self.cut0 > self.cut1:
+                    raise ValueError("cut0 must be less than or equal to cut1")
+            elif self.cut0 >= self.cut1:
+                raise ValueError("cut0 must be strictly less than cut1")
+
+        if self.method != FrequencyFilterMethod.BRICKWALL:
+            f_nyquist = get_nyquist_frequency(context[0])
+            active_cutoffs = [self.cut0]
+            if is_band_filter:
+                active_cutoffs.append(self.cut1)
+            if any(cutoff >= f_nyquist for cutoff in active_cutoffs):
+                raise ValueError(
+                    "IIR cutoff frequencies must be strictly below Nyquist"
+                )
+
     def update_from_obj(self, obj: SignalObj) -> None:
         """Update the filter parameters from a signal object
 

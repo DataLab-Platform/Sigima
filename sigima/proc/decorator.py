@@ -22,6 +22,7 @@ import makefun
 
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
+from sigima.validation import validate_dataset
 
 if sys.version_info >= (3, 10):
     # Use ParamSpec from typing module in Python 3.10+
@@ -124,11 +125,16 @@ def _make_computation_wrapper(
 
         # Build the final positional argument list for the original function
         final_args = []
+        validation_context = []
         for p in params:
             if p is ds_param:
                 final_args.append(ds_obj)
             else:
-                final_args.append(ba.arguments.get(p.name, None))
+                value = ba.arguments.get(p.name, None)
+                final_args.append(value)
+                validation_context.append(value)
+
+        validate_dataset(ds_obj, *validation_context)
 
         # Call the original function
         result = f(*final_args)
@@ -188,7 +194,14 @@ def computation_function(
         try:
             type_hints = typing.get_type_hints(f)
         except Exception:  # pylint: disable=broad-except
-            type_hints = {}
+            # Python 3.9 cannot evaluate stringized PEP 604 return annotations.
+            # Preserve direct parameter-class references resolved from module globals.
+            type_hints = {
+                p.name: f.__globals__.get(p.annotation, p.annotation)
+                if isinstance(p.annotation, str)
+                else p.annotation
+                for p in params
+            }
 
         # Find DataSet parameter if any
         ds_param = None

@@ -14,6 +14,7 @@ from __future__ import annotations
 import guidata.dataset as gds
 import numpy as np
 import pytest
+from guidata.config import ValidationMode, temporary_validation_mode
 
 from sigima.objects import ImageObj, SignalObj, create_image, create_signal
 from sigima.proc.base import dst_1_to_1
@@ -44,6 +45,12 @@ class DummySignalParam(gds.DataSet):
     methods = (("linear", "Linear"), ("quadratic", "Quadratic"))
     method = gds.ChoiceItem("Method", choices=methods, default="linear")
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate parameter ordering and record execution context."""
+        self.validation_context = context
+        if self.a > self.b:
+            raise ValueError("a must be less than or equal to b")
+
 
 SCF_NAME = "dummy_signal_func"
 SCF_DESCRIPTION = "A dummy signal function"
@@ -66,6 +73,12 @@ def dummy_signal_func(src: SignalObj, p: DummySignalParam) -> SignalObj:
     else:  # Quadratic method
         dst.y = src.y + src.x**2 * p.a + p.b
     return dst
+
+
+@computation_function()
+def dummy_optional_signal_func(src: SignalObj, p: DummySignalParam) -> SignalObj | None:
+    """Return a signal through a function with a PEP 604 return annotation."""
+    return src
 
 
 class DummyImageParam(gds.DataSet):
@@ -116,6 +129,7 @@ def test_signal_decorator_signature() -> None:
     # Call the function with a DataSet parameter
     p = DummySignalParam.create(a=3.0, b=4.0, method="quadratic")
     res_ds = dummy_signal_func(orig, p)
+    assert p.validation_context == (orig,)
     name = "Signal[DataSet parameter]"
     check_array_result(f"{name} x", res_ds.x, orig.x)
     check_array_result(f"{name} y", res_ds.y, orig.y + orig.x**2 * 3.0 + 4.0)
@@ -139,6 +153,31 @@ def test_signal_decorator_signature() -> None:
         res_both.y,
         orig.y + orig.x**2 * 3.0 + 4.0,
     )
+
+
+def test_signal_decorator_relational_validation() -> None:
+    """Relational validation applies to both supported call styles."""
+    x = np.linspace(0, 10, 100)
+    orig = create_signal("test_signal", x=x, y=x)
+
+    with temporary_validation_mode(ValidationMode.DISABLED):
+        with pytest.raises(ValueError, match="a must be less"):
+            dummy_signal_func(orig, DummySignalParam.create(a=5.0, b=4.0))
+        with pytest.raises(ValueError, match="a must be less"):
+            dummy_signal_func(orig, a=5.0, b=4.0)
+
+        param = DummySignalParam.create(a=3.0, b=4.0)
+        dummy_signal_func(orig, param, a=100.0, b=0.0)
+        assert param.validation_context == (orig,)
+
+
+def test_decorator_validates_dataset_with_optional_return_annotation() -> None:
+    """A failing return hint does not prevent DataSet parameter discovery."""
+    orig = create_signal("test_signal", x=np.arange(2.0), y=np.arange(2.0))
+
+    with temporary_validation_mode(ValidationMode.DISABLED):
+        with pytest.raises(ValueError, match="a must be less"):
+            dummy_optional_signal_func(orig, DummySignalParam.create(a=2.0, b=1.0))
 
 
 def test_image_decorator_marker() -> None:

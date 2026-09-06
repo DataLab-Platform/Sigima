@@ -34,6 +34,7 @@ from sigima.config import _
 from sigima.objects import base
 from sigima.objects.image.object import ImageObj
 from sigima.tools.image import scale_data_to_min_max
+from sigima.validation import validate_dataset
 
 
 def create_image(
@@ -404,7 +405,7 @@ class Gauss2DParam(
 
     a = gds.FloatItem("A", default=None, check=False)
     xmin = gds.FloatItem("x<sub>min</sub>", default=-10.0).set_pos(col=1)
-    sigma = gds.FloatItem("σ", default=1.0)
+    sigma = gds.FloatItem("σ", default=1.0, min=0.0, nonzero=True)
     xmax = gds.FloatItem("x<sub>max</sub>", default=10.0).set_pos(col=1)
     mu = gds.FloatItem("μ", default=0.0)
     ymin = gds.FloatItem("y<sub>min</sub>", default=-10.0).set_pos(col=1)
@@ -719,6 +720,14 @@ class SiemensStar2DParam(
     ymax = gds.FloatItem("y<sub>max</sub>", default=100.0).set_pos(col=1)
     _g2_end = gds.EndGroup("")
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate radial limits."""
+        parent_validator = getattr(super(), "validate_parameters", None)
+        if callable(parent_validator):
+            parent_validator(*context)
+        if self.inner_radius > self.outer_radius:
+            raise ValueError("inner_radius must be less than or equal to outer_radius")
+
     def generate_title(self) -> str:
         """Generate a title based on current parameters."""
         return f"Siemens(n={self.n_spokes})"
@@ -864,6 +873,7 @@ def create_image_from_param(param: NewImageParam) -> ImageObj:
         param.width = 1024
     if param.dtype is None:
         param.dtype = ImageDatatypes.UINT16
+    validate_dataset(param)
     # Generate data first, as some `generate_title()` methods may depend on it:
     shape = (param.height, param.width)
     data = param.generate_2d_data(shape)
