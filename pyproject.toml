@@ -106,7 +106,7 @@ include = ["sigima*"]
 ]
 
 [tool.setuptools.dynamic]
-version = { attr = "sigima.__version__" }
+version = { attr = "sigima._metadata.__version__" }
 
 [tool.pytest.ini_options]
 addopts = "sigima --import-mode=importlib"

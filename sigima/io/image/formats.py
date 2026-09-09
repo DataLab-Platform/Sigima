@@ -20,7 +20,7 @@ import scipy.io as sio
 import skimage.io
 from guidata.io import HDF5Reader, HDF5Writer
 
-import sigima
+from sigima._metadata import __version__
 from sigima.config import _, options
 from sigima.io import ftlab
 from sigima.io.base import FormatInfo
@@ -703,7 +703,7 @@ class CoordinatedTextFileWriter:
         # Write file
         with open(filename, "w", encoding="utf-8") as f:
             # Write metadata header
-            f.write(f"# Created by Sigima {sigima.__version__}\n")
+            f.write(f"# Created by Sigima {__version__}\n")
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
             f.write(f"# Created on {timestamp}\n")
             f.write(f"# nx: {obj.data.shape[1]}\n")
