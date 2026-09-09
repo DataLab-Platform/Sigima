@@ -60,6 +60,10 @@ __all__ = [
     "UniformDistribution1DParam",
     "UniformDistribution2DParam",
     "VoigtParam",
+    "__docurl__",
+    "__homeurl__",
+    "__supporturl__",
+    "__version__",
     "calc_table_from_data",
     "create_image",
     "create_image_from_param",
@@ -81,6 +85,12 @@ __all__ = [
 
 from guidata.config import ValidationMode, set_validation_mode
 
+from sigima._metadata import (
+    __docurl__,
+    __homeurl__,
+    __supporturl__,
+    __version__,
+)
 from sigima.client import SimpleBaseProxy, SimpleRemoteProxy
 from sigima.io import (
     read_image,
@@ -143,11 +153,6 @@ from sigima.objects import (
 
 # Set validation mode to ENABLED by default (issue warnings for invalid inputs)
 set_validation_mode(ValidationMode.ENABLED)
-
-__version__ = "1.2.0"
-__docurl__ = "https://sigima.readthedocs.io/"
-__homeurl__ = "https://github.com/DataLab-Platform/Sigima"
-__supporturl__ = "https://github.com/DataLab-Platform/sigima/issues/new/choose"
 
 # Dear (Debian, RPM, ...) package makers, please feel free to customize the
 # following path to module's data (images) and translations:
