@@ -6,8 +6,12 @@ Unit tests for exposure computation functions.
 
 from __future__ import annotations
 
+import inspect
+import json
+
 import numpy as np
 import pytest
+from guidata.dataset.jsonschema import dataset_to_schema
 from skimage import exposure
 
 import sigima.enums
@@ -16,6 +20,198 @@ import sigima.params
 import sigima.proc.image
 from sigima.tests.data import get_test_image
 from sigima.tests.helpers import check_array_result, check_scalar_result
+from sigima.tools.image import exposure as image_exposure
+
+
+@pytest.mark.validation
+def test_adjust_brightness_contrast() -> None:
+    """The source-derived window drives a clipped dtype-preserving remap."""
+    data = np.array([[0, 64, 128, 255]], dtype=np.uint8)
+    src = sigima.objects.create_image("uint8", data)
+    p = sigima.params.BrightnessContrastParam()
+    p.update_from_obj(src)
+
+    assert (
+        dataset_to_schema(type(p))["properties"]["histogram"][
+            "x-guidata-histogram-presentation"
+        ]
+        == "brightness_contrast"
+    )
+    assert (p.minimum, p.maximum) == (0.0, 255.0)
+    assert p.histogram["domain"] == [0.0, 255.0]
+    assert len(p.histogram["counts"]) == 256
+    assert (
+        "histogram"
+        not in inspect.signature(
+            sigima.proc.image.adjust_brightness_contrast
+        ).parameters
+    )
+
+    p.minimum, p.maximum = 64.0, 192.0
+    dst = sigima.proc.image.adjust_brightness_contrast(src, p)
+    np.testing.assert_array_equal(dst.data, [[0, 0, 128, 255]])
+    assert dst.data.dtype == src.data.dtype
+    np.testing.assert_array_equal(src.data, data)
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.uint64])
+@pytest.mark.parametrize("values", [[], [0, 1, 2]])
+@pytest.mark.parametrize("operation", ["ranges", "context", "remap", "identity"])
+def test_brightness_contrast_rejects_64bit_integers(dtype, values, operation):
+    """All tools reject unsupported types, including early-return paths."""
+    data = np.array([values], dtype=dtype)
+    original = data.copy()
+    with np.errstate(all="raise"), pytest.raises(TypeError, match="32-bit"):
+        if operation == "ranges":
+            image_exposure.brightness_contrast_ranges(data, data.dtype)
+        elif operation == "context":
+            image_exposure.brightness_contrast_context(data, data.dtype)
+        else:
+            output = (0.0, 2.0) if operation == "identity" else (0.0, 10.0)
+            image_exposure.adjust_brightness_contrast(data, 0.0, 2.0, output)
+    np.testing.assert_array_equal(data, original)
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.int8, np.uint8, np.int16, np.uint16, np.int32, np.uint32]
+)
+def test_brightness_contrast_integer_endpoints(dtype):
+    """Supported integer types retain exact endpoints and nearest-even rounding."""
+    data = np.array([[0, 1, 2]], dtype=dtype)
+    bounds = np.iinfo(dtype)
+    _, output = image_exposure.brightness_contrast_ranges(data, data.dtype)
+    with np.errstate(all="raise"):
+        result = image_exposure.adjust_brightness_contrast(data, 0.0, 2.0, output)
+    assert result.dtype == dtype
+    assert result[0, 0] == bounds.min
+    assert result[0, 2] == bounds.max
+    assert int(result[0, 1]) == round((int(bounds.min) + int(bounds.max)) / 2)
+    assert np.all(result[0, 1:] >= result[0, :-1])
+    np.testing.assert_array_equal(data, [[0, 1, 2]])
+
+
+def test_adjust_brightness_contrast_roi() -> None:
+    """The ROI controls initialization and pixels outside it are restored."""
+    data = np.arange(16, dtype=np.uint16).reshape(4, 4)
+    src = sigima.objects.create_image("roi", data)
+    src.roi = sigima.objects.create_image_roi("rectangle", [1, 1, 2, 2], indices=True)
+    p = sigima.params.BrightnessContrastParam()
+    p.update_from_obj(src)
+    assert (p.minimum, p.maximum) == (5.0, 10.0)
+
+    dst = sigima.proc.image.adjust_brightness_contrast(src, p)
+    mask = src.maskdata
+    np.testing.assert_array_equal(dst.data[mask], src.data[mask])
+    np.testing.assert_array_equal(dst.data[~mask], [0, 13107, 52428, 65535])
+
+
+def test_adjust_brightness_contrast_float_nonfinite() -> None:
+    """Non-finite values do not affect statistics and survive the remap."""
+    data = np.array([[-1.0, 0.0, 1.0, np.nan, np.inf, -np.inf]])
+    src = sigima.objects.create_image("float", data)
+    p = sigima.params.BrightnessContrastParam()
+    p.update_from_obj(src)
+    assert (p.minimum, p.maximum) == (-1.0, 1.0)
+
+    p.minimum, p.maximum = 0.0, 1.0
+    dst = sigima.proc.image.adjust_brightness_contrast(src, p)
+    np.testing.assert_array_equal(dst.data[0, :3], [-1.0, -1.0, 1.0])
+    assert np.isnan(dst.data[0, 3])
+    assert np.isposinf(dst.data[0, 4])
+    assert np.isneginf(dst.data[0, 5])
+
+
+def test_brightness_contrast_editor_context_preserves_range() -> None:
+    """Refreshing transient context does not overwrite persisted bounds."""
+    src = sigima.objects.create_image(
+        "source", np.array([[0, 64, 128, 255]], dtype=np.uint8)
+    )
+    p = sigima.params.BrightnessContrastParam()
+    p.minimum, p.maximum = 64.0, 192.0
+
+    p.update_editor_context(src)
+
+    assert (p.minimum, p.maximum) == (64.0, 192.0)
+    assert p.histogram["domain"] == [0.0, 255.0]
+
+
+def test_adjust_brightness_contrast_tiny_float_reset_is_identity() -> None:
+    """Reset preserves a non-constant float image at sub-unit scales."""
+    data = np.array([[0.0, 1e-9, 2e-9]], dtype=np.float32)
+    src = sigima.objects.create_image("tiny", data)
+    p = sigima.params.BrightnessContrastParam()
+    p.update_from_obj(src)
+
+    assert (p.minimum, p.maximum) == (0.0, float(data.max()))
+    assert 0.0 < p.histogram["minimum_width"] < p.maximum
+    dst = sigima.proc.image.adjust_brightness_contrast(src, p)
+    np.testing.assert_array_equal(dst.data, data)
+
+
+def test_brightness_contrast_float32_histogram_uses_safe_precision() -> None:
+    """Large finite float32 values all contribute to the histogram."""
+    data = np.array([[-3e38, 0.0, 3e38]], dtype=np.float32)
+    src = sigima.objects.create_image("large-float32", data)
+    p = sigima.params.BrightnessContrastParam()
+
+    with np.errstate(over="raise", invalid="raise", divide="raise"):
+        p.update_from_obj(src)
+
+    counts = p.histogram["counts"]
+    assert sum(counts) == data.size
+    assert (counts[0], counts[128], counts[-1]) == (1, 1, 1)
+    assert p.histogram["auto_range"] == p.histogram["reset_range"]
+    dst = sigima.proc.image.adjust_brightness_contrast(src, p)
+    np.testing.assert_array_equal(dst.data, data)
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        np.array([[-1e308, 0.0, 1e308]], dtype=np.float64),
+        np.array([[np.finfo(np.float64).max]], dtype=np.float64),
+        np.array([[-np.finfo(np.float64).max]], dtype=np.float64),
+    ],
+)
+def test_brightness_contrast_extreme_float_context_is_finite(
+    data: np.ndarray,
+) -> None:
+    """Finite IEEE-754 extremes produce a JSON-safe context and no exception."""
+    src = sigima.objects.create_image("extreme", data)
+    p = sigima.params.BrightnessContrastParam()
+    p.update_from_obj(src)
+
+    json.dumps(p.histogram, allow_nan=False)
+    assert np.all(np.isfinite(p.histogram["domain"]))
+    assert np.all(np.isfinite(p.histogram["bin_edges"]))
+    assert np.isfinite(p.histogram["minimum_width"])
+    assert p.histogram["minimum_width"] > 0.0
+    assert sum(p.histogram["counts"]) == data.size
+    dst = sigima.proc.image.adjust_brightness_contrast(src, p)
+    np.testing.assert_array_equal(dst.data, data)
+
+
+def test_adjust_brightness_contrast_degenerate_inputs() -> None:
+    """Constant images are no-ops and complex images are rejected."""
+    constant = sigima.objects.create_image(
+        "constant", np.full((3, 3), 7.0, dtype=np.float32)
+    )
+    p = sigima.params.BrightnessContrastParam()
+    p.update_from_obj(constant)
+    assert p.minimum < p.maximum
+    assert not p.histogram["active"]
+    dst = sigima.proc.image.adjust_brightness_contrast(constant, p)
+    np.testing.assert_array_equal(dst.data, constant.data)
+
+    complex_image = sigima.objects.create_image(
+        "complex", np.ones((2, 2), dtype=np.complex128)
+    )
+    with pytest.raises(ValueError, match="real image"):
+        p.update_from_obj(complex_image)
+    with pytest.raises(ValueError, match="real image"):
+        sigima.proc.image.adjust_brightness_contrast(
+            complex_image, minimum=0.0, maximum=1.0
+        )
 
 
 @pytest.mark.validation

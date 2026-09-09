@@ -221,7 +221,11 @@ def computation_function(
         # If a DataSet param is present, expand signature and docstring
         if ds_cls is not None:
             # Build signature exposing all DataSet items as keyword-only parameters
-            ds_items: list[gds.DataItem] = ds_cls._items  # pylint: disable=W0212
+            ds_items: list[gds.DataItem] = [
+                item
+                for item in ds_cls._items  # pylint: disable=W0212
+                if not item.get_prop("data", "transient", False)
+            ]
             item_names = [item.get_name() for item in ds_items]
             items = []
             for item in ds_items:

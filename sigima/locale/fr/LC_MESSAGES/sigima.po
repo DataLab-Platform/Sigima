@@ -1712,3 +1712,6 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
+
+msgid "Brightness and contrast"
+msgstr "Luminosité et contraste"

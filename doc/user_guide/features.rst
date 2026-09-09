@@ -661,6 +661,8 @@ Exposure and Intensity Correction
 
    * - Function
      - Description
+   * - :func:`adjust_brightness_contrast <sigima.proc.image.adjust_brightness_contrast>`
+     - Histogram-driven brightness and contrast adjustment
    * - :func:`histogram <sigima.proc.image.histogram>`
      - Compute image histogram
    * - :func:`equalize_hist <sigima.proc.image.equalize_hist>`
