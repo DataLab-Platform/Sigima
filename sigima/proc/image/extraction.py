@@ -146,11 +146,11 @@ class ROIGridParam(gds.DataSet):
             self.on_geometry_changed()  # pylint: disable=not-callable
 
     _b_group0 = gds.BeginGroup(_("Geometry"))
-    ny = gds.IntItem(f"N<sub>y</sub> ({_('rows')})", default=3, nonzero=True).set_prop(
+    ny = gds.IntItem(f"N<sub>y</sub> ({_('rows')})", default=3, min=1).set_prop(
         "display", callback=geometry_changed
     )
     nx = (
-        gds.IntItem(f"N<sub>x</sub> ({_('columns')})", default=3, nonzero=True)
+        gds.IntItem(f"N<sub>x</sub> ({_('columns')})", default=3, min=1)
         .set_prop("display", callback=geometry_changed)
         .set_pos(col=1)
     )

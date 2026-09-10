@@ -259,7 +259,7 @@ class ResizeParam(gds.DataSet):
 
     prop = gds.ValueProp(False)
 
-    zoom = gds.FloatItem(_("Zoom"), default=1.0)
+    zoom = gds.FloatItem(_("Zoom"), default=1.0, min=0.0, nonzero=True)
     mode = gds.ChoiceItem(_("Mode"), BorderMode, default=BorderMode.CONSTANT)
     cval = gds.FloatItem(
         _("cval"),
@@ -369,10 +369,16 @@ class Resampling2DParam(gds.DataSet):
 
     # Pixel size mode parameters
     dx = gds.FloatItem(
-        "ΔX", default=None, allow_none=True, help=_("Pixel size in X direction")
+        "ΔX",
+        default=None,
+        allow_none=True,
+        help=_("Pixel size in X direction"),
     ).set_prop("display", active=gds.FuncProp(_prop, lambda x: x == "dxy"))
     dy = gds.FloatItem(
-        "ΔY", default=None, allow_none=True, help=_("Pixel size in Y direction")
+        "ΔY",
+        default=None,
+        allow_none=True,
+        help=_("Pixel size in Y direction"),
     ).set_prop("display", active=gds.FuncProp(_prop, lambda x: x == "dxy"))
 
     # Shape mode parameters
@@ -404,6 +410,41 @@ class Resampling2DParam(gds.DataSet):
         ),
         check=False,
     )
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate output bounds and the active sampling mode."""
+        if not context or not isinstance(context[0], ImageObj):
+            raise ValueError("resampling validation requires a source ImageObj")
+        src = context[0]
+        xmin = self.xmin if self.xmin is not None else src.x0
+        xmax = self.xmax if self.xmax is not None else src.x0 + src.width
+        ymin = self.ymin if self.ymin is not None else src.y0
+        ymax = self.ymax if self.ymax is not None else src.y0 + src.height
+        x_extent = xmax - xmin
+        y_extent = ymax - ymin
+        if x_extent == 0.0 or y_extent == 0.0:
+            raise ValueError("resampling coordinate extents must be nonzero")
+
+        if self.mode == "dxy":
+            if self.dx is None or self.dy is None:
+                raise ValueError("dx and dy must be specified in pixel size mode")
+            if self.dx == 0.0 or self.dy == 0.0:
+                raise ValueError("dx and dy must be nonzero in pixel size mode")
+            if (
+                x_extent > 0.0
+                and self.dx < 0.0
+                or x_extent < 0.0
+                and self.dx > 0.0
+                or y_extent > 0.0
+                and self.dy < 0.0
+                or y_extent < 0.0
+                and self.dy > 0.0
+            ):
+                raise ValueError("pixel sizes must have the same sign as their extents")
+        elif self.width is None or self.height is None:
+            raise ValueError("width and height must be specified in shape mode")
+        elif self.width < 1 or self.height < 1:
+            raise ValueError("width and height must be at least 1 in shape mode")
 
     def update_from_obj(self, obj: ImageObj) -> None:
         """Update parameters from an image object."""
@@ -544,8 +585,12 @@ class UniformCoordsParam(gds.DataSet):
 
     x0 = gds.FloatItem("X<sub>0</sub>", default=0.0, help=_("Origin X-axis coordinate"))
     y0 = gds.FloatItem("Y<sub>0</sub>", default=0.0, help=_("Origin Y-axis coordinate"))
-    dx = gds.FloatItem("Δx", default=1.0, help=_("Pixel size along X-axis"))
-    dy = gds.FloatItem("Δy", default=1.0, help=_("Pixel size along Y-axis"))
+    dx = gds.FloatItem(
+        "Δx", default=1.0, nonzero=True, help=_("Pixel size along X-axis")
+    )
+    dy = gds.FloatItem(
+        "Δy", default=1.0, nonzero=True, help=_("Pixel size along Y-axis")
+    )
 
     def update_from_obj(self, obj: ImageObj) -> None:
         """Update default values from image object's non-uniform coordinates.

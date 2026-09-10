@@ -1,0 +1,34 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Version 1.3"
+msgstr "Version 1.3"
+
+msgid "Sigima Version 1.3.0"
+msgstr "Sigima Version 1.3.0"
+
+msgid "✨ New features since version 1.2.0"
+msgstr "✨ Nouvelles fonctionnalités depuis la version 1.2.0"
+
+msgid "**Brightness and contrast adjustment**: A new ROI-aware image processing performs numerically stable clipped linear remapping from persistent minimum and maximum bounds, preserves the source dtype and non-finite values, and exposes portable histogram context for native and browser interfaces. Tiny floating-point ranges and finite IEEE-754 extremes are supported without coupling headless computation to histogram rendering. The low-level helpers support floating-point arrays and integers up to 32 bits; they explicitly reject `int64` and `uint64` instead of risking precision loss at integer endpoints."
+msgstr "**Ajustement de la luminosité et du contraste** : Un nouveau traitement d'image conscient de la ROI effectue un remappage linéaire tronqué numériquement stable à partir de limites minimales et maximales persistantes, préserve le type de données source et les valeurs non finies, et expose un contexte d'histogramme portable pour les interfaces natives et navigateur. Les plages de flottants minuscules et les extrêmes finis IEEE-754 sont pris en charge sans coupler le calcul sans tête au rendu de l'histogramme. Les helpers bas niveau prennent en charge les tableaux flottants et les entiers jusqu'à 32 bits ; ils rejettent explicitement `int64` et `uint64` au lieu de risquer une perte de précision aux extrémités des entiers."
+
+msgid "**Portable graphical annotations**: Signals and images may now carry versioned, renderer-independent points, shapes, text, cursors and axis ranges. Annotations survive Sigima file round trips and supported image transformations, and are displayed consistently by the PlotPy and Matplotlib visualization backends. Existing PlotPy annotations remain readable and can be migrated explicitly while unknown application data is preserved. This implements [Issue #53](https://github.com/DataLab-Platform/Sigima/issues/53)."
+msgstr "**Annotations graphiques portables** : Les signaux et les images peuvent désormais transporter des points, des formes, du texte, des curseurs et des plages d'axes versionnés et indépendants du moteur de rendu. Les annotations survivent aux allers-retours des fichiers Sigima et aux transformations d'images prises en charge, et sont affichées de manière cohérente par les backends de visualisation PlotPy et Matplotlib. Les annotations PlotPy existantes restent lisibles et peuvent être migrées explicitement tandis que les données d'application inconnues sont préservées. Cela implémente [Issue #53](https://github.com/DataLab-Platform/Sigima/issues/53)."
+
+msgid "**Interactive Plotly visualization**: Signals and images can now be inspected in a browser with zoom, pan and hover through the optional Plotly backend. Sigima also exposes dependency-free Plotly JSON builders for applications and notebooks, including portable annotation, ROI and geometry-result overlays."
+msgstr "**Visualisation interactive Plotly** : Les signaux et les images peuvent désormais être inspectés dans un navigateur avec zoom, panoramique et survol grâce au backend Plotly optionnel. Sigima expose également des constructeurs JSON Plotly sans dépendance pour les applications et les notebooks, y compris les superpositions d'annotations portables, de ROI et de résultats géométriques."
+
+msgid "**Parameter validation**: Numeric creation and processing parameters now expose precise unconditional bounds, while mode-dependent and source-dependent constraints are checked before computation. Signed coordinate and grid conventions, as well as point-like or descending signal domains, remain supported."
+msgstr "**Validation des paramètres** : Les paramètres de création et de traitement numériques exposent désormais des limites inconditionnelles précises, tandis que les contraintes dépendantes du mode et de la source sont vérifiées avant le calcul. Les conventions de coordonnées et de grille signées, ainsi que les domaines de signaux ponctuels ou décroissants, restent prises en charge."

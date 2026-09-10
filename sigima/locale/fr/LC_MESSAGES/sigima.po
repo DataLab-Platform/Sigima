@@ -317,17 +317,17 @@ msgstr "Image sans titre"
 msgid "Title"
 msgstr "Titre"
 
-msgid "Image height: number of rows"
-msgstr "Hauteur de l'image : nombre de lignes"
-
 msgid "Height"
 msgstr "Hauteur"
 
-msgid "Image width: number of columns"
-msgstr "Largeur de l'image : nombre de colonnes"
+msgid "Image height: number of rows"
+msgstr "Hauteur de l'image : nombre de lignes"
 
 msgid "Width"
 msgstr "Largeur"
+
+msgid "Image width: number of columns"
+msgstr "Largeur de l'image : nombre de colonnes"
 
 msgid "Type"
 msgstr "Type"
@@ -374,17 +374,17 @@ msgstr "Décalage X"
 msgid "Y offset"
 msgstr "Décalage Y"
 
-msgid "Value for dark squares"
-msgstr "Valeur des carrés foncés"
-
 msgid "Minimum value"
 msgstr "Minimum"
 
-msgid "Value for light squares"
-msgstr "Valeur des carrés clairs"
+msgid "Value for dark squares"
+msgstr "Valeur des carrés foncés"
 
 msgid "Maximum value"
 msgstr "Maximum"
+
+msgid "Value for light squares"
+msgstr "Valeur des carrés clairs"
 
 msgid "Amplitude and offset"
 msgstr "Amplitude et décalage"
@@ -843,6 +843,9 @@ msgstr "- Infini"
 msgid "Replace special values (image)"
 msgstr "Remplacer les valeurs spéciales (image)"
 
+msgid "rows"
+msgstr "lignes"
+
 msgid "columns"
 msgstr "colonnes"
 
@@ -1072,6 +1075,15 @@ msgstr "Interprète les seuils bas et haut en tant que quantiles des niveaux des
 
 msgid "Value to fill past edges of input if mode is constant."
 msgstr "Valeur de remplissage si le mode est constant."
+
+msgid "Brightness and contrast"
+msgstr "Luminosité et contraste"
+
+msgid "Minimum"
+msgstr "Minimum"
+
+msgid "Adjust the intensity window using the histogram."
+msgstr "Ajuster la fenêtre d'intensité à l'aide de l'histogramme."
 
 msgid "Gamma"
 msgstr "Gamma"
@@ -1436,9 +1448,6 @@ msgstr "Manuel"
 msgid "Mean"
 msgstr "Moyenne"
 
-msgid "Minimum"
-msgstr "Minimum"
-
 msgid "Threshold method"
 msgstr "Méthode de seuillage"
 
@@ -1712,3 +1721,4 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
+

@@ -168,13 +168,6 @@ def butterworth(src: ImageObj, p: ButterworthParam) -> ImageObj:
 class GaussianFreqFilterParam(GaussianParam):
     """Parameters for Gaussian filter applied in the frequency domain."""
 
-    sigma = gds.FloatItem(
-        "σ",
-        default=1.0,
-        unit="pixel⁻¹",
-        min=0.0,
-        help=_("Standard deviation of the Gaussian filter"),
-    )
     f0 = gds.FloatItem(
         _("Center frequency"),
         default=1.0,
@@ -187,6 +180,7 @@ class GaussianFreqFilterParam(GaussianParam):
         default=0.5,
         unit="pixels⁻¹",
         min=0.0,
+        nonzero=True,
         help=_("Standard deviation of the Gaussian filter"),
     )
     ifft_result_type = gds.ChoiceItem(

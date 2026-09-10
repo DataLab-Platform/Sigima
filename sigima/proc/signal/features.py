@@ -49,7 +49,7 @@ from sigima.tools.signal import dynamic, features, peakdetection, pulse
 class PeakDetectionParam(gds.DataSet, title=_("Peak detection")):
     """Peak detection parameters"""
 
-    threshold = gds.FloatItem(_("Threshold"), default=0.1, min=0.0)
+    threshold = gds.FloatItem(_("Threshold"), default=0.1, min=0.0, max=100.0)
     min_dist = gds.IntItem(_("Minimum distance"), default=1, min=1)
 
 
@@ -273,6 +273,12 @@ class FWHMParam(
         help=_("Upper X boundary (empty for no limit, i.e. end of the signal)"),
     ).set_prop("display", col=1)
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate optional measurement boundaries."""
+        del context
+        if self.xmin is not None and self.xmax is not None and self.xmin >= self.xmax:
+            raise ValueError("xmin must be strictly less than xmax")
+
 
 @computation_function()
 def fwhm(obj: SignalObj, param: FWHMParam) -> GeometryResult | None:
@@ -452,7 +458,9 @@ def bandwidth_3db(obj: SignalObj) -> GeometryResult | None:
 class DynamicParam(gds.DataSet, title=_("Dynamic parameters")):
     """Parameters for dynamic range computation (ENOB, SNR, SINAD, THD, SFDR)"""
 
-    full_scale = gds.FloatItem(_("Full scale"), default=0.16, min=0.0, unit="V")
+    full_scale = gds.FloatItem(
+        _("Full scale"), default=0.16, min=0.0, nonzero=True, unit="V"
+    )
     unit = gds.ChoiceItem(
         _("Unit"),
         [(PowerUnit.DBC, "dBc"), (PowerUnit.DBFS, "dBFS")],

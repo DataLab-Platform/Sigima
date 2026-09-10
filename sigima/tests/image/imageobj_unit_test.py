@@ -402,6 +402,38 @@ def test_create_image_from_param() -> None:
     execenv.print(f"{test_create_image_from_param.__doc__}: OK")
 
 
+def test_image_creation_parameter_validation() -> None:
+    """Image generators enforce only their required parameter relations."""
+    constant = sigima.objects.create_image_from_param(
+        sigima.objects.UniformDistribution2DParam.create(
+            height=2, width=2, vmin=3.0, vmax=3.0
+        )
+    )
+    np.testing.assert_array_equal(constant.data, np.full((2, 2), 3.0))
+
+    with pytest.raises(ValueError, match="vmin must be less"):
+        sigima.objects.create_image_from_param(
+            sigima.objects.UniformDistribution2DParam.create(
+                height=2, width=2, vmin=2.0, vmax=1.0
+            )
+        )
+
+    equal_radii = SiemensStar2DParam.create(
+        height=2, width=2, inner_radius=1.0, outer_radius=1.0
+    )
+    assert sigima.objects.create_image_from_param(equal_radii).data.shape == (2, 2)
+
+    with pytest.raises(ValueError, match="inner_radius must be less"):
+        sigima.objects.create_image_from_param(
+            SiemensStar2DParam.create(
+                height=2, width=2, inner_radius=2.0, outer_radius=1.0
+            )
+        )
+
+    with pytest.raises(ValueError, match="Zero is not"):
+        Gauss2DParam.create(sigma=0.0)
+
+
 def test_image_copy() -> None:
     """Test copying image objects with uniform and non-uniform coordinates"""
     execenv.print(f"{test_image_copy.__doc__}:")

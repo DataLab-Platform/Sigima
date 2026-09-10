@@ -27,6 +27,7 @@ from sigima.objects.annotations import (
     annotation_to_dict,
     is_graphical_annotation_dict,
 )
+from sigima.validation import validate_dataset
 
 if sys.version_info >= (3, 11):
     # Use Self from typing module in Python 3.11+
@@ -122,6 +123,12 @@ class BaseRandomParam(BaseProcParam):
 
 class UniformDistributionParam(BaseRandomParam):
     """Uniform-distribution signal/image parameters."""
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate uniform-distribution bounds."""
+        validate_dataset(super(), *context)
+        if self.vmin > self.vmax:
+            raise ValueError("vmin must be less than or equal to vmax")
 
     def apply_integer_range(self, vmin, vmax):
         """Do something in case of integer min-max range."""
