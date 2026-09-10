@@ -722,9 +722,7 @@ class SiemensStar2DParam(
 
     def validate_parameters(self, *context: object) -> None:
         """Validate radial limits."""
-        parent_validator = getattr(super(), "validate_parameters", None)
-        if callable(parent_validator):
-            parent_validator(*context)
+        validate_dataset(super(), *context)
         if self.inner_radius > self.outer_radius:
             raise ValueError("inner_radius must be less than or equal to outer_radius")
 

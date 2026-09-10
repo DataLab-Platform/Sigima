@@ -39,6 +39,7 @@ from sigima.objects import (
 )
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import compute_geometry_from_obj
+from sigima.validation import validate_dataset
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT
@@ -402,9 +403,7 @@ class BaseBlobParam(gds.DataSet):
 
     def validate_parameters(self, *context: object) -> None:
         """Validate the Gaussian scale interval."""
-        parent_validator = getattr(super(), "validate_parameters", None)
-        if callable(parent_validator):
-            parent_validator(*context)
+        validate_dataset(super(), *context)
         if self.min_sigma > self.max_sigma:
             raise ValueError("min_sigma must be less than or equal to max_sigma")
 

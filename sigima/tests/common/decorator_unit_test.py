@@ -9,6 +9,11 @@ This test checks:
   - The metadata is correctly set and can be introspected
 """
 
+# `@computation_function` rewrites the decorated signature at import time, making the
+# DataSet parameter optional. Pylint only sees the source signature, so it wrongly
+# reports a missing argument on the expanded-keyword calls exercised below.
+# pylint: disable=no-value-for-parameter
+
 from __future__ import annotations
 
 import guidata.dataset as gds
@@ -135,7 +140,6 @@ def test_signal_decorator_signature() -> None:
     check_array_result(f"{name} y", res_ds.y, orig.y + orig.x**2 * 3.0 + 4.0)
 
     # Call the function with keyword arguments
-    # pylint: disable=no-value-for-parameter
     res_kw = dummy_signal_func(orig, a=3.0, b=4.0)
     name = "Signal[keyword arguments]"
     check_array_result(f"{name} x", res_kw.x, orig.x)

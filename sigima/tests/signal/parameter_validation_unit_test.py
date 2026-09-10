@@ -2,6 +2,11 @@
 
 """Unit tests for signal processing parameter validation."""
 
+# `@computation_function` rewrites the decorated signature at import time, making the
+# DataSet parameter optional. Pylint only sees the source signature, so it wrongly
+# reports a missing argument on the expanded-keyword calls exercised below.
+# pylint: disable=no-value-for-parameter
+
 from __future__ import annotations
 
 import numpy as np

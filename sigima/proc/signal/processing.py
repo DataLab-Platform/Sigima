@@ -48,6 +48,7 @@ from sigima.proc.base import (
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fourier, interpolation, scaling, windowing
 from sigima.tools.signal import replace_values as rv
+from sigima.validation import validate_dataset
 
 from .base import dst_1_to_1, is_uncertainty_data_available, restore_data_outside_roi
 
@@ -124,9 +125,7 @@ class Resampling1DParam(InterpolationParam):
 
     def validate_parameters(self, *context: object) -> None:
         """Validate the target domain and active sampling mode."""
-        parent_validator = getattr(super(), "validate_parameters", None)
-        if callable(parent_validator):
-            parent_validator(*context)
+        validate_dataset(super(), *context)
         if self.xmin is None or self.xmax is None:
             raise ValueError("xmin and xmax must be specified")
         if self.mode == "dx":

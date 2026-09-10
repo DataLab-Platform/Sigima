@@ -280,9 +280,7 @@ class NewSignalParam(gds.DataSet):
 
     def validate_parameters(self, *context: object) -> None:
         """Run validators provided by cooperative base classes."""
-        parent_validator = getattr(super(), "validate_parameters", None)
-        if callable(parent_validator):
-            parent_validator(*context)
+        validate_dataset(super(), *context)
 
     def generate_x_data(self) -> np.ndarray:
         """Generate x data based on current parameters."""
