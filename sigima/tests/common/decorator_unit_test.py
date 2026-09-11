@@ -47,6 +47,7 @@ class DummySignalParam(gds.DataSet):
 
     a = gds.FloatItem("X value", default=1.0)
     b = gds.FloatItem("Y value", default=5.0)
+    validation_context: tuple[object, ...]
     methods = (("linear", "Linear"), ("quadratic", "Quadratic"))
     method = gds.ChoiceItem("Method", choices=methods, default="linear")
 
@@ -83,6 +84,7 @@ def dummy_signal_func(src: SignalObj, p: DummySignalParam) -> SignalObj:
 @computation_function()
 def dummy_optional_signal_func(src: SignalObj, p: DummySignalParam) -> SignalObj | None:
     """Return a signal through a function with a PEP 604 return annotation."""
+    del p  # Unused parameter (delete to avoid lint warnings)
     return src
 
 

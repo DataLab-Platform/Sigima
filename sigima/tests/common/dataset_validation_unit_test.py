@@ -4,10 +4,19 @@
 
 from __future__ import annotations
 
+import importlib
+
 import guidata.dataset as gds
+import numpy as np
 import pytest
 from guidata.config import ValidationMode, temporary_validation_mode
 
+from sigima.objects import ImageObj
+from sigima.objects.image.roi import RectangularROI
+from sigima.proc.image import GridParam
+from sigima.proc.image.geometry import Resampling2DParam
+from sigima.proc.signal.processing import Resampling1DParam, WindowingParam
+from sigima.tests import guiutils
 from sigima.validation import validate_dataset
 
 
@@ -21,6 +30,7 @@ class RecordingParam(gds.DataSet):
     """DataSet recording relational validation context."""
 
     value = gds.FloatItem("Value", default=1.0)
+    validation_context: tuple[object, ...]
 
     def validate_parameters(self, *context: object) -> None:
         """Record validation context."""
@@ -63,9 +73,6 @@ def test_validate_dataset_propagates_value_error() -> None:
 
 def test_inactive_parameter_values_survive_json_round_trip() -> None:
     """Conditional values remain unchanged through DataSet JSON conversion."""
-    from sigima.proc.image.geometry import Resampling2DParam
-    from sigima.proc.signal.processing import Resampling1DParam, WindowingParam
-
     params_and_values = (
         (
             Resampling1DParam.create(mode="nbpts", xmin=0.0, xmax=1.0, nbpts=3, dx=0.0),
@@ -91,13 +98,9 @@ def test_inactive_parameter_values_survive_json_round_trip() -> None:
 @pytest.mark.parametrize("validation_mode", list(ValidationMode))
 def test_parameter_bounds_qt_forms(validation_mode: ValidationMode) -> None:
     """Signed ROI and grid values remain editable in real DataSet dialogs."""
-    import numpy as np
-    from guidata.dataset.qtwidgets import DataSetEditDialog
-
-    from sigima.objects import ImageObj
-    from sigima.objects.image.roi import RectangularROI
-    from sigima.proc.image import GridParam
-    from sigima.tests import guiutils
+    dataset_edit_dialog = getattr(
+        importlib.import_module("guidata.dataset.qtwidgets"), "DataSetEditDialog"
+    )
 
     image = ImageObj(title="Reversed axes")
     image.data = np.zeros((12, 12), dtype=float)
@@ -115,7 +118,7 @@ def test_parameter_bounds_qt_forms(validation_mode: ValidationMode) -> None:
         )
         with guiutils.lazy_qt_app_context(force=True) as app:
             assert app is not None
-            dialogs = (DataSetEditDialog(roi_param), DataSetEditDialog(grid_param))
+            dialogs = (dataset_edit_dialog(roi_param), dataset_edit_dialog(grid_param))
             assert all(dialog.edit_layout for dialog in dialogs)
             for dialog in dialogs:
                 assert all(layout.check_all_values() for layout in dialog.edit_layout)

@@ -430,16 +430,9 @@ class Resampling2DParam(gds.DataSet):
                 raise ValueError("dx and dy must be specified in pixel size mode")
             if self.dx == 0.0 or self.dy == 0.0:
                 raise ValueError("dx and dy must be nonzero in pixel size mode")
-            if (
-                x_extent > 0.0
-                and self.dx < 0.0
-                or x_extent < 0.0
-                and self.dx > 0.0
-                or y_extent > 0.0
-                and self.dy < 0.0
-                or y_extent < 0.0
-                and self.dy > 0.0
-            ):
+            x_sign_mismatch = (x_extent < 0.0) != (self.dx < 0.0)
+            y_sign_mismatch = (y_extent < 0.0) != (self.dy < 0.0)
+            if x_sign_mismatch or y_sign_mismatch:
                 raise ValueError("pixel sizes must have the same sign as their extents")
         elif self.width is None or self.height is None:
             raise ValueError("width and height must be specified in shape mode")
