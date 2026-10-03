@@ -13,15 +13,21 @@ and the default ``read`` / ``write`` ``NotImplementedError`` raisers.
 
 from __future__ import annotations
 
+import inspect
+
+import numpy as np
 import pytest
 
 from sigima.io.base import FormatBase, FormatInfo, IOAction
+from sigima.io.image.base import MultipleImagesFormatBase, SingleImageFormatBase
+from sigima.io.signal.base import SignalFormatBase
+from sigima.objects import create_image
 
 
 def _make_dummy_format_class(format_info):
     """Build a minimal ``FormatBase`` subclass with the given ``FORMAT_INFO``."""
 
-    class DummyFormat(FormatBase):  # pylint: disable=abstract-method
+    class DummyFormat(FormatBase):
         """Bare ``FormatBase`` subclass used solely to exercise base-class behaviour."""
 
         FORMAT_INFO = format_info
@@ -111,6 +117,57 @@ def test_format_base_get_filter_save_unwriteable_returns_none() -> None:
     cls = _make_dummy_format_class(info)
     fmt = cls()
     assert fmt.get_filter(IOAction.SAVE) is None
+
+
+@pytest.mark.parametrize("method", ["read", "write"])
+def test_format_base_unsupported_operation(method: str) -> None:
+    """Unsupported defaults preserve the NotImplementedError contract."""
+    info = FormatInfo(name="dummy", extensions="*.dummy", readable=True)
+    fmt = _make_dummy_format_class(info)()
+    args = ("dummy.file",) if method == "read" else ("dummy.file", None)
+    with pytest.raises(NotImplementedError, match="dummy is not supported"):
+        getattr(fmt, method)(*args)
+
+
+def test_signal_optional_hooks() -> None:
+    """Signal formats need not override hooks when supplying their own reader."""
+
+    class CustomReadFormatBase(SignalFormatBase):
+        """Read-only format bypassing the default XY reader."""
+
+        FORMAT_INFO = FormatInfo(name="dummy", extensions="*.dummy", readable=True)
+
+        def read(self, filename, worker=None):
+            return []
+
+    fmt = CustomReadFormatBase()
+    assert not fmt.read("dummy.file")
+    for method, args in (
+        (fmt.read_xydata, ("dummy.file",)),
+        (fmt.write, ("dummy.file", None)),
+    ):
+        with pytest.raises(NotImplementedError, match="dummy is not supported"):
+            method(*args)
+
+
+def test_image_optional_writer() -> None:
+    """Read-only image formats remain concrete without a writer."""
+
+    class ReadOnlyFormatBase(SingleImageFormatBase):
+        """Image reader with no write implementation."""
+
+        FORMAT_INFO = FormatInfo(name="dummy", extensions="*.dummy", readable=True)
+
+        @staticmethod
+        def read_data(filename):
+            return np.zeros((2, 2))
+
+    fmt = ReadOnlyFormatBase()
+    assert fmt.read("dummy.file")[0].data.shape == (2, 2)
+    with pytest.raises(NotImplementedError, match="dummy.file is not supported"):
+        fmt.write("dummy.file", create_image("dummy", np.zeros((2, 2))))
+    assert inspect.isabstract(MultipleImagesFormatBase)
+    assert "read_data" in MultipleImagesFormatBase.__abstractmethods__
 
 
 if __name__ == "__main__":

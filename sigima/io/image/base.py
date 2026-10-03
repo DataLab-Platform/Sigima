@@ -13,7 +13,7 @@ from typing import Sequence
 import numpy as np
 
 from sigima.config import _
-from sigima.io.base import BaseIORegistry, FormatBase
+from sigima.io.base import BaseIORegistry, FormatBase, UnsupportedFormatOperationError
 from sigima.objects.image import ImageObj, create_image
 from sigima.worker import CallbackWorkerProtocol
 
@@ -138,10 +138,10 @@ class SingleImageFormatBase(ImageFormatBase):
             filename: File name
             data: Image array data
         """
-        raise NotImplementedError(f"Writing to {filename} is not supported")
+        raise UnsupportedFormatOperationError(f"Writing to {filename} is not supported")
 
 
-class MultipleImagesFormatBase(SingleImageFormatBase):
+class MultipleImagesFormatBase(SingleImageFormatBase, abc.ABC):
     """Base image format object for multiple images (e.g., SIF or SPE).
 
     Works with read function that returns a NumPy array of 3 dimensions, where

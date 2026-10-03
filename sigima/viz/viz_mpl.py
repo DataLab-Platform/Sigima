@@ -204,11 +204,11 @@ def view_curves(
             if show_roi and obj.roi:
                 x_arr = np.asarray(xdata, dtype=float)
                 y_arr = np.asarray(ydata, dtype=float)
-                if x_arr.size >= 2 and y_arr.size == x_arr.size:
+                if 2 <= x_arr.size == y_arr.size:
                     finite = np.isfinite(x_arr) & np.isfinite(y_arr)
                     x_arr = x_arr[finite]
                     y_arr = y_arr[finite]
-                have_curve = x_arr.size >= 2 and y_arr.size == x_arr.size
+                have_curve = 2 <= x_arr.size == y_arr.size
                 if have_curve:
                     order = np.argsort(x_arr)
                     x_arr = x_arr[order]

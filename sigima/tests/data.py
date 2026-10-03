@@ -667,9 +667,8 @@ def create_ring_data(
     data = np.zeros((image_size, image_size), dtype=np.uint16)
     for x in range(data.shape[0]):
         for y in range(data.shape[1]):
-            if (x - xc) ** 2 + (y - yc) ** 2 >= (radius - thickness) ** 2 and (
-                x - xc
-            ) ** 2 + (y - yc) ** 2 <= (radius + thickness) ** 2:
+            distsq = (x - xc) ** 2 + (y - yc) ** 2
+            if (radius - thickness) ** 2 <= distsq <= (radius + thickness) ** 2:
                 data[x, y] = intensity
     return data
 
