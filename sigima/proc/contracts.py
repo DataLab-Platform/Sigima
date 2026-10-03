@@ -10,9 +10,10 @@ pattern, typed input and output roles, the parameter class and the preconditions
 under which replay is qualified.
 
 Contracts are declared with :func:`sigima.proc.decorator.computation_function`
-(``operation_id``, ``contract_version``, ``aliases``) and collected by scanning
-``sigima.proc``. Declaring a contract does not qualify it for replay:
-qualification is a separate, test-backed decision listed in this module.
+(``operation_id``, ``contract_version``, ``aliases``) and collected from the
+public computation packages (``sigima.proc.signal`` and ``sigima.proc.image``).
+Declaring a contract does not qualify it for replay: qualification is a separate,
+test-backed decision listed in this module.
 
 Parameters cross application boundaries as plain JSON values
 (:func:`parameters_to_values`) and are rebuilt only into the contract's own
@@ -41,7 +42,6 @@ from guidata.dataset.datatypes import (
 
 from sigima.objects import ImageObj, SignalObj
 from sigima.proc.decorator import (
-    find_computation_functions,
     get_computation_metadata,
     is_computation_function,
 )
@@ -330,19 +330,39 @@ class ContractRegistry:
         return self._by_function.get(id(func))
 
 
+#: Packages whose exported computation functions are collected by default. Only
+#: public runtime packages are imported (``sigima.proc.validation``, for one,
+#: needs pytest, which is not available at runtime).
+COMPUTATION_PACKAGES = ("sigima.proc.signal", "sigima.proc.image")
+
+
+def _exported_computation_functions() -> list[Callable]:
+    """Return the computation functions exported by :data:`COMPUTATION_PACKAGES`."""
+    functions: list[Callable] = []
+    for package in COMPUTATION_PACKAGES:
+        module = importlib.import_module(package)
+        for name in getattr(module, "__all__", ()):
+            obj = getattr(module, name, None)
+            if (
+                inspect.isfunction(obj)
+                and is_computation_function(obj)
+                and all(obj is not f for f in functions)
+            ):
+                functions.append(obj)
+    return functions
+
+
 def build_contract_registry(
     functions: Iterable[Callable] | None = None,
 ) -> ContractRegistry:
     """Build a contract registry.
 
     Args:
-        functions: Functions to register. If None, scan ``sigima.proc``.
+        functions: Functions to register. If None, collect the computation
+         functions exported by :data:`COMPUTATION_PACKAGES`.
     """
     if functions is None:
-        functions = [
-            getattr(importlib.import_module(modname), name)
-            for modname, name, _doc in find_computation_functions()
-        ]
+        functions = _exported_computation_functions()
     return ContractRegistry(functions)
 
 

@@ -8,6 +8,7 @@ import inspect
 import json
 import math
 import pickle
+import sys
 
 import guidata.dataset as gds
 import numpy as np
@@ -82,6 +83,22 @@ def test_only_normalize_declares_an_operation_id() -> None:
         if get_computation_metadata(func).operation_id:
             declared.append(f"{func.__module__}.{func.__qualname__}")
     assert declared == ["sigima.proc.signal.processing.normalize"]
+
+
+def test_default_registry_needs_no_test_dependency(monkeypatch) -> None:
+    """The default registry imports only public runtime modules (no pytest)."""
+    declared = [
+        getattr(__import__(modname, fromlist=[name]), name)
+        for modname, name, _doc in find_computation_functions()
+    ]
+    declared = [f for f in declared if get_computation_metadata(f).operation_id]
+    monkeypatch.setitem(sys.modules, "_pytest", None)
+    monkeypatch.setitem(sys.modules, "_pytest.mark", None)
+    monkeypatch.delitem(sys.modules, "sigima.proc.validation", raising=False)
+    registry = contracts.build_contract_registry()
+    assert "sigima.proc.validation" not in sys.modules
+    assert declared
+    assert all(registry.for_function(func) is not None for func in declared)
 
 
 def test_normalize_contract() -> None:
