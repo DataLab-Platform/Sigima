@@ -188,6 +188,25 @@ def test_signal_normalize() -> None:
         check_scalar_result(f"{title}|min", np.nanmin(dst.data), exp_min)
         check_scalar_result(f"{title}|max", np.nanmax(dst.data), exp_max)
 
+    # Exact analytical oracles (literals, never derived from Sigima)
+    x = np.array([0.0, 0.25, 0.5, 0.75], dtype=np.float64)
+    y = np.array([-2.0, 0.0, 1.0, 4.0], dtype=np.float64)
+    src = sigima.objects.create_signal("F0", x, y, units=("s", ""))
+    src_xydata = src.xydata.copy()
+    oracles = {
+        sigima.enums.NormalizationMethod.MAXIMUM: [-0.5, 0.0, 0.25, 1.0],
+        sigima.enums.NormalizationMethod.AMPLITUDE: [0.0, 1 / 3, 0.5, 1.0],
+    }
+    for method, expected_y in oracles.items():
+        p = sigima.params.NormalizeParam.create(method=method)
+        dst = sigima.proc.signal.normalize(src, p)
+        assert dst.x.dtype == np.float64 and dst.y.dtype == np.float64
+        assert dst.x.shape == x.shape and dst.y.shape == x.shape
+        assert np.array_equal(dst.x, x)
+        assert np.array_equal(dst.y, np.array(expected_y, dtype=np.float64))
+        assert (dst.xunit, dst.yunit) == ("s", "")
+        assert np.array_equal(src.xydata, src_xydata)
+
 
 @pytest.mark.validation
 def test_signal_clip() -> None:
