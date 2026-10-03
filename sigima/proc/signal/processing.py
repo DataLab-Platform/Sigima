@@ -245,7 +245,7 @@ def deconvolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.normalize", contract_version=1)
 def normalize(src: SignalObj, p: NormalizeParam) -> SignalObj:
     """Normalize data with :py:func:`sigima.tools.signal.level.normalize`
 

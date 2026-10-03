@@ -77,3 +77,28 @@ guidelines:
 - Avoid using ``__getattr__`` and ``__setattr__`` methods. They are often used
   to implement lazy initialization, but this can be done in a more explicit
   way.
+
+Operation contracts
+-------------------
+
+Some computation functions declare an operation contract with
+``@computation_function(operation_id=..., contract_version=...)`` (see
+:mod:`sigima.proc.contracts`). Applications record these identifiers in
+workspace provenance and use them to replay a computation later, possibly with
+another Sigima version. Follow these rules when you change such a function:
+
+- Never derive an operation identifier from a Python name. Keep the identifier
+  when you rename or move the function.
+
+- If the identifier itself must change, keep the previous one in ``aliases``.
+
+- Increase ``contract_version`` for any change of meaning: new, removed or
+  renamed parameters, a different default behavior, different outputs or a
+  different scientific result for the same inputs.
+
+- Never change a reference case to make a test pass. Update the reference
+  cases deliberately, and explain the scientific reason, when a numerical
+  correction changes the result.
+
+- Declaring a contract does not qualify it for replay. Qualification is listed
+  in :mod:`sigima.proc.contracts` and requires exact reference tests.

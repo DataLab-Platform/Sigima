@@ -191,7 +191,7 @@ def test_signal_normalize() -> None:
     # Exact analytical oracles (literals, never derived from Sigima)
     x = np.array([0.0, 0.25, 0.5, 0.75], dtype=np.float64)
     y = np.array([-2.0, 0.0, 1.0, 4.0], dtype=np.float64)
-    src = sigima.objects.create_signal("F0", x, y, units=("s", ""))
+    src = sigima.objects.create_signal("oracle", x, y, units=("s", ""))
     src_xydata = src.xydata.copy()
     oracles = {
         sigima.enums.NormalizationMethod.MAXIMUM: [-0.5, 0.0, 0.25, 1.0],

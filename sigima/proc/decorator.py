@@ -13,8 +13,10 @@ import importlib
 import inspect
 import os.path as osp
 import pkgutil
+import re
 import sys
 import typing
+from collections.abc import Sequence
 from typing import Callable, Literal, TypeVar
 
 import guidata.dataset as gds
@@ -45,6 +47,9 @@ __all__ = [
 # Marker attribute used by @computation_function and introspection
 COMPUTATION_METADATA_ATTR = "__computation_function_metadata"
 
+# Same character set as recipe identifiers, e.g. "sigima.signal.normalize"
+OPERATION_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
+
 P = ParamSpec("P")
 R = TypeVar("R")
 
@@ -56,10 +61,51 @@ class ComputationMetadata:
     Attributes:
         name: The name of the computation function.
         description: A description or docstring for the computation function.
+        operation_id: Stable operation identifier, or None if the function
+         declares no operation contract.
+        contract_version: Contract version (integer >= 1) when ``operation_id``
+         is set, None otherwise.
+        aliases: Earlier operation identifiers of the same operation.
     """
 
     name: str
     description: str
+    operation_id: str | None = None
+    contract_version: int | None = None
+    aliases: tuple[str, ...] = ()
+
+
+def _check_operation_identity(
+    operation_id: str | None,
+    contract_version: int | None,
+    aliases: Sequence[str],
+) -> tuple[str, ...]:
+    """Validate operation identity arguments and return aliases as a tuple.
+
+    Raises:
+        ValueError: If the identity arguments are inconsistent or malformed.
+    """
+    if isinstance(aliases, str):
+        raise ValueError("aliases must be a sequence of identifiers, not a string")
+    aliases = tuple(aliases)
+    if operation_id is None:
+        if contract_version is not None or aliases:
+            raise ValueError("contract_version and aliases require an operation_id")
+        return aliases
+    for identifier in (operation_id,) + aliases:
+        if not isinstance(identifier, str) or not OPERATION_ID_PATTERN.match(
+            identifier
+        ):
+            raise ValueError(f"Invalid operation identifier: {identifier!r}")
+    if (
+        not isinstance(contract_version, int)
+        or isinstance(contract_version, bool)
+        or contract_version < 1
+    ):
+        raise ValueError("operation_id requires an integer contract_version >= 1")
+    if operation_id in aliases or len(set(aliases)) != len(aliases):
+        raise ValueError("aliases must be unique and differ from operation_id")
+    return aliases
 
 
 def _make_computation_wrapper(
@@ -163,6 +209,9 @@ def computation_function(
     *,
     name: typing.Optional[str] = None,
     description: typing.Optional[str] = None,
+    operation_id: typing.Optional[str] = None,
+    contract_version: typing.Optional[int] = None,
+    aliases: Sequence[str] = (),
 ) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """
     Decorator to mark a function as a Sigima computation function.
@@ -182,10 +231,18 @@ def computation_function(
     Args:
         name: Optional custom name for metadata.
         description: Optional custom description or docstring.
+        operation_id: Optional stable operation identifier (see
+         :mod:`sigima.proc.contracts`). Never derived from the Python name.
+        contract_version: Contract version, required with ``operation_id``.
+        aliases: Earlier operation identifiers, only with ``operation_id``.
 
     Returns:
         The decorated, enhanced computation function.
+
+    Raises:
+        ValueError: If the operation identity arguments are invalid.
     """
+    aliases = _check_operation_identity(operation_id, contract_version, aliases)
 
     def decorator(f: Callable[P, R]) -> Callable[P, R]:
         # Gather signature and typing information
@@ -280,6 +337,9 @@ def computation_function(
             metadata = ComputationMetadata(
                 name=name or f.__name__,
                 description=description or f.__doc__,
+                operation_id=operation_id,
+                contract_version=contract_version,
+                aliases=aliases,
             )
             return _make_computation_wrapper(
                 f, ds_cls, ds_param, params, ds_items, new_sig, signature_info, metadata
@@ -303,6 +363,9 @@ def computation_function(
         metadata = ComputationMetadata(
             name=name or f.__name__,
             description=description or f.__doc__,
+            operation_id=operation_id,
+            contract_version=contract_version,
+            aliases=aliases,
         )
         setattr(wrapper, COMPUTATION_METADATA_ATTR, metadata)
         return wrapper
@@ -342,17 +405,14 @@ def get_computation_metadata(function: Callable) -> ComputationMetadata:
     return metadata
 
 
-def find_computation_functions() -> list[tuple[str, Callable]]:
+def find_computation_functions() -> list[tuple[str, str, str | None]]:
     """Find all computation functions in the `sigima.proc` package.
 
     This function uses introspection to locate all functions decorated with
     `@computation_function` in the `sigima.proc` package and its subpackages.
 
-    Args:
-        module: Optional module to search in. If None, the current module is used.
-
     Returns:
-        A list of tuples, each containing the function name and the function object.
+        A list of ``(module name, function name, docstring)`` tuples.
     """
     functions = []
     objs = []
