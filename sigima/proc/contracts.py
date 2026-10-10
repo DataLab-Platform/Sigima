@@ -227,13 +227,13 @@ def _infer_signal_1_to_1(func: Callable) -> type[gds.DataSet] | None:
             and not issubclass(paramclass, (SignalObj, ImageObj))
         ):
             paramclass = None
-    if (
-        not params
-        or not _is_signal_annotation(first)
-        or not _is_signal_annotation(ret)
-        or (len(params) == 2 and paramclass is None)
-        or len(params) > 2
-    ):
+    supported = (
+        len(params) in (1, 2)
+        and _is_signal_annotation(first)
+        and _is_signal_annotation(ret)
+        and (len(params) == 1 or paramclass is not None)
+    )
+    if not supported:
         raise ContractDeclarationError(
             f"{func.__module__}.{func.__qualname__}: only signal 1-to-1 "
             "operations can declare a contract in this version"

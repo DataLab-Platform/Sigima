@@ -2,6 +2,9 @@
 
 """Unit tests for operation contracts and parameter encoding."""
 
+# Test-only operations declare signatures they do not use.
+# pylint: disable=unused-argument
+
 from __future__ import annotations
 
 import inspect
@@ -124,6 +127,7 @@ def test_signature_calls_and_pickling_unchanged() -> None:
     assert list(inspect.signature(func).parameters) == ["src", "p", "method"]
     src = _f0()
     by_param = func(src, sigima.params.NormalizeParam.create(method="amplitude"))
+    # pylint: disable-next=no-value-for-parameter
     by_kwarg = func(src, method="amplitude")
     assert np.array_equal(by_param.y, by_kwarg.y)
     assert pickle.loads(pickle.dumps(func)) is func
@@ -188,7 +192,7 @@ def test_parameters_to_values() -> None:
     """Enums by value, choices by key, transient excluded, non-finite encoded."""
     param = sigima.params.NormalizeParam.create(method="maximum")
     assert contracts.parameters_to_values(param) == {"method": "maximum"}
-    assert contracts.parameters_to_values(None) == {}
+    assert not contracts.parameters_to_values(None)
     dummy_param = DummyParam.create(method=NormalizationMethod.RMS, factor=math.inf)
     assert contracts.parameters_to_values(dummy_param) == {
         "factor": {"$float": "Infinity"},
