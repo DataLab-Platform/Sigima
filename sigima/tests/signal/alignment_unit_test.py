@@ -95,15 +95,37 @@ def test_alignment_refusals(source, operand, code) -> None:
     assert info.value.code == code
 
 
-def test_units_and_uncertainties_are_never_converted() -> None:
-    """Different units are refused; uncertainties are never interpolated."""
+@pytest.mark.parametrize(
+    "source_units, operand_units, accepted",
+    [
+        (("s", "V"), ("s", "V"), True),
+        (("", ""), ("", ""), True),
+        (("s", ""), ("s", ""), True),
+        (("", "V"), ("", "V"), True),
+        (("", "V"), ("s", "V"), False),
+        (("s", "V"), ("", "V"), False),
+        (("s", ""), ("s", "V"), False),
+        (("s", "V"), ("s", ""), False),
+        (("s", "V"), ("ms", "V"), False),
+        (("s", "V"), ("s", "mV"), False),
+    ],
+)
+def test_units_are_compared_exactly(source_units, operand_units, accepted) -> None:
+    """X and Y units must be identical; an empty unit only matches an empty one."""
+    source = _signal([0, 1, 2], [0, 1, 2], units=source_units)
+    for operand_x in ([0, 1, 2], [0, 0.5, 2]):
+        operand = _signal(operand_x, [0, 1, 2], units=operand_units)
+        if accepted:
+            align_operand(source, operand)
+        else:
+            with pytest.raises(XAlignmentError) as info:
+                align_operand(source, operand)
+            assert info.value.code == "incompatible_units"
+
+
+def test_uncertainties_are_never_interpolated() -> None:
+    """An operand with uncertainty rows is refused when it must be interpolated."""
     source = _signal([0, 1, 2], [0, 1, 2])
-    with pytest.raises(XAlignmentError) as info:
-        align_operand(source, _signal([0, 1, 2], [0, 1, 2], units=("ms", "V")))
-    assert info.value.code == "incompatible_units"
-    with pytest.raises(XAlignmentError) as info:
-        align_operand(source, _signal([0, 1, 2], [0, 1, 2], units=("s", "mV")))
-    assert info.value.code == "incompatible_units"
     operand = _signal([0, 0.5, 2], [0, 1, 2])
     operand.dy = np.full(3, 0.1)
     with pytest.raises(XAlignmentError) as info:

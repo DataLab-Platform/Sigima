@@ -12,7 +12,10 @@ computed on the grid of the ``source`` signal.
   grids must be finite and strictly increasing, the operand grid must cover the
   source grid (no extrapolation, no constant extension at the ends) and the
   operand must have no uncertainty rows.
-- X units must be equal, and so must Y units: no conversion is ever applied.
+- Units are checked separately for X and Y, as exact strings: identical units
+  are accepted, including two empty units; an empty unit never matches a
+  non-empty one, and different units (e.g. ``V`` and ``mV``) are refused. No
+  conversion is ever applied.
 
 The inputs are never modified. Applications record the rule (identifier and
 version) with each execution; a replay accepts only the rules listed in
@@ -85,16 +88,14 @@ def align_operand(
     Raises:
         XAlignmentError: If the units differ or the grids cannot be aligned.
     """
-    if source.xunit != operand.xunit:
-        raise XAlignmentError(
-            "incompatible_units",
-            f"X units differ: {source.xunit!r} and {operand.xunit!r}",
-        )
-    if source.yunit != operand.yunit:
-        raise XAlignmentError(
-            "incompatible_units",
-            f"Y units differ: {source.yunit!r} and {operand.yunit!r}",
-        )
+    for axis in ("x", "y"):
+        src_unit = getattr(source, f"{axis}unit")
+        op_unit = getattr(operand, f"{axis}unit")
+        if src_unit != op_unit:
+            raise XAlignmentError(
+                "incompatible_units",
+                f"{axis.upper()} units differ: {src_unit!r} and {op_unit!r}",
+            )
     record = {"rule": SOURCE_GRID_LINEAR, "version": 1, "interpolated": False}
     xs, xo = np.asarray(source.x), np.asarray(operand.x)
     if xs.shape == xo.shape and np.array_equal(xs, xo):
