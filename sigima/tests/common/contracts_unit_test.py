@@ -64,8 +64,14 @@ def duplicate(src: SignalObj) -> SignalObj:
 
 
 @computation_function(operation_id="test.signal.pair", contract_version=1)
-def pair(src1: SignalObj, src2: SignalObj) -> SignalObj:
-    """Test-only 2-to-1 operation: not supported by contracts yet."""
+def pair(src1: SignalObj, src2: SignalObj, p: DummyParam) -> SignalObj:
+    """Test-only signal 2-to-1 operation."""
+    return src1.copy()
+
+
+@computation_function(operation_id="test.signal.triple", contract_version=1)
+def triple(src1: SignalObj, src2: SignalObj, src3: SignalObj) -> SignalObj:
+    """Test-only 3-to-1 operation: not supported by contracts."""
     return src1.copy()
 
 
@@ -78,14 +84,17 @@ def _f0() -> SignalObj:
     )
 
 
-def test_only_normalize_declares_an_operation_id() -> None:
-    """Only the signal normalization declares a contract."""
+def test_declared_operation_ids() -> None:
+    """Only the signal normalization and difference declare a contract."""
     declared = []
     for modname, name, _doc in find_computation_functions():
         func = getattr(__import__(modname, fromlist=[name]), name)
         if get_computation_metadata(func).operation_id:
             declared.append(f"{func.__module__}.{func.__qualname__}")
-    assert declared == ["sigima.proc.signal.processing.normalize"]
+    assert sorted(declared) == [
+        "sigima.proc.signal.arithmetic.difference",
+        "sigima.proc.signal.processing.normalize",
+    ]
 
 
 def test_default_registry_needs_no_test_dependency(monkeypatch) -> None:
@@ -119,6 +128,24 @@ def test_normalize_contract() -> None:
         contracts.get_operation_contract("sigima.signal.unknown", 1)
     with pytest.raises(contracts.IncompatibleContractError):
         contracts.get_operation_contract("sigima.signal.normalize", 2)
+    assert contract.x_alignment is None
+    assert contract.prepare_inputs([_f0()], {"x_alignment": None})[1] == {}
+
+
+def test_difference_contract() -> None:
+    """The difference contract is qualified, signal 2-to-1, with X alignment."""
+    contract = contracts.get_operation_contract("sigima.signal.difference", 1)
+    assert contract.function is sigima.proc.signal.difference
+    assert contract.pattern == "2_to_1" and contract.qualified
+    assert contract.inputs == (
+        contracts.Role("source", "signal"),
+        contracts.Role("operand", "signal"),
+    )
+    assert contract.outputs == (contracts.Role("result", "signal"),)
+    assert contract.paramclass is None
+    assert contract.x_alignment == "sigima.signal.x_alignment.source_grid_linear"
+    assert contracts.contract_for_function(sigima.proc.signal.difference) is contract
+    assert contracts.parameters_from_values(contract, {}) is None
 
 
 def test_signature_calls_and_pickling_unchanged() -> None:
@@ -171,7 +198,10 @@ def test_registry_aliases_and_errors() -> None:
     with pytest.raises(contracts.ContractDeclarationError):
         contracts.build_contract_registry([dummy, duplicate])
     with pytest.raises(contracts.ContractDeclarationError):
-        contracts.build_contract_registry([pair])
+        contracts.build_contract_registry([triple])
+    paired = contracts.build_contract_registry([pair]).get("test.signal.pair", 1)
+    assert paired.pattern == "2_to_1" and paired.paramclass is DummyParam
+    assert paired.x_alignment is None and not paired.qualified
 
 
 def test_preconditions() -> None:

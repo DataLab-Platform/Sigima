@@ -102,3 +102,8 @@ another Sigima version. Follow these rules when you change such a function:
 
 - Declaring a contract does not qualify it for replay. Qualification is listed
   in :mod:`sigima.proc.contracts` and requires exact reference tests.
+
+- Some two-input contracts align the operand on the source grid before the
+  call (see :mod:`sigima.proc.alignment`). Applications record the rule and its
+  version, and a replay refuses unknown rules. Never change a rule in place:
+  add a new version and keep the previous one supported.

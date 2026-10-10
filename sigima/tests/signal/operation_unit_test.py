@@ -146,6 +146,12 @@ def test_signal_difference() -> None:
     check_array_result("Signal difference", s3.y, s1.y - s2.y)
     expected_dy = np.sqrt(s1.dy**2 + s2.dy**2)
     check_array_result("Difference error propagation", s3.dy, expected_dy)
+    x = np.array([0.0, 1.0, 2.0, 3.0])
+    a = sigima.objects.create_signal("a", x, np.array([1.0, 4.0, 9.0, 16.0]))
+    b = sigima.objects.create_signal("b", x, np.array([1.0, 1.0, 2.0, 3.0]))
+    c = sigima.proc.signal.difference(a, b)
+    assert np.array_equal(c.x, x)
+    assert np.array_equal(c.y, [0.0, 3.0, 7.0, 13.0])
 
 
 @pytest.mark.validation

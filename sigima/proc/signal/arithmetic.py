@@ -379,7 +379,7 @@ def arithmetic(src1: SignalObj, src2: SignalObj, p: ArithmeticParam) -> SignalOb
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.difference", contract_version=1)
 def difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute the element-wise difference between two signals.
 

@@ -41,6 +41,12 @@ from guidata.dataset.datatypes import (
 )
 
 from sigima.objects import ImageObj, SignalObj
+from sigima.proc.alignment import (
+    SOURCE_GRID_LINEAR,
+    XAlignmentError,
+    align_operand,
+    check_alignment_record,
+)
 from sigima.proc.decorator import (
     get_computation_metadata,
     is_computation_function,
@@ -55,6 +61,7 @@ __all__ = [
     "ParameterEncodingError",
     "Role",
     "UnknownOperationError",
+    "XAlignmentError",
     "build_contract_registry",
     "contract_for_function",
     "get_operation_contract",
@@ -142,6 +149,16 @@ _QUALIFIED: dict[tuple[str, int], _Qualification] = {
         parameter_schema_version=1,
         preconditions=("signal", "real_dtype", "no_roi", "no_uncertainty"),
     ),
+    ("sigima.signal.difference", 1): _Qualification(
+        parameter_schema_version=1,
+        preconditions=("signal", "real_dtype", "no_roi", "no_uncertainty"),
+    ),
+}
+
+# X-alignment rule applied to the inputs of a contract, before the function runs,
+# in ordinary processing and in replay alike.
+_X_ALIGNMENT: dict[tuple[str, int], str] = {
+    ("sigima.signal.difference", 1): SOURCE_GRID_LINEAR,
 }
 
 
@@ -161,6 +178,7 @@ class OperationContract:
         aliases: Earlier identifiers of the operation.
         qualified: True if replay of this contract is qualified.
         preconditions: Names of the checks that inputs must pass for replay.
+        x_alignment: X-alignment rule applied to the inputs, or None.
     """
 
     operation_id: str
@@ -174,6 +192,7 @@ class OperationContract:
     aliases: tuple[str, ...] = ()
     qualified: bool = False
     preconditions: tuple[str, ...] = ()
+    x_alignment: str | None = None
 
     def check_preconditions(self, inputs: Sequence[Any]) -> str | None:
         """Return the name of the first failing precondition, or None.
@@ -190,6 +209,35 @@ class OperationContract:
                 return name
         return None
 
+    def prepare_inputs(
+        self, inputs: Sequence[Any], context: dict[str, Any] | None = None
+    ) -> tuple[list[Any], dict[str, Any]]:
+        """Return the inputs to pass to the function and the execution context.
+
+        The original inputs are never modified. Ordinary processing calls this
+        without *context*; a replay passes the recorded context, whose rules must
+        all be supported.
+
+        Args:
+            inputs: Input objects, in role order.
+            context: Recorded execution context, for a replay.
+
+        Returns:
+            ``(inputs, context)``; *context* holds ``x_alignment`` when the
+            contract aligns its inputs.
+
+        Raises:
+            XAlignmentError: If a recorded rule is unknown or the inputs cannot
+             be aligned.
+        """
+        if self.x_alignment is None:
+            return list(inputs), {}
+        if context is not None:
+            check_alignment_record(context.get("x_alignment"))
+        source, operand = inputs
+        aligned, record = align_operand(source, operand)
+        return [source, aligned], {"x_alignment": record}
+
 
 def _annotation_name(func: Callable, annotation: Any) -> Any:
     """Resolve a (possibly stringized) annotation against the function module."""
@@ -205,11 +253,14 @@ def _is_signal_annotation(annotation: Any) -> bool:
     return isinstance(annotation, type) and issubclass(annotation, SignalObj)
 
 
-def _infer_signal_1_to_1(func: Callable) -> type[gds.DataSet] | None:
-    """Return the parameter class of a signal 1-to-1 function.
+def _infer_signal_pattern(
+    func: Callable,
+) -> tuple[str, tuple[Role, ...], type[gds.DataSet] | None]:
+    """Return the pattern, input roles and parameter class of a signal function.
 
     Raises:
-        ContractDeclarationError: If the signature is not a signal 1-to-1 one.
+        ContractDeclarationError: If the signature is neither a signal 1-to-1 nor
+         a signal 2-to-1 one.
     """
     sig = inspect.signature(func)
     # Keyword-only parameters are the DataSet items expanded by the decorator.
@@ -217,40 +268,46 @@ def _infer_signal_1_to_1(func: Callable) -> type[gds.DataSet] | None:
         p for p in sig.parameters.values() if p.kind != inspect.Parameter.KEYWORD_ONLY
     ]
     ret = _annotation_name(func, sig.return_annotation)
-    first = _annotation_name(func, params[0].annotation) if params else None
-    paramclass = None
-    if len(params) == 2:
-        paramclass = _annotation_name(func, params[1].annotation)
-        if not (
-            isinstance(paramclass, type)
-            and issubclass(paramclass, gds.DataSet)
-            and not issubclass(paramclass, (SignalObj, ImageObj))
-        ):
-            paramclass = None
+    annotations = [_annotation_name(func, p.annotation) for p in params]
+    n_signals = 0
+    while n_signals < len(annotations) and _is_signal_annotation(
+        annotations[n_signals]
+    ):
+        n_signals += 1
+    rest = annotations[n_signals:]
+    paramclass = rest[0] if len(rest) == 1 else None
+    if not (
+        isinstance(paramclass, type)
+        and issubclass(paramclass, gds.DataSet)
+        and not issubclass(paramclass, (SignalObj, ImageObj))
+    ):
+        paramclass = None
     supported = (
-        len(params) in (1, 2)
-        and _is_signal_annotation(first)
+        n_signals in (1, 2)
         and _is_signal_annotation(ret)
-        and (len(params) == 1 or paramclass is not None)
+        and (not rest or (len(rest) == 1 and paramclass is not None))
     )
     if not supported:
         raise ContractDeclarationError(
-            f"{func.__module__}.{func.__qualname__}: only signal 1-to-1 "
+            f"{func.__module__}.{func.__qualname__}: only signal 1-to-1 and 2-to-1 "
             "operations can declare a contract in this version"
         )
-    return paramclass
+    if n_signals == 1:
+        return "1_to_1", (Role("source", "signal"),), paramclass
+    roles = (Role("source", "signal"), Role("operand", "signal"))
+    return "2_to_1", roles, paramclass
 
 
 def _build_contract(func: Callable) -> OperationContract:
     metadata = get_computation_metadata(func)
-    paramclass = _infer_signal_1_to_1(func)
+    pattern, inputs, paramclass = _infer_signal_pattern(func)
     key = (metadata.operation_id, metadata.contract_version)
     qualification = _QUALIFIED.get(key)
     return OperationContract(
         operation_id=metadata.operation_id,
         contract_version=metadata.contract_version,
-        pattern="1_to_1",
-        inputs=(Role("source", "signal"),),
+        pattern=pattern,
+        inputs=inputs,
         outputs=(Role("result", "signal"),),
         paramclass=paramclass,
         parameter_schema_version=(
@@ -260,6 +317,7 @@ def _build_contract(func: Callable) -> OperationContract:
         aliases=metadata.aliases,
         qualified=qualification is not None,
         preconditions=qualification.preconditions if qualification else (),
+        x_alignment=_X_ALIGNMENT.get(key),
     )
 
 

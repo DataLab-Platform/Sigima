@@ -108,3 +108,6 @@ msgstr "Ne modifiez jamais un cas de référence pour faire passer un test. Mett
 
 msgid "Declaring a contract does not qualify it for replay. Qualification is listed in :mod:`sigima.proc.contracts` and requires exact reference tests."
 msgstr "Déclarer un contrat ne le qualifie pas pour le rejeu. La qualification est listée dans :mod:`sigima.proc.contracts` et exige des tests de référence exacts."
+
+msgid "Some two-input contracts align the operand on the source grid before the call (see :mod:`sigima.proc.alignment`). Applications record the rule and its version, and a replay refuses unknown rules. Never change a rule in place: add a new version and keep the previous one supported."
+msgstr "Certains contrats à deux entrées alignent l'opérande sur la grille de la source avant l'appel (voir :mod:`sigima.proc.alignment`). Les applications enregistrent la règle et sa version, et un rejeu refuse les règles inconnues. Ne modifiez jamais une règle sur place : ajoutez une nouvelle version et conservez la précédente."
