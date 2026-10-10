@@ -87,3 +87,24 @@ msgstr "Évitez d'utiliser des mixins (héritage multiple) si possible. Il est s
 
 msgid "Avoid using ``__getattr__`` and ``__setattr__`` methods. They are often used to implement lazy initialization, but this can be done in a more explicit way."
 msgstr "Évitez d'utiliser les méthodes ``__getattr__`` et ``__setattr__``. Ils sont souvent utilisés pour implémenter une initialisation paresseuse, mais cela peut être fait de manière plus explicite."
+
+msgid "Operation contracts"
+msgstr "Contrats d'opération"
+
+msgid "Some computation functions declare an operation contract with ``@computation_function(operation_id=..., contract_version=...)`` (see :mod:`sigima.proc.contracts`). Applications record these identifiers in workspace provenance and use them to replay a computation later, possibly with another Sigima version. Follow these rules when you change such a function:"
+msgstr "Certaines fonctions de calcul déclarent un contrat d'opération avec ``@computation_function(operation_id=..., contract_version=...)`` (voir :mod:`sigima.proc.contracts`). Les applications enregistrent ces identifiants dans la provenance de l'espace de travail et s'en servent pour rejouer un calcul plus tard, éventuellement avec une autre version de Sigima. Respectez ces règles lorsque vous modifiez une telle fonction :"
+
+msgid "Never derive an operation identifier from a Python name. Keep the identifier when you rename or move the function."
+msgstr "Ne déduisez jamais un identifiant d'opération d'un nom Python. Conservez l'identifiant lorsque vous renommez ou déplacez la fonction."
+
+msgid "If the identifier itself must change, keep the previous one in ``aliases``."
+msgstr "Si l'identifiant lui-même doit changer, conservez le précédent dans ``aliases``."
+
+msgid "Increase ``contract_version`` for any change of meaning: new, removed or renamed parameters, a different default behavior, different outputs or a different scientific result for the same inputs."
+msgstr "Augmentez ``contract_version`` pour tout changement de sens : paramètres ajoutés, supprimés ou renommés, comportement par défaut différent, sorties différentes ou résultat scientifique différent pour les mêmes entrées."
+
+msgid "Never change a reference case to make a test pass. Update the reference cases deliberately, and explain the scientific reason, when a numerical correction changes the result."
+msgstr "Ne modifiez jamais un cas de référence pour faire passer un test. Mettez à jour les cas de référence délibérément, en expliquant la raison scientifique, lorsqu'une correction numérique change le résultat."
+
+msgid "Declaring a contract does not qualify it for replay. Qualification is listed in :mod:`sigima.proc.contracts` and requires exact reference tests."
+msgstr "Déclarer un contrat ne le qualifie pas pour le rejeu. La qualification est listée dans :mod:`sigima.proc.contracts` et exige des tests de référence exacts."
