@@ -51,7 +51,13 @@ jobs:
         /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
         python -m pip install --upgrade pip
         python -m pip install ruff
-        if [ "${{ github.ref_name }}" = "develop" ]; then
+        # PRs select by target branch; pushes and manual runs by their own branch.
+        case "${{ github.base_ref || github.ref_name }}" in
+          develop|feature/*|fix/*) DEPENDENCIES=development ;;
+          release) DEPENDENCIES=release ;;
+          *) DEPENDENCIES=published ;;
+        esac
+        if [ "$DEPENDENCIES" = "development" ]; then
            pip uninstall -y guidata
            cd ..
            git clone --depth 1 --branch develop https://github.com/PlotPyStack/guidata.git
@@ -64,7 +70,7 @@ jobs:
            pip install -r deps.txt
            # Install Sigima and its test dependencies, keeping local guidata
            pip install ".[test]"
-        elif [ "${{ github.ref_name }}" = "release" ]; then
+        elif [ "$DEPENDENCIES" = "release" ]; then
            pip uninstall -y guidata
            cd ..
            # Try cloning guidata from release, fallback to main or master
