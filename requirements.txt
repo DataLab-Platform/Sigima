@@ -5,7 +5,7 @@ PyWavelets >= 1.2, < 2.0
 SciPy >= 1.10.1, < 1.17
 babel
 build
-guidata >= 3.13
+guidata >= 3.16.0
 makefun >= 1.13.1
 matplotlib
 myst-nb
