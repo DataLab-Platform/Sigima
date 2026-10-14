@@ -82,7 +82,7 @@ def test_describe_qualified_call() -> None:
     }
     assert description["pattern"] == "1_to_1" and description["roles"] == ["source"]
     assert description["parameters"] == {"method": "maximum"}
-    assert not description["limits"] and description["options"] == {}
+    assert not description["limits"] and not description["options"]
     assert description["implementation"] == {
         "package": "sigima",
         "version": sigima.__version__,
