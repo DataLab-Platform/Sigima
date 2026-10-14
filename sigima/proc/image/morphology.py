@@ -26,6 +26,7 @@ from skimage import morphology
 
 from sigima.config import _
 from sigima.objects.image import ImageObj
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import dst_1_to_1, restore_data_outside_roi
 
@@ -52,7 +53,11 @@ class MorphologyParam(gds.DataSet):
     )
 
 
-@computation_function(operation_id="sigima.image.white_tophat", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.white_tophat",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def white_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute White Top-Hat with :py:func:`skimage.morphology.white_tophat`
 
@@ -69,7 +74,11 @@ def white_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.black_tophat", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.black_tophat",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def black_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute Black Top-Hat with :py:func:`skimage.morphology.black_tophat`
 
@@ -86,7 +95,11 @@ def black_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.erosion", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.erosion",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def erosion(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute Erosion with :py:func:`skimage.morphology.erosion`
 
@@ -103,7 +116,11 @@ def erosion(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.dilation", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.dilation",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def dilation(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute Dilation with :py:func:`skimage.morphology.dilation`
 
@@ -120,7 +137,11 @@ def dilation(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.opening", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.opening",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def opening(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute morphological opening with :py:func:`skimage.morphology.opening`
 
@@ -137,7 +158,11 @@ def opening(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.closing", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.closing",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def closing(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute morphological closing with :py:func:`skimage.morphology.closing`
 

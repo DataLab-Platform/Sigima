@@ -82,7 +82,7 @@ def test_describe_qualified_call() -> None:
     }
     assert description["pattern"] == "1_to_1" and description["roles"] == ["source"]
     assert description["parameters"] == {"method": "maximum"}
-    assert description["limits"] == []
+    assert not description["limits"]
     assert description["implementation"] == {
         "package": "sigima",
         "version": sigima.__version__,
@@ -94,17 +94,26 @@ def test_describe_qualified_call() -> None:
 def test_identity_is_kept_without_qualification() -> None:
     """Unqualified contracts and mismatched inputs keep the operation identity."""
     src = _signal([0, 1, 2], [1.0, 2.0, 4.0])
-    param = sigima.params.ConstantParam.create(value=2.0)
-    description = describe_call(sigima.proc.signal.addition_constant, [src], param)
-    assert description["operation"]["id"] == "sigima.signal.addition_constant"
+    description = describe_call(sigima.proc.signal.phase_spectrum, [src])
+    assert description["operation"] == {
+        "id": "sigima.signal.phase_spectrum",
+        "contract_version": 1,
+    }
     assert description["qualification"] == {
         "status": "not_qualified",
         "comparison": None,
     }
-    assert description["parameters"] == {"value": 2.0}
+    assert description["parameters"] is not None and not description["parameters"]
+    param = sigima.params.ConstantParam.create(value=2.0)
+    constant = describe_call(sigima.proc.signal.addition_constant, [src], param)
+    assert constant["qualification"]["comparison"] == {"rule": "exact"}
+    assert constant["parameters"] == {"value": 2.0}
     image = sigima.objects.create_image("i", np.zeros((2, 2)))
     mismatch = describe_call(sigima.proc.signal.addition_constant, [image], param)
-    assert mismatch["operation"]["id"] == "sigima.signal.addition_constant"
+    assert mismatch["operation"] == {
+        "id": "sigima.signal.addition_constant",
+        "contract_version": 1,
+    }
     assert mismatch["limits"] == ["inputs_do_not_match_contract"]
     bad = describe_call(sigima.proc.signal.addition_constant, [src], [param])
     assert bad["parameters"] is None and bad["limits"] == ["parameters_not_encoded"]

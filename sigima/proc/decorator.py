@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import dataclasses
 import functools
 import importlib
@@ -16,8 +18,8 @@ import pkgutil
 import re
 import sys
 import typing
-from collections.abc import Sequence
-from typing import Callable, Literal, TypeVar
+from collections.abc import Iterator, Sequence
+from typing import Any, Callable, Literal, TypeVar
 
 import guidata.dataset as gds
 import makefun
@@ -43,6 +45,7 @@ __all__ = [
     "find_computation_functions",
     "get_computation_metadata",
     "is_computation_function",
+    "observe_calls",
 ]
 
 # Marker attribute used by @computation_function and introspection
@@ -53,6 +56,53 @@ OPERATION_ID_PATTERN = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)*$")
 
 P = ParamSpec("P")
 R = TypeVar("R")
+
+#: Observer of computation calls (see :func:`observe_calls`), None by default.
+_CALL_OBSERVER: contextvars.ContextVar[Any] = contextvars.ContextVar(
+    "sigima_call_observer", default=None
+)
+#: True while an observed call runs: nested calls are not observed.
+_IN_OBSERVED_CALL: contextvars.ContextVar[bool] = contextvars.ContextVar(
+    "sigima_in_observed_call", default=False
+)
+
+
+@contextlib.contextmanager
+def observe_calls(
+    observer: Callable[[Callable, tuple], Callable[[Any], None] | None],
+) -> Iterator[None]:
+    """Observe the outermost calls of computation functions within the context.
+
+    Used by test and audit tools (e.g. the replay qualification tests): nothing
+    is observed by default, and observation never changes a result.
+
+    Args:
+        observer: ``(function, args) -> on_result or None``, called before each
+         outermost call with the decorated function and the positional arguments
+         passed to the original function (parameter sets included); the returned
+         callable, if any, receives the result.
+    """
+    token = _CALL_OBSERVER.set(observer)
+    try:
+        yield
+    finally:
+        _CALL_OBSERVER.reset(token)
+
+
+def _begin_observation(
+    function: Callable, args: Sequence[Any]
+) -> tuple[Any, Callable[[Any], None] | None]:
+    """Notify the observer of an outermost call; return ``(token, on_result)``."""
+    observer = _CALL_OBSERVER.get()
+    if observer is None or _IN_OBSERVED_CALL.get():
+        return None, None
+    on_result = observer(function, tuple(args))
+    return _IN_OBSERVED_CALL.set(True), on_result
+
+
+def _end_observation(token: Any) -> None:
+    if token is not None:
+        _IN_OBSERVED_CALL.reset(token)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -241,7 +291,11 @@ def _make_computation_wrapper(
         validate_dataset(ds_obj, *validation_context)
 
         # Call the original function
-        result = f(*final_args)
+        token, on_result = _begin_observation(wrapper, final_args)
+        try:
+            result = f(*final_args)
+        finally:
+            _end_observation(token)
 
         # Auto-inject func_name into result objects if they support it
         if (
@@ -251,6 +305,8 @@ def _make_computation_wrapper(
             # Since results are frozen dataclasses, we need to recreate them
             result = dataclasses.replace(result, func_name=f.__name__)
 
+        if on_result is not None:
+            on_result(result)
         return result
 
     # Attach dynamic Sphinx docstring and signature
@@ -431,7 +487,18 @@ def computation_function(
         # No DataSet parameter: simple passthrough with func_name injection
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
-            result = f(*args, **kwargs)
+            if _CALL_OBSERVER.get() is not None:
+                bound = sig.bind(*args, **kwargs)
+                bound.apply_defaults()
+                token, on_result = _begin_observation(
+                    wrapper, tuple(bound.arguments.values())
+                )
+            else:
+                token = on_result = None
+            try:
+                result = f(*args, **kwargs)
+            finally:
+                _end_observation(token)
 
             # Auto-inject func_name into result objects if they support it
             if (
@@ -441,6 +508,8 @@ def computation_function(
                 # Since results are frozen dataclasses, we need to recreate them
                 result = dataclasses.replace(result, func_name=f.__name__)
 
+            if on_result is not None:
+                on_result(result)
             return result
 
         metadata = _metadata(f)

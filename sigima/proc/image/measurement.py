@@ -42,6 +42,7 @@ from sigima.objects import (
     TableResultBuilder,
 )
 from sigima.proc.base import new_signal_result
+from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import compute_geometry_from_obj
 
@@ -72,7 +73,22 @@ def get_centroid_coords(data: np.ndarray) -> np.ndarray:
     return np.array([(x, y)])
 
 
-@computation_function(operation_id="sigima.image.centroid", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.centroid",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
+                "image) differ in the last bits across library versions"
+            ),
+            atol=1e-11,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
+)
 def centroid(image: ImageObj) -> GeometryResult | None:
     """Compute centroid
     with :py:func:`sigima.tools.image.get_centroid_fourier`
@@ -102,7 +118,11 @@ def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
     return np.array([[x, y, r]])
 
 
-@computation_function(operation_id="sigima.image.enclosing_circle", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.enclosing_circle",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def enclosing_circle(image: ImageObj) -> GeometryResult | None:
     """Compute minimum enclosing circle
     with :py:func:`sigima.tools.image.get_enclosing_circle`
@@ -132,7 +152,22 @@ def __calc_snr_without_warning(data: np.ndarray) -> float:
     return snr
 
 
-@computation_function(operation_id="sigima.image.stats", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.stats",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
+                "image) differ in the last bits across library versions"
+            ),
+            atol=1e-09,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
+)
 def stats(obj: ImageObj) -> TableResult:
     """Compute statistics on an image
 
@@ -155,7 +190,9 @@ def stats(obj: ImageObj) -> TableResult:
 
 
 @computation_function(
-    operation_id="sigima.image.horizontal_projection", contract_version=1
+    operation_id="sigima.image.horizontal_projection",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def horizontal_projection(image: ImageObj) -> SignalObj:
     """Compute the sum of pixel intensities along each col. (projection on the x-axis).
@@ -179,7 +216,9 @@ def horizontal_projection(image: ImageObj) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.image.vertical_projection", contract_version=1
+    operation_id="sigima.image.vertical_projection",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def vertical_projection(image: ImageObj) -> SignalObj:
     """Compute the sum of pixel intensities along each row (projection on the y-axis).

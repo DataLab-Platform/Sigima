@@ -37,6 +37,7 @@ from sigima.objects import (
     create_image_roi,
     create_image_roi_around_points,
 )
+from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import compute_geometry_from_obj
 from sigima.validation import validate_dataset
@@ -338,7 +339,11 @@ class Peak2DDetectionParam(DetectionROIParam, GenericDetectionParam):
     )
 
 
-@computation_function(operation_id="sigima.image.peak_detection", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.peak_detection",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def peak_detection(obj: ImageObj, p: Peak2DDetectionParam) -> GeometryResult | None:
     """Compute 2D peak detection
     with :py:func:`sigima.tools.image.get_2d_peaks_coords`
@@ -382,7 +387,22 @@ class ContourShapeParam(GenericDetectionParam):
     )
 
 
-@computation_function(operation_id="sigima.image.contour_shape", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.contour_shape",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
+                "image) differ in the last bits across library versions"
+            ),
+            atol=1e-11,
+            rtol=1e-11,
+            same_environment="exact",
+        ),
+    ),
+)
 def contour_shape(image: ImageObj, p: ContourShapeParam) -> GeometryResult | None:
     """Compute contour shape with :py:func:`sigima.tools.image.get_contour_shapes`."""
     shape: sigima.enums.ContourShape = p.shape
@@ -458,7 +478,11 @@ class BlobDOGParam(DetectionROIParam, BaseBlobParam):
     )
 
 
-@computation_function(operation_id="sigima.image.blob_dog", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.blob_dog",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def blob_dog(image: ImageObj, p: BlobDOGParam) -> GeometryResult | None:
     """Compute blobs using Difference of Gaussian method
     with :py:func:`sigima.tools.image.find_blobs_dog`
@@ -498,7 +522,11 @@ class BlobDOHParam(DetectionROIParam, BaseBlobParam):
     )
 
 
-@computation_function(operation_id="sigima.image.blob_doh", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.blob_doh",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def blob_doh(image: ImageObj, p: BlobDOHParam) -> GeometryResult | None:
     """Compute blobs using Determinant of Hessian method
     with :py:func:`sigima.tools.image.find_blobs_doh`
@@ -534,7 +562,11 @@ class BlobLOGParam(BlobDOHParam):
     )
 
 
-@computation_function(operation_id="sigima.image.blob_log", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.blob_log",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def blob_log(image: ImageObj, p: BlobLOGParam) -> GeometryResult | None:
     """Compute blobs using Laplacian of Gaussian method
     with :py:func:`sigima.tools.image.find_blobs_log`
@@ -734,7 +766,11 @@ class BlobOpenCVParam(DetectionROIParam, gds.DataSet):
     ).set_prop("display", active=_prop_conv)
 
 
-@computation_function(operation_id="sigima.image.blob_opencv", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.blob_opencv",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def blob_opencv(image: ImageObj, p: BlobOpenCVParam) -> GeometryResult | None:
     """Compute blobs using OpenCV
     with :py:func:`sigima.tools.image.find_blobs_opencv`
@@ -792,7 +828,9 @@ class HoughCircleParam(DetectionROIParam, gds.DataSet):
 
 
 @computation_function(
-    operation_id="sigima.image.hough_circle_peaks", contract_version=1
+    operation_id="sigima.image.hough_circle_peaks",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def hough_circle_peaks(image: ImageObj, p: HoughCircleParam) -> GeometryResult | None:
     """Compute Hough circles

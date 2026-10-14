@@ -41,6 +41,7 @@ from sigima.objects import (
 )
 from sigima.objects.signal.creation import create_signal
 from sigima.proc.base import dst_1_to_1
+from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import compute_geometry_from_obj
 from sigima.tools.signal import dynamic, features, peakdetection, pulse
@@ -53,7 +54,11 @@ class PeakDetectionParam(gds.DataSet, title=_("Peak detection")):
     min_dist = gds.IntItem(_("Minimum distance"), default=1, min=1)
 
 
-@computation_function(operation_id="sigima.signal.peak_detection", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.peak_detection",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     """Peak detection with
     :py:func:`sigima.tools.signal.peakdetection.peak_indices`
@@ -184,7 +189,9 @@ def markers_table_to_signal(
 
 
 @computation_function(
-    operation_id="sigima.signal.extract_peak_positions", contract_version=1
+    operation_id="sigima.signal.extract_peak_positions",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def extract_peak_positions(obj: SignalObj, p: PeakDetectionParam) -> TableResult:
     """Extract peak positions as an XY-markers table.
@@ -282,7 +289,22 @@ class FWHMParam(
             raise ValueError("xmin must be strictly less than xmax")
 
 
-@computation_function(operation_id="sigima.signal.fwhm", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.fwhm",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Iterative least-squares fits (SciPy) converge to results equal within "
+                "the optimizer tolerance across SciPy versions"
+            ),
+            atol=1e-06,
+            rtol=1e-06,
+            same_environment="exact",
+        ),
+    ),
+)
 def fwhm(obj: SignalObj, param: FWHMParam) -> GeometryResult | None:
     """Compute FWHM with :py:func:`sigima.tools.signal.pulse.fwhm`
 
@@ -304,7 +326,22 @@ def fwhm(obj: SignalObj, param: FWHMParam) -> GeometryResult | None:
     )
 
 
-@computation_function(operation_id="sigima.signal.fw1e2", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.fw1e2",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Iterative least-squares fits (SciPy) converge to results equal within "
+                "the optimizer tolerance across SciPy versions"
+            ),
+            atol=1e-07,
+            rtol=1e-08,
+            same_environment="exact",
+        ),
+    ),
+)
 def fw1e2(obj: SignalObj) -> GeometryResult | None:
     """Compute FW at 1/e² with :py:func:`sigima.tools.signal.pulse.fw1e2`
 
@@ -326,7 +363,11 @@ class OrdinateParam(gds.DataSet):
     y = gds.FloatItem("y", default=0.0)
 
 
-@computation_function(operation_id="sigima.signal.full_width_at_y", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.full_width_at_y",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def full_width_at_y(obj: SignalObj, p: OrdinateParam) -> GeometryResult | None:
     """
     Compute full width at a given y value for a signal object.
@@ -343,7 +384,11 @@ def full_width_at_y(obj: SignalObj, p: OrdinateParam) -> GeometryResult | None:
     )
 
 
-@computation_function(operation_id="sigima.signal.x_at_y", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.x_at_y",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def x_at_y(obj: SignalObj, p: OrdinateParam) -> GeometryResult | None:
     """
     Compute the smallest x-value at a given y-value for a signal object.
@@ -379,7 +424,11 @@ class AbscissaParam(gds.DataSet):
     x = gds.FloatItem("x", default=0.0)
 
 
-@computation_function(operation_id="sigima.signal.y_at_x", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.y_at_x",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def y_at_x(obj: SignalObj, p: AbscissaParam) -> GeometryResult | None:
     """
     Compute the smallest y-value at a given x-value for a signal object.
@@ -405,7 +454,11 @@ def y_at_x(obj: SignalObj, p: AbscissaParam) -> GeometryResult | None:
     )
 
 
-@computation_function(operation_id="sigima.signal.stats", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.stats",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def stats(obj: SignalObj) -> TableResult:
     """Compute statistics on a signal
 
@@ -428,7 +481,11 @@ def stats(obj: SignalObj) -> TableResult:
     return table.compute(obj)
 
 
-@computation_function(operation_id="sigima.signal.bandwidth_3db", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.bandwidth_3db",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def bandwidth_3db(obj: SignalObj) -> GeometryResult | None:
     """Compute bandwidth at -3 dB with
     :py:func:`sigima.tools.signal.misc.bandwidth`
@@ -478,7 +535,20 @@ class DynamicParam(gds.DataSet, title=_("Dynamic parameters")):
 
 
 @computation_function(
-    operation_id="sigima.signal.dynamic_parameters", contract_version=1
+    operation_id="sigima.signal.dynamic_parameters",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1.0,
+            rtol=1e-07,
+            same_environment="exact",
+        ),
+    ),
 )
 def dynamic_parameters(src: SignalObj, p: DynamicParam) -> TableResult:
     """Compute Dynamic parameters

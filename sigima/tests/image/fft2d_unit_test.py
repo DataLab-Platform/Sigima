@@ -131,13 +131,12 @@ def test_image_fft() -> None:
     check_scalar_result("Parseval's Theorem", transformed_energy, original_energy)
 
 
-@pytest.mark.skip(reason="Already covered by the `test_image_fft` test.")
 @pytest.mark.validation
 def test_image_ifft() -> None:
-    """2D iFFT validation test."""
-    # This is just a way of marking the iFFT test as a validation test because it is
-    # already covered by the FFT test above (there is no need to repeat the same test).
-    # The tested function is :py:func:`sigima.proc.image.ifft`.
+    """2D iFFT validation test: the inverse FFT reconstructs the image."""
+    ima1 = sigima.tests.data.create_checkerboard()
+    ifft = sigima.proc.image.ifft(sigima.proc.image.fft(ima1))
+    check_array_result("Checkerboard image iFFT(FFT)", ifft.data.real, ima1.data)
 
 
 @pytest.mark.validation

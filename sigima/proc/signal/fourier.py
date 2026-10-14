@@ -29,6 +29,7 @@ from sigima.config import _
 from sigima.enums import PadLocation1D
 from sigima.objects import SignalObj
 from sigima.proc.base import FFTParam, SpectrumParam
+from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import dst_1_to_1
 from sigima.tools.signal import fourier
@@ -149,7 +150,11 @@ class ZeroPadding1DParam(gds.DataSet, title=_("Zero padding")):
     ).set_prop("display", active=_func_prop)
 
 
-@computation_function(operation_id="sigima.signal.zero_padding", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.zero_padding",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def zero_padding(src: SignalObj, p: ZeroPadding1DParam) -> SignalObj:
     """Compute zero padding with :py:func:`sigima.tools.signal.fourier.zero_padding`.
 
@@ -186,7 +191,22 @@ def zero_padding(src: SignalObj, p: ZeroPadding1DParam) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.fft", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.fft",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-11,
+            rtol=1e-12,
+            same_environment="exact",
+        ),
+    ),
+)
 def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
     """Compute FFT with :py:func:`sigima.tools.signal.fourier.fft1d`.
 
@@ -209,7 +229,22 @@ def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.ifft", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.ifft",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-14,
+            rtol=1e-10,
+            same_environment="exact",
+        ),
+    ),
+)
 def ifft(src: SignalObj) -> SignalObj:
     """Compute the inverse FFT with :py:func:`sigima.tools.signal.fourier.ifft1d`.
 
@@ -230,7 +265,20 @@ def ifft(src: SignalObj) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.magnitude_spectrum", contract_version=1
+    operation_id="sigima.signal.magnitude_spectrum",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-11,
+            rtol=1e-12,
+            same_environment="exact",
+        ),
+    ),
 )
 def magnitude_spectrum(src: SignalObj, p: SpectrumParam | None = None) -> SignalObj:
     """Compute magnitude spectrum.
@@ -279,7 +327,22 @@ def phase_spectrum(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.psd", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.psd",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-08,
+            rtol=1e-09,
+            same_environment="exact",
+        ),
+    ),
+)
 def psd(src: SignalObj, p: SpectrumParam | None = None) -> SignalObj:
     """Compute power spectral density with :py:func:`sigima.tools.signal.fourier.psd`.
 

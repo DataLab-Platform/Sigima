@@ -39,6 +39,7 @@ from sigima.proc.base import (
     ArithmeticParam,
     ConstantParam,
 )
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import (
     dst_1_to_1,
@@ -80,7 +81,11 @@ __all__ = [
 # the modified object from the worker processes.
 
 
-@computation_function(operation_id="sigima.image.addition", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.addition",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def addition(src_list: list[ImageObj]) -> ImageObj:
     """Add images in the list and return the result image object
 
@@ -97,7 +102,11 @@ def addition(src_list: list[ImageObj]) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.average", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.average",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def average(src_list: list[ImageObj]) -> ImageObj:
     """Compute the average of images in the list and return the result image object
 
@@ -116,7 +125,9 @@ def average(src_list: list[ImageObj]) -> ImageObj:
 
 
 @computation_function(
-    operation_id="sigima.image.standard_deviation", contract_version=1
+    operation_id="sigima.image.standard_deviation",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def standard_deviation(src_list: list[ImageObj]) -> ImageObj:
     """Compute the element-wise standard deviation of multiple images.
@@ -147,7 +158,11 @@ def standard_deviation(src_list: list[ImageObj]) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.product", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.product",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def product(src_list: list[ImageObj]) -> ImageObj:
     """Multiply images in the list and return the result image object
 
@@ -164,7 +179,11 @@ def product(src_list: list[ImageObj]) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.addition_constant", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.addition_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def addition_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     """Add **dst** and a constant value and return the new result image object
 
@@ -185,7 +204,9 @@ def addition_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
 
 
 @computation_function(
-    operation_id="sigima.image.difference_constant", contract_version=1
+    operation_id="sigima.image.difference_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def difference_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     """Subtract a constant value from an image and return the new result image object
@@ -206,7 +227,11 @@ def difference_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.product_constant", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.product_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def product_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     """Multiply **dst** by a constant value and return the new result image object
 
@@ -228,7 +253,11 @@ def product_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.division_constant", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.division_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def division_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     """Divide an image by a constant value and return the new result image object
 
@@ -254,7 +283,11 @@ def division_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
 # --------------------------------------------------------------------------------------
 
 
-@computation_function(operation_id="sigima.image.arithmetic", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.arithmetic",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def arithmetic(src1: ImageObj, src2: ImageObj, p: ArithmeticParam) -> ImageObj:
     """Compute arithmetic operation on two images
 
@@ -288,7 +321,11 @@ def arithmetic(src1: ImageObj, src2: ImageObj, p: ArithmeticParam) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.difference", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.difference",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def difference(src1: ImageObj, src2: ImageObj) -> ImageObj:
     """Compute difference between two images
 
@@ -306,7 +343,9 @@ def difference(src1: ImageObj, src2: ImageObj) -> ImageObj:
 
 
 @computation_function(
-    operation_id="sigima.image.quadratic_difference", contract_version=1
+    operation_id="sigima.image.quadratic_difference",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def quadratic_difference(src1: ImageObj, src2: ImageObj) -> ImageObj:
     """Compute quadratic difference between two images
@@ -324,7 +363,11 @@ def quadratic_difference(src1: ImageObj, src2: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.division", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.division",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def division(src1: ImageObj, src2: ImageObj) -> ImageObj:
     """Compute division between two images
 

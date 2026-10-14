@@ -14,6 +14,7 @@ import inspect
 import os.path as osp
 import pkgutil
 import re
+from typing import Any
 
 from _pytest.mark import Mark
 
@@ -270,3 +271,132 @@ class ValidationStatistics:
         with open(fname, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerows(statistics_rows)
+
+    @staticmethod
+    def environment_info() -> dict[str, Any]:
+        """Return the versions of the environment where the tests ran."""
+        # pylint: disable=import-outside-toplevel
+        import platform
+
+        import numpy
+        import scipy
+
+        return {
+            "sigima": __version__,
+            "python": platform.python_version(),
+            "platform": platform.platform(),
+            "numpy": numpy.__version__,
+            "scipy": scipy.__version__,
+        }
+
+    def collect_qualification_status(
+        self,
+        test_outcomes: dict[str, str],
+        replay_outcomes: dict[str, list[Any]],
+    ) -> list[QualificationStatus]:
+        """Return the replay qualification status of every operation contract.
+
+        A qualification is proven only when the validation test of the function
+        and the generic replay test of its contract were run and passed, and the
+        qualification names the current contract version.
+
+        Args:
+            test_outcomes: Outcome of each test function, by name (``passed``,
+             ``failed`` or ``skipped``); parametrized tests are named
+             ``name[parameter]``.
+            replay_outcomes: Replay outcomes of the captured calls, by operation.
+
+        Returns:
+            One status per contract, sorted by operation identifier.
+        """
+        # pylint: disable=import-outside-toplevel
+        from sigima.proc.contracts import build_contract_registry
+
+        statuses = []
+        for contract in build_contract_registry().contracts:
+            func = contract.function
+            family = (
+                "signal"
+                if contract.operation_id.startswith("sigima.signal.")
+                else "image"
+            )
+            names = generate_valid_test_names_for_function(
+                f"sigima.proc.{family}", func.__name__
+            )
+            validation = next((n for n in names if n in test_outcomes), None)
+            replay_name = f"test_replay_qualification[{contract.operation_id}]"
+            outcomes = replay_outcomes.get(contract.operation_id, [])
+            status = QualificationStatus(
+                operation_id=contract.operation_id,
+                function=f"{func.__module__}.{func.__name__}",
+                contract_version=contract.contract_version,
+                qualification=contract.qualification_status,
+                qualified_version=None
+                if contract.qualification is None
+                else contract.qualification.contract_version,
+                comparison=None
+                if contract.qualification is None
+                else contract.qualification.comparison.to_dict(),
+                validation_test=validation,
+                validation_result=test_outcomes.get(validation or ""),
+                replay_result=test_outcomes.get(replay_name),
+                replays={o.key: o.verdict or o.status for o in outcomes},
+            )
+            if contract.qualification is not None:
+                status.check()
+            statuses.append(status)
+        return statuses
+
+
+@dataclasses.dataclass
+class QualificationStatus:
+    """Replay qualification status of one operation contract.
+
+    Attributes:
+        operation_id: Operation identifier.
+        function: Python name of the function (informative).
+        contract_version: Current contract version.
+        qualification: ``qualified``, ``not_qualified`` or
+         ``qualification_outdated``.
+        qualified_version: Contract version named by the qualification, or None.
+        comparison: Declared comparison rule, or None.
+        validation_test: Validation test of the function, or None.
+        validation_result: Outcome of the validation test, or None if not run.
+        replay_result: Outcome of the generic replay test, or None if not run.
+        replays: Outcome of each captured call replay.
+        problems: Reasons why a declared qualification is not proven.
+    """
+
+    operation_id: str
+    function: str
+    contract_version: int
+    qualification: str
+    qualified_version: int | None
+    comparison: dict[str, Any] | None
+    validation_test: str | None
+    validation_result: str | None
+    replay_result: str | None
+    replays: dict[str, str]
+    problems: list[str] = dataclasses.field(default_factory=list)
+
+    def check(self) -> None:
+        """Record why a declared qualification is not proven, if it is not."""
+        if self.qualified_version != self.contract_version:
+            self.problems.append(
+                f"{self.operation_id}: qualification of v{self.qualified_version} "
+                f"for contract v{self.contract_version}"
+            )
+        if self.validation_test is None or self.validation_result != "passed":
+            test = self.validation_test or "(none)"
+            result = self.validation_result or "not run"
+            self.problems.append(
+                f"{self.operation_id}: validation test {test} {result}"
+            )
+        if self.replay_result != "passed":
+            self.problems.append(
+                f"{self.operation_id}: replay test {self.replay_result or 'not run'}"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return the status as plain JSON values."""
+        return dataclasses.asdict(self)

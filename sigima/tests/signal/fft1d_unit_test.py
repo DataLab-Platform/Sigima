@@ -155,13 +155,15 @@ def test_signal_fft() -> None:
     check_array_result("Original and recovered y data", s1.x, ifft.x.real)
 
 
-@pytest.mark.skip(reason="Already covered by the `test_signal_fft` test.")
 @pytest.mark.validation
 def test_signal_ifft() -> None:
-    """1D iFFT validation test."""
-    # This is just a way of marking the iFFT test as a validation test because it is
-    # already covered by the FFT test above (there is no need to repeat the same test).
-    # The tested function is :py:func:`sigima.proc.signal.ifft`.
+    """1D iFFT validation test: the inverse FFT reconstructs the signal."""
+    s1 = sigima.tests.data.create_periodic_signal(
+        sigima.objects.SignalTypes.COSINE, freq=50.0, size=10000, xmin=0.0
+    )
+    ifft = sigima.proc.signal.ifft(sigima.proc.signal.fft(s1))
+    check_array_result("Original and recovered y data", s1.y, ifft.y.real)
+    check_array_result("Original and recovered x data", s1.x, ifft.x.real)
 
 
 def test_fft_ifft_tools() -> None:

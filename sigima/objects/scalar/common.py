@@ -138,13 +138,15 @@ class DisplayPreferencesManager:
             headers: List of valid header names
             attr_name: Name of the attribute to store hidden headers
         """
-        hidden_headers = {
+        hidden_headers = [
             header
-            for header, visible in preferences.items()
-            if not visible and header in headers
-        }
+            for header in headers
+            if header in preferences and not preferences[header]
+        ]
         if hidden_headers:
-            result.attrs[attr_name] = list(hidden_headers)
+            # Ordered like the headers: a set would depend on string hashing,
+            # which differs from one process to another.
+            result.attrs[attr_name] = hidden_headers
         elif attr_name in result.attrs:
             del result.attrs[attr_name]
 

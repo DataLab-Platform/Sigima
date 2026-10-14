@@ -91,7 +91,20 @@ jobs:
     - name: Lint with Ruff
       run: ruff check --output-format=github sigima
     - name: Test with pytest
-      run: pytest -v --tb=long
+      env:
+        # Calls captured from the validation tests, for cross-environment replays
+        SIGIMA_REPLAY_DUMP: replay-calls-py${{ matrix.python-version }}.pkl
+      # Fails if a declared replay qualification is not proven by passing tests
+      run: pytest -v --tb=long --qualification-report=qualification-report-py${{ matrix.python-version }}.json
+    - name: Upload replay qualification evidence
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v6
+      with:
+        name: replay-qualification-py${{ matrix.python-version }}
+        path: |
+          qualification-report-py*.json
+          replay-calls-py*.pkl
+        if-no-files-found: ignore
     - name: Install quality dependencies
       if: ${{ matrix.python-version == '3.13' }}
       run: |
@@ -147,4 +160,4 @@ jobs:
       run: ruff check --output-format=github sigima
 
     - name: Test with pytest (latest)
-      run: pytest -v --tb=long
+      run: pytest -v --tb=long --qualification-report=qualification-report-latest.json

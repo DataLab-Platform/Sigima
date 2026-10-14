@@ -180,6 +180,15 @@ class GeometryResult:
                 raise ValueError("roi_indices must be a 1-D numpy array if provided")
             if len(self.roi_indices) != len(self.coords):
                 raise ValueError("roi_indices length must match number of coord rows")
+            if (
+                self.roi_indices.dtype.kind in "iu"
+                and self.roi_indices.dtype != np.int64
+            ):
+                # Same dtype on every platform and NumPy version (the default
+                # integer is 32-bit on Windows with NumPy 1.x).
+                object.__setattr__(
+                    self, "roi_indices", self.roi_indices.astype(np.int64)
+                )
 
     @property
     def name(self) -> str:

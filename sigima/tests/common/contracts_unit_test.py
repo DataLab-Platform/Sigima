@@ -251,9 +251,9 @@ def test_catalogue_contracts() -> None:
     assert fwhm.outputs == (contracts.Role("result", "geometry", optional=True),)
     stats = registry.for_function(sigima.proc.signal.stats)
     assert stats.outputs == (contracts.Role("result", "table"),)
-    rois = registry.for_function(sigima.proc.signal.extract_rois)
-    assert rois.paramclass is None
-    assert rois.parameters == (
+    extract = registry.for_function(sigima.proc.signal.extract_rois)
+    assert extract.paramclass is None
+    assert extract.parameters == (
         contracts.ParameterSpec("params", sigima.objects.ROI1DParam, "list"),
     )
     erase = registry.for_function(sigima.proc.image.erase)
@@ -265,7 +265,19 @@ def test_catalogue_contracts() -> None:
     for func in (sigima.proc.signal.convolution, sigima.proc.image.deconvolution):
         assert registry.for_function(func).reads_options == ("auto_normalize_kernel",)
     qualified = sorted(c.operation_id for c in registry.contracts if c.qualified)
-    assert qualified == ["sigima.signal.difference", "sigima.signal.normalize"]
+    unqualified = sorted(
+        set(c.operation_id for c in registry.contracts) - set(qualified)
+    )
+    assert "sigima.signal.difference" in qualified
+    assert "sigima.signal.normalize" in qualified
+    # The phase of nearly real values is not reproducible across NumPy versions.
+    assert unqualified == [
+        "sigima.image.phase_spectrum",
+        "sigima.signal.phase_spectrum",
+    ]
+    fft = registry.for_function(sigima.proc.signal.fft)
+    assert not fft.comparison.exact and fft.comparison.same_environment == "exact"
+    assert registry.for_function(sigima.proc.signal.addition).comparison.exact
 
 
 def test_default_registry_needs_no_test_dependency(monkeypatch) -> None:
@@ -294,10 +306,10 @@ def test_normalize_contract() -> None:
     assert contract.paramclass is sigima.params.NormalizeParam
     assert contract.parameter_schema_version == 2
     assert contracts.contract_for_function(sigima.proc.signal.normalize) is contract
-    constant = contracts.contract_for_function(sigima.proc.signal.addition_constant)
-    assert constant.operation_id == "sigima.signal.addition_constant"
-    assert not constant.qualified and constant.qualification_status == "not_qualified"
-    assert constant.comparison is None
+    phase = contracts.contract_for_function(sigima.proc.signal.phase_spectrum)
+    assert phase.operation_id == "sigima.signal.phase_spectrum"
+    assert not phase.qualified and phase.qualification_status == "not_qualified"
+    assert phase.comparison is None
     assert contract.comparison is contracts.EXACT
     with pytest.raises(contracts.UnknownOperationError):
         contracts.get_operation_contract("sigima.signal.unknown", 1)

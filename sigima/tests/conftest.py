@@ -8,6 +8,7 @@ This file contains the configuration for running pytest in `sigima`. It is
 executed before running any tests.
 """
 
+import json
 import os
 import os.path as osp
 
@@ -21,8 +22,11 @@ from guidata.config import ValidationMode, set_validation_mode
 from guidata.utils.gitreport import format_git_info_for_pytest, get_git_info_for_modules
 
 import sigima
+from sigima.proc.contracts import build_contract_registry
+from sigima.proc.decorator import observe_calls
 from sigima.proc.validation import ValidationStatistics
 from sigima.tests import SIGIMA_TESTS_GUI_ENV, env, helpers
+from sigima.tests import replay_probe as replay_probe_module
 
 # Set validation mode to STRICT for all tests
 set_validation_mode(ValidationMode.STRICT)
@@ -32,6 +36,7 @@ env.execenv.unattended = True
 env.execenv.verbose = "quiet"
 
 INITIAL_CWD = os.getcwd()
+REPLAY_TEST_MODULE = "replay_qualification_test.py"
 
 
 def pytest_addoption(parser):
@@ -44,6 +49,12 @@ def pytest_addoption(parser):
     )
     parser.addoption(
         "--gui", action="store_true", default=False, help="Run tests that require a GUI"
+    )
+    parser.addoption(
+        "--qualification-report",
+        default=None,
+        help="Write the replay qualification report (JSON) to this file and fail "
+        "if a declared qualification is not backed by passing tests",
     )
 
 
@@ -112,6 +123,11 @@ def pytest_configure(config):
 
 def pytest_collection_modifyitems(config, items):
     """Modify collected test items based on command line options."""
+    # The generic replay test replays the calls captured during the validation
+    # tests: it runs last.
+    replay = [item for item in items if REPLAY_TEST_MODULE in item.nodeid]
+    items[:] = [item for item in items if REPLAY_TEST_MODULE not in item.nodeid]
+    items.extend(replay)
     if config.getoption("--gui"):
         return  # User requested GUI tests
 
@@ -127,3 +143,83 @@ def reset_cwd(request):  # pylint: disable=unused-argument
     """Reset the current working directory to the initial one after each test."""
     yield
     os.chdir(INITIAL_CWD)
+
+
+@pytest.fixture(autouse=True)
+def replay_probe(request):
+    """Capture the computation calls of validation tests, for the replay test."""
+    if request.node.get_closest_marker("validation") is None:
+        yield
+        return
+    with observe_calls(replay_probe_module.make_observer(request.node.nodeid)):
+        yield
+
+
+def pytest_runtest_logreport(report):
+    """Record the outcome of validation and replay tests (qualification report).
+
+    Only the validation tests (marked ``validation``, as for the validation
+    statistics) and the generic replay test are recorded, by function name:
+    other tests may share the name of a computation function. Parametrized
+    tests are recorded under ``name[parameter]`` and under their base name,
+    which fails if any of its cases failed.
+    """
+    if report.when != "call" and (report.when != "setup" or report.passed):
+        return
+    if "validation" not in report.keywords and REPLAY_TEST_MODULE not in report.nodeid:
+        return
+    outcomes = replay_probe_module.TEST_OUTCOMES
+    name = report.nodeid.split("::")[-1]
+    outcomes[name] = report.outcome
+    base = name.split("[", 1)[0]
+    if base != name and outcomes.get(base) != "failed":
+        if outcomes.get(base) != "passed" or report.outcome == "failed":
+            outcomes[base] = report.outcome
+
+
+def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argument
+    """Write the qualification report and the cross-environment replay files."""
+    dump, reference, cross_report = replay_probe_module.environment_paths()
+    if dump:
+        replay_probe_module.dump_samples(dump)
+    if reference and cross_report:
+        report = replay_probe_module.cross_replay(reference)
+        with open(cross_report, "w", encoding="utf-8") as file:
+            json.dump(report, file, indent=1, sort_keys=True)
+        qualified = {
+            c.operation_id
+            for c in build_contract_registry().contracts
+            if c.qualification is not None
+        }
+        different = sorted(
+            op
+            for op, entry in report.items()
+            if op in qualified and entry["verdict"] == "different"
+        )
+        if different:
+            print(
+                "\nQualified operations differing from the reference environment"
+                " beyond their comparison rule:\n  " + "\n  ".join(different)
+            )
+            session.exitstatus = pytest.ExitCode.TESTS_FAILED
+    path = session.config.getoption("--qualification-report")
+    if not path:
+        return
+    stats = ValidationStatistics()
+    statuses = stats.collect_qualification_status(
+        replay_probe_module.TEST_OUTCOMES, replay_probe_module.OUTCOMES
+    )
+    problems = [p for status in statuses for p in status.problems]
+    with open(path, "w", encoding="utf-8") as file:
+        json.dump(
+            {
+                "environment": stats.environment_info(),
+                "problems": problems,
+                "operations": [status.to_dict() for status in statuses],
+            },
+            file,
+            indent=1,
+        )
+    if problems:
+        print("\nQualification problems:\n  " + "\n  ".join(problems))
+        session.exitstatus = pytest.ExitCode.TESTS_FAILED

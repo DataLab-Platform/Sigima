@@ -247,11 +247,16 @@ def _encode_item(item: gds.DataItem, raw: Any) -> Any:
     return encode_value(name, raw)
 
 
-def encode_dataset(param: gds.DataSet) -> dict[str, Any]:
+def encode_dataset(
+    param: gds.DataSet, paramclass: type[gds.DataSet] | None = None
+) -> dict[str, Any]:
     """Encode a parameter set as plain JSON values.
 
     Args:
         param: Parameter set instance actually used.
+        paramclass: Declared parameter class; only its items are encoded (an
+         instance of a subclass may carry other items, which the computation
+         does not use). Default: the class of *param*.
 
     Returns:
         Mapping of item names to JSON values.
@@ -260,7 +265,7 @@ def encode_dataset(param: gds.DataSet) -> dict[str, Any]:
         ParameterEncodingError: If an item value cannot be encoded.
     """
     values: dict[str, Any] = {}
-    for item in parameter_items(type(param)):
+    for item in parameter_items(paramclass or type(param)):
         values[item.get_name()] = _encode_item(item, item.get_value(param))
     json.dumps(values, allow_nan=False)
     return values
@@ -307,6 +312,16 @@ def _decode_enum(name: str, enum_cls: type[Enum], value: Any) -> str:
     )
 
 
+def _accepts_none(item: gds.DataItem) -> bool:
+    """True if *item* accepts None (``allow_none``, or validation disabled)."""
+    if item.get_prop("data", "allow_none", False):
+        return True
+    try:
+        return bool(item.check_value(None))
+    except Exception:  # pylint: disable=broad-except
+        return False
+
+
 def _decode_item(item: gds.DataItem, value: Any) -> Any:
     """Return the raw stored value of *item* for the JSON *value*."""
     # pylint: disable=too-many-branches
@@ -314,7 +329,7 @@ def _decode_item(item: gds.DataItem, value: Any) -> Any:
     if value is None and not (
         isinstance(item, gds.ChoiceItem) and None in (_choice_keys(item) or ())
     ):
-        if not item.get_prop("data", "allow_none", False):
+        if not _accepts_none(item):
             raise InvalidParametersError(f"Parameter {name!r} cannot be null")
         return None
     if isinstance(item, gds.ChoiceItem):
@@ -410,13 +425,13 @@ def _encode_argument(spec: ParameterSpec, value: Any) -> Any:
             raise ParameterEncodingError(
                 f"Parameter {spec.name!r}: {spec.paramclass.__name__} items expected"
             )
-        return [encode_dataset(v) for v in value]
+        return [encode_dataset(v, spec.paramclass) for v in value]
     if not multiple and spec.container in ("single", "single_or_list"):
         if not isinstance(value, spec.paramclass):
             raise ParameterEncodingError(
                 f"Parameter {spec.name!r}: {spec.paramclass.__name__} expected"
             )
-        return encode_dataset(value)
+        return encode_dataset(value, spec.paramclass)
     raise ParameterEncodingError(
         f"Parameter {spec.name!r}: unexpected container {type(value).__name__}"
     )

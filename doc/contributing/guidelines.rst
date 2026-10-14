@@ -119,8 +119,12 @@ Follow these rules when you add or change a computation function:
   ``qualification=ReplayQualification(contract_version=..., comparison=...)``
   (see :mod:`sigima.proc.contract_types`). It names the contract version that
   was actually tested: increasing ``contract_version`` does not qualify the new
-  version. It requires the validation test of the function and the replay
-  test of its contract shape.
+  version. It requires the validation test of the function (marked
+  ``validation``) and the generic replay test
+  (``sigima/tests/common/replay_qualification_test.py``), which replays the
+  calls captured during the validation tests as an application replays a
+  recorded activity. Run ``pytest --qualification-report=report.json``: the
+  run fails if a declared qualification is not proven.
 
 - The comparison rule of a qualification is exact by default (``EXACT``).
   Declare a tolerance (``tolerance(...)``) only when the nature of the
@@ -128,6 +132,15 @@ Follow these rules when you add or change a computation function:
   with that justification, and state whether results must still be identical
   within an identical environment. Never widen a tolerance to hide an error:
   changing a rule changes the qualification.
+
+- Set a tolerance from differences measured between environments (NumPy,
+  SciPy, platforms), not from guesses: run the test suite in a first
+  environment with ``SIGIMA_REPLAY_DUMP=<calls file>``, then in a second one
+  with ``SIGIMA_REPLAY_REFERENCE=<calls file>`` and
+  ``SIGIMA_REPLAY_CROSS_REPORT=<report.json>``. The second run replays the
+  calls captured by the first one and reports the differences by operation. A
+  function whose results differ beyond any justified tolerance stays
+  unqualified.
 
 - Some two-input contracts align the operand on the source grid before the
   call: declare the policy with ``x_alignment=...`` (see
