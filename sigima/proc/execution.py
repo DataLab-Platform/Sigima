@@ -326,7 +326,10 @@ def prepare_execution(
     The inputs are never modified. Ordinary processing passes the parameter
     argument actually used (*param*) and no *context*; a replay passes the
     recorded encoded parameters (*values*) and the recorded *context*, whose
-    policy and global options must be those declared by the contract.
+    policy and global options must be those declared by the contract. A replay
+    works on detached copies of the inputs (all metadata included), so that the
+    live objects are protected even when the computation runs in the same
+    process.
 
     Args:
         contract: Operation contract.
@@ -378,6 +381,8 @@ def prepare_execution(
             }
     record = None
     prepared_inputs = list(inputs)
+    if replay:
+        prepared_inputs = [obj.copy(all_metadata=True) for obj in prepared_inputs]
     if contract.x_alignment is not None:
         if replay:
             check_x_alignment_record(context.get("x_alignment"), contract.x_alignment)

@@ -150,6 +150,11 @@ def test_ordinary_and_replay_give_the_same_result() -> None:
     values = _json(describe_call(contract.function, [src], param)["parameters"])
     replay = prepare_execution(contract, [src], values=values, context=ordinary.context)
     _same_signal(replay.run(), reference)
+    # A replay works on detached copies; ordinary processing on the inputs.
+    assert ordinary.args[0] is src
+    copy = replay.args[0]
+    assert copy is not src and copy.roi is None and copy.title == src.title
+    assert copy.metadata == src.metadata and _same_signal(copy, src) is None
     with pytest.raises(TypeError):
         prepare_execution(contract, [src])
     with pytest.raises(ExecutionError) as info:
