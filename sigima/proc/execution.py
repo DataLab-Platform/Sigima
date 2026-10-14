@@ -185,13 +185,15 @@ def describe_call(
 
     Returns:
         ``{"operation", "qualification", "pattern", "roles", "parameters",
-        "parameter_codec", "limits", "implementation"}``: ``operation`` is
-        ``{"id", "contract_version"}`` or None; ``qualification`` is
-        ``{"status", "comparison"}`` (status ``qualified``, ``not_qualified``,
-        ``qualification_outdated`` or ``no_contract``; comparison rule as plain
-        data when qualified); ``parameters`` are the encoded parameters or None
-        when they could not be encoded (``parameters_not_encoded`` in
-        ``limits``).
+        "parameter_codec", "options", "limits", "implementation"}``:
+        ``operation`` is ``{"id", "contract_version"}`` or None;
+        ``qualification`` is ``{"status", "comparison"}`` (status ``qualified``,
+        ``not_qualified``, ``qualification_outdated`` or ``no_contract``;
+        comparison rule as plain data when qualified); ``parameters`` are the
+        encoded parameters or None when they could not be encoded
+        (``parameters_not_encoded`` in ``limits``); ``options`` are the current
+        values of the global options read by the computation (see
+        :func:`prepare_execution`), to be recorded in the execution context.
     """
     if contract is _MISSING:
         contract = contract_for_function(func)
@@ -203,6 +205,7 @@ def describe_call(
         "roles": list(roles) if roles is not None else default_roles(len(inputs)),
         "parameters": None,
         "parameter_codec": PARAMETER_CODEC_VERSION,
+        "options": {},
         "limits": limits,
         "implementation": implementation_of(func),
     }
@@ -223,6 +226,7 @@ def describe_call(
         "comparison": None if comparison is None else comparison.to_dict(),
     }
     description["pattern"] = contract.pattern
+    description["options"] = _current_options(contract)
     if _inputs_match(contract, inputs):
         description["roles"] = contract.input_role_names(len(inputs))
     else:
@@ -234,6 +238,11 @@ def describe_call(
     except (ParameterEncodingError, ExecutionError):
         limits.append("parameters_not_encoded")
     return description
+
+
+def _current_options(contract: OperationContract) -> dict[str, Any]:
+    """Return the current values of the global options read by *contract*."""
+    return {name: getattr(options, name).get() for name in contract.reads_options}
 
 
 def _encode_without_contract(param: Any) -> dict[str, Any]:
@@ -376,9 +385,7 @@ def prepare_execution(
                 )
             option_values = {name: recorded[name] for name in contract.reads_options}
         else:
-            option_values = {
-                name: getattr(options, name).get() for name in contract.reads_options
-            }
+            option_values = _current_options(contract)
     record = None
     prepared_inputs = list(inputs)
     if replay:
