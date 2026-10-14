@@ -145,7 +145,11 @@ Follow these rules when you add or change a computation function:
   ``SIGIMA_REPLAY_CROSS_REPORT=<report.json>``. The second run replays the
   calls captured by the first one and reports the differences by operation. A
   function whose results differ beyond any justified tolerance stays
-  unqualified.
+  unqualified. To include Pyodide (WebAssembly, the runtime of DataLab-Web),
+  capture the calls into a directory with NumPy 1.26
+  (``SIGIMA_REPLAY_DUMP=<directory>/``), replay them with
+  ``node scripts/pyodide_replay/run.mjs`` (see its header) and compare the
+  results with ``sigima.tests.replay_probe.compare_replays``.
 
 - Some two-input contracts align the operand on the source grid before the
   call: declare the policy with ``x_alignment=...`` (see
