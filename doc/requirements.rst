@@ -22,6 +22,9 @@ The `sigima` package requires the following Python modules:
     * - scikit-image
       - >= 0.19.2, < 0.27
       - Image processing in Python
+    * - imagecodecs
+      - >= 2024.12.30
+      - Image transformation, compression, and decompression codecs
     * - pandas
       - >= 1.4, < 3.1
       - Powerful data structures for data analysis, time series, and statistics
