@@ -269,9 +269,17 @@ class PreparedExecution:
     context: dict[str, Any]
     options: dict[str, Any] = dataclasses.field(default_factory=dict)
 
+    def applied_options(self) -> contextlib.AbstractContextManager[None]:
+        """Return a context applying the global options, restored on exit.
+
+        For applications that run :attr:`function` (or the same function from
+        their catalogue) themselves with :attr:`args`.
+        """
+        return _options_applied(self.options)
+
     def run(self) -> Any:
         """Run the function with the recorded global options, then restore them."""
-        with _options_applied(self.options):
+        with self.applied_options():
             return self.function(*self.args)
 
 
