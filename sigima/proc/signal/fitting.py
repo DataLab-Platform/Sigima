@@ -64,7 +64,7 @@ def __generic_fit(
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.linear_fit", contract_version=1)
 def linear_fit(src: SignalObj) -> SignalObj:
     """Compute linear fit with :py:func:`numpy.polyfit`
 
@@ -83,7 +83,7 @@ class PolynomialFitParam(gds.DataSet, title=_("Polynomial fit")):
     degree = gds.IntItem(_("Degree"), 3, min=1, max=10, slider=True)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.polynomial_fit", contract_version=1)
 def polynomial_fit(src: SignalObj, p: PolynomialFitParam) -> SignalObj:
     """Compute polynomial fit with :py:func:`numpy.polyfit`
 
@@ -98,7 +98,7 @@ def polynomial_fit(src: SignalObj, p: PolynomialFitParam) -> SignalObj:
     return __generic_fit(src, lambda x, y: fitting.polynomial_fit(x, y, p.degree))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.gaussian_fit", contract_version=1)
 def gaussian_fit(src: SignalObj) -> SignalObj:
     """Compute Gaussian fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -111,7 +111,7 @@ def gaussian_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.gaussian_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.lorentzian_fit", contract_version=1)
 def lorentzian_fit(src: SignalObj) -> SignalObj:
     """Compute Lorentzian fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -124,7 +124,7 @@ def lorentzian_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.lorentzian_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.voigt_fit", contract_version=1)
 def voigt_fit(src: SignalObj) -> SignalObj:
     """Compute Voigt fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -137,7 +137,7 @@ def voigt_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.voigt_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.exponential_fit", contract_version=1)
 def exponential_fit(src: SignalObj) -> SignalObj:
     """Compute exponential fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -150,7 +150,7 @@ def exponential_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.exponential_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.cdf_fit", contract_version=1)
 def cdf_fit(src: SignalObj) -> SignalObj:
     """Compute CDF fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -163,7 +163,7 @@ def cdf_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.cdf_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.planckian_fit", contract_version=1)
 def planckian_fit(src: SignalObj) -> SignalObj:
     """Compute Planckian fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -176,7 +176,9 @@ def planckian_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.planckian_fit)
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.twohalfgaussian_fit", contract_version=1
+)
 def twohalfgaussian_fit(src: SignalObj) -> SignalObj:
     """Compute two-half-Gaussian fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -189,7 +191,7 @@ def twohalfgaussian_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.twohalfgaussian_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.sigmoid_fit", contract_version=1)
 def sigmoid_fit(src: SignalObj) -> SignalObj:
     """Compute sigmoid fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -202,7 +204,9 @@ def sigmoid_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.sigmoid_fit)
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.piecewiseexponential_fit", contract_version=1
+)
 def piecewiseexponential_fit(src: SignalObj) -> SignalObj:
     """Compute piecewise exponential fit (raise-decay) with
     :py:func:`scipy.optimize.curve_fit`
@@ -216,7 +220,7 @@ def piecewiseexponential_fit(src: SignalObj) -> SignalObj:
     return __generic_fit(src, fitting.piecewiseexponential_fit)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.sinusoidal_fit", contract_version=1)
 def sinusoidal_fit(src: SignalObj) -> SignalObj:
     """Compute sinusoidal fit with :py:func:`scipy.optimize.curve_fit`
 
@@ -247,7 +251,7 @@ def extract_fit_params(signal: SignalObj) -> fitting.FitParams:
     return fit_params_dict
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.evaluate_fit", contract_version=1)
 def evaluate_fit(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Evaluate fit function from src1 on the x-axis of src2.
 

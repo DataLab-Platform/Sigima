@@ -24,6 +24,7 @@ import makefun
 
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
+from sigima.proc.contract_types import NAME_PATTERN, ReplayQualification
 from sigima.validation import validate_dataset
 
 if sys.version_info >= (3, 10):
@@ -66,6 +67,13 @@ class ComputationMetadata:
         contract_version: Contract version (integer >= 1) when ``operation_id``
          is set, None otherwise.
         aliases: Earlier operation identifiers of the same operation.
+        qualification: Replay qualification of a tested contract version, or
+         None.
+        x_alignment: Identifier of the X-alignment policy applied to the
+         inputs, or None.
+        reads_options: Names of the :data:`sigima.config.options` read by the
+         computation itself.
+        roles: Explicit input role names, or None to infer them.
     """
 
     name: str
@@ -73,6 +81,56 @@ class ComputationMetadata:
     operation_id: str | None = None
     contract_version: int | None = None
     aliases: tuple[str, ...] = ()
+    qualification: ReplayQualification | None = None
+    x_alignment: str | None = None
+    reads_options: tuple[str, ...] = ()
+    roles: tuple[str, ...] | None = None
+
+
+def _as_names(value: Sequence[str] | None, label: str) -> tuple[str, ...] | None:
+    """Return *value* as a tuple of unique names, or None."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        raise ValueError(f"{label} must be a sequence of names, not a string")
+    names = tuple(value)
+    if any(not isinstance(n, str) or not NAME_PATTERN.match(n) for n in names):
+        raise ValueError(f"Invalid {label}: {names!r}")
+    if len(set(names)) != len(names):
+        raise ValueError(f"{label} must be unique")
+    return names
+
+
+def _check_contract_declarations(
+    operation_id: str | None,
+    qualification: ReplayQualification | None,
+    x_alignment: str | None,
+    reads_options: Sequence[str],
+    roles: Sequence[str] | None,
+) -> tuple[tuple[str, ...], tuple[str, ...] | None]:
+    """Validate contract declarations; return ``(reads_options, roles)``.
+
+    Raises:
+        ValueError: If the declarations are inconsistent or malformed.
+    """
+    reads_options = _as_names(reads_options, "reads_options")
+    roles = _as_names(roles, "roles")
+    if operation_id is None and (
+        qualification is not None or x_alignment is not None or reads_options or roles
+    ):
+        raise ValueError(
+            "qualification, x_alignment, reads_options and roles require "
+            "an operation_id"
+        )
+    if qualification is not None and not isinstance(qualification, ReplayQualification):
+        raise ValueError("qualification must be a ReplayQualification")
+    if x_alignment is not None and (
+        not isinstance(x_alignment, str) or not OPERATION_ID_PATTERN.match(x_alignment)
+    ):
+        raise ValueError(f"Invalid X-alignment policy identifier: {x_alignment!r}")
+    if roles is not None and not roles:
+        raise ValueError("roles must not be empty")
+    return reads_options, roles
 
 
 def _check_operation_identity(
@@ -212,6 +270,10 @@ def computation_function(
     operation_id: typing.Optional[str] = None,
     contract_version: typing.Optional[int] = None,
     aliases: Sequence[str] = (),
+    qualification: typing.Optional[ReplayQualification] = None,
+    x_alignment: typing.Optional[str] = None,
+    reads_options: Sequence[str] = (),
+    roles: typing.Optional[Sequence[str]] = None,
 ) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """
     Decorator to mark a function as a Sigima computation function.
@@ -235,14 +297,41 @@ def computation_function(
          :mod:`sigima.proc.contracts`). Never derived from the Python name.
         contract_version: Contract version, required with ``operation_id``.
         aliases: Earlier operation identifiers, only with ``operation_id``.
+        qualification: Replay qualification of the tested contract version
+         (see :class:`sigima.proc.contract_types.ReplayQualification`), only
+         with ``operation_id``.
+        x_alignment: Identifier of the X-alignment policy applied to the inputs
+         before the function runs (see :mod:`sigima.proc.policies`), only with
+         ``operation_id``.
+        reads_options: Names of the :data:`sigima.config.options` that the
+         computation reads, only with ``operation_id``.
+        roles: Input role names, only with ``operation_id``, when they cannot
+         be inferred from the signature.
 
     Returns:
         The decorated, enhanced computation function.
 
     Raises:
-        ValueError: If the operation identity arguments are invalid.
+        ValueError: If the operation identity or contract declarations are
+         invalid.
     """
     aliases = _check_operation_identity(operation_id, contract_version, aliases)
+    reads_options, roles = _check_contract_declarations(
+        operation_id, qualification, x_alignment, reads_options, roles
+    )
+
+    def _metadata(f: Callable) -> ComputationMetadata:
+        return ComputationMetadata(
+            name=name or f.__name__,
+            description=description or f.__doc__,
+            operation_id=operation_id,
+            contract_version=contract_version,
+            aliases=aliases,
+            qualification=qualification,
+            x_alignment=x_alignment,
+            reads_options=reads_options,
+            roles=roles,
+        )
 
     def decorator(f: Callable[P, R]) -> Callable[P, R]:
         # Gather signature and typing information
@@ -334,13 +423,7 @@ def computation_function(
                 f"         func(obj, {kwarg_example})\n\n"
                 f"   Both styles are fully supported and equivalent.\n\n"
             )
-            metadata = ComputationMetadata(
-                name=name or f.__name__,
-                description=description or f.__doc__,
-                operation_id=operation_id,
-                contract_version=contract_version,
-                aliases=aliases,
-            )
+            metadata = _metadata(f)
             return _make_computation_wrapper(
                 f, ds_cls, ds_param, params, ds_items, new_sig, signature_info, metadata
             )
@@ -360,13 +443,7 @@ def computation_function(
 
             return result
 
-        metadata = ComputationMetadata(
-            name=name or f.__name__,
-            description=description or f.__doc__,
-            operation_id=operation_id,
-            contract_version=contract_version,
-            aliases=aliases,
-        )
+        metadata = _metadata(f)
         setattr(wrapper, COMPUTATION_METADATA_ATTR, metadata)
         return wrapper
 

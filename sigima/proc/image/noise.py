@@ -35,7 +35,9 @@ from sigima.proc.image.arithmetic import addition
 from sigima.proc.image.base import dst_1_to_1
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.add_gaussian_noise", contract_version=1
+)
 def add_gaussian_noise(src: ImageObj, p: NormalDistributionParam) -> ImageObj:
     """Add Gaussian (normal) noise to the input image.
 
@@ -59,7 +61,7 @@ def add_gaussian_noise(src: ImageObj, p: NormalDistributionParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.add_poisson_noise", contract_version=1)
 def add_poisson_noise(src: ImageObj, p: PoissonDistributionParam) -> ImageObj:
     """Add Poisson noise to the input image.
 
@@ -83,7 +85,7 @@ def add_poisson_noise(src: ImageObj, p: PoissonDistributionParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.add_uniform_noise", contract_version=1)
 def add_uniform_noise(src: ImageObj, p: UniformDistributionParam) -> ImageObj:
     """Add uniform noise to the input image.
 

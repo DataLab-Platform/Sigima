@@ -59,7 +59,7 @@ __all__ = [
 # MARK: Noise reduction filters
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.gaussian_filter", contract_version=1)
 def gaussian_filter(src: ImageObj, p: GaussianParam) -> ImageObj:
     """Compute gaussian filter with :py:func:`scipy.ndimage.gaussian_filter`.
 
@@ -73,7 +73,7 @@ def gaussian_filter(src: ImageObj, p: GaussianParam) -> ImageObj:
     return Wrap1to1Func(spi.gaussian_filter, sigma=p.sigma)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.moving_average", contract_version=1)
 def moving_average(src: ImageObj, p: MovingAverageParam) -> ImageObj:
     """Compute moving average with :py:func:`scipy.ndimage.uniform_filter`.
 
@@ -89,7 +89,7 @@ def moving_average(src: ImageObj, p: MovingAverageParam) -> ImageObj:
     )(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.moving_median", contract_version=1)
 def moving_median(src: ImageObj, p: MovingMedianParam) -> ImageObj:
     """Compute moving median with :py:func:`scipy.ndimage.median_filter`.
 
@@ -105,7 +105,7 @@ def moving_median(src: ImageObj, p: MovingMedianParam) -> ImageObj:
     )(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.wiener", contract_version=1)
 def wiener(src: ImageObj) -> ImageObj:
     """Compute Wiener filter with :py:func:`scipy.signal.wiener`
 
@@ -144,7 +144,7 @@ class ButterworthParam(gds.DataSet):
 # MARK: Frequency filters
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.butterworth", contract_version=1)
 def butterworth(src: ImageObj, p: ButterworthParam) -> ImageObj:
     """Compute Butterworth filter with :py:func:`skimage.filters.butterworth`.
 
@@ -191,7 +191,9 @@ class GaussianFreqFilterParam(GaussianParam):
     )
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.gaussian_freq_filter", contract_version=1
+)
 def gaussian_freq_filter(src: ImageObj, p: GaussianFreqFilterParam) -> ImageObj:
     """Apply a Gaussian filter in the frequency domain.
 

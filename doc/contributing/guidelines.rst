@@ -81,14 +81,18 @@ guidelines:
 Operation contracts
 -------------------
 
-Some computation functions declare an operation contract with
+Every public computation function declares an operation contract with
 ``@computation_function(operation_id=..., contract_version=...)`` (see
 :mod:`sigima.proc.contracts`). Applications record these identifiers in
 workspace provenance and use them to replay a computation later, possibly with
-another Sigima version. Follow these rules when you change such a function:
+another Sigima version. Everything about an operation is declared next to its
+function; :mod:`sigima.proc.contracts` holds no data naming an operation.
+Follow these rules when you add or change a computation function:
 
-- Never derive an operation identifier from a Python name. Keep the identifier
-  when you rename or move the function.
+- Write the identifier in clear next to the function: ``sigima.signal.<name>``
+  or ``sigima.image.<name>``, ``contract_version=1`` at the first declaration.
+  Never derive an identifier from a Python name. Keep the identifier when you
+  rename or move the function.
 
 - If the identifier itself must change, keep the previous one in ``aliases``.
 
@@ -96,14 +100,38 @@ another Sigima version. Follow these rules when you change such a function:
   renamed parameters, a different default behavior, different outputs or a
   different scientific result for the same inputs.
 
+- The structure of the contract (input roles, parameter arguments, outputs) is
+  inferred from the annotations. Annotate every argument and the return value
+  with names imported at runtime (not only under ``TYPE_CHECKING``). When roles
+  cannot be inferred (more than two input objects), declare them with
+  ``roles=(...)``.
+
+- Declare the :data:`sigima.config.options` read by the computation itself with
+  ``reads_options=(...)``: applications record their values and restore them
+  for a replay. Random generators take their seed as a parameter.
+
 - Never change a reference case to make a test pass. Update the reference
   cases deliberately, and explain the scientific reason, when a numerical
   correction changes the result.
 
-- Declaring a contract does not qualify it for replay. Qualification is listed
-  in :mod:`sigima.proc.contracts` and requires exact reference tests.
+- Declaring a contract does not qualify it for replay. A qualification is
+  declared next to the function with
+  ``qualification=ReplayQualification(contract_version=..., comparison=...)``
+  (see :mod:`sigima.proc.contract_types`). It names the contract version that
+  was actually tested: increasing ``contract_version`` does not qualify the new
+  version. It requires the validation test of the function and the replay
+  test of its contract shape.
+
+- The comparison rule of a qualification is exact by default (``EXACT``).
+  Declare a tolerance (``tolerance(...)``) only when the nature of the
+  computation justifies it (transforms, interpolations, iterative fits...),
+  with that justification, and state whether results must still be identical
+  within an identical environment. Never widen a tolerance to hide an error:
+  changing a rule changes the qualification.
 
 - Some two-input contracts align the operand on the source grid before the
-  call (see :mod:`sigima.proc.alignment`). Applications record the rule and its
-  version, and a replay refuses unknown rules. Never change a rule in place:
-  add a new version and keep the previous one supported.
+  call: declare the policy with ``x_alignment=...`` (see
+  :mod:`sigima.proc.policies` and :mod:`sigima.proc.alignment`). Applications
+  record the policy and its version, and a replay refuses unknown policies.
+  Never change a policy in place: add a new version and keep the previous one
+  supported.

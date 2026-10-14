@@ -45,6 +45,7 @@ from sigima.proc.base import (
     ReplaceSpecialValuesSignalParam,
     dst_2_to_1,
 )
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fourier, interpolation, scaling, windowing
 from sigima.tools.signal import replace_values as rv
@@ -79,7 +80,7 @@ class InterpolationParam(gds.DataSet, title=_("Interpolation")):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.interpolate", contract_version=1)
 def interpolate(src1: SignalObj, src2: SignalObj, p: InterpolationParam) -> SignalObj:
     """Interpolate data with :py:func:`sigima.tools.signal.interpolation.interpolate`.
 
@@ -150,7 +151,7 @@ class Resampling1DParam(InterpolationParam):
             self.nbpts = len(obj.x)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.resampling", contract_version=1)
 def resampling(src: SignalObj, p: Resampling1DParam) -> SignalObj:
     """Resample data with :py:func:`sigima.tools.signal.interpolation.interpolate`
 
@@ -205,7 +206,11 @@ def check_same_sample_rate(src1: SignalObj, src2: SignalObj) -> None:
         raise ValueError(f"Signals must have the same sample rate (dx): {dx1} != {dx2}")
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.deconvolution",
+    contract_version=1,
+    reads_options=("auto_normalize_kernel",),
+)
 def deconvolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute deconvolution.
 
@@ -245,7 +250,11 @@ def deconvolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.normalize", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.normalize",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def normalize(src: SignalObj, p: NormalizeParam) -> SignalObj:
     """Normalize data with :py:func:`sigima.tools.signal.level.normalize`
 
@@ -290,7 +299,7 @@ def normalize(src: SignalObj, p: NormalizeParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.derivative", contract_version=1)
 def derivative(src: SignalObj) -> SignalObj:
     """Compute derivative with :py:func:`numpy.gradient`
 
@@ -317,7 +326,7 @@ def derivative(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.integral", contract_version=1)
 def integral(src: SignalObj) -> SignalObj:
     """Compute integral with :py:func:`scipy.integrate.cumulative_trapezoid`
 
@@ -356,7 +365,7 @@ class XYCalibrateParam(gds.DataSet, title=_("Calibration")):
     b = gds.FloatItem("b", default=0.0)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.calibration", contract_version=1)
 def calibration(src: SignalObj, p: XYCalibrateParam) -> SignalObj:
     """Compute linear calibration
 
@@ -385,7 +394,7 @@ def calibration(src: SignalObj, p: XYCalibrateParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.clip", contract_version=1)
 def clip(src: SignalObj, p: ClipParam) -> SignalObj:
     """Compute maximum data clipping with :py:func:`numpy.clip`
 
@@ -415,7 +424,9 @@ def clip(src: SignalObj, p: ClipParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.offset_correction", contract_version=1
+)
 def offset_correction(src: SignalObj, p: ROI1DParam) -> SignalObj:
     """Correct offset: subtract the mean value of the signal in the specified range
     (baseline correction)
@@ -441,7 +452,7 @@ class DetrendingParam(gds.DataSet, title=_("Detrending")):
     method = gds.ChoiceItem(_("Detrending method"), methods, default="linear")
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.detrending", contract_version=1)
 def detrending(src: SignalObj, p: DetrendingParam) -> SignalObj:
     """Detrend data with :py:func:`scipy.signal.detrend`
 
@@ -497,7 +508,7 @@ class WindowingParam(gds.DataSet, title=_("Windowing")):
             raise ValueError("sigma must be non-zero for Gaussian windowing")
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.apply_window", contract_version=1)
 def apply_window(src: SignalObj, p: WindowingParam) -> SignalObj:
     """Compute windowing with :py:func:`sigima.tools.signal.windowing.apply_window`.
 
@@ -523,7 +534,7 @@ def apply_window(src: SignalObj, p: WindowingParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.reverse_x", contract_version=1)
 def reverse_x(src: SignalObj) -> SignalObj:
     """Reverse x-axis
 
@@ -538,7 +549,11 @@ def reverse_x(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.convolution",
+    contract_version=1,
+    reads_options=("auto_normalize_kernel",),
+)
 def convolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute convolution of two signals with :py:func:`scipy.signal.convolve`.
 
@@ -572,7 +587,7 @@ def convolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.xy_mode", contract_version=1)
 def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Simulate the X-Y mode of an oscilloscope.
 
@@ -600,7 +615,9 @@ def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.replace_x_by_other_y", contract_version=1
+)
 def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Create a new signal using Y from src1 and Y from src2 as X coordinates.
 
@@ -700,7 +717,9 @@ def _apply_signal_strategy(
     return x, y, False
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.replace_special_values", contract_version=1
+)
 def replace_special_values(
     src: SignalObj, p: ReplaceSpecialValuesSignalParam
 ) -> SignalObj:

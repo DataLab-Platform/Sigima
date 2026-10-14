@@ -60,7 +60,7 @@ __all__ = [
 ]
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.extract_rois", contract_version=1)
 def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
     """Extract multiple regions of interest from data
 
@@ -101,7 +101,7 @@ def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.extract_roi", contract_version=1)
 def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
     """Extract single ROI
 
@@ -285,7 +285,7 @@ class LineProfileParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.line_profile", contract_version=1)
 def line_profile(src: ImageObj, p: LineProfileParam) -> SignalObj:
     """Compute horizontal or vertical profile
 
@@ -346,7 +346,7 @@ def csline(data: np.ndarray, row0, col0, row1, col1) -> tuple[np.ndarray, np.nda
     return x, y
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.segment_profile", contract_version=1)
 def segment_profile(src: ImageObj, p: SegmentProfileParam) -> SignalObj:
     """Compute segment profile
 
@@ -383,7 +383,7 @@ class AverageProfileParam(gds.DataSet):
     _hgroup_end = gds.EndGroup(_("Profile rectangular area"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.average_profile", contract_version=1)
 def average_profile(src: ImageObj, p: AverageProfileParam) -> SignalObj:
     """Compute horizontal or vertical average profile
 
@@ -463,7 +463,7 @@ class RadialProfileParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.radial_profile", contract_version=1)
 def radial_profile(src: ImageObj, p: RadialProfileParam) -> SignalObj:
     """Compute radial profile around the centroid
     with :py:func:`sigima.tools.image.get_radial_profile`

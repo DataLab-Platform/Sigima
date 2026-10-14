@@ -53,7 +53,7 @@ class PeakDetectionParam(gds.DataSet, title=_("Peak detection")):
     min_dist = gds.IntItem(_("Minimum distance"), default=1, min=1)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.peak_detection", contract_version=1)
 def peak_detection(src: SignalObj, p: PeakDetectionParam) -> SignalObj:
     """Peak detection with
     :py:func:`sigima.tools.signal.peakdetection.peak_indices`
@@ -183,7 +183,9 @@ def markers_table_to_signal(
     return signal
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.extract_peak_positions", contract_version=1
+)
 def extract_peak_positions(obj: SignalObj, p: PeakDetectionParam) -> TableResult:
     """Extract peak positions as an XY-markers table.
 
@@ -280,7 +282,7 @@ class FWHMParam(
             raise ValueError("xmin must be strictly less than xmax")
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.fwhm", contract_version=1)
 def fwhm(obj: SignalObj, param: FWHMParam) -> GeometryResult | None:
     """Compute FWHM with :py:func:`sigima.tools.signal.pulse.fwhm`
 
@@ -302,7 +304,7 @@ def fwhm(obj: SignalObj, param: FWHMParam) -> GeometryResult | None:
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.fw1e2", contract_version=1)
 def fw1e2(obj: SignalObj) -> GeometryResult | None:
     """Compute FW at 1/e² with :py:func:`sigima.tools.signal.pulse.fw1e2`
 
@@ -324,7 +326,7 @@ class OrdinateParam(gds.DataSet):
     y = gds.FloatItem("y", default=0.0)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.full_width_at_y", contract_version=1)
 def full_width_at_y(obj: SignalObj, p: OrdinateParam) -> GeometryResult | None:
     """
     Compute full width at a given y value for a signal object.
@@ -341,7 +343,7 @@ def full_width_at_y(obj: SignalObj, p: OrdinateParam) -> GeometryResult | None:
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.x_at_y", contract_version=1)
 def x_at_y(obj: SignalObj, p: OrdinateParam) -> GeometryResult | None:
     """
     Compute the smallest x-value at a given y-value for a signal object.
@@ -377,7 +379,7 @@ class AbscissaParam(gds.DataSet):
     x = gds.FloatItem("x", default=0.0)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.y_at_x", contract_version=1)
 def y_at_x(obj: SignalObj, p: AbscissaParam) -> GeometryResult | None:
     """
     Compute the smallest y-value at a given x-value for a signal object.
@@ -403,7 +405,7 @@ def y_at_x(obj: SignalObj, p: AbscissaParam) -> GeometryResult | None:
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.stats", contract_version=1)
 def stats(obj: SignalObj) -> TableResult:
     """Compute statistics on a signal
 
@@ -426,7 +428,7 @@ def stats(obj: SignalObj) -> TableResult:
     return table.compute(obj)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.bandwidth_3db", contract_version=1)
 def bandwidth_3db(obj: SignalObj) -> GeometryResult | None:
     """Compute bandwidth at -3 dB with
     :py:func:`sigima.tools.signal.misc.bandwidth`
@@ -475,7 +477,9 @@ class DynamicParam(gds.DataSet, title=_("Dynamic parameters")):
     )
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.dynamic_parameters", contract_version=1
+)
 def dynamic_parameters(src: SignalObj, p: DynamicParam) -> TableResult:
     """Compute Dynamic parameters
     using the following functions:

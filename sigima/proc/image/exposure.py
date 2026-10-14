@@ -133,7 +133,9 @@ class BrightnessContrastParam(gds.DataSet, title=_("Brightness and contrast")):
             raise ValueError("minimum must be finite and strictly less than maximum")
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.adjust_brightness_contrast", contract_version=1
+)
 def adjust_brightness_contrast(src: ImageObj, p: BrightnessContrastParam) -> ImageObj:
     """Apply a clipped linear brightness and contrast adjustment.
 
@@ -181,7 +183,7 @@ class AdjustGammaParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.adjust_gamma", contract_version=1)
 def adjust_gamma(src: ImageObj, p: AdjustGammaParam) -> ImageObj:
     """Gamma correction with :py:func:`skimage.exposure.adjust_gamma`
 
@@ -214,7 +216,7 @@ class AdjustLogParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.adjust_log", contract_version=1)
 def adjust_log(src: ImageObj, p: AdjustLogParam) -> ImageObj:
     """Compute log correction with :py:func:`skimage.exposure.adjust_log`
 
@@ -254,7 +256,7 @@ class AdjustSigmoidParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.adjust_sigmoid", contract_version=1)
 def adjust_sigmoid(src: ImageObj, p: AdjustSigmoidParam) -> ImageObj:
     """Compute sigmoid correction with :py:func:`skimage.exposure.adjust_sigmoid`
 
@@ -299,7 +301,7 @@ class RescaleIntensityParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.rescale_intensity", contract_version=1)
 def rescale_intensity(src: ImageObj, p: RescaleIntensityParam) -> ImageObj:
     """Rescale image intensity levels
     with :py:func:`skimage.exposure.rescale_intensity`
@@ -334,7 +336,7 @@ class EqualizeHistParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.equalize_hist", contract_version=1)
 def equalize_hist(src: ImageObj, p: EqualizeHistParam) -> ImageObj:
     """Histogram equalization with :py:func:`skimage.exposure.equalize_hist`
 
@@ -363,7 +365,9 @@ class EqualizeAdaptHistParam(EqualizeHistParam):
     )
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.equalize_adapthist", contract_version=1
+)
 def equalize_adapthist(src: ImageObj, p: EqualizeAdaptHistParam) -> ImageObj:
     """Adaptive histogram equalization
     with :py:func:`skimage.exposure.equalize_adapthist`
@@ -391,7 +395,7 @@ class FlatFieldParam(gds.DataSet):
     threshold = gds.FloatItem(_("Threshold"), default=0.0)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.flatfield", contract_version=1)
 def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
     """Compute flat field correction with :py:func:`sigima.tools.image.flatfield`
 
@@ -414,7 +418,7 @@ def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
 # --------------------------------------------------------------------------------------
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.normalize", contract_version=1)
 def normalize(src: ImageObj, p: NormalizeParam) -> ImageObj:
     """
     Normalize image data depending on its maximum,
@@ -433,7 +437,7 @@ def normalize(src: ImageObj, p: NormalizeParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.histogram", contract_version=1)
 def histogram(src: ImageObj, p: HistogramParam) -> SignalObj:
     """Compute histogram of the image data, with :py:func:`numpy.histogram`
 
@@ -461,7 +465,7 @@ def histogram(src: ImageObj, p: HistogramParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.clip", contract_version=1)
 def clip(src: ImageObj, p: ClipParam) -> ImageObj:
     """Apply clipping with :py:func:`numpy.clip`
 
@@ -475,7 +479,7 @@ def clip(src: ImageObj, p: ClipParam) -> ImageObj:
     return Wrap1to1Func(np.clip, a_min=p.lower, a_max=p.upper)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.offset_correction", contract_version=1)
 def offset_correction(src: ImageObj, p: ROI2DParam) -> ImageObj:
     """Apply offset correction
 
@@ -540,7 +544,9 @@ def _apply_image_strategy(
     return data
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.replace_special_values", contract_version=1
+)
 def replace_special_values(
     src: ImageObj, p: ReplaceSpecialValuesImageParam
 ) -> ImageObj:

@@ -65,7 +65,7 @@ class BinningParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.binning", contract_version=1)
 def binning(src: ImageObj, p: BinningParam) -> ImageObj:
     """Binning: image pixel binning (or aggregation).
 
@@ -148,7 +148,7 @@ class ZeroPadding2DParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.zero_padding", contract_version=1)
 def zero_padding(
     src: ImageObj,
     p: ZeroPadding2DParam | None = None,

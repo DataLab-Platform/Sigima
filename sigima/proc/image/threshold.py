@@ -78,7 +78,7 @@ class ThresholdParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold", contract_version=1)
 def threshold(src: ImageObj, p: ThresholdParam) -> ImageObj:
     """Compute the threshold, using one of the available algorithms:
 
@@ -118,7 +118,7 @@ def threshold(src: ImageObj, p: ThresholdParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold_isodata", contract_version=1)
 def threshold_isodata(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Isodata algorithm with default parameters,
     see :py:func:`skimage.filters.threshold_isodata`
@@ -132,7 +132,7 @@ def threshold_isodata(src: ImageObj) -> ImageObj:
     return threshold(src, ThresholdParam.create(method="isodata"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold_li", contract_version=1)
 def threshold_li(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Li algorithm with default parameters,
     see :py:func:`skimage.filters.threshold_li`
@@ -146,7 +146,7 @@ def threshold_li(src: ImageObj) -> ImageObj:
     return threshold(src, ThresholdParam.create(method="li"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold_mean", contract_version=1)
 def threshold_mean(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Mean algorithm,
     see :py:func:`skimage.filters.threshold_mean`
@@ -160,7 +160,7 @@ def threshold_mean(src: ImageObj) -> ImageObj:
     return threshold(src, ThresholdParam.create(method="mean"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold_minimum", contract_version=1)
 def threshold_minimum(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Minimum algorithm with default parameters,
     see :py:func:`skimage.filters.threshold_minimum`
@@ -174,7 +174,7 @@ def threshold_minimum(src: ImageObj) -> ImageObj:
     return threshold(src, ThresholdParam.create(method="minimum"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold_otsu", contract_version=1)
 def threshold_otsu(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Otsu algorithm with default parameters,
     see :py:func:`skimage.filters.threshold_otsu`
@@ -188,7 +188,9 @@ def threshold_otsu(src: ImageObj) -> ImageObj:
     return threshold(src, ThresholdParam.create(method="otsu"))
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.threshold_triangle", contract_version=1
+)
 def threshold_triangle(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Triangle algorithm with default parameters,
     see :py:func:`skimage.filters.threshold_triangle`
@@ -202,7 +204,7 @@ def threshold_triangle(src: ImageObj) -> ImageObj:
     return threshold(src, ThresholdParam.create(method="triangle"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.threshold_yen", contract_version=1)
 def threshold_yen(src: ImageObj) -> ImageObj:
     """Compute the threshold using the Yen algorithm with default parameters,
     see :py:func:`skimage.filters.threshold_yen`

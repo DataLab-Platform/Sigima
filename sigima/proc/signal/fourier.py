@@ -149,7 +149,7 @@ class ZeroPadding1DParam(gds.DataSet, title=_("Zero padding")):
     ).set_prop("display", active=_func_prop)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.zero_padding", contract_version=1)
 def zero_padding(src: SignalObj, p: ZeroPadding1DParam) -> SignalObj:
     """Compute zero padding with :py:func:`sigima.tools.signal.fourier.zero_padding`.
 
@@ -186,7 +186,7 @@ def zero_padding(src: SignalObj, p: ZeroPadding1DParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.fft", contract_version=1)
 def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
     """Compute FFT with :py:func:`sigima.tools.signal.fourier.fft1d`.
 
@@ -209,7 +209,7 @@ def fft(src: SignalObj, p: FFTParam | None = None) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.ifft", contract_version=1)
 def ifft(src: SignalObj) -> SignalObj:
     """Compute the inverse FFT with :py:func:`sigima.tools.signal.fourier.ifft1d`.
 
@@ -229,7 +229,9 @@ def ifft(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.magnitude_spectrum", contract_version=1
+)
 def magnitude_spectrum(src: SignalObj, p: SpectrumParam | None = None) -> SignalObj:
     """Compute magnitude spectrum.
 
@@ -254,7 +256,7 @@ def magnitude_spectrum(src: SignalObj, p: SpectrumParam | None = None) -> Signal
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.phase_spectrum", contract_version=1)
 def phase_spectrum(src: SignalObj) -> SignalObj:
     """Compute phase spectrum.
 
@@ -277,7 +279,7 @@ def phase_spectrum(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.psd", contract_version=1)
 def psd(src: SignalObj, p: SpectrumParam | None = None) -> SignalObj:
     """Compute power spectral density with :py:func:`sigima.tools.signal.fourier.psd`.
 

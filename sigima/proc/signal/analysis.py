@@ -34,7 +34,7 @@ from sigima.proc.decorator import computation_function
 from sigima.tools.signal import dynamic, features, pulse
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.histogram", contract_version=1)
 def histogram(src: SignalObj, p: HistogramParam) -> SignalObj:
     """Compute histogram with :py:func:`numpy.histogram`
 
@@ -130,7 +130,9 @@ class PulseFeaturesParam(gds.DataSet, title=_("Pulse features")):
         self.xendmin, self.xendmax = pulse.get_end_range(obj.x)
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.extract_pulse_features", contract_version=1
+)
 def extract_pulse_features(obj: SignalObj, p: PulseFeaturesParam) -> TableResult:
     """Extract pulse features.
 
@@ -190,7 +192,9 @@ def extract_pulse_features(obj: SignalObj, p: PulseFeaturesParam) -> TableResult
     return builder.compute(obj)
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.sampling_rate_period", contract_version=1
+)
 def sampling_rate_period(obj: SignalObj) -> TableResult:
     """Compute sampling rate and period
     using the following functions:
@@ -210,7 +214,7 @@ def sampling_rate_period(obj: SignalObj) -> TableResult:
     return table.compute(obj)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.contrast", contract_version=1)
 def contrast(obj: SignalObj) -> TableResult:
     """Compute contrast with :py:func:`sigima.tools.signal.misc.contrast`"""
     table = TableResultBuilder(_("Contrast"))
@@ -218,7 +222,7 @@ def contrast(obj: SignalObj) -> TableResult:
     return table.compute(obj)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.x_at_minmax", contract_version=1)
 def x_at_minmax(obj: SignalObj) -> TableResult:
     """
     Compute the smallest argument at the minima and the smallest argument at the maxima.
