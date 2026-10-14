@@ -411,13 +411,13 @@ def _is_flat(specs: Sequence[ParameterSpec]) -> bool:
     return len(specs) == 1 and specs[0].container == "single"
 
 
-def _encode_argument(spec: ParameterSpec, value: Any) -> Any:
+def _encode_argument(spec: ParameterSpec, value: Any, defaulted: bool) -> Any:
     if value is None:
-        if not spec.optional:
-            raise ParameterEncodingError(f"Parameter {spec.name!r} is required")
-        if spec.container == "single":
+        if spec.container == "single" and (spec.optional or defaulted):
             # None stands for a default instance: record the values actually used.
             return encode_dataset(spec.paramclass())
+        if not spec.optional:
+            raise ParameterEncodingError(f"Parameter {spec.name!r} is required")
         return None
     multiple = isinstance(value, (list, tuple))
     if multiple and spec.container in ("list", "single_or_list"):
@@ -445,7 +445,9 @@ def encode_parameters(
     Args:
         specs: Parameter arguments declared by the contract.
         arguments: Values actually passed, in the same order (missing trailing
-         arguments stand for None).
+         arguments stand for None). When the first required parameter set is
+         None, the computation function builds a default instance (see
+         :mod:`sigima.proc.decorator`): its values are recorded.
 
     Returns:
         The encoded parameters (see the module documentation).
@@ -458,10 +460,13 @@ def encode_parameters(
             f"{len(arguments)} parameter arguments for {len(specs)} declared"
         )
     arguments = list(arguments) + [None] * (len(specs) - len(arguments))
+    defaulted = next(
+        (s for s in specs if s.container == "single" and not s.optional), None
+    )
     if _is_flat(specs):
-        return _encode_argument(specs[0], arguments[0])
+        return _encode_argument(specs[0], arguments[0], specs[0] is defaulted)
     return {
-        spec.name: _encode_argument(spec, value)
+        spec.name: _encode_argument(spec, value, spec is defaulted)
         for spec, value in zip(specs, arguments)
     }
 

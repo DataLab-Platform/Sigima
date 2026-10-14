@@ -20,7 +20,7 @@ import sigima.proc.signal
 from sigima.config import options
 from sigima.enums import FrequencyFilterMethod
 from sigima.proc import contracts
-from sigima.proc.contract_types import ParameterSpec
+from sigima.proc.contract_types import ParameterEncodingError, ParameterSpec
 from sigima.proc.parameter_codec import (
     decode_dataset,
     decode_parameters,
@@ -173,6 +173,25 @@ def test_optional_parameter_records_effective_values() -> None:
         (decoded,) = contract.decode_parameters(values)
         assert decoded.shift is shift
     assert contract.encode_parameters([]) == contract.encode_parameters([None])
+
+
+def test_omitted_required_parameter_records_defaults() -> None:
+    """An omitted required parameter set records the defaults the function uses."""
+    contract = contracts.contract_for_function(sigima.proc.image.normalize)
+    assert not contract.parameters[0].optional
+    values = contract.encode_parameters([None])
+    assert values == encode_dataset(sigima.params.NormalizeParam.create())
+    image = sigima.objects.create_image("i", np.arange(6.0).reshape(2, 3))
+    (decoded,) = contract.decode_parameters(values)
+    # The computation function decorator builds the omitted parameter set.
+    expected = sigima.proc.image.normalize(image)  # pylint: disable=E1120
+    assert np.array_equal(
+        sigima.proc.image.normalize(image, decoded).data, expected.data
+    )
+    two = ParameterSpec("a", sigima.params.NormalizeParam)
+    other = ParameterSpec("b", sigima.params.NormalizeParam)
+    with pytest.raises(ParameterEncodingError, match="'b' is required"):
+        encode_parameters((two, other), [None, None])
 
 
 def test_version_1_values_decode_unchanged() -> None:
