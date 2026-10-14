@@ -57,6 +57,12 @@ msgstr ":mod:`sigima.proc`"
 msgid "Computation functions, which operate on signal and image objects (:class:`sigima.objects.SignalObj` or :class:`sigima.objects.ImageObj`) and return signal or image objects, or scalar results (:class:`sigima.objects.GeometryResult` or :class:`sigima.objects.TableResult`)."
 msgstr "Fonctions de calcul, qui opèrent sur des objets signal et image (:class:`sigima.objects.SignalObj` ou :class:`sigima.objects.ImageObj`) et retournent des objets signal ou image, ou des résultats scalaires (:class:`sigima.objects.GeometryResult` ou :class:`sigima.objects.TableResult`)."
 
+msgid ":mod:`sigima.io`"
+msgstr ":mod:`sigima.io`"
+
+msgid "Input/output functions for reading and writing signals and images, including parameterized RAW image import and format-aware image export."
+msgstr "Fonctions d'entr?e/sortie pour la lecture et l'?criture de signaux et d'images, y compris l'import param?tr? d'images RAW et l'export d'images adapt? au format."
+
 msgid ":mod:`sigima.config`"
 msgstr ":mod:`sigima.config`"
 
