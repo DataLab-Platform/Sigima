@@ -82,7 +82,7 @@ def test_describe_qualified_call() -> None:
     }
     assert description["pattern"] == "1_to_1" and description["roles"] == ["source"]
     assert description["parameters"] == {"method": "maximum"}
-    assert not description["limits"]
+    assert not description["limits"] and description["options"] == {}
     assert description["implementation"] == {
         "package": "sigima",
         "version": sigima.__version__,
@@ -264,6 +264,12 @@ def test_global_options_are_recorded_and_restored() -> None:
         ordinary = prepare_execution(contract, [src, kernel], param=None)
         assert ordinary.context["options"] == {"auto_normalize_kernel": False}
         reference = ordinary.run()
+        # The description of the call records the same values.
+        description = describe_call(contract.function, [src, kernel])
+        assert description["options"] == ordinary.context["options"]
+    image = sigima.objects.create_image("i", np.ones((3, 3)))
+    image_conv = describe_call(sigima.proc.image.convolution, [image, image])
+    assert set(image_conv["options"]) == {"auto_normalize_kernel"}
     before = options.auto_normalize_kernel.get()
     with options.auto_normalize_kernel.context(True):
         replay = prepare_execution(
