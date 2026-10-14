@@ -90,6 +90,8 @@ jobs:
         fi
     - name: Lint with Ruff
       run: ruff check --output-format=github sigima
+    - name: Build the operation contract registry (without pytest)
+      run: python -c "from sigima.proc.contracts import build_contract_registry as b; print(len(b().contracts), 'operation contracts')"
     - name: Test with pytest
       env:
         # Calls captured from the validation tests, for cross-environment replays
