@@ -311,3 +311,28 @@ def test_envelope_is_checked() -> None:
         encode_parameters(specs, [[roi], None, None])
     with pytest.raises(contracts.InvalidParametersError):
         decode_parameters((), {"a": 1})
+
+
+def test_declared_class_items_only() -> None:
+    """A subclass instance is encoded with the items of the declared class."""
+
+    class Extended(sigima.params.NormalizeParam):
+        """Parameter subclass carrying an extra item."""
+
+        extra = gds.IntItem("Extra", default=3)
+
+    spec = ParameterSpec("p", sigima.params.NormalizeParam)
+    values = encode_parameters((spec,), [Extended.create(method="rms")])
+    assert values == {"method": "rms"}
+    (decoded,) = decode_parameters((spec,), values)
+    assert decoded.__class__ is sigima.params.NormalizeParam
+
+
+def test_null_follows_item_validation() -> None:
+    """None is accepted by items whose validation accepts it (``check=False``)."""
+    values = encode_dataset(sigima.params.HistogramParam())
+    assert values["lower"] is None and values["upper"] is None
+    decoded = decode_dataset(sigima.params.HistogramParam, values)
+    assert decoded.lower is None
+    with pytest.raises(contracts.InvalidParametersError):
+        decode_dataset(sigima.params.HistogramParam, dict(values, bins=None))

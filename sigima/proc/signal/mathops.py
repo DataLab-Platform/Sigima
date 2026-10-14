@@ -17,6 +17,7 @@ from sigima.enums import AngleUnit
 from sigima.objects import SignalObj
 from sigima.proc.alignment import SOURCE_GRID_LINEAR_HOLD
 from sigima.proc.base import AngleUnitParam, PhaseParam, dst_1_to_1, dst_2_to_1
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import (
     Wrap1to1Func,
@@ -26,7 +27,11 @@ from sigima.proc.signal.base import (
 from sigima.tools import coordinates
 
 
-@computation_function(operation_id="sigima.signal.transpose", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.transpose",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def transpose(src: SignalObj) -> SignalObj:
     """Transpose signal (swap X and Y axes).
 
@@ -46,7 +51,11 @@ def transpose(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.inverse", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.inverse",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def inverse(src: SignalObj) -> SignalObj:
     """Compute the element-wise inverse of a signal.
 
@@ -81,7 +90,11 @@ def inverse(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.absolute", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.absolute",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def absolute(src: SignalObj) -> SignalObj:
     """Compute absolute value with :py:data:`numpy.absolute`
 
@@ -94,7 +107,11 @@ def absolute(src: SignalObj) -> SignalObj:
     return Wrap1to1Func(np.absolute)(src)
 
 
-@computation_function(operation_id="sigima.signal.real", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.real",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def real(src: SignalObj) -> SignalObj:
     """Compute real part with :py:func:`numpy.real`
 
@@ -107,7 +124,11 @@ def real(src: SignalObj) -> SignalObj:
     return Wrap1to1Func(np.real)(src)
 
 
-@computation_function(operation_id="sigima.signal.imag", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.imag",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def imag(src: SignalObj) -> SignalObj:
     """Compute imaginary part with :py:func:`numpy.imag`
 
@@ -120,7 +141,11 @@ def imag(src: SignalObj) -> SignalObj:
     return Wrap1to1Func(np.imag)(src)
 
 
-@computation_function(operation_id="sigima.signal.phase", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.phase",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def phase(src: SignalObj, p: PhaseParam) -> SignalObj:
     """Compute the phase (argument) of a complex signal.
 
@@ -152,6 +177,7 @@ def phase(src: SignalObj, p: PhaseParam) -> SignalObj:
     operation_id="sigima.signal.complex_from_real_imag",
     contract_version=1,
     x_alignment=SOURCE_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def complex_from_real_imag(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Combine two real signals into a complex signal using real + i * imag.
@@ -182,6 +208,7 @@ def complex_from_real_imag(src1: SignalObj, src2: SignalObj) -> SignalObj:
     operation_id="sigima.signal.complex_from_magnitude_phase",
     contract_version=1,
     x_alignment=SOURCE_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def complex_from_magnitude_phase(
     src1: SignalObj, src2: SignalObj, p: AngleUnitParam
@@ -229,7 +256,11 @@ class DataTypeSParam(gds.DataSet, title=_("Convert data type")):
     )
 
 
-@computation_function(operation_id="sigima.signal.astype", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.astype",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def astype(src: SignalObj, p: DataTypeSParam) -> SignalObj:
     """Convert data type with :py:func:`numpy.astype`
 
@@ -245,7 +276,11 @@ def astype(src: SignalObj, p: DataTypeSParam) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.log10", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.log10",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def log10(src: SignalObj) -> SignalObj:
     """Compute Log10 with :py:data:`numpy.log10`
 
@@ -273,7 +308,11 @@ def log10(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.exp", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.exp",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def exp(src: SignalObj) -> SignalObj:
     """Compute exponential with :py:data:`numpy.exp`
 
@@ -298,7 +337,11 @@ def exp(src: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.sqrt", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.sqrt",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def sqrt(src: SignalObj) -> SignalObj:
     """Compute square root with :py:data:`numpy.sqrt`
 
@@ -332,7 +375,11 @@ class PowerParam(gds.DataSet, title=_("Power")):
     power = gds.FloatItem(_("Power"), default=2.0)
 
 
-@computation_function(operation_id="sigima.signal.power", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.power",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def power(src: SignalObj, p: PowerParam) -> SignalObj:
     """Compute power with :py:data:`numpy.power`
 
@@ -357,7 +404,11 @@ def power(src: SignalObj, p: PowerParam) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.to_polar", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.to_polar",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def to_polar(src: SignalObj, p: AngleUnitParam) -> SignalObj:
     """Convert Cartesian coordinates to polar coordinates.
 
@@ -394,7 +445,11 @@ def to_polar(src: SignalObj, p: AngleUnitParam) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.to_cartesian", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.to_cartesian",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def to_cartesian(src: SignalObj, p: AngleUnitParam) -> SignalObj:
     """Convert polar coordinates to Cartesian coordinates.
 

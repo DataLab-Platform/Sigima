@@ -64,6 +64,7 @@ def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
     operation_id="sigima.signal.addition",
     contract_version=1,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def addition(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise sum of multiple signals.
@@ -102,6 +103,7 @@ def addition(src_list: list[SignalObj]) -> SignalObj:
     operation_id="sigima.signal.average",
     contract_version=1,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def average(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise average of multiple signals.
@@ -141,6 +143,7 @@ def average(src_list: list[SignalObj]) -> SignalObj:
     operation_id="sigima.signal.standard_deviation",
     contract_version=1,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise standard deviation of multiple signals.
@@ -175,6 +178,7 @@ def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
     operation_id="sigima.signal.product",
     contract_version=1,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def product(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise product of multiple signals.
@@ -218,7 +222,9 @@ def product(src_list: list[SignalObj]) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.addition_constant", contract_version=1
+    operation_id="sigima.signal.addition_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def addition_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     """Compute the sum of a signal and a constant value.
@@ -250,7 +256,9 @@ def addition_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.difference_constant", contract_version=1
+    operation_id="sigima.signal.difference_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def difference_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     """Compute the difference between a signal and a constant value.
@@ -282,7 +290,11 @@ def difference_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.product_constant", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.product_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def product_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     """Compute the product of a signal and a constant value.
 
@@ -317,7 +329,9 @@ def product_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.division_constant", contract_version=1
+    operation_id="sigima.signal.division_constant",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def division_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     """Compute the division of a signal by a constant value.
@@ -360,6 +374,7 @@ def division_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     operation_id="sigima.signal.arithmetic",
     contract_version=1,
     x_alignment=SOURCE_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def arithmetic(src1: SignalObj, src2: SignalObj, p: ArithmeticParam) -> SignalObj:
     """Perform an arithmetic operation on two signals.
@@ -452,6 +467,7 @@ def difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     operation_id="sigima.signal.quadratic_difference",
     contract_version=1,
     x_alignment=SOURCE_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def quadratic_difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute the normalized difference between two signals.
@@ -490,6 +506,7 @@ def quadratic_difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     operation_id="sigima.signal.division",
     contract_version=1,
     x_alignment=SOURCE_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def division(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute the element-wise division between two signals.
@@ -525,6 +542,7 @@ def division(src1: SignalObj, src2: SignalObj) -> SignalObj:
     operation_id="sigima.signal.signals_to_image",
     contract_version=1,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def signals_to_image(src_list: list[SignalObj], p: SignalsToImageParam) -> ImageObj:
     """Combine multiple signals into an image.

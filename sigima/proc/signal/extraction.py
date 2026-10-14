@@ -11,10 +11,15 @@ import numpy as np
 
 from sigima.objects import ROI1DParam, SignalObj
 from sigima.proc.base import dst_1_to_1
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 
 
-@computation_function(operation_id="sigima.signal.extract_rois", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.extract_rois",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def extract_rois(src: SignalObj, params: list[ROI1DParam]) -> SignalObj:
     """Extract multiple regions of interest from data
 
@@ -57,7 +62,11 @@ def extract_rois(src: SignalObj, params: list[ROI1DParam]) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.extract_roi", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.extract_roi",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def extract_roi(src: SignalObj, p: ROI1DParam) -> SignalObj:
     """Extract single region of interest from data
 

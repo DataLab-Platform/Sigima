@@ -32,6 +32,7 @@ import sigima.tools.image
 from sigima.config import _
 from sigima.objects.image import ImageObj
 from sigima.proc.base import FFTParam, SpectrumParam
+from sigima.proc.contract_types import ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import Wrap1to1Func, dst_1_to_1
 
@@ -48,7 +49,22 @@ __all__ = [
 ]
 
 
-@computation_function(operation_id="sigima.image.fft", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.fft",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-08,
+            rtol=1e-12,
+            same_environment="exact",
+        ),
+    ),
+)
 def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     """Compute FFT with :py:func:`sigima.tools.image.fft2d`
 
@@ -71,7 +87,22 @@ def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.ifft", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.ifft",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-14,
+            rtol=1e-12,
+            same_environment="exact",
+        ),
+    ),
+)
 def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     """Compute inverse FFT with :py:func:`sigima.tools.image.ifft2d`
 
@@ -95,7 +126,20 @@ def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
 
 
 @computation_function(
-    operation_id="sigima.image.magnitude_spectrum", contract_version=1
+    operation_id="sigima.image.magnitude_spectrum",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-11,
+            rtol=1e-13,
+            same_environment="exact",
+        ),
+    ),
 )
 def magnitude_spectrum(src: ImageObj, p: SpectrumParam | None = None) -> ImageObj:
     """Compute magnitude spectrum
@@ -133,7 +177,22 @@ def phase_spectrum(src: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.psd", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.psd",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-11,
+            rtol=1e-13,
+            same_environment="exact",
+        ),
+    ),
+)
 def psd(src: ImageObj, p: SpectrumParam | None = None) -> ImageObj:
     """Compute power spectral density
     with :py:func:`sigima.tools.image.psd`

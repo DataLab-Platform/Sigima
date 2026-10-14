@@ -37,6 +37,7 @@ from sigima.config import options as sigima_options
 from sigima.enums import AngleUnit
 from sigima.objects.image import ImageObj
 from sigima.proc.base import AngleUnitParam, PhaseParam
+from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import (
     Wrap1to1Func,
@@ -76,7 +77,11 @@ __all__ = [
 ]
 
 
-@computation_function(operation_id="sigima.image.inverse", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.inverse",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def inverse(src: ImageObj) -> ImageObj:
     """Compute the inverse of an image and return the new result image object
 
@@ -95,7 +100,11 @@ def inverse(src: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.absolute", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.absolute",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def absolute(src: ImageObj) -> ImageObj:
     """Compute absolute value with :py:data:`numpy.absolute`
 
@@ -108,7 +117,11 @@ def absolute(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(np.absolute)(src)
 
 
-@computation_function(operation_id="sigima.image.real", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.real",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def real(src: ImageObj) -> ImageObj:
     """Compute real part with :py:func:`numpy.real`
 
@@ -121,7 +134,11 @@ def real(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(np.real)(src)
 
 
-@computation_function(operation_id="sigima.image.imag", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.imag",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def imag(src: ImageObj) -> ImageObj:
     """Compute imaginary part with :py:func:`numpy.imag`
 
@@ -134,7 +151,11 @@ def imag(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(np.imag)(src)
 
 
-@computation_function(operation_id="sigima.image.phase", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.phase",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def phase(src: ImageObj, p: PhaseParam) -> ImageObj:
     """Compute the phase (argument) of a complex image.
 
@@ -163,7 +184,9 @@ def phase(src: ImageObj, p: PhaseParam) -> ImageObj:
 
 
 @computation_function(
-    operation_id="sigima.image.complex_from_magnitude_phase", contract_version=1
+    operation_id="sigima.image.complex_from_magnitude_phase",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def complex_from_magnitude_phase(
     src1: ImageObj, src2: ImageObj, p: AngleUnitParam
@@ -189,7 +212,9 @@ def complex_from_magnitude_phase(
 
 
 @computation_function(
-    operation_id="sigima.image.complex_from_real_imag", contract_version=1
+    operation_id="sigima.image.complex_from_real_imag",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def complex_from_real_imag(src1: ImageObj, src2: ImageObj) -> ImageObj:
     """Combine two real images into a complex image using real + i * imag.
@@ -220,6 +245,7 @@ def complex_from_real_imag(src1: ImageObj, src2: ImageObj) -> ImageObj:
     operation_id="sigima.image.convolution",
     contract_version=1,
     reads_options=("auto_normalize_kernel",),
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def convolution(src: ImageObj, kernel: ImageObj) -> ImageObj:
     """Convolve an image with a kernel.
@@ -254,6 +280,18 @@ def convolution(src: ImageObj, kernel: ImageObj) -> ImageObj:
     operation_id="sigima.image.deconvolution",
     contract_version=1,
     reads_options=("auto_normalize_kernel",),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
+                "across library versions"
+            ),
+            atol=1e-07,
+            rtol=1e-12,
+            same_environment="exact",
+        ),
+    ),
 )
 def deconvolution(src: ImageObj, kernel: ImageObj) -> ImageObj:
     """Deconvolve a kernel from an image using Fast Fourier Transform (FFT).
@@ -282,7 +320,11 @@ def deconvolution(src: ImageObj, kernel: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.log10", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.log10",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def log10(src: ImageObj) -> ImageObj:
     """Compute log10 with :py:data:`numpy.log10`
 
@@ -295,7 +337,11 @@ def log10(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(np.log10)(src)
 
 
-@computation_function(operation_id="sigima.image.exp", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.exp",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def exp(src: ImageObj) -> ImageObj:
     """Compute exponential with :py:data:`numpy.exp`
 
@@ -314,7 +360,11 @@ class Log10ZPlusNParam(gds.DataSet):
     n = gds.FloatItem("n")
 
 
-@computation_function(operation_id="sigima.image.log10_z_plus_n", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.log10_z_plus_n",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def log10_z_plus_n(src: ImageObj, p: Log10ZPlusNParam) -> ImageObj:
     """Compute log10(z+n) with :py:data:`numpy.log10`
 
@@ -341,7 +391,11 @@ class DataTypeIParam(gds.DataSet):
     )
 
 
-@computation_function(operation_id="sigima.image.astype", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.astype",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def astype(src: ImageObj, p: DataTypeIParam) -> ImageObj:
     """Convert image data type with :py:func:`sigima.tools.datatypes.clip_astype`
 

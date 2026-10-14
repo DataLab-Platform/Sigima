@@ -37,6 +37,7 @@ import sigima.tools.image
 from sigima.config import _
 from sigima.objects.image import ImageObj, ImageROI, RectangularROI, ROI2DParam
 from sigima.objects.signal import SignalObj
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import dst_1_to_1, dst_1_to_1_signal
 
@@ -60,7 +61,11 @@ __all__ = [
 ]
 
 
-@computation_function(operation_id="sigima.image.extract_rois", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.extract_rois",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
     """Extract multiple regions of interest from data
 
@@ -101,7 +106,11 @@ def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
     return dst
 
 
-@computation_function(operation_id="sigima.image.extract_roi", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.extract_roi",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
     """Extract single ROI
 
@@ -285,7 +294,11 @@ class LineProfileParam(gds.DataSet):
     )
 
 
-@computation_function(operation_id="sigima.image.line_profile", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.line_profile",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def line_profile(src: ImageObj, p: LineProfileParam) -> SignalObj:
     """Compute horizontal or vertical profile
 
@@ -346,7 +359,11 @@ def csline(data: np.ndarray, row0, col0, row1, col1) -> tuple[np.ndarray, np.nda
     return x, y
 
 
-@computation_function(operation_id="sigima.image.segment_profile", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.segment_profile",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def segment_profile(src: ImageObj, p: SegmentProfileParam) -> SignalObj:
     """Compute segment profile
 
@@ -383,7 +400,11 @@ class AverageProfileParam(gds.DataSet):
     _hgroup_end = gds.EndGroup(_("Profile rectangular area"))
 
 
-@computation_function(operation_id="sigima.image.average_profile", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.average_profile",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def average_profile(src: ImageObj, p: AverageProfileParam) -> SignalObj:
     """Compute horizontal or vertical average profile
 
@@ -463,7 +484,11 @@ class RadialProfileParam(gds.DataSet):
     )
 
 
-@computation_function(operation_id="sigima.image.radial_profile", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.radial_profile",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def radial_profile(src: ImageObj, p: RadialProfileParam) -> SignalObj:
     """Compute radial profile around the centroid
     with :py:func:`sigima.tools.image.get_radial_profile`

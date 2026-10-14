@@ -18,6 +18,7 @@ import sigima.tools.image
 from sigima.config import _
 from sigima.enums import PadLocation2D
 from sigima.objects.image import ImageObj
+from sigima.proc.contract_types import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import dst_1_to_1
 
@@ -65,7 +66,11 @@ class BinningParam(gds.DataSet):
     )
 
 
-@computation_function(operation_id="sigima.image.binning", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.binning",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def binning(src: ImageObj, p: BinningParam) -> ImageObj:
     """Binning: image pixel binning (or aggregation).
 
@@ -148,7 +153,11 @@ class ZeroPadding2DParam(gds.DataSet):
     )
 
 
-@computation_function(operation_id="sigima.image.zero_padding", contract_version=1)
+@computation_function(
+    operation_id="sigima.image.zero_padding",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def zero_padding(
     src: ImageObj,
     p: ZeroPadding2DParam | None = None,

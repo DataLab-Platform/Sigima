@@ -30,11 +30,16 @@ from sigima.objects import (
 )
 from sigima.objects.scalar.common import format_legend_value
 from sigima.proc.base import HistogramParam, new_signal_result
+from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import dynamic, features, pulse
 
 
-@computation_function(operation_id="sigima.signal.histogram", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.histogram",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def histogram(src: SignalObj, p: HistogramParam) -> SignalObj:
     """Compute histogram with :py:func:`numpy.histogram`
 
@@ -131,7 +136,20 @@ class PulseFeaturesParam(gds.DataSet, title=_("Pulse features")):
 
 
 @computation_function(
-    operation_id="sigima.signal.extract_pulse_features", contract_version=1
+    operation_id="sigima.signal.extract_pulse_features",
+    contract_version=1,
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
+                "image) differ in the last bits across library versions"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def extract_pulse_features(obj: SignalObj, p: PulseFeaturesParam) -> TableResult:
     """Extract pulse features.
@@ -193,7 +211,9 @@ def extract_pulse_features(obj: SignalObj, p: PulseFeaturesParam) -> TableResult
 
 
 @computation_function(
-    operation_id="sigima.signal.sampling_rate_period", contract_version=1
+    operation_id="sigima.signal.sampling_rate_period",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def sampling_rate_period(obj: SignalObj) -> TableResult:
     """Compute sampling rate and period
@@ -214,7 +234,11 @@ def sampling_rate_period(obj: SignalObj) -> TableResult:
     return table.compute(obj)
 
 
-@computation_function(operation_id="sigima.signal.contrast", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.contrast",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def contrast(obj: SignalObj) -> TableResult:
     """Compute contrast with :py:func:`sigima.tools.signal.misc.contrast`"""
     table = TableResultBuilder(_("Contrast"))
@@ -222,7 +246,11 @@ def contrast(obj: SignalObj) -> TableResult:
     return table.compute(obj)
 
 
-@computation_function(operation_id="sigima.signal.x_at_minmax", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.x_at_minmax",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def x_at_minmax(obj: SignalObj) -> TableResult:
     """
     Compute the smallest argument at the minima and the smallest argument at the maxima.
