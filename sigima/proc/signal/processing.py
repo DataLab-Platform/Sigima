@@ -39,6 +39,7 @@ from sigima.enums import (
     WindowingMethod,
 )
 from sigima.objects import ROI1DParam, SignalObj
+from sigima.proc.alignment import SOURCE_GRID_LINEAR_HOLD
 from sigima.proc.base import (
     ClipParam,
     NormalizeParam,
@@ -210,6 +211,7 @@ def check_same_sample_rate(src1: SignalObj, src2: SignalObj) -> None:
     operation_id="sigima.signal.deconvolution",
     contract_version=1,
     reads_options=("auto_normalize_kernel",),
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
 )
 def deconvolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute deconvolution.
@@ -553,6 +555,7 @@ def reverse_x(src: SignalObj) -> SignalObj:
     operation_id="sigima.signal.convolution",
     contract_version=1,
     reads_options=("auto_normalize_kernel",),
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
 )
 def convolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute convolution of two signals with :py:func:`scipy.signal.convolve`.
@@ -587,7 +590,11 @@ def convolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.xy_mode", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.xy_mode",
+    contract_version=1,
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
+)
 def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Simulate the X-Y mode of an oscilloscope.
 

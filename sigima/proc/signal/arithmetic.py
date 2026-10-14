@@ -13,7 +13,11 @@ import numpy as np
 
 from sigima.enums import MathOperator, SignalsToImageOrientation
 from sigima.objects import ImageObj, SignalObj, create_image
-from sigima.proc.alignment import SOURCE_GRID_LINEAR
+from sigima.proc.alignment import (
+    SMALLEST_GRID_LINEAR_HOLD,
+    SOURCE_GRID_LINEAR,
+    SOURCE_GRID_LINEAR_HOLD,
+)
 from sigima.proc.base import (
     ArithmeticParam,
     ConstantParam,
@@ -56,7 +60,11 @@ def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
     return np.array([sig.dy for sig in signals], dtype=signals[0].dy.dtype)
 
 
-@computation_function(operation_id="sigima.signal.addition", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.addition",
+    contract_version=1,
+    x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+)
 def addition(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise sum of multiple signals.
 
@@ -90,7 +98,11 @@ def addition(src_list: list[SignalObj]) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.average", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.average",
+    contract_version=1,
+    x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+)
 def average(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise average of multiple signals.
 
@@ -126,7 +138,9 @@ def average(src_list: list[SignalObj]) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.standard_deviation", contract_version=1
+    operation_id="sigima.signal.standard_deviation",
+    contract_version=1,
+    x_alignment=SMALLEST_GRID_LINEAR_HOLD,
 )
 def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise standard deviation of multiple signals.
@@ -157,7 +171,11 @@ def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.product", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.product",
+    contract_version=1,
+    x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+)
 def product(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise product of multiple signals.
 
@@ -338,7 +356,11 @@ def division_constant(src: SignalObj, p: ConstantParam) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.arithmetic", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.arithmetic",
+    contract_version=1,
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
+)
 def arithmetic(src1: SignalObj, src2: SignalObj, p: ArithmeticParam) -> SignalObj:
     """Perform an arithmetic operation on two signals.
 
@@ -427,7 +449,9 @@ def difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.quadratic_difference", contract_version=1
+    operation_id="sigima.signal.quadratic_difference",
+    contract_version=1,
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
 )
 def quadratic_difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute the normalized difference between two signals.
@@ -462,7 +486,11 @@ def quadratic_difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return product_constant(difference(src1, src2), norm)
 
 
-@computation_function(operation_id="sigima.signal.division", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.division",
+    contract_version=1,
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
+)
 def division(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute the element-wise division between two signals.
 
@@ -493,7 +521,11 @@ def division(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
-@computation_function(operation_id="sigima.signal.signals_to_image", contract_version=1)
+@computation_function(
+    operation_id="sigima.signal.signals_to_image",
+    contract_version=1,
+    x_alignment=SMALLEST_GRID_LINEAR_HOLD,
+)
 def signals_to_image(src_list: list[SignalObj], p: SignalsToImageParam) -> ImageObj:
     """Combine multiple signals into an image.
 

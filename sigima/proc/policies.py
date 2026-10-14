@@ -18,7 +18,15 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Callable
 
-from sigima.proc.alignment import SOURCE_GRID_LINEAR, XAlignmentError, align_operand
+from sigima.proc.alignment import (
+    SMALLEST_GRID_LINEAR_HOLD,
+    SOURCE_GRID_LINEAR,
+    SOURCE_GRID_LINEAR_HOLD,
+    XAlignmentError,
+    align_operand,
+    align_operand_hold,
+    align_signals_hold,
+)
 
 __all__ = [
     "XAlignmentPolicy",
@@ -107,6 +115,18 @@ def _source_grid_linear(inputs: list[Any]) -> tuple[list[Any], dict[str, Any]]:
     return [source, aligned], record
 
 
+def _source_grid_linear_hold(inputs: list[Any]) -> tuple[list[Any], dict[str, Any]]:
+    source, operand = inputs
+    aligned, record = align_operand_hold(source, operand)
+    return [source, aligned], record
+
+
 register_x_alignment_policy(
     XAlignmentPolicy(SOURCE_GRID_LINEAR, 1, ("2_to_1",), _source_grid_linear)
+)
+register_x_alignment_policy(
+    XAlignmentPolicy(SOURCE_GRID_LINEAR_HOLD, 1, ("2_to_1",), _source_grid_linear_hold)
+)
+register_x_alignment_policy(
+    XAlignmentPolicy(SMALLEST_GRID_LINEAR_HOLD, 1, ("n_to_1",), align_signals_hold)
 )
