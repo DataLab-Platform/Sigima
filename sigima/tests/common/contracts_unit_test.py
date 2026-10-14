@@ -179,6 +179,16 @@ def unknown_option(src: SignalObj) -> SignalObj:
     return src.copy()
 
 
+@computation_function(
+    operation_id="test.signal.unknown_metadata_role",
+    contract_version=1,
+    reads_metadata={"operand": ("fit_params",)},
+)
+def unknown_metadata_role(src: SignalObj) -> SignalObj:
+    """Test-only operation reading the metadata of an unknown role."""
+    return src.copy()
+
+
 @computation_function(operation_id="test.signal.bad_order", contract_version=1)
 def bad_order(p: list[DummyParam], src: SignalObj) -> SignalObj:
     """Test-only operation with parameters before its input."""
@@ -267,6 +277,11 @@ def test_catalogue_contracts() -> None:
     assert tophat.paramclass is sigima.params.MorphologyParam
     for func in (sigima.proc.signal.convolution, sigima.proc.image.deconvolution):
         assert registry.for_function(func).reads_options == ("auto_normalize_kernel",)
+    # Metadata read by a computation are declared next to it (not fingerprinted).
+    readers = {c.operation_id: c.reads_metadata for c in registry.contracts}
+    assert {op: reads for op, reads in readers.items() if reads} == {
+        "sigima.signal.evaluate_fit": (("source", ("fit_params",)),)
+    }
     qualified = sorted(c.operation_id for c in registry.contracts if c.qualified)
     unqualified = sorted(
         set(c.operation_id for c in registry.contracts) - set(qualified)
@@ -564,6 +579,7 @@ def test_unknown_operation_discovered_by_metadata() -> None:
         misaligned,
         unknown_policy,
         unknown_option,
+        unknown_metadata_role,
         bad_order,
         bad_return,
         bad_argument,
@@ -583,6 +599,16 @@ def test_inconsistent_declarations(func) -> None:
         {"x_alignment": SOURCE_GRID_LINEAR},
         {"reads_options": ("auto_normalize_kernel",)},
         {"roles": ("source",)},
+        {"reads_metadata": {"source": ("fit_params",)}},
+        {"operation_id": "a.b", "contract_version": 1, "reads_metadata": ["k"]},
+        {"operation_id": "a.b", "contract_version": 1, "reads_metadata": {"s": "k"}},
+        {"operation_id": "a.b", "contract_version": 1, "reads_metadata": {"s": ()}},
+        {"operation_id": "a.b", "contract_version": 1, "reads_metadata": {"S": ("k",)}},
+        {
+            "operation_id": "a.b",
+            "contract_version": 1,
+            "reads_metadata": {"s": ("k", "k")},
+        },
         {"operation_id": "a.b", "contract_version": 1, "qualification": 1},
         {"operation_id": "a.b", "contract_version": 1, "x_alignment": "Bad"},
         {"operation_id": "a.b", "contract_version": 1, "reads_options": "opt"},

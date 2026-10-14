@@ -18,7 +18,7 @@ import pkgutil
 import re
 import sys
 import typing
-from collections.abc import Iterator, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from typing import Any, Callable, Literal, TypeVar
 
 import guidata.dataset as gds
@@ -123,6 +123,8 @@ class ComputationMetadata:
          inputs, or None.
         reads_options: Names of the :data:`sigima.config.options` read by the
          computation itself.
+        reads_metadata: ``((role, (key, ...)), ...)``: metadata keys of input
+         objects read by the computation itself.
         roles: Explicit input role names, or None to infer them.
     """
 
@@ -134,6 +136,7 @@ class ComputationMetadata:
     qualification: ReplayQualification | None = None
     x_alignment: str | None = None
     reads_options: tuple[str, ...] = ()
+    reads_metadata: tuple[tuple[str, tuple[str, ...]], ...] = ()
     roles: tuple[str, ...] | None = None
 
 
@@ -149,6 +152,29 @@ def _as_names(value: Sequence[str] | None, label: str) -> tuple[str, ...] | None
     if len(set(names)) != len(names):
         raise ValueError(f"{label} must be unique")
     return names
+
+
+def _as_metadata_reads(
+    value: Mapping[str, Sequence[str]] | None,
+) -> tuple[tuple[str, tuple[str, ...]], ...]:
+    """Return ``reads_metadata`` as ``((role, (key, ...)), ...)``."""
+    if not value:
+        return ()
+    if not isinstance(value, Mapping):
+        raise ValueError("reads_metadata must map input role names to metadata keys")
+    reads = []
+    for role, keys in value.items():
+        if not isinstance(role, str) or not NAME_PATTERN.match(role):
+            raise ValueError(f"Invalid role in reads_metadata: {role!r}")
+        if isinstance(keys, str):
+            raise ValueError("reads_metadata keys must be a sequence, not a string")
+        keys = tuple(keys)
+        if not keys or any(not isinstance(k, str) or not k for k in keys):
+            raise ValueError(f"Invalid metadata keys for role {role!r}: {keys!r}")
+        if len(set(keys)) != len(keys):
+            raise ValueError(f"Metadata keys of role {role!r} must be unique")
+        reads.append((role, keys))
+    return tuple(reads)
 
 
 def _check_contract_declarations(
@@ -169,8 +195,8 @@ def _check_contract_declarations(
         qualification is not None or x_alignment is not None or reads_options or roles
     ):
         raise ValueError(
-            "qualification, x_alignment, reads_options and roles require "
-            "an operation_id"
+            "qualification, x_alignment, reads_options, reads_metadata and roles "
+            "require an operation_id"
         )
     if qualification is not None and not isinstance(qualification, ReplayQualification):
         raise ValueError("qualification must be a ReplayQualification")
@@ -329,6 +355,7 @@ def computation_function(
     qualification: typing.Optional[ReplayQualification] = None,
     x_alignment: typing.Optional[str] = None,
     reads_options: Sequence[str] = (),
+    reads_metadata: typing.Optional[Mapping[str, Sequence[str]]] = None,
     roles: typing.Optional[Sequence[str]] = None,
 ) -> Callable[[Callable[P, R]], Callable[P, R]]:
     """
@@ -361,6 +388,10 @@ def computation_function(
          ``operation_id``.
         reads_options: Names of the :data:`sigima.config.options` that the
          computation reads, only with ``operation_id``.
+        reads_metadata: Metadata keys of input objects that the computation
+         reads, by input role name (e.g. ``{"source": ("fit_params",)}``), only
+         with ``operation_id``. They are not covered by state fingerprints:
+         applications record their values and check them before a replay.
         roles: Input role names, only with ``operation_id``, when they cannot
          be inferred from the signature.
 
@@ -375,6 +406,9 @@ def computation_function(
     reads_options, roles = _check_contract_declarations(
         operation_id, qualification, x_alignment, reads_options, roles
     )
+    reads_metadata = _as_metadata_reads(reads_metadata)
+    if reads_metadata and operation_id is None:
+        raise ValueError("reads_metadata requires an operation_id")
 
     def _metadata(f: Callable) -> ComputationMetadata:
         return ComputationMetadata(
@@ -386,6 +420,7 @@ def computation_function(
             qualification=qualification,
             x_alignment=x_alignment,
             reads_options=reads_options,
+            reads_metadata=reads_metadata,
             roles=roles,
         )
 

@@ -110,6 +110,11 @@ Follow these rules when you add or change a computation function:
   ``reads_options=(...)``: applications record their values and restore them
   for a replay. Random generators take their seed as a parameter.
 
+- Declare the metadata keys of input objects read by the computation itself
+  with ``reads_metadata={role: (key, ...)}`` (e.g. the fit parameters read by
+  ``evaluate_fit``): state fingerprints do not cover metadata, so applications
+  record their values and refuse a replay when they changed.
+
 - Never change a reference case to make a test pass. Update the reference
   cases deliberately, and explain the scientific reason, when a numerical
   correction changes the result.

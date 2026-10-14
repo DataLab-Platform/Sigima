@@ -12,11 +12,11 @@ policy, the global options read and, when tested, the replay qualification.
 Every property is declared next to the function with
 :func:`sigima.proc.decorator.computation_function` (``operation_id``,
 ``contract_version``, ``aliases``, ``qualification``, ``x_alignment``,
-``reads_options``, ``roles``) or inferred from its signature. This module only
-discovers the declarations of the public computation packages
-(``sigima.proc.signal`` and ``sigima.proc.image``), infers the structure,
-assembles the contracts, detects collisions and resolves identifiers: it holds
-no data naming an operation.
+``reads_options``, ``reads_metadata``, ``roles``) or inferred from its
+signature. This module only discovers the declarations of the public
+computation packages (``sigima.proc.signal`` and ``sigima.proc.image``), infers
+the structure, assembles the contracts, detects collisions and resolves
+identifiers: it holds no data naming an operation.
 
 Declaring a contract does not qualify it for replay: a qualification names the
 contract version actually tested (see
@@ -133,6 +133,8 @@ class OperationContract:
         qualification: Declared replay qualification, or None.
         x_alignment: X-alignment policy applied to the inputs, or None.
         reads_options: Global options read by the computation.
+        reads_metadata: ``((role, (key, ...)), ...)``: metadata keys of input
+         objects read by the computation (not covered by state fingerprints).
     """
 
     operation_id: str
@@ -148,6 +150,7 @@ class OperationContract:
     qualification: ReplayQualification | None = None
     x_alignment: str | None = None
     reads_options: tuple[str, ...] = ()
+    reads_metadata: tuple[tuple[str, tuple[str, ...]], ...] = ()
 
     @property
     def qualification_status(self) -> str:
@@ -376,6 +379,12 @@ def _build_contract(func: Callable) -> OperationContract:
     for name in metadata.reads_options:
         if not isinstance(getattr(options, name, None), OptionField):
             raise _declaration_error(func, f"unknown global option {name!r}")
+    role_names = {role.name for role in structure.inputs}
+    for role, _keys in metadata.reads_metadata:
+        if role not in role_names:
+            raise _declaration_error(
+                func, f"reads_metadata names an unknown input role {role!r}"
+            )
     single = structure.parameters
     paramclass = (
         single[0].paramclass
@@ -396,6 +405,7 @@ def _build_contract(func: Callable) -> OperationContract:
         qualification=metadata.qualification,
         x_alignment=metadata.x_alignment,
         reads_options=metadata.reads_options,
+        reads_metadata=metadata.reads_metadata,
     )
 
 

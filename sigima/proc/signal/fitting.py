@@ -431,6 +431,7 @@ def extract_fit_params(signal: SignalObj) -> fitting.FitParams:
 @computation_function(
     operation_id="sigima.signal.evaluate_fit",
     contract_version=1,
+    reads_metadata={"source": ("fit_params",)},
     qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def evaluate_fit(src1: SignalObj, src2: SignalObj) -> SignalObj:
