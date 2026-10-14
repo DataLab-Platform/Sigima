@@ -153,6 +153,15 @@ msgstr ">= 0.19.2, < 0.27"
 msgid "Image processing in Python"
 msgstr "Traitement d'images en Python"
 
+msgid "imagecodecs"
+msgstr "imagecodecs"
+
+msgid ">= 2024.12.30"
+msgstr ">= 2024.12.30"
+
+msgid "Image transformation, compression, and decompression codecs"
+msgstr "Codecs de transformation, de compression et de d?compression d'images"
+
 msgid "pandas"
 msgstr "pandas"
 
