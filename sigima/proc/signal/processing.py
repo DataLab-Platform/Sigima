@@ -581,7 +581,18 @@ class WindowingParam(gds.DataSet, title=_("Windowing")):
 @computation_function(
     operation_id="sigima.signal.apply_window",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def apply_window(src: SignalObj, p: WindowingParam) -> SignalObj:
     """Compute windowing with :py:func:`sigima.tools.signal.windowing.apply_window`.

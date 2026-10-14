@@ -121,7 +121,18 @@ def moving_median(src: ImageObj, p: MovingMedianParam) -> ImageObj:
 @computation_function(
     operation_id="sigima.image.wiener",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms and filters (NumPy, SciPy) differ "
+                "in the last bits across library versions and platforms"
+            ),
+            atol=1e-11,
+            rtol=1e-11,
+            same_environment="exact",
+        ),
+    ),
 )
 def wiener(src: ImageObj) -> ImageObj:
     """Compute Wiener filter with :py:func:`scipy.signal.wiener`
@@ -164,7 +175,18 @@ class ButterworthParam(gds.DataSet):
 @computation_function(
     operation_id="sigima.image.butterworth",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms and filters (NumPy, SciPy) differ "
+                "in the last bits across library versions and platforms"
+            ),
+            atol=1e-11,
+            rtol=1e-11,
+            same_environment="exact",
+        ),
+    ),
 )
 def butterworth(src: ImageObj, p: ButterworthParam) -> ImageObj:
     """Compute Butterworth filter with :py:func:`skimage.filters.butterworth`.

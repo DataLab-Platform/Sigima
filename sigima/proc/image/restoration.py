@@ -137,7 +137,18 @@ class DenoiseBilateralParam(gds.DataSet):
 @computation_function(
     operation_id="sigima.image.denoise_bilateral",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def denoise_bilateral(src: ImageObj, p: DenoiseBilateralParam) -> ImageObj:
     """Compute bilateral filter denoising

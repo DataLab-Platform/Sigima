@@ -30,7 +30,7 @@ from sigima.objects.image import (
     UniformDistribution2DParam,
     create_image_from_param,
 )
-from sigima.proc.contracts import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.arithmetic import addition
 from sigima.proc.image.base import dst_1_to_1
@@ -39,7 +39,18 @@ from sigima.proc.image.base import dst_1_to_1
 @computation_function(
     operation_id="sigima.image.add_gaussian_noise",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def add_gaussian_noise(src: ImageObj, p: NormalDistributionParam) -> ImageObj:
     """Add Gaussian (normal) noise to the input image.
