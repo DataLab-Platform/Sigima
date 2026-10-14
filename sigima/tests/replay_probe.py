@@ -37,6 +37,7 @@ import math
 import os
 import pickle
 from collections import defaultdict
+from collections.abc import Iterator, Sequence
 from typing import Any, Callable
 
 import guidata.dataset as gds
@@ -114,18 +115,55 @@ def _size(value: Any) -> int:
     return 0
 
 
-def _feed(hasher: Any, value: Any) -> None:
-    """Feed the scientific content of *value* to *hasher* (inputs digest)."""
-    if isinstance(value, SignalObj):
-        _feed(hasher, value.xydata)
-    elif isinstance(value, ImageObj):
-        _feed(hasher, value.data)
+def _canonical(value: Any) -> Any:  # pylint: disable=R0911
+    """Return *value* as JSON-ready data independent of library versions."""
+    if isinstance(value, dict):
+        return {str(k): _canonical(v) for k, v in sorted(value.items(), key=str)}
+    if isinstance(value, (list, tuple)):
+        return [_canonical(v) for v in value]
+    if isinstance(value, np.ndarray):
+        data = np.ascontiguousarray(value)
+        digest = hashlib.sha256(data.tobytes()).hexdigest()
+        return {"$ndarray": [data.dtype.str, list(data.shape), digest]}
+    if isinstance(value, np.generic):
+        return _canonical(value.item())
+    if isinstance(value, float) and not math.isfinite(value):
+        return {"$float": repr(value)}
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    return repr(value)
+
+
+def _feed_json(hasher: Any, value: Any) -> None:
+    hasher.update(json.dumps(_canonical(value), sort_keys=True).encode())
+
+
+def _feed(hasher: Any, value: Any, metadata_keys: Sequence[str] = ()) -> None:
+    """Feed the scientific content of *value* to *hasher* (inputs digest).
+
+    Signals and images contribute their data, coordinates, region of interest
+    and the metadata *metadata_keys* read by the computation, so that two calls
+    on the same data with another ROI or other read metadata get other keys.
+    """
+    if isinstance(value, (SignalObj, ImageObj)):
+        if isinstance(value, SignalObj):
+            _feed(hasher, value.xydata)
+        else:
+            _feed(hasher, value.data)
+            if value.is_uniform_coords:
+                coords = [value.x0, value.y0, value.dx, value.dy]
+            else:
+                coords = [value.xcoords, value.ycoords]
+            _feed_json(hasher, coords)
+        roi = getattr(value, "roi", None)
+        _feed_json(hasher, None if roi is None else roi.to_dict())
+        _feed_json(hasher, {k: value.metadata.get(k) for k in metadata_keys})
     elif isinstance(value, np.ndarray):
         hasher.update(f"{value.dtype.str}{value.shape}".encode())
         hasher.update(np.ascontiguousarray(value).tobytes())
     elif isinstance(value, (list, tuple)):
         for item in value:
-            _feed(hasher, item)
+            _feed(hasher, item, metadata_keys)
     elif isinstance(value, gds.DataSet):
         hasher.update(
             json.dumps(encode_dataset(value), sort_keys=True, allow_nan=False).encode()
@@ -134,10 +172,11 @@ def _feed(hasher: Any, value: Any) -> None:
         hasher.update(repr(value).encode())
 
 
-def _digest(args: tuple) -> str:
+def input_digest(args: tuple, metadata_keys: Sequence[str] = ()) -> str:
+    """Return the digest of the inputs of a call (key of a captured call)."""
     hasher = hashlib.sha256()
     try:
-        _feed(hasher, args)
+        _feed(hasher, args, metadata_keys)
     except Exception:  # pylint: disable=broad-exception-caught
         return ""
     return hasher.hexdigest()[:16]
@@ -162,7 +201,8 @@ def make_observer(test: str) -> Callable[[Callable, tuple], Any]:
         ):
             return None
         snapshot = copy.deepcopy(args)
-        digest = _digest(snapshot)
+        keys = sorted({key for _role, keys in contract.reads_metadata for key in keys})
+        digest = input_digest(snapshot, keys)
 
         def on_result(result: Any) -> None:
             if _size(result) <= MAX_ELEMENTS:
@@ -399,15 +439,90 @@ def safe_replay(contract: contracts.OperationContract, sample: Sample) -> Outcom
         return Outcome(sample.key, "error", detail=f"{type(exc).__name__}: {exc}")
 
 
+def _is_directory(path: str) -> bool:
+    return path.endswith(("/", "\\")) or os.path.isdir(path)
+
+
+def _file_name(operation_id: str) -> str:
+    return f"{operation_id}.pkl"
+
+
 def dump_samples(path: str) -> None:
     """Save the captured calls (inputs, parameters and results), for a cross
-    replay in another environment (:func:`cross_replay`)."""
+    replay in another environment (:func:`cross_replay`, :func:`replay_dump`).
+
+    Args:
+        path: A file, or a directory (existing, or ending with a separator)
+         receiving one file per operation, so that an environment with little
+         memory (Pyodide) loads one operation at a time.
+    """
     data = {
         op: [(sample.key, sample.args, sample.result) for sample in samples]
         for op, samples in SAMPLES.items()
     }
-    with open(path, "wb") as file:
-        pickle.dump(data, file)
+    if not _is_directory(path):
+        with open(path, "wb") as file:
+            pickle.dump(data, file)
+        return
+    os.makedirs(path, exist_ok=True)
+    for op, entries in data.items():
+        with open(os.path.join(path, _file_name(op)), "wb") as file:
+            pickle.dump(entries, file)
+
+
+def load_dump(path: str) -> Iterator[tuple[str, list[tuple[str, Any, Any]]]]:
+    """Yield ``(operation, [(key, args, result)])`` from :func:`dump_samples`.
+
+    A directory is read one operation at a time.
+    """
+    if not _is_directory(path):
+        with open(path, "rb") as file:
+            data = pickle.load(file)  # noqa: S301 - file written by this module
+        yield from sorted(data.items())
+        return
+    for name in sorted(os.listdir(path)):
+        if name.endswith(".pkl"):
+            with open(os.path.join(path, name), "rb") as file:
+                entries = pickle.load(file)  # noqa: S301 - written by this module
+            yield name[: -len(".pkl")], entries
+
+
+_VERDICT_ORDER = ("exact", "within_tolerance", "different")
+
+
+def _new_entry() -> dict[str, Any]:
+    return {
+        "samples": 0,
+        "exact": True,
+        "verdict": "exact",
+        "max_abs_error": 0.0,
+        "max_rel_error": 0.0,
+        "detail": "",
+    }
+
+
+def _add_comparison(
+    entry: dict[str, Any], candidate: Any, reference: Any, rule: ComparisonRule
+) -> None:
+    """Add one compared sample to a report entry (environments differ)."""
+    entry["samples"] += 1
+    verdict, comparison = compare_results(candidate, reference, EXACT, False)
+    if verdict == "exact":
+        return
+    ruled, _comparison = compare_results(candidate, reference, rule, False)
+    if _VERDICT_ORDER.index(ruled) > _VERDICT_ORDER.index(entry["verdict"]):
+        entry["verdict"] = ruled
+    entry["exact"] = False
+    entry["detail"] = entry["detail"] or comparison.detail
+    if comparison.undefined:
+        entry["max_abs_error"] = entry["max_rel_error"] = None
+    elif entry["max_abs_error"] is not None:
+        entry["max_abs_error"] = max(entry["max_abs_error"], comparison.max_abs)
+        entry["max_rel_error"] = max(entry["max_rel_error"], comparison.max_rel)
+
+
+def _registry() -> dict[str, contracts.OperationContract]:
+    return {c.operation_id: c for c in contracts.build_contract_registry().contracts}
 
 
 def cross_replay(path: str) -> dict[str, dict[str, Any]]:
@@ -423,46 +538,109 @@ def cross_replay(path: str) -> dict[str, dict[str, Any]]:
         "max_rel_error", "detail"}}``; errors are None when undefined (e.g. NaN
         moved).
     """
-    with open(path, "rb") as file:
-        reference = pickle.load(file)  # noqa: S301 - file written by this module
-    registry = {
-        c.operation_id: c for c in contracts.build_contract_registry().contracts
-    }
-    order = ("exact", "within_tolerance", "different")
+    registry = _registry()
     report: dict[str, dict[str, Any]] = {}
-    for op, entries in sorted(reference.items()):
+    for op, entries in load_dump(path):
         contract = registry.get(op)
         if contract is None:
             continue
         rule = contract.comparison or EXACT
-        entry = {
-            "samples": 0,
-            "exact": True,
-            "verdict": "exact",
-            "max_abs_error": 0.0,
-            "max_rel_error": 0.0,
-            "detail": "",
-        }
+        entry = _new_entry()
         for key, args, result in entries:
-            sample = Sample(key, 0, args, result)
-            outcome = safe_replay(contract, sample)
-            if outcome.status != "replayed":
-                continue
-            entry["samples"] += 1
-            verdict, comparison = compare_results(outcome.result, result, EXACT, False)
-            if verdict == "exact":
-                continue
-            ruled, _comparison = compare_results(outcome.result, result, rule, False)
-            if order.index(ruled) > order.index(entry["verdict"]):
-                entry["verdict"] = ruled
-            entry["exact"] = False
-            entry["detail"] = entry["detail"] or comparison.detail
-            if comparison.undefined:
-                entry["max_abs_error"] = entry["max_rel_error"] = None
-            elif entry["max_abs_error"] is not None:
-                entry["max_abs_error"] = max(entry["max_abs_error"], comparison.max_abs)
-                entry["max_rel_error"] = max(entry["max_rel_error"], comparison.max_rel)
+            outcome = safe_replay(contract, Sample(key, 0, args, result))
+            if outcome.status == "replayed":
+                _add_comparison(entry, outcome.result, result, rule)
         if entry["samples"]:
+            report[op] = entry
+    return report
+
+
+def replay_dump(
+    path: str, out_dir: str, operations: Sequence[str] | None = None
+) -> dict[str, dict[str, Any]]:
+    """Replay captured calls here and save the results, one file per operation.
+
+    Used where the test suite does not run (e.g. Pyodide): each call of
+    :func:`dump_samples` is replayed as an application replays a recorded
+    activity, and ``(key, status, result, detail)`` is saved for
+    :func:`compare_replays`, run in another environment.
+
+    Args:
+        path: Captured calls (file or directory).
+        out_dir: Directory receiving one result file per operation.
+        operations: Operations to replay (default: all).
+
+    Returns:
+        Report against the results captured with the calls (see
+        :func:`cross_replay`), plus ``"statuses"`` (count of replay statuses).
+    """
+    registry = _registry()
+    os.makedirs(out_dir, exist_ok=True)
+    report: dict[str, dict[str, Any]] = {}
+    for op, entries in load_dump(path):
+        contract = registry.get(op)
+        if contract is None or (operations is not None and op not in operations):
+            continue
+        rule = contract.comparison or EXACT
+        entry = _new_entry()
+        statuses: dict[str, int] = defaultdict(int)
+        saved = []
+        for key, args, result in entries:
+            outcome = safe_replay(contract, Sample(key, 0, args, result))
+            statuses[outcome.status] += 1
+            saved.append((key, outcome.status, outcome.result, outcome.detail))
+            if outcome.status == "replayed":
+                _add_comparison(entry, outcome.result, result, rule)
+        entry["statuses"] = dict(statuses)
+        with open(os.path.join(out_dir, _file_name(op)), "wb") as file:
+            pickle.dump(saved, file)
+        report[op] = entry
+    return report
+
+
+def compare_replays(results_dir: str, reference: str) -> dict[str, dict[str, Any]]:
+    """Compare results saved by :func:`replay_dump` with captured results.
+
+    Args:
+        results_dir: Directory written by :func:`replay_dump`.
+        reference: Captured calls of another environment (file or directory),
+         whose results are the references; samples are matched by key (content
+         of the inputs).
+
+    Returns:
+        Report as :func:`cross_replay`, plus ``"unmatched"``: samples replayed
+        without a reference with the same key (e.g. inputs computed upstream,
+        which differ between environments); ``"exact"`` and ``"verdict"`` are
+        None when no sample was compared.
+    """
+    registry = _registry()
+    report: dict[str, dict[str, Any]] = {}
+    for op, entries in load_dump(reference):
+        contract = registry.get(op)
+        result_file = os.path.join(results_dir, _file_name(op))
+        if contract is None or not os.path.exists(result_file):
+            continue
+        with open(result_file, "rb") as file:
+            replayed = pickle.load(file)  # noqa: S301 - written by this module
+        references: dict[str, list[Any]] = defaultdict(list)
+        for key, _args, result in entries:
+            references[key].append(result)
+        rule = contract.comparison or EXACT
+        entry = _new_entry()
+        unmatched = 0
+        for key, status, result, _detail in replayed:
+            # Calls with the same inputs are matched in capture order.
+            candidates = references.get(key)
+            if not candidates:
+                unmatched += status == "replayed"
+                continue
+            reference_result = candidates.pop(0)
+            if status == "replayed":
+                _add_comparison(entry, result, reference_result, rule)
+        entry["unmatched"] = unmatched
+        if not entry["samples"]:
+            entry["exact"] = entry["verdict"] = None
+        if entry["samples"] or unmatched:
             report[op] = entry
     return report
 

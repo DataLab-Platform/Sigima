@@ -1,0 +1,9 @@
+{
+  "name": "sigima-pyodide-replay",
+  "private": true,
+  "description": "Replays in Pyodide the calls of Sigima's validation tests captured in CPython.",
+  "type": "module",
+  "dependencies": {
+    "pyodide": "0.26.4"
+  }
+}
