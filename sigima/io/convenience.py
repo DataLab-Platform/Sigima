@@ -162,7 +162,8 @@ def write_image(
     if param is None:
         ImageIORegistry.write(filename, image)
         return
-    exported_image = copy.deepcopy(image)
+    # Skip deep-copying the source array, which is replaced by the prepared data
+    exported_image = copy.deepcopy(image, {id(image.data): None})
     exported_image.data = prepare_image_for_export(image.data, filename, param)
     writer_options = validate_image_export_configuration(
         filename,
