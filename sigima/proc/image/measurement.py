@@ -72,7 +72,7 @@ def get_centroid_coords(data: np.ndarray) -> np.ndarray:
     return np.array([(x, y)])
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.centroid", contract_version=1)
 def centroid(image: ImageObj) -> GeometryResult | None:
     """Compute centroid
     with :py:func:`sigima.tools.image.get_centroid_fourier`
@@ -102,7 +102,7 @@ def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
     return np.array([[x, y, r]])
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.enclosing_circle", contract_version=1)
 def enclosing_circle(image: ImageObj) -> GeometryResult | None:
     """Compute minimum enclosing circle
     with :py:func:`sigima.tools.image.get_enclosing_circle`
@@ -132,7 +132,7 @@ def __calc_snr_without_warning(data: np.ndarray) -> float:
     return snr
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.stats", contract_version=1)
 def stats(obj: ImageObj) -> TableResult:
     """Compute statistics on an image
 
@@ -154,7 +154,9 @@ def stats(obj: ImageObj) -> TableResult:
     return builder.compute(obj)
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.horizontal_projection", contract_version=1
+)
 def horizontal_projection(image: ImageObj) -> SignalObj:
     """Compute the sum of pixel intensities along each col. (projection on the x-axis).
 
@@ -176,7 +178,9 @@ def horizontal_projection(image: ImageObj) -> SignalObj:
     return dst_signal
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.vertical_projection", contract_version=1
+)
 def vertical_projection(image: ImageObj) -> SignalObj:
     """Compute the sum of pixel intensities along each row (projection on the y-axis).
 

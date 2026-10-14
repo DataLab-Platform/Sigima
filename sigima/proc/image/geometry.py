@@ -71,7 +71,7 @@ class TranslateParam(gds.DataSet):
     dy = gds.FloatItem(_("Y translation"), default=0.0)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.translate", contract_version=1)
 def translate(src: ImageObj, p: TranslateParam) -> ImageObj:
     """Translate data with :py:func:`scipy.ndimage.shift`
 
@@ -129,7 +129,7 @@ class RotateParam(gds.DataSet):
     ).set_prop("display", active=prop)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.rotate", contract_version=1)
 def rotate(src: ImageObj, p: RotateParam) -> ImageObj:
     """Rotate data with :py:func:`scipy.ndimage.rotate`
 
@@ -176,7 +176,7 @@ def __swap_axes(src: ImageObj, dst: ImageObj) -> None:
         dst.set_coords(src.ycoords, src.xcoords)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.rotate90", contract_version=1)
 def rotate90(src: ImageObj) -> ImageObj:
     """Rotate data 90° with :py:func:`numpy.rot90`
 
@@ -199,7 +199,7 @@ def rotate90(src: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.rotate270", contract_version=1)
 def rotate270(src: ImageObj) -> ImageObj:
     """Rotate data 270° with :py:func:`numpy.rot90`
 
@@ -220,7 +220,7 @@ def rotate270(src: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.fliph", contract_version=1)
 def fliph(src: ImageObj) -> ImageObj:
     """Flip data horizontally with :py:func:`numpy.fliplr`
 
@@ -237,7 +237,7 @@ def fliph(src: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.flipv", contract_version=1)
 def flipv(src: ImageObj) -> ImageObj:
     """Flip data vertically with :py:func:`numpy.flipud`
 
@@ -282,7 +282,7 @@ class ResizeParam(gds.DataSet):
     ).set_prop("display", active=prop)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.resize", contract_version=1)
 def resize(src: ImageObj, p: ResizeParam) -> ImageObj:
     """Zooming function with :py:func:`scipy.ndimage.zoom`
 
@@ -313,7 +313,7 @@ def resize(src: ImageObj, p: ResizeParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.transpose", contract_version=1)
 def transpose(src: ImageObj) -> ImageObj:
     """Transpose image with :py:func:`numpy.transpose`.
 
@@ -459,7 +459,7 @@ class Resampling2DParam(gds.DataSet):
             self.height = obj.data.shape[0]
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.resampling", contract_version=1)
 def resampling(src: ImageObj, p: Resampling2DParam) -> ImageObj:
     """Resample image to new coordinate grid using interpolation
 
@@ -624,7 +624,9 @@ class UniformCoordsParam(gds.DataSet):
                 self.dy = 1.0
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.set_uniform_coords", contract_version=1
+)
 def set_uniform_coords(src: ImageObj, p: UniformCoordsParam) -> ImageObj:
     """Convert image to uniform coordinate system
 
@@ -651,7 +653,7 @@ class XYZCalibrateParam(gds.DataSet):
     a3 = gds.FloatItem("a<sub>3</sub>", default=0.0, help=_("Cubic term"))
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.calibration", contract_version=1)
 def calibration(src: ImageObj, p: XYZCalibrateParam) -> ImageObj:
     """Compute polynomial calibration
 

@@ -338,7 +338,7 @@ class Peak2DDetectionParam(DetectionROIParam, GenericDetectionParam):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.peak_detection", contract_version=1)
 def peak_detection(obj: ImageObj, p: Peak2DDetectionParam) -> GeometryResult | None:
     """Compute 2D peak detection
     with :py:func:`sigima.tools.image.get_2d_peaks_coords`
@@ -382,7 +382,7 @@ class ContourShapeParam(GenericDetectionParam):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.contour_shape", contract_version=1)
 def contour_shape(image: ImageObj, p: ContourShapeParam) -> GeometryResult | None:
     """Compute contour shape with :py:func:`sigima.tools.image.get_contour_shapes`."""
     shape: sigima.enums.ContourShape = p.shape
@@ -458,7 +458,7 @@ class BlobDOGParam(DetectionROIParam, BaseBlobParam):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.blob_dog", contract_version=1)
 def blob_dog(image: ImageObj, p: BlobDOGParam) -> GeometryResult | None:
     """Compute blobs using Difference of Gaussian method
     with :py:func:`sigima.tools.image.find_blobs_dog`
@@ -498,7 +498,7 @@ class BlobDOHParam(DetectionROIParam, BaseBlobParam):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.blob_doh", contract_version=1)
 def blob_doh(image: ImageObj, p: BlobDOHParam) -> GeometryResult | None:
     """Compute blobs using Determinant of Hessian method
     with :py:func:`sigima.tools.image.find_blobs_doh`
@@ -534,7 +534,7 @@ class BlobLOGParam(BlobDOHParam):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.blob_log", contract_version=1)
 def blob_log(image: ImageObj, p: BlobLOGParam) -> GeometryResult | None:
     """Compute blobs using Laplacian of Gaussian method
     with :py:func:`sigima.tools.image.find_blobs_log`
@@ -734,7 +734,7 @@ class BlobOpenCVParam(DetectionROIParam, gds.DataSet):
     ).set_prop("display", active=_prop_conv)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.blob_opencv", contract_version=1)
 def blob_opencv(image: ImageObj, p: BlobOpenCVParam) -> GeometryResult | None:
     """Compute blobs using OpenCV
     with :py:func:`sigima.tools.image.find_blobs_opencv`
@@ -791,7 +791,9 @@ class HoughCircleParam(DetectionROIParam, gds.DataSet):
     min_distance = gds.IntItem(_("Minimal distance"), min=0)
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.hough_circle_peaks", contract_version=1
+)
 def hough_circle_peaks(image: ImageObj, p: HoughCircleParam) -> GeometryResult | None:
     """Compute Hough circles
     with :py:func:`sigima.tools.image.get_hough_circle_peaks`

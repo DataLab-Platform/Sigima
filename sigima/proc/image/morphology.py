@@ -52,7 +52,7 @@ class MorphologyParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.white_tophat", contract_version=1)
 def white_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute White Top-Hat with :py:func:`skimage.morphology.white_tophat`
 
@@ -69,7 +69,7 @@ def white_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.black_tophat", contract_version=1)
 def black_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute Black Top-Hat with :py:func:`skimage.morphology.black_tophat`
 
@@ -86,7 +86,7 @@ def black_tophat(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.erosion", contract_version=1)
 def erosion(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute Erosion with :py:func:`skimage.morphology.erosion`
 
@@ -103,7 +103,7 @@ def erosion(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.dilation", contract_version=1)
 def dilation(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute Dilation with :py:func:`skimage.morphology.dilation`
 
@@ -120,7 +120,7 @@ def dilation(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.opening", contract_version=1)
 def opening(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute morphological opening with :py:func:`skimage.morphology.opening`
 
@@ -137,7 +137,7 @@ def opening(src: ImageObj, p: MorphologyParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.closing", contract_version=1)
 def closing(src: ImageObj, p: MorphologyParam) -> ImageObj:
     """Compute morphological closing with :py:func:`skimage.morphology.closing`
 

@@ -125,7 +125,7 @@ class CannyParam(gds.DataSet):
     )
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.canny", contract_version=1)
 def canny(src: ImageObj, p: CannyParam) -> ImageObj:
     """Compute Canny filter with :py:func:`skimage.feature.canny`.
 
@@ -158,7 +158,7 @@ def canny(src: ImageObj, p: CannyParam) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.farid", contract_version=1)
 def farid(src: ImageObj) -> ImageObj:
     """Compute Farid filter with :py:func:`skimage.filters.farid`.
 
@@ -171,7 +171,7 @@ def farid(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.farid)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.farid_h", contract_version=1)
 def farid_h(src: ImageObj) -> ImageObj:
     """Compute horizontal Farid filter with :py:func:`skimage.filters.farid_h`.
 
@@ -184,7 +184,7 @@ def farid_h(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.farid_h)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.farid_v", contract_version=1)
 def farid_v(src: ImageObj) -> ImageObj:
     """Compute vertical Farid filter with :py:func:`skimage.filters.farid_v`.
 
@@ -197,7 +197,7 @@ def farid_v(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.farid_v)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.laplace", contract_version=1)
 def laplace(src: ImageObj) -> ImageObj:
     """Compute Laplace filter with :py:func:`skimage.filters.laplace`.
 
@@ -210,7 +210,7 @@ def laplace(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.laplace)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.prewitt", contract_version=1)
 def prewitt(src: ImageObj) -> ImageObj:
     """Compute Prewitt filter with :py:func:`skimage.filters.prewitt`.
 
@@ -223,7 +223,7 @@ def prewitt(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.prewitt)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.prewitt_h", contract_version=1)
 def prewitt_h(src: ImageObj) -> ImageObj:
     """Compute horizontal Prewitt filter with :py:func:`skimage.filters.prewitt_h`.
 
@@ -236,7 +236,7 @@ def prewitt_h(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.prewitt_h)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.prewitt_v", contract_version=1)
 def prewitt_v(src: ImageObj) -> ImageObj:
     """Compute vertical Prewitt filter with :py:func:`skimage.filters.prewitt_v`.
 
@@ -249,7 +249,7 @@ def prewitt_v(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.prewitt_v)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.roberts", contract_version=1)
 def roberts(src: ImageObj) -> ImageObj:
     """Compute Roberts filter with :py:func:`skimage.filters.roberts`.
 
@@ -262,7 +262,7 @@ def roberts(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.roberts)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.scharr", contract_version=1)
 def scharr(src: ImageObj) -> ImageObj:
     """Compute Scharr filter with :py:func:`skimage.filters.scharr`.
 
@@ -275,7 +275,7 @@ def scharr(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.scharr)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.scharr_h", contract_version=1)
 def scharr_h(src: ImageObj) -> ImageObj:
     """Compute horizontal Scharr filter with :py:func:`skimage.filters.scharr_h`.
 
@@ -288,7 +288,7 @@ def scharr_h(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.scharr_h)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.sobel", contract_version=1)
 def sobel(src: ImageObj) -> ImageObj:
     """Compute Sobel filter with :py:func:`skimage.filters.sobel`.
 
@@ -301,7 +301,7 @@ def sobel(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.sobel)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.sobel_h", contract_version=1)
 def sobel_h(src: ImageObj) -> ImageObj:
     """Compute horizontal Sobel filter with :py:func:`skimage.filters.sobel_h`.
 
@@ -314,7 +314,7 @@ def sobel_h(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.sobel_h)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.sobel_v", contract_version=1)
 def sobel_v(src: ImageObj) -> ImageObj:
     """Compute vertical Sobel filter with :py:func:`skimage.filters.sobel_v`.
 
@@ -327,7 +327,7 @@ def sobel_v(src: ImageObj) -> ImageObj:
     return Wrap1to1Func(filters.sobel_v)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.scharr_v", contract_version=1)
 def scharr_v(src: ImageObj) -> ImageObj:
     """Compute vertical Scharr filter with :py:func:`skimage.filters.scharr_v`.
 

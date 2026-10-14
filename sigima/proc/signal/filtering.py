@@ -52,7 +52,7 @@ from sigima.proc.signal.fourier import ZeroPadding1DParam, zero_padding
 from sigima.tools.signal import fourier
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.gaussian_filter", contract_version=1)
 def gaussian_filter(src: SignalObj, p: GaussianParam) -> SignalObj:
     """Compute gaussian filter with :py:func:`scipy.ndimage.gaussian_filter`
 
@@ -66,7 +66,7 @@ def gaussian_filter(src: SignalObj, p: GaussianParam) -> SignalObj:
     return Wrap1to1Func(spi.gaussian_filter, sigma=p.sigma)(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.moving_average", contract_version=1)
 def moving_average(src: SignalObj, p: MovingAverageParam) -> SignalObj:
     """Compute moving average with :py:func:`scipy.ndimage.uniform_filter`
 
@@ -82,7 +82,7 @@ def moving_average(src: SignalObj, p: MovingAverageParam) -> SignalObj:
     )(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.moving_median", contract_version=1)
 def moving_median(src: SignalObj, p: MovingMedianParam) -> SignalObj:
     """Compute moving median with :py:func:`scipy.ndimage.median_filter`
 
@@ -98,7 +98,7 @@ def moving_median(src: SignalObj, p: MovingMedianParam) -> SignalObj:
     )(src)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.wiener", contract_version=1)
 def wiener(src: SignalObj) -> SignalObj:
     """Compute Wiener filter with :py:func:`scipy.signal.wiener`
 
@@ -393,7 +393,7 @@ def frequency_filter(src: SignalObj, p: BaseHighLowBandParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.lowpass", contract_version=1)
 def lowpass(src: SignalObj, p: LowPassFilterParam) -> SignalObj:
     """Compute low-pass filter with :py:func:`scipy.signal.filtfilt`
 
@@ -407,7 +407,7 @@ def lowpass(src: SignalObj, p: LowPassFilterParam) -> SignalObj:
     return frequency_filter(src, p)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.highpass", contract_version=1)
 def highpass(src: SignalObj, p: HighPassFilterParam) -> SignalObj:
     """Compute high-pass filter with :py:func:`scipy.signal.filtfilt`
 
@@ -421,7 +421,7 @@ def highpass(src: SignalObj, p: HighPassFilterParam) -> SignalObj:
     return frequency_filter(src, p)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.bandpass", contract_version=1)
 def bandpass(src: SignalObj, p: BandPassFilterParam) -> SignalObj:
     """Compute band-pass filter with :py:func:`scipy.signal.filtfilt`
 
@@ -435,7 +435,7 @@ def bandpass(src: SignalObj, p: BandPassFilterParam) -> SignalObj:
     return frequency_filter(src, p)
 
 
-@computation_function()
+@computation_function(operation_id="sigima.signal.bandstop", contract_version=1)
 def bandstop(src: SignalObj, p: BandStopFilterParam) -> SignalObj:
     """Compute band-stop filter with :py:func:`scipy.signal.filtfilt`
 
@@ -450,7 +450,9 @@ def bandstop(src: SignalObj, p: BandStopFilterParam) -> SignalObj:
 
 
 # Noise addition functions
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.add_gaussian_noise", contract_version=1
+)
 def add_gaussian_noise(src: SignalObj, p: NormalDistributionParam) -> SignalObj:
     """Add normal noise to the input signal.
 
@@ -472,7 +474,9 @@ def add_gaussian_noise(src: SignalObj, p: NormalDistributionParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.add_poisson_noise", contract_version=1
+)
 def add_poisson_noise(src: SignalObj, p: PoissonDistributionParam) -> SignalObj:
     """Add Poisson noise to the input signal.
 
@@ -494,7 +498,9 @@ def add_poisson_noise(src: SignalObj, p: PoissonDistributionParam) -> SignalObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.add_uniform_noise", contract_version=1
+)
 def add_uniform_noise(src: SignalObj, p: UniformDistributionParam) -> SignalObj:
     """Add uniform noise to the input signal.
 

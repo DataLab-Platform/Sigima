@@ -48,7 +48,7 @@ __all__ = [
 ]
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.fft", contract_version=1)
 def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     """Compute FFT with :py:func:`sigima.tools.image.fft2d`
 
@@ -71,7 +71,7 @@ def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.ifft", contract_version=1)
 def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     """Compute inverse FFT with :py:func:`sigima.tools.image.ifft2d`
 
@@ -94,7 +94,9 @@ def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.image.magnitude_spectrum", contract_version=1
+)
 def magnitude_spectrum(src: ImageObj, p: SpectrumParam | None = None) -> ImageObj:
     """Compute magnitude spectrum
     with :py:func:`sigima.tools.image.magnitude_spectrum`
@@ -114,7 +116,7 @@ def magnitude_spectrum(src: ImageObj, p: SpectrumParam | None = None) -> ImageOb
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.phase_spectrum", contract_version=1)
 def phase_spectrum(src: ImageObj) -> ImageObj:
     """Compute phase spectrum
     with :py:func:`sigima.tools.image.phase_spectrum`
@@ -131,7 +133,7 @@ def phase_spectrum(src: ImageObj) -> ImageObj:
     return dst
 
 
-@computation_function()
+@computation_function(operation_id="sigima.image.psd", contract_version=1)
 def psd(src: ImageObj, p: SpectrumParam | None = None) -> ImageObj:
     """Compute power spectral density
     with :py:func:`sigima.tools.image.psd`
