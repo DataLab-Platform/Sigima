@@ -16,6 +16,7 @@ from sigima.proc.alignment import (
     align_operand,
     check_alignment_record,
 )
+from sigima.proc.execution import prepare_execution
 
 
 def _signal(x, y, title: str = "s", units=("s", "V")) -> sigima.objects.SignalObj:
@@ -27,8 +28,8 @@ def _signal(x, y, title: str = "s", units=("s", "V")) -> sigima.objects.SignalOb
 def _difference(source, operand):
     """Run the difference contract as an application does: prepare, then call."""
     contract = contracts.contract_for_function(sigima.proc.signal.difference)
-    inputs, context = contract.prepare_inputs([source, operand])
-    return sigima.proc.signal.difference(*inputs), context
+    prepared = prepare_execution(contract, [source, operand], param=None)
+    return prepared.run(), prepared.context
 
 
 def test_equal_grids_are_not_interpolated() -> None:
@@ -138,9 +139,9 @@ def test_recorded_rule_is_checked_on_replay() -> None:
     contract = contracts.get_operation_contract("sigima.signal.difference", 1)
     source = _signal([0, 1, 2], [0, 1, 2])
     operand = _signal([0, 0.5, 2], [0, 0.5, 2])
-    _inputs, context = contract.prepare_inputs([source, operand])
-    inputs, _ = contract.prepare_inputs([source, operand], context)
-    assert np.array_equal(inputs[1].y, [0.0, 1.0, 2.0])
+    context = prepare_execution(contract, [source, operand], param=None).context
+    replay = prepare_execution(contract, [source, operand], values={}, context=context)
+    assert np.array_equal(replay.args[1].y, [0.0, 1.0, 2.0])
     for recorded in (
         {},
         {"x_alignment": None},
@@ -148,6 +149,6 @@ def test_recorded_rule_is_checked_on_replay() -> None:
         {"x_alignment": {"rule": "other.rule", "version": 1}},
     ):
         with pytest.raises(XAlignmentError) as info:
-            contract.prepare_inputs([source, operand], recorded)
+            prepare_execution(contract, [source, operand], values={}, context=recorded)
         assert info.value.code == "unknown_rule"
     check_alignment_record(context["x_alignment"])

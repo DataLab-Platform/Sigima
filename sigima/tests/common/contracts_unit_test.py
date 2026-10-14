@@ -297,14 +297,13 @@ def test_normalize_contract() -> None:
     constant = contracts.contract_for_function(sigima.proc.signal.addition_constant)
     assert constant.operation_id == "sigima.signal.addition_constant"
     assert not constant.qualified and constant.qualification_status == "not_qualified"
-    assert constant.comparison is None and constant.preconditions == ()
+    assert constant.comparison is None
     assert contract.comparison is contracts.EXACT
     with pytest.raises(contracts.UnknownOperationError):
         contracts.get_operation_contract("sigima.signal.unknown", 1)
     with pytest.raises(contracts.IncompatibleContractError):
         contracts.get_operation_contract("sigima.signal.normalize", 2)
     assert contract.x_alignment is None
-    assert contract.prepare_inputs([_f0()], {"x_alignment": None})[1] == {}
 
 
 def test_difference_contract() -> None:
@@ -379,18 +378,12 @@ def test_registry_aliases_and_errors() -> None:
     assert paired.x_alignment is None and not paired.qualified
 
 
-def test_preconditions() -> None:
-    """ROI and uncertainty rows fail the qualified preconditions."""
+def test_input_kinds() -> None:
+    """Input kinds follow the roles; any valid signal state is accepted."""
     contract = contracts.get_operation_contract("sigima.signal.normalize", 1)
-    src = _f0()
-    assert contract.check_preconditions([src]) is None
-    assert contract.check_preconditions([]) == "input_count"
-    with_dy = src.copy()
-    with_dy.dy = np.full(4, 0.1)
-    assert contract.check_preconditions([with_dy]) == "no_uncertainty"
-    with_roi = src.copy()
-    with_roi.roi = sigima.objects.create_signal_roi([0.0, 0.5])
-    assert contract.check_preconditions([with_roi]) == "no_roi"
+    assert contract.input_kinds(1) == ["signal"]
+    assert contract.input_kinds(0) is None and contract.input_kinds(2) is None
+    assert not hasattr(contract, "check_preconditions")
 
 
 def test_parameters_to_values() -> None:

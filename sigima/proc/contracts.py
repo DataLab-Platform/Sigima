@@ -40,7 +40,6 @@ from collections.abc import Iterable, Sequence
 from typing import Any, Callable
 
 import guidata.dataset as gds
-import numpy as np
 
 from sigima.config import OptionField, options
 from sigima.objects import ImageObj, SignalObj
@@ -81,7 +80,7 @@ from sigima.proc.parameter_codec import (
     encode_dataset,
     encode_parameters,
 )
-from sigima.proc.policies import check_x_alignment_record, get_x_alignment_policy
+from sigima.proc.policies import get_x_alignment_policy
 
 __all__ = [
     "EXACT",
@@ -130,41 +129,6 @@ def _kind_of(tp: Any, classes: tuple[tuple[type, str], ...]) -> str | None:
             if issubclass(tp, cls):
                 return kind
     return None
-
-
-def _object_kind(obj: Any) -> str | None:
-    """Return the kind of a live object (``"signal"``, ``"image"`` or None)."""
-    return _kind_of(type(obj), _OBJECT_CLASSES)
-
-
-# Provisional replay preconditions of qualified contracts. They restrict replay
-# to the states that the current state fingerprints and comparisons can verify;
-# they are removed once those are generalized. They name no operation.
-
-
-def _check_real_dtype(obj: Any) -> bool:
-    if isinstance(obj, SignalObj):
-        return (
-            np.asarray(obj.x).dtype.kind == "f" and np.asarray(obj.y).dtype.kind == "f"
-        )
-    return np.asarray(obj.data).dtype.kind in "biuf"
-
-
-def _check_no_roi(obj: Any) -> bool:
-    return obj.roi is None
-
-
-def _check_no_uncertainty(obj: Any) -> bool:
-    # Only signals carry uncertainty rows (an image's dx/dy are its pixel size).
-    return not isinstance(obj, SignalObj) or (obj.dx is None and obj.dy is None)
-
-
-# Ordered: the first failing check names the refusal reason.
-_PROVISIONAL_PRECONDITIONS: dict[str, Callable[[Any], bool]] = {
-    "real_dtype": _check_real_dtype,
-    "no_roi": _check_no_roi,
-    "no_uncertainty": _check_no_uncertainty,
-}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -228,11 +192,6 @@ class OperationContract:
         """Comparison rule of the qualification, or None if not qualified."""
         return self.qualification.comparison if self.qualified else None
 
-    @property
-    def preconditions(self) -> tuple[str, ...]:
-        """Names of the provisional checks that inputs must pass for replay."""
-        return tuple(_PROVISIONAL_PRECONDITIONS) if self.qualified else ()
-
     def input_kinds(self, count: int) -> list[str] | None:
         """Return the kind expected for each of *count* inputs, or None.
 
@@ -284,53 +243,6 @@ class OperationContract:
             return decode_parameters(self.parameters, values)
         except InvalidParametersError as exc:
             raise InvalidParametersError(f"{self.operation_id}: {exc}") from exc
-
-    def check_preconditions(self, inputs: Sequence[Any]) -> str | None:
-        """Return the name of the first failing precondition, or None.
-
-        Args:
-            inputs: Input objects, in role order.
-        """
-        kinds = self.input_kinds(len(inputs))
-        if kinds is None:
-            return "input_count"
-        for obj, kind in zip(inputs, kinds):
-            if _object_kind(obj) != kind:
-                return kind
-        for name in self.preconditions:
-            check = _PROVISIONAL_PRECONDITIONS[name]
-            if not all(check(obj) for obj in inputs):
-                return name
-        return None
-
-    def prepare_inputs(
-        self, inputs: Sequence[Any], context: dict[str, Any] | None = None
-    ) -> tuple[list[Any], dict[str, Any]]:
-        """Return the inputs to pass to the function and the execution context.
-
-        The original inputs are never modified. Ordinary processing calls this
-        without *context*; a replay passes the recorded context, whose policy
-        must be the one declared by the contract.
-
-        Args:
-            inputs: Input objects, in role order.
-            context: Recorded execution context, for a replay.
-
-        Returns:
-            ``(inputs, context)``; *context* holds ``x_alignment`` when the
-            contract aligns its inputs.
-
-        Raises:
-            XAlignmentError: If a recorded policy is unknown or the inputs cannot
-             be aligned.
-        """
-        if self.x_alignment is None:
-            return list(inputs), {}
-        if context is not None:
-            check_x_alignment_record(context.get("x_alignment"), self.x_alignment)
-        policy = get_x_alignment_policy(self.x_alignment)
-        prepared, record = policy.apply(list(inputs))
-        return prepared, {"x_alignment": record}
 
 
 def _declaration_error(func: Callable, message: str) -> ContractDeclarationError:
