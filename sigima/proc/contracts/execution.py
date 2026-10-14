@@ -187,7 +187,8 @@ def describe_call(
 
     Returns:
         ``{"operation", "qualification", "pattern", "roles", "parameters",
-        "parameter_codec", "options", "limits", "implementation"}``:
+        "parameter_codec", "options", "metadata_read", "limits",
+        "implementation"}``:
         ``operation`` is ``{"id", "contract_version"}`` or None;
         ``qualification`` is ``{"status", "comparison"}`` (status ``qualified``,
         ``not_qualified``, ``qualification_outdated`` or ``no_contract``;
@@ -195,7 +196,10 @@ def describe_call(
         encoded parameters or None when they could not be encoded
         (``parameters_not_encoded`` in ``limits``); ``options`` are the current
         values of the global options read by the computation (see
-        :func:`prepare_execution`), to be recorded in the execution context.
+        :func:`prepare_execution`), to be recorded in the execution context;
+        ``metadata_read`` lists the metadata keys of the inputs read by the
+        computation (``{"role", "position", "key"}``, *position* in *inputs*),
+        whose values an application records and checks before a replay.
     """
     if contract is _MISSING:
         contract = contract_for_function(func)
@@ -208,6 +212,7 @@ def describe_call(
         "parameters": None,
         "parameter_codec": PARAMETER_CODEC_VERSION,
         "options": {},
+        "metadata_read": [],
         "limits": limits,
         "implementation": implementation_of(func),
     }
@@ -231,6 +236,12 @@ def describe_call(
     description["options"] = _current_options(contract)
     if _inputs_match(contract, inputs):
         description["roles"] = contract.input_role_names(len(inputs))
+        reads = dict(contract.reads_metadata)
+        description["metadata_read"] = [
+            {"role": role, "position": position, "key": key}
+            for position, role in enumerate(description["roles"])
+            for key in reads.get(role, ())
+        ]
     else:
         limits.append("inputs_do_not_match_contract")
     try:

@@ -83,6 +83,7 @@ def test_describe_qualified_call() -> None:
     assert description["pattern"] == "1_to_1" and description["roles"] == ["source"]
     assert description["parameters"] == {"method": "maximum"}
     assert not description["limits"] and not description["options"]
+    assert not description["metadata_read"]
     assert description["implementation"] == {
         "package": "sigima",
         "version": sigima.__version__,
@@ -298,6 +299,22 @@ def test_prepared_execution_is_picklable() -> None:
     copy = pickle.loads(pickle.dumps(prepared))
     assert isinstance(copy, PreparedExecution)
     _same_signal(execute(copy), prepared.run())
+
+
+def test_metadata_read_are_described() -> None:
+    """The metadata read by a computation are listed by input position."""
+    x = np.linspace(0.0, 1.0, 11)
+    data = _signal(x, 2.0 * x + 1.0)
+    fit = sigima.proc.signal.linear_fit(data)
+    other = _signal(np.linspace(0.0, 2.0, 5), np.zeros(5))
+    description = describe_call(sigima.proc.signal.evaluate_fit, [fit, other])
+    assert description["roles"] == ["source", "operand"]
+    assert description["metadata_read"] == [
+        {"role": "source", "position": 0, "key": "fit_params"}
+    ]
+    assert _json(description) == description
+    mismatch = describe_call(sigima.proc.signal.evaluate_fit, [fit])
+    assert not mismatch["metadata_read"]
 
 
 def test_normalize_outputs() -> None:

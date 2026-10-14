@@ -109,6 +109,9 @@ msgstr "La structure du contrat (rôles des entrées, arguments de paramètres, 
 msgid "Declare the :data:`sigima.config.options` read by the computation itself with ``reads_options=(...)``: applications record their values and restore them for a replay. Random generators take their seed as a parameter."
 msgstr "Déclarez les :data:`sigima.config.options` lues par le calcul lui-même avec ``reads_options=(...)`` : les applications enregistrent leurs valeurs et les restaurent pour un rejeu. Les générateurs aléatoires reçoivent leur graine en paramètre."
 
+msgid "Declare the metadata keys of input objects read by the computation itself with ``reads_metadata={role: (key, ...)}`` (e.g. the fit parameters read by ``evaluate_fit``): state fingerprints do not cover metadata, so applications record their values and refuse a replay when they changed."
+msgstr "Déclarez les clés de métadonnées des objets d'entrée lues par le calcul lui-même avec ``reads_metadata={rôle: (clé, ...)}`` (par exemple les paramètres d'ajustement lus par ``evaluate_fit``) : les empreintes d'état ne couvrent pas les métadonnées, si bien que les applications enregistrent leurs valeurs et refusent un rejeu lorsqu'elles ont changé."
+
 msgid "Never change a reference case to make a test pass. Update the reference cases deliberately, and explain the scientific reason, when a numerical correction changes the result."
 msgstr "Ne modifiez jamais un cas de référence pour faire passer un test. Mettez à jour les cas de référence délibérément, en expliquant la raison scientifique, lorsqu'une correction numérique change le résultat."
 
