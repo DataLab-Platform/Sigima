@@ -16,11 +16,15 @@ import os.path as osp
 
 import numpy as np
 import pytest
+import tifffile
 from PIL import Image
 
 from sigima.io import ImageExportParam, read_image, write_image
 from sigima.objects import create_image
 from sigima.tests.helpers import WorkdirRestoringTempDir
+
+# CCITT decoders are only provided by imagecodecs >= 2026 (Python >= 3.11)
+CCITT_SUPPORTED = tifffile.COMPRESSION.CCITT_T6 in tifffile.TIFF.DECOMPRESSORS
 
 
 def make_gradient(shape: tuple[int, int], dtype: type = np.uint8) -> np.ndarray:
@@ -75,6 +79,7 @@ def test_read_jpeg_compressed_tiff() -> None:
     assert np.max(np.abs(image.data.astype(int) - data.astype(int))) <= 8
 
 
+@pytest.mark.skipif(not CCITT_SUPPORTED, reason="CCITT codecs are not available")
 def test_read_ccitt_group4_tiff() -> None:
     """Bilevel TIFF files compressed with CCITT Group 4 are read back exactly."""
     data = np.zeros((32, 32), dtype=bool)

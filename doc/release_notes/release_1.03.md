@@ -13,7 +13,7 @@
 
 ### ??? Bug Fixes since version 1.2.0 ###
 
-* **Compressed TIFF files**: TIFF files compressed with LZW, JPEG, WebP or CCITT (Group 3, Group 4, RLE) could not be opened and failed with the error "requires the 'imagecodecs' package". LZW is the default compression of many acquisition and image-editing tools. The same limitation prevented format-aware TIFF export with LZW or JPEG compression. These compression schemes are now supported out of the box. This closes [DataLab issue #381](https://github.com/DataLab-Platform/DataLab/issues/381).
+* **Compressed TIFF files**: TIFF files compressed with LZW, JPEG or WebP could not be opened and failed with the error "requires the 'imagecodecs' package". LZW is the default compression of many acquisition and image-editing tools. The same limitation prevented format-aware TIFF export with LZW or JPEG compression. These compression schemes are now supported out of the box. CCITT compression (Group 3, Group 4, RLE), used for bilevel images, is also supported with Python 3.11 or later, as it requires `imagecodecs` 2026 or later. This closes [DataLab issue #381](https://github.com/DataLab-Platform/DataLab/issues/381).
 
 ### ?? Dependencies changes since version 1.2.0 ###
 
