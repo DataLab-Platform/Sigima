@@ -32,7 +32,7 @@ import sigima.tools.image
 from sigima.config import _
 from sigima.objects.image import ImageObj
 from sigima.proc.base import FFTParam, SpectrumParam
-from sigima.proc.contract_types import ReplayQualification, tolerance
+from sigima.proc.contracts import ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import Wrap1to1Func, dst_1_to_1
 

@@ -1,8 +1,8 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Operation contracts
-===================
+Contract registry
+=================
 
 An operation contract states what a computation function does, independently of
 its Python name: a stable identifier, an integer contract version, the processing
@@ -20,13 +20,13 @@ no data naming an operation.
 
 Declaring a contract does not qualify it for replay: a qualification names the
 contract version actually tested (see
-:class:`sigima.proc.contract_types.ReplayQualification`).
+:class:`sigima.proc.contracts.declarations.ReplayQualification`).
 
 Parameters cross application boundaries as plain JSON values
 (:meth:`OperationContract.encode_parameters`, :func:`parameters_to_values`) and
 are rebuilt only into the classes declared by the local contract
 (:meth:`OperationContract.decode_parameters`, :func:`parameters_from_values`),
-see :mod:`sigima.proc.parameter_codec`. No class name is ever read from data.
+see :mod:`sigima.proc.contracts.codec`. No class name is ever read from data.
 """
 
 from __future__ import annotations
@@ -45,66 +45,46 @@ from sigima.config import OptionField, options
 from sigima.objects import ImageObj, SignalObj
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
-from sigima.proc.alignment import XAlignmentError
-from sigima.proc.annotations import (
+from sigima.proc.contracts._annotations import (
     AnnotationError,
     resolve_annotation,
     sequence_item,
     split_optional,
     union_members,
 )
-from sigima.proc.contract_types import (
-    EXACT,
-    ComparisonRule,
-    ContractDeclarationError,
-    ContractError,
-    IncompatibleContractError,
-    InvalidParametersError,
-    OutputTolerance,
-    ParameterEncodingError,
-    ParameterSpec,
-    ReplayQualification,
-    Role,
-    UnknownOperationError,
-    tolerance,
-)
-from sigima.proc.decorator import (
-    ComputationMetadata,
-    get_computation_metadata,
-    is_computation_function,
-)
-from sigima.proc.parameter_codec import (
+from sigima.proc.contracts.alignment import XAlignmentError
+from sigima.proc.contracts.codec import (
     PARAMETER_CODEC_VERSION,
     decode_dataset,
     decode_parameters,
     encode_dataset,
     encode_parameters,
 )
-from sigima.proc.policies import get_x_alignment_policy
+from sigima.proc.contracts.declarations import (
+    ComparisonRule,
+    ContractDeclarationError,
+    IncompatibleContractError,
+    InvalidParametersError,
+    ParameterSpec,
+    ReplayQualification,
+    Role,
+    UnknownOperationError,
+)
+from sigima.proc.contracts.policies import get_x_alignment_policy
+from sigima.proc.decorator import (
+    ComputationMetadata,
+    get_computation_metadata,
+    is_computation_function,
+)
 
 __all__ = [
-    "EXACT",
-    "ComparisonRule",
-    "ContractDeclarationError",
-    "ContractError",
-    "IncompatibleContractError",
-    "InvalidParametersError",
+    "ContractRegistry",
     "OperationContract",
-    "OutputTolerance",
-    "ParameterEncodingError",
-    "ParameterSpec",
-    "ReplayQualification",
-    "Role",
-    "UnknownOperationError",
-    "XAlignmentError",
     "build_contract_registry",
     "contract_for_function",
-    "decode_parameters",
-    "encode_parameters",
     "get_operation_contract",
     "parameters_from_values",
     "parameters_to_values",
-    "tolerance",
 ]
 
 
@@ -146,7 +126,7 @@ class OperationContract:
         paramclass: Parameter class when the operation takes a single parameter
          set, None otherwise.
         parameter_schema_version: Version of the parameter encoding (see
-         :mod:`sigima.proc.parameter_codec`).
+         :mod:`sigima.proc.contracts.codec`).
         function: The decorated Sigima function.
         aliases: Earlier identifiers of the operation.
         parameters: Parameter arguments, in call order.
@@ -555,7 +535,7 @@ def parameters_to_values(param: gds.DataSet | None) -> dict[str, Any]:
     Enum choices are encoded by their stable ``.value``, other choices by their
     key. Non-finite floats use ``{"$float": "Infinity" | "-Infinity" | "NaN"}``;
     arrays and other composite values use the typed forms of
-    :mod:`sigima.proc.parameter_codec`. Transient and computed items are
+    :mod:`sigima.proc.contracts.codec`. Transient and computed items are
     excluded.
 
     Args:
@@ -580,7 +560,7 @@ def parameters_from_values(
     Only the contract's own parameter class is used. Every item is required;
     unknown items are refused; enum choices are accepted only by ``.value``. For
     operations taking other parameter arguments than a single parameter set, use
-    :func:`sigima.proc.parameter_codec.decode_parameters`.
+    :func:`sigima.proc.contracts.codec.decode_parameters`.
 
     Args:
         contract: Operation contract.

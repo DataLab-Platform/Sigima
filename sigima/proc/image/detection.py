@@ -37,7 +37,7 @@ from sigima.objects import (
     create_image_roi,
     create_image_roi_around_points,
 )
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import compute_geometry_from_obj
 from sigima.validation import validate_dataset

@@ -20,8 +20,7 @@ import sigima.proc.signal
 from sigima.config import options
 from sigima.enums import FrequencyFilterMethod
 from sigima.proc import contracts
-from sigima.proc.contract_types import ParameterEncodingError, ParameterSpec
-from sigima.proc.parameter_codec import (
+from sigima.proc.contracts.codec import (
     decode_dataset,
     decode_parameters,
     decode_value,
@@ -30,6 +29,7 @@ from sigima.proc.parameter_codec import (
     encode_value,
     parameter_items,
 )
+from sigima.proc.contracts.declarations import ParameterEncodingError, ParameterSpec
 
 
 def _json_round_trip(value):

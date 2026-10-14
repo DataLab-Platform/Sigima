@@ -28,7 +28,7 @@ import numpy as np
 
 from sigima.config import _
 from sigima.objects import SignalObj
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import stability
 

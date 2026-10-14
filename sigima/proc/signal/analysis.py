@@ -30,7 +30,7 @@ from sigima.objects import (
 )
 from sigima.objects.scalar.common import format_legend_value
 from sigima.proc.base import HistogramParam, new_signal_result
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import dynamic, features, pulse
 

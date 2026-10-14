@@ -46,7 +46,7 @@ from skimage.util import img_as_ubyte  # type: ignore[import]
 from sigima.config import _
 from sigima.enums import FilterMode
 from sigima.objects.image import ImageObj
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import Wrap1to1Func, dst_1_to_1, restore_data_outside_roi
 

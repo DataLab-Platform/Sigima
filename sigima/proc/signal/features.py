@@ -41,7 +41,7 @@ from sigima.objects import (
 )
 from sigima.objects.signal.creation import create_signal
 from sigima.proc.base import dst_1_to_1
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import compute_geometry_from_obj
 from sigima.tools.signal import dynamic, features, peakdetection, pulse

@@ -21,14 +21,13 @@ import sigima.proc.signal
 from sigima.config import options
 from sigima.objects import SignalObj
 from sigima.proc import contracts
-from sigima.proc.alignment import (
+from sigima.proc.contracts.alignment import (
     SMALLEST_GRID_LINEAR_HOLD,
     SOURCE_GRID_LINEAR,
     SOURCE_GRID_LINEAR_HOLD,
     XAlignmentError,
 )
-from sigima.proc.decorator import computation_function
-from sigima.proc.execution import (
+from sigima.proc.contracts.execution import (
     ExecutionError,
     PreparedExecution,
     default_roles,
@@ -37,6 +36,7 @@ from sigima.proc.execution import (
     normalize_outputs,
     prepare_execution,
 )
+from sigima.proc.decorator import computation_function
 
 
 @computation_function()

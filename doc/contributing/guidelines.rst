@@ -117,8 +117,8 @@ Follow these rules when you add or change a computation function:
 - Declaring a contract does not qualify it for replay. A qualification is
   declared next to the function with
   ``qualification=ReplayQualification(contract_version=..., comparison=...)``
-  (see :mod:`sigima.proc.contract_types`). It names the contract version that
-  was actually tested: increasing ``contract_version`` does not qualify the new
+  (see :mod:`sigima.proc.contracts.declarations`). It names the contract
+  version that was actually tested: increasing ``contract_version`` does not qualify the new
   version. It requires the validation test of the function (marked
   ``validation``) and the generic replay test
   (``sigima/tests/common/replay_qualification_test.py``), which replays the
@@ -144,7 +144,8 @@ Follow these rules when you add or change a computation function:
 
 - Some two-input contracts align the operand on the source grid before the
   call: declare the policy with ``x_alignment=...`` (see
-  :mod:`sigima.proc.policies` and :mod:`sigima.proc.alignment`). Applications
+  :mod:`sigima.proc.contracts.policies` and
+  :mod:`sigima.proc.contracts.alignment`). Applications
   record the policy and its version, and a replay refuses unknown policies.
   Never change a policy in place: add a new version and keep the previous one
   supported.

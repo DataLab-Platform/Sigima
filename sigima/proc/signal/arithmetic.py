@@ -13,11 +13,6 @@ import numpy as np
 
 from sigima.enums import MathOperator, SignalsToImageOrientation
 from sigima.objects import ImageObj, SignalObj, create_image
-from sigima.proc.alignment import (
-    SMALLEST_GRID_LINEAR_HOLD,
-    SOURCE_GRID_LINEAR,
-    SOURCE_GRID_LINEAR_HOLD,
-)
 from sigima.proc.base import (
     ArithmeticParam,
     ConstantParam,
@@ -26,7 +21,13 @@ from sigima.proc.base import (
     dst_2_to_1,
     dst_n_to_1,
 )
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import (
+    EXACT,
+    SMALLEST_GRID_LINEAR_HOLD,
+    SOURCE_GRID_LINEAR,
+    SOURCE_GRID_LINEAR_HOLD,
+    ReplayQualification,
+)
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import (
     is_uncertainty_data_available,

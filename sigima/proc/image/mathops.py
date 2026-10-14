@@ -37,7 +37,7 @@ from sigima.config import options as sigima_options
 from sigima.enums import AngleUnit
 from sigima.objects.image import ImageObj
 from sigima.proc.base import AngleUnitParam, PhaseParam
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import (
     Wrap1to1Func,
