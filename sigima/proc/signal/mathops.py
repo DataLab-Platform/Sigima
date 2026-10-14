@@ -15,6 +15,7 @@ import numpy as np
 from sigima.config import _
 from sigima.enums import AngleUnit
 from sigima.objects import SignalObj
+from sigima.proc.alignment import SOURCE_GRID_LINEAR_HOLD
 from sigima.proc.base import AngleUnitParam, PhaseParam, dst_1_to_1, dst_2_to_1
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import (
@@ -148,7 +149,9 @@ def phase(src: SignalObj, p: PhaseParam) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.complex_from_real_imag", contract_version=1
+    operation_id="sigima.signal.complex_from_real_imag",
+    contract_version=1,
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
 )
 def complex_from_real_imag(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Combine two real signals into a complex signal using real + i * imag.
@@ -176,7 +179,9 @@ def complex_from_real_imag(src1: SignalObj, src2: SignalObj) -> SignalObj:
 
 
 @computation_function(
-    operation_id="sigima.signal.complex_from_magnitude_phase", contract_version=1
+    operation_id="sigima.signal.complex_from_magnitude_phase",
+    contract_version=1,
+    x_alignment=SOURCE_GRID_LINEAR_HOLD,
 )
 def complex_from_magnitude_phase(
     src1: SignalObj, src2: SignalObj, p: AngleUnitParam
