@@ -18,7 +18,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Callable
 
-from sigima.proc.alignment import (
+from sigima.proc.contracts.alignment import (
     SMALLEST_GRID_LINEAR_HOLD,
     SOURCE_GRID_LINEAR,
     SOURCE_GRID_LINEAR_HOLD,

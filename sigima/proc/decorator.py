@@ -26,7 +26,7 @@ import makefun
 
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
-from sigima.proc.contract_types import NAME_PATTERN, ReplayQualification
+from sigima.proc.contracts.declarations import NAME_PATTERN, ReplayQualification
 from sigima.validation import validate_dataset
 
 if sys.version_info >= (3, 10):
@@ -354,10 +354,10 @@ def computation_function(
         contract_version: Contract version, required with ``operation_id``.
         aliases: Earlier operation identifiers, only with ``operation_id``.
         qualification: Replay qualification of the tested contract version
-         (see :class:`sigima.proc.contract_types.ReplayQualification`), only
+         (see :class:`sigima.proc.contracts.declarations.ReplayQualification`), only
          with ``operation_id``.
         x_alignment: Identifier of the X-alignment policy applied to the inputs
-         before the function runs (see :mod:`sigima.proc.policies`), only with
+         before the function runs (see :mod:`sigima.proc.contracts.policies`), only with
          ``operation_id``.
         reads_options: Names of the :data:`sigima.config.options` that the
          computation reads, only with ``operation_id``.

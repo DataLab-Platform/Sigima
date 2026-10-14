@@ -42,7 +42,7 @@ from sigima.objects import (
     TableResultBuilder,
 )
 from sigima.proc.base import new_signal_result
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import compute_geometry_from_obj
 

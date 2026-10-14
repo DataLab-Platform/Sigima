@@ -29,7 +29,7 @@ import numpy as np
 from sigima.config import _
 from sigima.objects import SignalObj
 from sigima.proc.base import dst_2_to_1
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fitting
 

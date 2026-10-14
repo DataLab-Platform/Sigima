@@ -11,7 +11,7 @@ import numpy as np
 
 from sigima.objects import ROI1DParam, SignalObj
 from sigima.proc.base import dst_1_to_1
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 
 

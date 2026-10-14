@@ -7,10 +7,13 @@
 
 from __future__ import annotations
 
+import importlib
 import inspect
 import json
 import math
+import os
 import pickle
+import subprocess
 import sys
 
 import guidata.dataset as gds
@@ -26,14 +29,14 @@ from sigima.objects import ImageObj, SignalObj
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
 from sigima.proc import contracts
-from sigima.proc.alignment import SOURCE_GRID_LINEAR
-from sigima.proc.annotations import (
+from sigima.proc.contracts._annotations import (
     AnnotationError,
     resolve_annotation,
     sequence_item,
     split_optional,
 )
-from sigima.proc.contract_types import (
+from sigima.proc.contracts.alignment import SOURCE_GRID_LINEAR
+from sigima.proc.contracts.declarations import (
     EXACT,
     ComparisonRule,
     OutputTolerance,
@@ -665,3 +668,50 @@ def test_annotation_resolution() -> None:
             resolve_annotation(bad, namespace)
     with pytest.raises(AnnotationError):
         split_optional(resolve_annotation("None", namespace))
+
+
+@pytest.mark.parametrize(
+    "statements",
+    [
+        "import sigima.proc.decorator; import sigima.proc.contracts",
+        "import sigima.proc.contracts.declarations",
+        "from sigima.proc.contracts import EXACT, build_contract_registry",
+        "import sigima.proc.signal; import sigima.proc.image",
+        "import sigima.proc.contracts.execution",
+        "from sigima.proc.contracts.registry import contract_for_function",
+    ],
+)
+def test_package_imports_in_any_order(statements: str) -> None:
+    """The contracts package imports without cycle, whatever comes first."""
+    code = f"{statements}; from sigima.proc.contracts import build_contract_registry"
+    code += "; assert len(build_contract_registry().contracts) > 200"
+    completed = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        env={**os.environ, "PYTHONPATH": os.pathsep.join(sys.path)},
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_package_exposes_the_public_names() -> None:
+    """The package exposes the public names of its modules, and nothing else."""
+    exported = set(contracts.__all__)
+    expected = set()
+    for module in ("declarations", "registry", "codec", "execution", "policies"):
+        expected.update(
+            importlib.import_module(f"sigima.proc.contracts.{module}").__all__
+        )
+    alignment = importlib.import_module("sigima.proc.contracts.alignment")
+    expected.update(
+        name for name in alignment.__all__ if not name.startswith(("align_", "check_"))
+    )
+    # Low-level codec helper used by the registry only.
+    expected.discard("parameter_items")
+    assert exported == expected
+    for name in contracts.__all__:
+        assert getattr(contracts, name) is not None, name
+    assert contracts.execution.describe_call is contracts.describe_call
+    with pytest.raises(AttributeError):
+        getattr(contracts, "not_a_name")

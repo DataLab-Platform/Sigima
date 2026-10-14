@@ -10,13 +10,13 @@ import pytest
 import sigima.objects
 import sigima.proc.signal
 from sigima.proc import contracts
-from sigima.proc.alignment import (
+from sigima.proc.contracts.alignment import (
     SOURCE_GRID_LINEAR,
     XAlignmentError,
     align_operand,
     check_alignment_record,
 )
-from sigima.proc.execution import prepare_execution
+from sigima.proc.contracts.execution import prepare_execution
 
 
 def _signal(x, y, title: str = "s", units=("s", "V")) -> sigima.objects.SignalObj:

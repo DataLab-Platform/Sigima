@@ -46,7 +46,7 @@ from sigima.proc.base import (
     ReplaceSpecialValuesImageParam,
     new_signal_result,
 )
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import (
     Wrap1to1Func,

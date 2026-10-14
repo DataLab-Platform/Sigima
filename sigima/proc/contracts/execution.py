@@ -20,8 +20,9 @@ application:
 - :func:`normalize_outputs` returns the outputs of a result by role.
 
 Errors carry a stable ``code`` (:class:`ExecutionError`); scientific refusals of a
-policy keep their own exception (:class:`~sigima.proc.alignment.XAlignmentError`)
-in ordinary processing and in replay alike. Nothing here depends on a
+policy keep their own exception
+(:class:`~sigima.proc.contracts.alignment.XAlignmentError`) in ordinary processing
+and in replay alike. Nothing here depends on a
 provenance format.
 """
 
@@ -38,21 +39,22 @@ from sigima.config import options
 from sigima.objects import ImageObj, SignalObj
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
-from sigima.proc.alignment import XAlignmentError
-from sigima.proc.contract_types import (
+from sigima.proc.contracts.codec import PARAMETER_CODEC_VERSION, encode_value
+from sigima.proc.contracts.declarations import (
     ContractError,
     InvalidParametersError,
     ParameterEncodingError,
 )
-from sigima.proc.contracts import OperationContract, contract_for_function
-from sigima.proc.parameter_codec import PARAMETER_CODEC_VERSION, encode_value
-from sigima.proc.policies import check_x_alignment_record, get_x_alignment_policy
+from sigima.proc.contracts.policies import (
+    check_x_alignment_record,
+    get_x_alignment_policy,
+)
+from sigima.proc.contracts.registry import OperationContract, contract_for_function
 
 __all__ = [
     "EXECUTION_ERROR_CODES",
     "ExecutionError",
     "PreparedExecution",
-    "XAlignmentError",
     "default_roles",
     "describe_call",
     "execute",
@@ -250,7 +252,7 @@ def _encode_without_contract(param: Any) -> dict[str, Any]:
     # pylint: disable=import-outside-toplevel
     import guidata.dataset as gds
 
-    from sigima.proc.parameter_codec import encode_dataset
+    from sigima.proc.contracts.codec import encode_dataset
 
     if param is None:
         return {}

@@ -39,14 +39,18 @@ from sigima.enums import (
     WindowingMethod,
 )
 from sigima.objects import ROI1DParam, SignalObj
-from sigima.proc.alignment import SOURCE_GRID_LINEAR_HOLD
 from sigima.proc.base import (
     ClipParam,
     NormalizeParam,
     ReplaceSpecialValuesSignalParam,
     dst_2_to_1,
 )
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import (
+    EXACT,
+    SOURCE_GRID_LINEAR_HOLD,
+    ReplayQualification,
+    tolerance,
+)
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fourier, interpolation, scaling, windowing
 from sigima.tools.signal import replace_values as rv

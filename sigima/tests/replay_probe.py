@@ -9,10 +9,10 @@ computation functions (:func:`sigima.proc.decorator.observe_calls`): copies of
 the inputs and parameters before the call, and a copy of the result. The generic
 replay test then replays each captured call exactly as an application does:
 
-1. :func:`sigima.proc.execution.describe_call` encodes the effective parameters;
+1. :func:`sigima.proc.contracts.describe_call` encodes the effective parameters;
 2. the description and the execution context go through JSON;
-3. :func:`sigima.proc.execution.prepare_execution` decodes and prepares the call;
-4. the prepared execution runs, :func:`~sigima.proc.execution.normalize_outputs`
+3. :func:`sigima.proc.contracts.prepare_execution` decodes and prepares the call;
+4. the prepared execution runs, :func:`~sigima.proc.contracts.normalize_outputs`
    checks its outputs, and the result is compared with the captured one under the
    comparison rule declared by the qualification (exact for unqualified
    contracts).
@@ -46,13 +46,13 @@ from sigima.objects import ImageObj, SignalObj
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
 from sigima.proc import contracts
-from sigima.proc.contract_types import EXACT, ComparisonRule
-from sigima.proc.execution import (
+from sigima.proc.contracts.codec import encode_dataset
+from sigima.proc.contracts.declarations import EXACT, ComparisonRule
+from sigima.proc.contracts.execution import (
     describe_call,
     normalize_outputs,
     prepare_execution,
 )
-from sigima.proc.parameter_codec import encode_dataset
 
 #: Largest number of calls captured per operation.
 MAX_SAMPLES = 3

@@ -45,7 +45,7 @@ from sigima.objects.base import (
     UniformDistributionParam,
 )
 from sigima.proc.base import GaussianParam, MovingAverageParam, MovingMedianParam
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.arithmetic import addition
 from sigima.proc.signal.base import Wrap1to1Func, dst_1_to_1, restore_data_outside_roi

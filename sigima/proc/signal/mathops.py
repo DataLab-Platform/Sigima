@@ -15,9 +15,8 @@ import numpy as np
 from sigima.config import _
 from sigima.enums import AngleUnit
 from sigima.objects import SignalObj
-from sigima.proc.alignment import SOURCE_GRID_LINEAR_HOLD
 from sigima.proc.base import AngleUnitParam, PhaseParam, dst_1_to_1, dst_2_to_1
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, SOURCE_GRID_LINEAR_HOLD, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import (
     Wrap1to1Func,

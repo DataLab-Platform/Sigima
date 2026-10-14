@@ -29,7 +29,7 @@ from sigima.config import _
 from sigima.enums import PadLocation1D
 from sigima.objects import SignalObj
 from sigima.proc.base import FFTParam, SpectrumParam
-from sigima.proc.contract_types import EXACT, ReplayQualification, tolerance
+from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import dst_1_to_1
 from sigima.tools.signal import fourier

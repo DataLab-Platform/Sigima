@@ -39,7 +39,7 @@ from sigima.proc.base import (
     ArithmeticParam,
     ConstantParam,
 )
-from sigima.proc.contract_types import EXACT, ReplayQualification
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import (
     dst_1_to_1,

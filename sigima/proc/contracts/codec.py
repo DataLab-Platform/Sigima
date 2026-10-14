@@ -45,7 +45,7 @@ import guidata.dataset as gds
 import numpy as np
 from guidata.dataset.datatypes import BeginGroup, ComputedProp, EndGroup
 
-from sigima.proc.contract_types import (
+from sigima.proc.contracts.declarations import (
     InvalidParametersError,
     ParameterEncodingError,
     ParameterSpec,
