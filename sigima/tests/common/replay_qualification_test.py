@@ -39,7 +39,12 @@ def test_replay_qualification(operation_id: str) -> None:
     names = generate_valid_test_names_for_function(
         f"sigima.proc.{family}", contract.function.__name__
     )
-    if not any(name in replay_probe.TEST_OUTCOMES for name in names):
+    ran = [
+        name
+        for name in names
+        if replay_probe.TEST_OUTCOMES.get(name) in ("passed", "failed")
+    ]
+    if not ran:
         pytest.skip("the validation test of the function did not run in this session")
     assert samples, "no call captured from the validation tests"
     proofs = [o for o in outcomes if o.status == "replayed"]
