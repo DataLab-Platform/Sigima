@@ -9,7 +9,7 @@ import guidata.dataset as gds
 import numpy as np
 
 from sigima.config import _
-from sigima.io.base import FormatInfo
+from sigima.io.base import FormatInfo, UnsupportedFormatOperationError
 from sigima.io.image.base import ImageFormatBase
 from sigima.objects.image import ImageObj, create_image
 from sigima.worker import CallbackWorkerProtocol
@@ -208,4 +208,4 @@ class RawImageFormat(ImageFormatBase):
 
     def write(self, filename: str, obj: ImageObj) -> None:
         """Reject RAW image writing."""
-        raise NotImplementedError(f"Writing to {filename} is not supported")
+        raise UnsupportedFormatOperationError(f"Writing to {filename} is not supported")

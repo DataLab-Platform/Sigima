@@ -35,13 +35,13 @@ class BinningParam(gds.DataSet):
     sx = gds.IntItem(
         _("Cluster size (X)"),
         default=2,
-        min=2,
+        min=1,
         help=_("Number of adjacent pixels to be combined together along X-axis."),
     )
     sy = gds.IntItem(
         _("Cluster size (Y)"),
         default=2,
-        min=2,
+        min=1,
         help=_("Number of adjacent pixels to be combined together along Y-axis."),
     )
     operation = gds.ChoiceItem(

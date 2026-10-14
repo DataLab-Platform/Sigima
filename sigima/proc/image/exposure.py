@@ -63,10 +63,12 @@ __all__ = [
     "AdjustGammaParam",
     "AdjustLogParam",
     "AdjustSigmoidParam",
+    "BrightnessContrastParam",
     "EqualizeAdaptHistParam",
     "EqualizeHistParam",
     "FlatFieldParam",
     "RescaleIntensityParam",
+    "adjust_brightness_contrast",
     "adjust_gamma",
     "adjust_log",
     "adjust_sigmoid",
@@ -80,6 +82,86 @@ __all__ = [
     "replace_special_values",
     "rescale_intensity",
 ]
+
+
+class BrightnessContrastParam(gds.DataSet, title=_("Brightness and contrast")):
+    """Brightness and contrast adjustment parameters."""
+
+    minimum = gds.FloatItem(_("Minimum"), default=0.0, check=False).set_prop(
+        "display", hide=True
+    )
+    maximum = gds.FloatItem(_("Maximum"), default=1.0, check=False).set_prop(
+        "display", hide=True
+    )
+    histogram = gds.HistogramRangeItem(
+        _("Brightness and contrast"),
+        "minimum",
+        "maximum",
+        help=_("Adjust the intensity window using the histogram."),
+    ).set_prop("display", presentation="brightness_contrast")
+
+    def update_from_obj(self, obj: ImageObj) -> None:
+        """Initialize the range and histogram from an image object."""
+        self.update_editor_context(obj)
+        self.minimum, self.maximum = self.histogram["reset_range"]
+
+    def update_editor_context(self, obj: ImageObj | None) -> None:
+        """Refresh transient editor context without changing saved parameters."""
+        if obj is None:
+            self.histogram = {}
+            return
+        if np.issubdtype(obj.data.dtype, np.complexfloating):
+            raise ValueError("Brightness and contrast require a real image")
+        data = obj.get_masked_view().compressed()
+        self.histogram = sigima.tools.image.brightness_contrast_context(
+            data, obj.data.dtype
+        )
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate the source dtype and canonical input range."""
+        if not context or not isinstance(context[0], ImageObj):
+            raise ValueError(
+                "brightness and contrast validation requires a source ImageObj"
+            )
+        if np.issubdtype(context[0].data.dtype, np.complexfloating):
+            raise ValueError("Brightness and contrast require a real image")
+        if (
+            not np.isfinite(self.minimum)
+            or not np.isfinite(self.maximum)
+            or self.minimum >= self.maximum
+        ):
+            raise ValueError("minimum must be finite and strictly less than maximum")
+
+
+@computation_function()
+def adjust_brightness_contrast(src: ImageObj, p: BrightnessContrastParam) -> ImageObj:
+    """Apply a clipped linear brightness and contrast adjustment.
+
+    Args:
+        src: Input image object
+        p: Brightness and contrast parameters
+
+    Returns:
+        Adjusted image object
+    """
+    dst = dst_1_to_1(
+        src,
+        "adjust_brightness_contrast",
+        f"min={p.minimum:.6g}, max={p.maximum:.6g}",
+    )
+    data = src.get_masked_view().compressed()
+    observed_range, output_range = sigima.tools.image.brightness_contrast_ranges(
+        data, src.data.dtype
+    )
+    if observed_range is not None and observed_range[0] < observed_range[1]:
+        dst.data = sigima.tools.image.adjust_brightness_contrast(
+            src.data,
+            p.minimum,
+            p.maximum,
+            output_range,
+        )
+        restore_data_outside_roi(dst, src)
+    return dst
 
 
 class AdjustGammaParam(gds.DataSet):

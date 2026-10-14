@@ -15,7 +15,7 @@ from typing import Sequence
 import numpy as np
 
 from sigima.config import _
-from sigima.io.base import BaseIORegistry, FormatBase
+from sigima.io.base import BaseIORegistry, FormatBase, UnsupportedFormatOperationError
 from sigima.objects.signal import SignalObj, create_signal
 from sigima.worker import CallbackWorkerProtocol
 
@@ -126,4 +126,6 @@ class SignalFormatBase(abc.ABC, FormatBase, metaclass=SignalFormatBaseMeta):
         Returns:
             XY data
         """
-        raise NotImplementedError(f"Reading from {self.info.name} is not supported")
+        raise UnsupportedFormatOperationError(
+            f"Reading from {self.info.name} is not supported"
+        )

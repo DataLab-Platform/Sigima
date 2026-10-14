@@ -1182,6 +1182,12 @@ msgstr "Seuillage minimal"
 msgid "Exposure and Intensity Correction"
 msgstr "Correction d'exposition et d'intensité"
 
+msgid ":func:`adjust_brightness_contrast <sigima.proc.image.adjust_brightness_contrast>`"
+msgstr ""
+
+msgid "Histogram-driven brightness and contrast adjustment"
+msgstr "Réglage de la luminosité et du contraste piloté par histogramme"
+
 msgid ":func:`histogram <sigima.proc.image.histogram>`"
 msgstr ""
 

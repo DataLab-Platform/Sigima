@@ -20,7 +20,16 @@ import numpy as np
 import pytest
 from guidata.dataset import dataset_to_json
 
-from sigima.objects import GaussParam, LorentzParam, SquarePulseParam, VoigtParam
+from sigima.objects import (
+    GaussParam,
+    LorentzParam,
+    NewSignalParam,
+    PulseParam,
+    SquarePulseParam,
+    UniformDistribution1DParam,
+    VoigtParam,
+    create_signal_from_param,
+)
 from sigima.objects.signal.creation import (
     CREATION_PARAMS_VERSION,
     convert_legacy_peak_creation_params,
@@ -231,6 +240,84 @@ def test_square_pulse_get_crossing_time_branches() -> None:
     assert t_fall > t_rise
     with pytest.raises(ValueError, match="rise.*fall"):
         p.get_crossing_time("middle", 0.5)
+
+
+def test_signal_creation_relational_validation() -> None:
+    """Signal creation rejects only relations required by the generators."""
+    with pytest.raises(ValueError, match="vmin must be less"):
+        create_signal_from_param(
+            UniformDistribution1DParam.create(
+                size=2, xmin=1.0, xmax=0.0, vmin=2.0, vmax=1.0
+            )
+        )
+
+    with pytest.raises(ValueError, match="start must be less"):
+        create_signal_from_param(
+            PulseParam.create(size=2, xmin=0.0, xmax=1.0, start=1.0, stop=0.0)
+        )
+
+    with pytest.raises(ValueError, match="plateau duration"):
+        create_signal_from_param(
+            SquarePulseParam.create(
+                size=2,
+                xmin=0.0,
+                xmax=1.0,
+                fwhm=1.0,
+                total_rise_time=2.0,
+                total_fall_time=2.0,
+            )
+        )
+
+
+@pytest.mark.parametrize(
+    ("size", "xmin", "xmax"),
+    [(4, 0.0, 1.0), (1, 0.5, 0.5), (3, 0.5, 0.5), (4, 1.0, 0.0)],
+)
+def test_signal_creation_preserves_supported_domains(
+    size: int, xmin: float, xmax: float
+) -> None:
+    """Signal creation preserves ascending, point, repeated, and descending X."""
+    signal = create_signal_from_param(
+        NewSignalParam.create(size=size, xmin=xmin, xmax=xmax)
+    )
+
+    np.testing.assert_array_equal(signal.x, np.linspace(xmin, xmax, size))
+    np.testing.assert_array_equal(signal.y, np.zeros(size))
+
+
+def test_signal_creation_preserves_valid_degenerate_cases() -> None:
+    """Constant distributions and instantaneous pulse edges remain valid."""
+    uniform = create_signal_from_param(
+        UniformDistribution1DParam.create(
+            size=3, xmin=0.0, xmax=1.0, vmin=2.0, vmax=2.0
+        )
+    )
+    np.testing.assert_array_equal(uniform.y, np.full(3, 2.0))
+
+    pulse = create_signal_from_param(
+        PulseParam.create(size=3, xmin=0.0, xmax=1.0, start=0.5, stop=0.5)
+    )
+    assert np.isfinite(pulse.y).all()
+
+    square = create_signal_from_param(
+        SquarePulseParam.create(
+            size=3,
+            xmin=0.0,
+            xmax=1.0,
+            x_rise_start=-1.0,
+            fwhm=0.0,
+            total_rise_time=0.0,
+            total_fall_time=0.0,
+            noise_amplitude=0.0,
+        )
+    )
+    assert np.isfinite(square.y).all()
+
+
+def test_peak_creation_sigma_is_strictly_positive() -> None:
+    """Analytical peak generators reject a zero standard deviation."""
+    with pytest.raises(ValueError, match="Zero is not"):
+        GaussParam.create(sigma=0.0)
 
 
 if __name__ == "__main__":

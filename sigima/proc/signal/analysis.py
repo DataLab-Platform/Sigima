@@ -116,6 +116,14 @@ class PulseFeaturesParam(gds.DataSet, title=_("Pulse features")):
         ),
     )
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate baseline intervals."""
+        del context
+        if self.xstartmin > self.xstartmax:
+            raise ValueError("xstartmin must be less than or equal to xstartmax")
+        if self.xendmin > self.xendmax:
+            raise ValueError("xendmin must be less than or equal to xendmax")
+
     def update_from_obj(self, obj: SignalObj) -> None:
         """Update parameters from a signal object."""
         self.xstartmin, self.xstartmax = pulse.get_start_range(obj.x)

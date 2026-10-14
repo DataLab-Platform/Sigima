@@ -20,7 +20,6 @@ on:
         options:
           - 'all'
           - 'build'
-          - 'quality'
           - 'build_latest'
         default: 'all'
   schedule:
@@ -87,38 +86,20 @@ jobs:
       run: ruff check --output-format=github sigima
     - name: Test with pytest
       run: pytest -v --tb=long
-
-  quality:
-    name: Quality (visualization and Pylint)
-    if: ${{ (github.event_name == 'push' || github.event_name == 'pull_request' || github.event_name == 'release' || github.event_name == 'workflow_call') || (github.event_name == 'workflow_dispatch' && (github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'quality')) }}
-    env:
-      DISPLAY: ':99.0'
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v7
-    - name: Set up Python 3.13
-      uses: actions/setup-python@v7
-      with:
-        python-version: "3.13"
     - name: Install quality dependencies
+      if: ${{ matrix.python-version == '3.13' }}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
-          libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
-        /sbin/start-stop-daemon --start --quiet \
-          --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background \
-          --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
-        python -m pip install --upgrade pip
         python -m pip install -e ".[dev,test,qt,plotly]" matplotlib
     - name: Verify optional visualization backends
+      if: ${{ matrix.python-version == '3.13' }}
       run: |
         python -c "import plotpy; print(f'PlotPy loaded from {plotpy.__file__}')"
         python -c "import plotly; print(f'Plotly loaded from {plotly.__file__}')"
     - name: Test visualization backends
+      if: ${{ matrix.python-version == '3.13' }}
       run: python -m pytest -o addopts="--import-mode=importlib" sigima/tests/viz -vv
     - name: Lint with Pylint
+      if: ${{ matrix.python-version == '3.13' }}
       run: python -m pylint sigima
 
   build_latest:

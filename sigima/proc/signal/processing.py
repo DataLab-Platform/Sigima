@@ -48,6 +48,7 @@ from sigima.proc.base import (
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fourier, interpolation, scaling, windowing
 from sigima.tools.signal import replace_values as rv
+from sigima.validation import validate_dataset
 
 from .base import dst_1_to_1, is_uncertainty_data_available, restore_data_outside_roi
 
@@ -121,6 +122,21 @@ class Resampling1DParam(InterpolationParam):
     nbpts = gds.IntItem(_("Number of points"), allow_none=True).set_prop(
         "display", active=FuncProp(_prop, lambda x: x == "nbpts")
     )
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate the target domain and active sampling mode."""
+        validate_dataset(super(), *context)
+        if self.xmin is None or self.xmax is None:
+            raise ValueError("xmin and xmax must be specified")
+        if self.mode == "dx":
+            if self.dx is None or self.dx == 0.0:
+                raise ValueError("dx must be non-zero in step size mode")
+            if (self.xmax > self.xmin and self.dx < 0.0) or (
+                self.xmax < self.xmin and self.dx > 0.0
+            ):
+                raise ValueError("dx sign must match the target domain orientation")
+        elif self.mode == "nbpts" and (self.nbpts is None or self.nbpts < 1):
+            raise ValueError("nbpts must be at least 1 in number of points mode")
 
     def update_from_obj(self, obj: SignalObj) -> None:
         """Update parameters from a signal object."""
@@ -473,6 +489,12 @@ class WindowingParam(gds.DataSet, title=_("Windowing")):
         "display",
         active=gds.FuncProp(_meth_prop, lambda x: x == WindowingMethod.GAUSSIAN),
     )
+
+    def validate_parameters(self, *context: object) -> None:
+        """Validate parameters used by the selected window method."""
+        del context
+        if self.method == WindowingMethod.GAUSSIAN and self.sigma == 0.0:
+            raise ValueError("sigma must be non-zero for Gaussian windowing")
 
 
 @computation_function()

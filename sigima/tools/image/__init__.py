@@ -37,7 +37,13 @@ from sigima.tools.image.detection import (
     get_hough_circle_peaks,
     remove_overlapping_disks,
 )
-from sigima.tools.image.exposure import flatfield, normalize
+from sigima.tools.image.exposure import (
+    adjust_brightness_contrast,
+    brightness_contrast_context,
+    brightness_contrast_ranges,
+    flatfield,
+    normalize,
+)
 from sigima.tools.image.extraction import get_radial_profile
 from sigima.tools.image.fourier import (
     convolve,
@@ -66,7 +72,10 @@ from sigima.tools.image.preprocessing import (
 # Define __all__ to specify what gets imported with
 # "from sigima.tools.image import *"
 __all__ = [
+    "adjust_brightness_contrast",
     "binning",
+    "brightness_contrast_context",
+    "brightness_contrast_ranges",
     "convolve",
     "deconvolve",
     "distance_matrix",

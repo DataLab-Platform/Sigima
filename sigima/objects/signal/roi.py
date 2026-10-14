@@ -29,6 +29,7 @@ import numpy as np
 
 from sigima.config import _
 from sigima.objects import base
+from sigima.validation import validate_dataset
 
 if TYPE_CHECKING:
     from sigima.objects.signal.object import SignalObj
@@ -52,6 +53,7 @@ class ROI1DParam(base.BaseROIParam["SignalObj", "SegmentROI"]):
         Returns:
             Single ROI
         """
+        validate_dataset(self, obj)
         assert isinstance(self.xmin, float) and isinstance(self.xmax, float)
         return SegmentROI([self.xmin, self.xmax], False, title=self.title)
 

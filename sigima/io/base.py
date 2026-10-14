@@ -20,6 +20,10 @@ from sigima.objects.base import BaseObj, TypeObj
 from sigima.worker import CallbackWorkerProtocol
 
 
+class UnsupportedFormatOperationError(NotImplementedError):
+    """Operation not supported by a file format, rather than an abstract hook."""
+
+
 class IOAction(enum.Enum):
     """I/O action type"""
 
@@ -114,7 +118,9 @@ class FormatBase(Generic[TypeObj]):
         Returns:
             List of native objects (signal or image)
         """
-        raise NotImplementedError(f"Reading from {self.info.name} is not supported")
+        raise UnsupportedFormatOperationError(
+            f"Reading from {self.info.name} is not supported"
+        )
 
     def write(self, filename: str, obj: BaseObj) -> None:
         """Write data to file
@@ -126,7 +132,9 @@ class FormatBase(Generic[TypeObj]):
         Raises:
             NotImplementedError: if format is not supported
         """
-        raise NotImplementedError(f"Writing to {self.info.name} is not supported")
+        raise UnsupportedFormatOperationError(
+            f"Writing to {self.info.name} is not supported"
+        )
 
 
 #  pylint: disable=bad-mcs-classmethod-argument

@@ -146,6 +146,16 @@ class NormalizeParam(gds.DataSet, title=_("Normalize")):
 class HistogramParam(gds.DataSet, title=_("Histogram")):
     """Histogram parameters"""
 
+    def validate_parameters(self, *context: object) -> None:
+        """Validate optional histogram limits."""
+        del context
+        if (
+            self.lower is not None
+            and self.upper is not None
+            and self.lower > self.upper
+        ):
+            raise ValueError("lower must be less than or equal to upper")
+
     def get_suffix(self, data: np.ndarray) -> str:
         """Return suffix for the histogram computation
 

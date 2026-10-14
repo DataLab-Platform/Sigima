@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from sigima.objects import ImageObj, ROI2DParam
+from sigima.objects.image.roi import CircularROI, ImageROI, RectangularROI
 from sigima.proc.image.extraction import extract_roi
 from sigima.tests import guiutils
 from sigima.tests.env import execenv
@@ -38,6 +39,69 @@ def test_roi_2d_param_unit():
     group = __create_roi_2d_parameters()
     for param in group.datasets:
         execenv.print(param)
+
+
+@pytest.mark.parametrize(
+    ("roi_class", "coords"),
+    [
+        (RectangularROI, [2, 3, 4, 2]),
+        (CircularROI, [5, 6, 2]),
+    ],
+    ids=("rectangle", "circle"),
+)
+@pytest.mark.parametrize("inverse", [False, True], ids=("normal", "inverse"))
+@pytest.mark.parametrize(
+    ("xstep", "ystep"),
+    [(0.5, 2.0), (-0.5, 2.0), (0.5, -2.0), (-0.5, -2.0)],
+    ids=("ascending", "x-reversed", "y-reversed", "both-reversed"),
+)
+def test_roi_2d_param_preserves_signed_sizes_on_reversed_axes(
+    roi_class: type[RectangularROI] | type[CircularROI],
+    coords: list[int],
+    inverse: bool,
+    xstep: float,
+    ystep: float,
+) -> None:
+    """Signed physical sizes survive the ROI parameter round trip."""
+    obj = _create_image()
+    obj.set_uniform_coords(xstep, ystep, 10.0, 20.0)
+    roi = roi_class(coords, indices=True, inverse=inverse)
+    expected_physical = roi.get_physical_coords(obj)
+    expected_indices = roi.get_indices_coords(obj)
+    expected_mask = roi.to_mask(obj)
+
+    param = roi.to_param(obj, 0)
+    restored = param.to_single_roi(obj)
+
+    np.testing.assert_allclose(restored.get_physical_coords(obj), expected_physical)
+    np.testing.assert_allclose(restored.get_indices_coords(obj), expected_indices)
+    np.testing.assert_array_equal(restored.to_mask(obj), expected_mask)
+
+
+def test_signed_roi_collection_round_trip_and_extraction() -> None:
+    """Signed ROI collections preserve masks and yield nonempty extracted data."""
+    obj = _create_image()
+    obj.set_uniform_coords(-1.0, -2.0, 10.0, 20.0)
+    roi = ImageROI()
+    roi.add_roi(RectangularROI([2, 3, 4, 2], indices=True))
+    roi.add_roi(CircularROI([8, 7, 2], indices=True))
+
+    restored = ImageROI.from_params(obj, roi.to_params(obj))
+
+    np.testing.assert_array_equal(restored.to_mask(obj), roi.to_mask(obj))
+    extracted = roi.to_params(obj)[0].get_data(obj)
+    assert extracted.shape == (2, 4)
+    assert np.isfinite(extracted).all()
+
+
+def test_roi_2d_param_accepts_zero_sizes() -> None:
+    """Degenerate rectangle and circle geometries remain representable."""
+    obj = _create_image()
+    rectangle = ROI2DParam.create(geometry="rectangle", dx=0.0, dy=0.0)
+    circle = ROI2DParam.create(geometry="circle", r=0.0)
+
+    assert rectangle.to_single_roi(obj).coords.tolist() == [0.0, 0.0, 0.0, 0.0]
+    assert circle.to_single_roi(obj).coords.tolist() == [0.0, 0.0, 0.0]
 
 
 @pytest.mark.gui
