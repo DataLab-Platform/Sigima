@@ -30,6 +30,7 @@ of image data.
 from __future__ import annotations
 
 import warnings
+from typing import Any
 
 import numpy as np
 
@@ -179,6 +180,29 @@ def product(src_list: list[ImageObj]) -> ImageObj:
     return dst
 
 
+def _constant_like(value: float, dtype: np.dtype) -> Any:
+    """Return the constant of an operation at the precision of the image data.
+
+    For integer images, the constant is truncated toward zero, as a Python
+    integer: it is never converted to the integer type, whose conversion of an
+    out-of-range value depends on the platform (``-1`` would become ``255`` for
+    ``uint8`` on x86-64 and ``0`` in WebAssembly). For other types, it is
+    converted to the type of the data.
+
+    Args:
+        value: Constant value.
+        dtype: Data type of the image.
+
+    Returns:
+        The constant, used in a float computation.
+    """
+    if np.issubdtype(dtype, np.integer) and np.isfinite(value):
+        return int(np.trunc(value))
+    if np.issubdtype(dtype, np.integer):
+        return float(value)
+    return np.array(value).astype(dtype=dtype)
+
+
 @computation_function(
     operation_id="sigima.image.addition_constant",
     contract_version=1,
@@ -194,9 +218,7 @@ def addition_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     Returns:
         Result image object **src** + **p.value** (new object)
     """
-    # For the addition of a constant value, we convert the constant value to the same
-    # data type as the input image, for consistency.
-    value = np.array(p.value).astype(dtype=src.data.dtype)
+    value = _constant_like(p.value, src.data.dtype)
     dst = dst_1_to_1(src, "+", str(value))
     dst.data = np.add(src.data, value, dtype=float)
     restore_data_outside_roi(dst, src)
@@ -218,9 +240,7 @@ def difference_constant(src: ImageObj, p: ConstantParam) -> ImageObj:
     Returns:
         Result image object **src** - **p.value** (new object)
     """
-    # For the subtraction of a constant value, we convert the constant value to the same
-    # data type as the input image, for consistency.
-    value = np.array(p.value).astype(dtype=src.data.dtype)
+    value = _constant_like(p.value, src.data.dtype)
     dst = dst_1_to_1(src, "-", str(value))
     dst.data = np.subtract(src.data, value, dtype=float)
     restore_data_outside_roi(dst, src)

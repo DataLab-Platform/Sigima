@@ -47,3 +47,9 @@ msgstr "🔧 Dépendances"
 
 msgid "guidata 3.16.0 or later is now required (histogram-backed range items used by brightness and contrast adjustment)."
 msgstr "guidata 3.16.0 ou ultérieur est désormais requis (éléments de plage adossés à un histogramme utilisés par l'ajustement de la luminosité et du contraste)."
+
+msgid "🛠️ Bug Fixes since version 1.2.0"
+msgstr "🛠️ Corrections de bogues depuis la version 1.2.0"
+
+msgid "**Constant added to or subtracted from an integer image**: a constant outside the range of the image data type was converted to that type before the operation, a conversion whose result depends on the platform: adding -1 to a `uint8` image added 255 on x86-64 computers, and nothing in a web browser (WebAssembly). The constant is now truncated toward zero without being converted (adding -1 subtracts 1), as it already was for values within the range of the type."
+msgstr "**Constante ajoutée à une image entière ou soustraite de celle-ci** : une constante hors de la plage du type des données de l'image était convertie dans ce type avant l'opération, une conversion dont le résultat dépend de la plateforme : ajouter -1 à une image `uint8` ajoutait 255 sur les ordinateurs x86-64, et rien dans un navigateur web (WebAssembly). La constante est désormais tronquée vers zéro sans être convertie (ajouter -1 soustrait 1), comme c'était déjà le cas pour les valeurs comprises dans la plage du type."
