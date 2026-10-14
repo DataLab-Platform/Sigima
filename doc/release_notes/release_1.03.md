@@ -12,6 +12,10 @@
 * **Explicit X alignment for signal difference**: When the two signals of a difference have different X grids, the second one is interpolated linearly on the grid of the first, under a named and versioned rule. The second grid must cover the first one (no extrapolation), both must be strictly increasing, and X and Y units must match exactly (no conversion): otherwise the operation is refused with a clear reason instead of producing a misleading result. The inputs are never modified.
 * **Recorded X alignment for other signal operations**: The alignment historically applied by DataLab to signals with different X grids is now a named and versioned rule declared with each operation, so that a replay applies exactly the same alignment. For operations with a second signal (division, quadratic difference, arithmetic, convolution, deconvolution, complex signal construction, X-Y mode), the second signal is interpolated on the grid of the first one, keeping its first and last values outside its range. For operations combining several signals (sum, average, product, standard deviation, assembly into an image), all signals are interpolated on the smallest grid. Applications can thus warn before interpolating and record what was done.
 
+### 🛠️ Bug Fixes since version 1.2.0 ###
+
+* **Constant added to or subtracted from an integer image**: a constant outside the range of the image data type was converted to that type before the operation, a conversion whose result depends on the platform: adding -1 to a `uint8` image added 255 on x86-64 computers, and nothing in a web browser (WebAssembly). The constant is now truncated toward zero without being converted (adding -1 subtracts 1), as it already was for values within the range of the type.
+
 ### 🔧 Dependencies ###
 
 * guidata 3.16.0 or later is now required (histogram-backed range items used by brightness and contrast adjustment).

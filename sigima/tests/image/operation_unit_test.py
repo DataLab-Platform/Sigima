@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import math
 import warnings
 from typing import Generator
 
@@ -181,6 +182,13 @@ def __iterate_image_with_constant() -> Generator[
             yield ima, p
 
 
+def __expected_constant(value: float, dtype: np.dtype) -> float:
+    """Expected constant: truncated toward zero for integer images (no wrap)."""
+    if np.issubdtype(dtype, np.integer):
+        return float(math.trunc(value))
+    return float(np.array(value, dtype=dtype))
+
+
 @pytest.mark.validation
 def test_image_addition_constant() -> None:
     """Image addition with constant test."""
@@ -188,10 +196,15 @@ def test_image_addition_constant() -> None:
     for ima1, p in __iterate_image_with_constant():
         dtype1 = ima1.data.dtype
         execenv.print(f"  {dtype1} += constant ({p.value}): ", end="")
-        expvalue = np.array(p.value).astype(dtype=dtype1)
-        exp = ima1.data.astype(float) + expvalue
+        exp = ima1.data.astype(float) + __expected_constant(p.value, dtype1)
         ima2 = sigima.proc.image.addition_constant(ima1, p)
         check_array_result(f"Image + constant ({p.value})", ima2.data, exp)
+    # Constants out of the range of an integer type are never wrapped.
+    ima = sigima.objects.create_image("u8", np.full((2, 2), 10, dtype=np.uint8))
+    for value, expected in ((-1.0, 9.0), (3.14, 13.0), (300.0, 310.0)):
+        p = sigima.params.ConstantParam.create(value=value)
+        result = sigima.proc.image.addition_constant(ima, p)
+        assert np.array_equal(result.data, np.full((2, 2), expected)), value
 
 
 @pytest.mark.validation
@@ -201,10 +214,14 @@ def test_image_difference_constant() -> None:
     for ima1, p in __iterate_image_with_constant():
         dtype1 = ima1.data.dtype
         execenv.print(f"  {dtype1} -= constant ({p.value}): ", end="")
-        expvalue = np.array(p.value).astype(dtype=dtype1)
-        exp = ima1.data.astype(float) - expvalue
+        exp = ima1.data.astype(float) - __expected_constant(p.value, dtype1)
         ima2 = sigima.proc.image.difference_constant(ima1, p)
         check_array_result(f"Image - constant ({p.value})", ima2.data, exp)
+    ima = sigima.objects.create_image("u8", np.full((2, 2), 10, dtype=np.uint8))
+    for value, expected in ((-1.0, 11.0), (3.14, 7.0), (300.0, -290.0)):
+        p = sigima.params.ConstantParam.create(value=value)
+        result = sigima.proc.image.difference_constant(ima, p)
+        assert np.array_equal(result.data, np.full((2, 2), expected)), value
 
 
 @pytest.mark.validation
