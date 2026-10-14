@@ -16,7 +16,12 @@ from sigima.config import _
 from sigima.enums import AngleUnit
 from sigima.objects import SignalObj
 from sigima.proc.base import AngleUnitParam, PhaseParam, dst_1_to_1, dst_2_to_1
-from sigima.proc.contracts import EXACT, SOURCE_GRID_LINEAR_HOLD, ReplayQualification
+from sigima.proc.contracts import (
+    EXACT,
+    SOURCE_GRID_LINEAR_HOLD,
+    ReplayQualification,
+    tolerance,
+)
 from sigima.proc.decorator import computation_function
 from sigima.proc.signal.base import (
     Wrap1to1Func,
@@ -143,7 +148,18 @@ def imag(src: SignalObj) -> SignalObj:
 @computation_function(
     operation_id="sigima.signal.phase",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def phase(src: SignalObj, p: PhaseParam) -> SignalObj:
     """Compute the phase (argument) of a complex signal.
@@ -278,7 +294,18 @@ def astype(src: SignalObj, p: DataTypeSParam) -> SignalObj:
 @computation_function(
     operation_id="sigima.signal.log10",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def log10(src: SignalObj) -> SignalObj:
     """Compute Log10 with :py:data:`numpy.log10`
@@ -447,7 +474,18 @@ def to_polar(src: SignalObj, p: AngleUnitParam) -> SignalObj:
 @computation_function(
     operation_id="sigima.signal.to_cartesian",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def to_cartesian(src: SignalObj, p: AngleUnitParam) -> SignalObj:
     """Convert polar coordinates to Cartesian coordinates.

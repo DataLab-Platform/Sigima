@@ -121,7 +121,18 @@ def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
 @computation_function(
     operation_id="sigima.image.enclosing_circle",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "The fitted circle center is truncated to whole pixels: "
+                "a last-bit difference of the fit may move it by one pixel"
+            ),
+            atol=1.0,
+            rtol=0.0,
+            same_environment="exact",
+        ),
+    ),
 )
 def enclosing_circle(image: ImageObj) -> GeometryResult | None:
     """Compute minimum enclosing circle

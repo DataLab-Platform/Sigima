@@ -154,7 +154,18 @@ def imag(src: ImageObj) -> ImageObj:
 @computation_function(
     operation_id="sigima.image.phase",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def phase(src: ImageObj, p: PhaseParam) -> ImageObj:
     """Compute the phase (argument) of a complex image.
@@ -245,7 +256,18 @@ def complex_from_real_imag(src1: ImageObj, src2: ImageObj) -> ImageObj:
     operation_id="sigima.image.convolution",
     contract_version=1,
     reads_options=("auto_normalize_kernel",),
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Fourier transforms and filters (NumPy, SciPy) differ "
+                "in the last bits across library versions and platforms"
+            ),
+            atol=1e-11,
+            rtol=1e-11,
+            same_environment="exact",
+        ),
+    ),
 )
 def convolution(src: ImageObj, kernel: ImageObj) -> ImageObj:
     """Convolve an image with a kernel.
@@ -323,7 +345,18 @@ def deconvolution(src: ImageObj, kernel: ImageObj) -> ImageObj:
 @computation_function(
     operation_id="sigima.image.log10",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Float32 data: transcendental functions of the platform math "
+                "library differ by one unit in the last place (e.g. WebAssembly)"
+            ),
+            atol=1e-06,
+            rtol=1e-05,
+            same_environment="exact",
+        ),
+    ),
 )
 def log10(src: ImageObj) -> ImageObj:
     """Compute log10 with :py:data:`numpy.log10`
@@ -340,7 +373,18 @@ def log10(src: ImageObj) -> ImageObj:
 @computation_function(
     operation_id="sigima.image.exp",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Float32 data: transcendental functions of the platform math "
+                "library differ by one unit in the last place (e.g. WebAssembly)"
+            ),
+            atol=1e-06,
+            rtol=1e-05,
+            same_environment="exact",
+        ),
+    ),
 )
 def exp(src: ImageObj) -> ImageObj:
     """Compute exponential with :py:data:`numpy.exp`
@@ -363,7 +407,18 @@ class Log10ZPlusNParam(gds.DataSet):
 @computation_function(
     operation_id="sigima.image.log10_z_plus_n",
     contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(
+        contract_version=1,
+        comparison=tolerance(
+            (
+                "Transcendental functions (exp, log, trigonometric) of the "
+                "platform math library differ in the last bits (e.g. WebAssembly)"
+            ),
+            atol=1e-14,
+            rtol=1e-14,
+            same_environment="exact",
+        ),
+    ),
 )
 def log10_z_plus_n(src: ImageObj, p: Log10ZPlusNParam) -> ImageObj:
     """Compute log10(z+n) with :py:data:`numpy.log10`
