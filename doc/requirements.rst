@@ -158,3 +158,6 @@ Optional modules for running test suite:
     * - pytest-xvfb
       - 
       - A pytest plugin to run Xvfb (or Xephyr/Xvnc) for tests.
+    * - jsonschema
+      - >= 4
+      - An implementation of JSON Schema validation for Python

@@ -7,6 +7,7 @@ babel
 build
 guidata >= 3.13
 imagecodecs >= 2024.12.30
+jsonschema >= 4
 makefun >= 1.13.1
 matplotlib
 myst-nb
@@ -14,6 +15,7 @@ myst_parser
 opencv-python-headless >= 4.8.1.78
 packaging >= 21.3
 pandas >= 1.4, < 3.1
+plotly >= 5.0
 plotpy
 pre-commit
 pydata-sphinx-theme

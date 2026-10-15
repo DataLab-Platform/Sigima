@@ -396,13 +396,37 @@ class SimpleRemoteProxy(SimpleBaseProxy):
         """
         self._datalab.set_object(dataset_to_rpcjson(obj))
 
-    def load_from_directory(self, path: str) -> None:
+    def load_from_files(
+        self, filenames: list[str], param: gds.DataSet | None = None
+    ) -> None:
+        """Open objects from files in current panel (signals/images).
+
+        Args:
+            filenames: list of file names
+            param: Optional format-specific import parameters applied to every
+             file requiring them, without showing any dialog (e.g.
+             :class:`sigima.io.RawImageImportParam` for RAW images).
+             Requires DataLab 1.4 or later. Defaults to None.
+        """
+        if param is None:
+            self._datalab.load_from_files(filenames)
+        else:
+            self._datalab.load_from_files(filenames, dataset_to_rpcjson(param))
+
+    def load_from_directory(self, path: str, param: gds.DataSet | None = None) -> None:
         """Open objects from directory in current panel (signals/images).
 
         Args:
             path: directory path
+            param: Optional format-specific import parameters applied to every
+             file requiring them, without showing any dialog (e.g.
+             :class:`sigima.io.RawImageImportParam` for RAW images).
+             Requires DataLab 1.4 or later. Defaults to None.
         """
-        self._datalab.load_from_directory(path)
+        if param is None:
+            self._datalab.load_from_directory(path)
+        else:
+            self._datalab.load_from_directory(path, dataset_to_rpcjson(param))
 
     def calc(self, name: str, param: gds.DataSet | None = None) -> None:
         """Call compute function ``name`` in current panel's processor.
