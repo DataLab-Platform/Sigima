@@ -196,11 +196,17 @@ class SimpleAbstractDLControl(abc.ABC):
         """
 
     @abc.abstractmethod
-    def load_from_files(self, filenames: list[str]) -> None:
+    def load_from_files(
+        self, filenames: list[str], param: gds.DataSet | None = None
+    ) -> None:
         """Open objects from files in current panel (signals/images).
 
         Args:
             filenames: list of file names
+            param: Optional format-specific import parameters applied to every
+             file requiring them, without showing any dialog (e.g.
+             :class:`sigima.io.RawImageImportParam` for RAW images).
+             Defaults to None.
         """
 
     @abc.abstractmethod
@@ -292,11 +298,15 @@ class SimpleAbstractDLControl(abc.ABC):
         """
 
     @abc.abstractmethod
-    def load_from_directory(self, path: str) -> None:
+    def load_from_directory(self, path: str, param: gds.DataSet | None = None) -> None:
         """Open objects from directory in current panel (signals/images).
 
         Args:
             path: directory path
+            param: Optional format-specific import parameters applied to every
+             file requiring them, without showing any dialog (e.g.
+             :class:`sigima.io.RawImageImportParam` for RAW images).
+             Defaults to None.
         """
 
     @abc.abstractmethod
@@ -710,13 +720,22 @@ class SimpleBaseProxy(SimpleAbstractDLControl, metaclass=abc.ABCMeta):
         """
         self._datalab.save_h5_workspace(filename)
 
-    def load_from_files(self, filenames: list[str]) -> None:
+    def load_from_files(
+        self, filenames: list[str], param: gds.DataSet | None = None
+    ) -> None:
         """Open objects from files in current panel (signals/images).
 
         Args:
             filenames: list of file names
+            param: Optional format-specific import parameters applied to every
+             file requiring them, without showing any dialog (e.g.
+             :class:`sigima.io.RawImageImportParam` for RAW images).
+             Defaults to None.
         """
-        self._datalab.load_from_files(filenames)
+        if param is None:
+            self._datalab.load_from_files(filenames)
+        else:
+            self._datalab.load_from_files(filenames, param)
 
     def add_group(
         self, title: str, panel: str | None = None, select: bool = False
