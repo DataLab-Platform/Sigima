@@ -406,7 +406,7 @@ class SimpleRemoteProxy(SimpleBaseProxy):
             param: Optional format-specific import parameters applied to every
              file requiring them, without showing any dialog (e.g.
              :class:`sigima.io.RawImageImportParam` for RAW images).
-             Defaults to None.
+             Requires DataLab 1.4 or later. Defaults to None.
         """
         if param is None:
             self._datalab.load_from_files(filenames)
@@ -421,7 +421,7 @@ class SimpleRemoteProxy(SimpleBaseProxy):
             param: Optional format-specific import parameters applied to every
              file requiring them, without showing any dialog (e.g.
              :class:`sigima.io.RawImageImportParam` for RAW images).
-             Defaults to None.
+             Requires DataLab 1.4 or later. Defaults to None.
         """
         if param is None:
             self._datalab.load_from_directory(path)
