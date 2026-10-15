@@ -33,8 +33,9 @@ __all__ = [
 
 NoneType = type(None)
 
-# ``X | Y`` evaluated at runtime (Python >= 3.10) is a ``types.UnionType``.
-_UNION_TYPE = getattr(types, "UnionType", None)
+# Origins of a union: ``typing.Union``, and ``types.UnionType`` for ``X | Y``
+# evaluated at runtime (Python >= 3.10).
+_UNION_ORIGINS = (Union,) + ((types.UnionType,) if hasattr(types, "UnionType") else ())
 
 _SEQUENCE_ORIGINS = (list, tuple, collections.abc.Sequence)
 
@@ -112,7 +113,7 @@ def resolve_annotation(annotation: Any, namespace: dict[str, Any]) -> Any:
 def union_members(tp: Any) -> tuple[Any, ...]:
     """Return the members of a union, or ``(tp,)``."""
     origin = typing.get_origin(tp)
-    if origin is Union or (_UNION_TYPE is not None and origin is _UNION_TYPE):
+    if origin in _UNION_ORIGINS:
         return typing.get_args(tp)
     return (tp,)
 
