@@ -374,6 +374,38 @@ class DataLabStubServer:
             if self.verbose:
                 execenv.print(f"[STUB] Failed to save workspace: {exc}")
 
+    def export_capsule(
+        self,
+        filename: str,
+        name: str | None = None,
+        description: str | None = None,
+        as_revision: bool = True,
+        workspace_ref: str | None = None,
+        workspace_filename: str | None = None,
+        attachments: list[str] | None = None,
+    ) -> str:
+        """Export the workspace as a capsule (stub: writes a placeholder file).
+
+        Returns:
+            A dummy manifest fingerprint.
+        """
+        if self.verbose:
+            execenv.print(
+                f"[STUB] export_capsule: {filename}, name={name}, "
+                f"as_revision={as_revision}, workspace_ref={workspace_ref}, "
+                f"attachments={attachments}"
+            )
+        del description, workspace_filename
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("# DataLab capsule stub file (for testing)\n")
+        return "sha256:" + "0" * 64
+
+    def open_capsule(self, filename: str, workspace: str | None = None) -> None:
+        """Open a capsule as the workspace (stub: like loading a workspace)."""
+        if self.verbose:
+            execenv.print(f"[STUB] open_capsule: {filename}, workspace={workspace}")
+        self.load_h5_workspace([filename], reset_all=True)
+
     # Object operations
     # pylint: disable=unused-argument
     def add_signal(
