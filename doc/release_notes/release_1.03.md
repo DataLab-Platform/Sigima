@@ -27,4 +27,4 @@
 ### 🔧 Dependencies ###
 
 * guidata 3.16.0 or later is now required (histogram-backed range items used by brightness and contrast adjustment).
-* **imagecodecs**: Added `imagecodecs >= 2024.12.30` as a required dependency. It provides the TIFF decoders and encoders used by `tifffile` for compression schemes that `tifffile` does not implement itself. The minimum version is the latest release with wheels for every supported Python version (3.9 and later); pip automatically selects the most recent release compatible with the installed Python and NumPy versions.
+* **imagecodecs**: Added `imagecodecs >= 2024.12.30` as a required dependency. It provides the TIFF decoders and encoders used by `tifffile` for compression schemes that `tifffile` does not implement itself. The minimum version is the latest release with wheels for every supported Python version (3.9 and later); pip automatically selects the most recent release compatible with the installed Python and NumPy versions. It is not installed in web browsers (Pyodide, WebAssembly), where it is not available: compressed TIFF files are not supported there.

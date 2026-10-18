@@ -6,7 +6,7 @@ SciPy >= 1.10.1, < 1.17
 babel
 build
 guidata >= 3.16.0
-imagecodecs >= 2024.12.30
+imagecodecs >= 2024.12.30; sys_platform != 'emscripten'
 jsonschema >= 4
 makefun >= 1.13.1
 matplotlib

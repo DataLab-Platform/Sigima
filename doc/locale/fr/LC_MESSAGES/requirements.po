@@ -72,8 +72,8 @@ msgstr "Traitement d'image en Python"
 msgid "imagecodecs"
 msgstr "imagecodecs"
 
-msgid ">= 2024.12.30"
-msgstr ">= 2024.12.30"
+msgid ">= 2024.12.30 (sys_platform != 'emscripten')"
+msgstr ">= 2024.12.30 (sys_platform != 'emscripten')"
 
 msgid "Image transformation, compression, and decompression codecs"
 msgstr "Codecs de transformation, de compression et de d?compression d'images"
