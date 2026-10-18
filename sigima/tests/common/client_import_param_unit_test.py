@@ -11,6 +11,7 @@ servers keep receiving the original call signature.
 
 from __future__ import annotations
 
+import xmlrpc.client
 from unittest.mock import Mock
 
 from sigima.client.remote import SimpleRemoteProxy
@@ -87,3 +88,14 @@ def test_stub_server_accepts_import_param() -> None:
             proxy.load_from_directory("data", param=param)
         finally:
             proxy.disconnect()
+
+
+def test_stub_server_exports_and_opens_capsules(tmp_path) -> None:
+    """The stub server answers the capsule calls of the DataLab control API."""
+    capsule = tmp_path / "workspace.dlcapsule"
+    with datalab_stub_server() as port:
+        server = xmlrpc.client.ServerProxy(f"http://127.0.0.1:{port}")
+        fingerprint = server.export_capsule(str(capsule), "Name")
+        assert fingerprint.startswith("sha256:")
+        assert capsule.exists()
+        server.open_capsule(str(capsule))

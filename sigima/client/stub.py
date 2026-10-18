@@ -154,6 +154,8 @@ class DataLabStubServer:
         self.server.register_function(self.import_h5_file, "import_h5_file")
         self.server.register_function(self.load_h5_workspace, "load_h5_workspace")
         self.server.register_function(self.save_h5_workspace, "save_h5_workspace")
+        self.server.register_function(self.export_capsule, "export_capsule")
+        self.server.register_function(self.open_capsule, "open_capsule")
         self.server.register_function(self.load_from_files, "load_from_files")
         self.server.register_function(self.load_from_directory, "load_from_directory")
 
