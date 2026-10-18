@@ -35,6 +35,9 @@ function parseArgs(argv) {
       throw new Error(`Missing --${name} (see the header of run.mjs)`);
     }
   }
+  if (!/^[1-9]\d*$/.test(args.batch)) {
+    throw new Error(`Invalid --batch ${args.batch}: a positive integer is expected`);
+  }
   return args;
 }
 
@@ -122,11 +125,28 @@ for (let start = 0; start < operations.length; start += size) {
 }
 console.log(JSON.stringify(report.environment));
 const verdicts = {};
+let replayErrors = 0;
 for (const entry of Object.values(report.operations)) {
-  const key = entry.error ? "error" : entry.samples ? entry.verdict : "not_replayed";
+  // Captured calls whose replay raised (replay_probe status "error")
+  const failed = entry.statuses?.error ?? 0;
+  replayErrors += failed;
+  let key = "not_replayed";
+  if (entry.error) {
+    key = "error";
+  } else if (entry.samples) {
+    key = entry.verdict;
+  } else if (failed) {
+    key = "error";
+  }
   verdicts[key] = (verdicts[key] ?? 0) + 1;
 }
 console.log(`Verdicts against the captured results: ${JSON.stringify(verdicts)}`);
+if (replayErrors) {
+  console.log(`Captured calls failing to replay: ${replayErrors}`);
+}
 if (args.report) {
   writeFileSync(args.report, JSON.stringify(report, null, 1));
+}
+if (verdicts.error || replayErrors) {
+  process.exitCode = 1;
 }
