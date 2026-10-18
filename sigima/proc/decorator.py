@@ -26,6 +26,11 @@ import makefun
 
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
+from sigima.proc.contracts._annotations import (
+    AnnotationError,
+    resolve_annotation,
+    split_optional,
+)
 from sigima.proc.contracts.declarations import NAME_PATTERN, ReplayQualification
 from sigima.validation import validate_dataset
 
@@ -242,6 +247,39 @@ def _check_operation_identity(
     return aliases
 
 
+def _dataset_class(annotation: Any, namespace: dict[str, Any]) -> type | None:
+    """Return the parameter class of an annotation, if it designates one.
+
+    ``SomeParam`` and ``SomeParam | None`` (or ``Optional[SomeParam]``) designate
+    ``SomeParam``. String annotations are resolved without :func:`eval`, also
+    on Python 3.9 (see :mod:`sigima.proc.contracts._annotations`).
+    """
+    if annotation is inspect.Signature.empty:
+        return None
+    try:
+        tp, _optional = split_optional(resolve_annotation(annotation, namespace))
+    except AnnotationError:
+        return None
+    if (
+        isinstance(tp, type)
+        and issubclass(tp, gds.DataSet)
+        and tp.__name__ not in ("SignalObj", "ImageObj")
+    ):
+        return tp
+    return None
+
+
+def _is_default(value: Any, item: gds.DataItem) -> bool:
+    """Return True if *value* is the default value of *item*."""
+    default = item.get_default()
+    if value is default:
+        return True
+    try:
+        return bool(value == default)
+    except (TypeError, ValueError):  # e.g. arrays
+        return False
+
+
 def _make_computation_wrapper(
     f: Callable,
     ds_cls: type,
@@ -301,7 +339,16 @@ def _make_computation_wrapper(
                 for k in list(ba.arguments.keys())
                 if k in ds_item_names
             }
-            ds_obj = ds_cls.create(**ds_kwargs)
+            if ds_param.default is None and all(
+                _is_default(ds_kwargs.get(item.get_name(), item.get_default()), item)
+                for item in ds_items
+            ):
+                # Optional parameter set, not given (keywords at their defaults):
+                # the function applies its own default, e.g. a global option
+                # read by the parameter set
+                ds_obj = None
+            else:
+                ds_obj = ds_cls.create(**ds_kwargs)
 
         # Build the final positional argument list for the original function
         final_args = []
@@ -314,7 +361,8 @@ def _make_computation_wrapper(
                 final_args.append(value)
                 validation_context.append(value)
 
-        validate_dataset(ds_obj, *validation_context)
+        if ds_obj is not None:
+            validate_dataset(ds_obj, *validation_context)
 
         # Call the original function
         token, on_result = _begin_observation(wrapper, final_args)
@@ -425,32 +473,16 @@ def computation_function(
         )
 
     def decorator(f: Callable[P, R]) -> Callable[P, R]:
-        # Gather signature and typing information
+        # Gather signature information
         sig = inspect.signature(f)
         params = list(sig.parameters.values())
-        try:
-            type_hints = typing.get_type_hints(f)
-        except Exception:  # pylint: disable=broad-except
-            # Python 3.9 cannot evaluate stringized PEP 604 return annotations.
-            # Preserve direct parameter-class references resolved from module globals.
-            type_hints = {
-                p.name: f.__globals__.get(p.annotation, p.annotation)
-                if isinstance(p.annotation, str)
-                else p.annotation
-                for p in params
-            }
 
-        # Find DataSet parameter if any
+        # Find DataSet parameter if any (optional or not: ``SomeParam | None``)
         ds_param = None
         ds_cls = None
         for p in params:
-            annot = type_hints.get(p.name, p.annotation)
-            if (
-                annot is not inspect.Signature.empty
-                and isinstance(annot, type)
-                and issubclass(annot, gds.DataSet)
-                and annot.__name__ not in ("SignalObj", "ImageObj")
-            ):
+            annot = _dataset_class(p.annotation, f.__globals__)
+            if annot is not None:
                 ds_param = p
                 ds_cls = annot
                 break

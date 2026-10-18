@@ -16,6 +16,8 @@ This test checks:
 
 from __future__ import annotations
 
+import inspect
+
 import guidata.dataset as gds
 import numpy as np
 import pytest
@@ -184,6 +186,61 @@ def test_decorator_validates_dataset_with_optional_return_annotation() -> None:
     with temporary_validation_mode(ValidationMode.DISABLED):
         with pytest.raises(ValueError, match="a must be less"):
             dummy_optional_signal_func(orig, DummySignalParam.create(a=2.0, b=1.0))
+
+
+@computation_function()
+def dummy_optional_param_func(
+    src: SignalObj, p: DummySignalParam | None = None
+) -> SignalObj:
+    """A computation function whose parameter set is optional."""
+    dst = dst_1_to_1(src, "dummy_optional")
+    p = DummySignalParam() if p is None else p
+    dst.y = src.y * p.a
+    return dst
+
+
+def test_optional_dataset_parameter_is_expanded() -> None:
+    """``SomeParam | None = None`` is a parameter set like ``SomeParam``."""
+    orig = create_signal("test_signal", x=np.arange(3.0), y=np.arange(3.0))
+    assert dummy_optional_param_func(orig).y.tolist() == [0.0, 1.0, 2.0]
+    assert dummy_optional_param_func(orig, a=2.0).y.tolist() == [0.0, 2.0, 4.0]
+    param = DummySignalParam.create(a=3.0)
+    assert dummy_optional_param_func(orig, param).y.tolist() == [0.0, 3.0, 6.0]
+    with pytest.raises(ValueError, match="a must be less"):
+        dummy_optional_param_func(orig, a=9.0)
+
+
+@pytest.mark.parametrize(
+    "func",
+    [
+        "signal.fft",
+        "signal.magnitude_spectrum",
+        "signal.psd",
+        "image.fft",
+        "image.ifft",
+        "image.magnitude_spectrum",
+        "image.psd",
+        "image.zero_padding",
+    ],
+)
+def test_optional_parameter_functions_accept_keywords(func: str) -> None:
+    """Functions with an optional parameter set accept its items as keywords."""
+    import importlib  # pylint: disable=import-outside-toplevel
+
+    kind, name = func.split(".")
+    module = importlib.import_module(f"sigima.proc.{kind}")
+    function = getattr(module, name)
+    keywords = set(inspect.signature(function).parameters)
+    assert len(keywords) > 2, keywords
+
+
+def test_image_zero_padding_with_keywords() -> None:
+    """Image zero padding is called with its parameters as keywords."""
+    import sigima.proc.image as sipi  # pylint: disable=import-outside-toplevel
+
+    image = create_image("test_image", data=np.ones((4, 4)))
+    result = sipi.zero_padding(image, strategy="custom", rows=2, cols=3)
+    assert result.data.shape == (6, 7)
 
 
 def test_image_decorator_marker() -> None:
