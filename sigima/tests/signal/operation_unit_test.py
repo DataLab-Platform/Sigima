@@ -352,6 +352,21 @@ def test_signal_complex_from_magnitude_phase(
     )
 
 
+def test_complex_from_magnitude_phase_keeps_negative_magnitude() -> None:
+    """Negative magnitudes are clipped in the result, not in the input signal."""
+    x = np.linspace(0.0, 1.0, 3)
+    magnitude = np.array([-1.0, 2.0, -3.0])
+    s_mag = SignalObj("magnitude")
+    s_mag.set_xydata(x, magnitude.copy())
+    s_phase = SignalObj("phase")
+    s_phase.set_xydata(x, np.zeros(3))
+    p = AngleUnitParam.create(unit=AngleUnit.RADIAN)
+    with pytest.warns(UserWarning, match="Negative radius"):
+        result = complex_from_magnitude_phase(s_mag, s_phase, p)
+    assert np.array_equal(s_mag.y, magnitude)
+    assert np.array_equal(result.y, np.array([0.0, 2.0, 0.0], dtype=complex))
+
+
 def __test_all_complex_from_magnitude_phase() -> None:
     """Test all combinations of magnitude and phase."""
     for phase, unit in MAGNITUDE_PHASE_TEST_CASES:

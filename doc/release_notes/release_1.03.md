@@ -20,6 +20,7 @@
 * **Constant added to or subtracted from an integer image**: a constant outside the range of the image data type was converted to that type before the operation, a conversion whose result depends on the platform: adding -1 to a `uint8` image added 255 on x86-64 computers, and nothing in a web browser (WebAssembly). The constant is now truncated toward zero without being converted (adding -1 subtracts 1), as it already was for values within the range of the type.
 
 * **Compressed TIFF files**: TIFF files compressed with LZW, JPEG or WebP could not be opened and failed with the error "requires the 'imagecodecs' package". LZW is the default compression of many acquisition and image-editing tools. The same limitation prevented format-aware TIFF export with LZW or JPEG compression. These compression schemes are now supported out of the box. CCITT compression (Group 3, Group 4, RLE), used for bilevel images, is also supported with Python 3.11 or later, as it requires `imagecodecs` 2026 or later. This closes [DataLab issue #381](https://github.com/DataLab-Platform/DataLab/issues/381).
+* **Complex signal from magnitude and phase**: when the magnitude signal had negative values, they were set to zero in the magnitude signal itself, which was modified by the computation. They are now set to zero in the result only.
 
 ### 🔧 Dependencies ###
 

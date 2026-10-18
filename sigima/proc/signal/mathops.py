@@ -251,12 +251,13 @@ def complex_from_magnitude_phase(
             "The x coordinates of the two signals are not the same. "
             "Results may be incorrect."
         )
-    if np.any(src1.y < 0.0):
+    magnitude = src1.y
+    if np.any(magnitude < 0.0):
         warnings.warn("Negative radius values are not allowed. They will be set to 0.")
-        src1.y = np.maximum(src1.y, 0.0)
+        magnitude = np.maximum(magnitude, 0.0)
     dst = dst_2_to_1(src1, src2, "mag_phase")
     assert p.unit is not None
-    y = coordinates.polar_to_complex(src1.y, src2.y, unit=p.unit)
+    y = coordinates.polar_to_complex(magnitude, src2.y, unit=p.unit)
     dst.set_xydata(src1.x, y, src1.x, None)
     return dst
 
