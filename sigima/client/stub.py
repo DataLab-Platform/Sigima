@@ -494,18 +494,19 @@ class DataLabStubServer:
             set_current: if True, set the added object as current
         """
         obj: SignalObj | ImageObj = utils.rpcjson_to_dataset(obj_data)
+        obj_uuid = str(uuid.uuid4())
+        if isinstance(obj, SignalObj):
+            self.signals[obj_uuid] = obj
+            if group_id and group_id in self.signal_groups:
+                self.signal_groups[group_id].objects.append(obj_uuid)
+        else:
+            self.images[obj_uuid] = obj
+            if group_id and group_id in self.image_groups:
+                self.image_groups[group_id].objects.append(obj_uuid)
         if self.verbose:
             obj_str = "signal" if isinstance(obj, SignalObj) else "image"
-            obj_uuid = str(uuid.uuid4())
             print(f"Added {obj_str} {obj.title} with UUID {obj_uuid}")
-            if isinstance(obj, SignalObj):
-                self.signals[obj_uuid] = obj
-                if group_id and group_id in self.signal_groups:
-                    self.signal_groups[group_id].objects.append(obj_uuid)
-            else:
-                self.images[obj_uuid] = obj
-                if group_id and group_id in self.image_groups:
-                    self.image_groups[group_id].objects.append(obj_uuid)
+        return True
 
     def set_object(self, obj_data: list[str]) -> None:
         """Set object data (update an existing object by UUID).
