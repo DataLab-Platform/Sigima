@@ -354,6 +354,18 @@ def _decode_item(item: gds.DataItem, value: Any) -> Any:
         raw = value
     elif isinstance(item, (gds.DictItem, gds.DateItem)):
         raw = decode_value(name, value)
+        if isinstance(item, gds.DictItem):
+            expected, valid_type = "a dictionary", isinstance(raw, dict)
+        elif isinstance(item, gds.DateTimeItem):
+            expected = "a date and time"
+            valid_type = isinstance(raw, datetime.datetime)
+        else:
+            expected = "a date"
+            valid_type = isinstance(raw, datetime.date) and not isinstance(
+                raw, datetime.datetime
+            )
+        if not valid_type:
+            raise InvalidParametersError(f"Parameter {name!r}: {expected} is expected")
     else:
         raise InvalidParametersError(
             f"Parameter {name!r}: items of type {type(item).__name__} are not supported"

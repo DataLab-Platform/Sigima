@@ -355,3 +355,41 @@ def test_null_follows_item_validation() -> None:
     assert decoded.lower is None
     with pytest.raises(contracts.InvalidParametersError):
         decode_dataset(sigima.params.HistogramParam, dict(values, bins=None))
+
+
+class _TypedItemsParam(gds.DataSet):
+    """Dictionary, date and date-time items."""
+
+    mapping = gds.DictItem("Mapping", default={})
+    day = gds.DateItem("Day", default=datetime.date(2026, 1, 2))
+    moment = gds.DateTimeItem("Moment", default=datetime.datetime(2026, 1, 2, 3, 4))
+
+
+def test_typed_items_round_trip() -> None:
+    """Dictionary, date and date-time items decode to their own type."""
+    param = _TypedItemsParam.create(
+        mapping={"a": 1},
+        day=datetime.date(2025, 5, 6),
+        moment=datetime.datetime(2025, 5, 6, 7, 8, 9),
+    )
+    values = _json_round_trip(encode_dataset(param))
+    _assert_same_dataset(param, decode_dataset(_TypedItemsParam, values))
+
+
+@pytest.mark.parametrize(
+    "name, value",
+    [
+        ("mapping", [1, 2]),
+        ("mapping", "text"),
+        ("day", {"$datetime": "2025-05-06T07:08:09"}),
+        ("day", 3),
+        ("moment", {"$date": "2025-05-06"}),
+        ("moment", "2025-05-06T07:08:09"),
+    ],
+)
+def test_typed_items_refuse_other_types(name: str, value) -> None:
+    """A value of another type is refused, not stored in the parameter set."""
+    values = _json_round_trip(encode_dataset(_TypedItemsParam()))
+    values[name] = value
+    with pytest.raises(contracts.InvalidParametersError):
+        decode_dataset(_TypedItemsParam, values)
