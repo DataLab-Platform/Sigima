@@ -10,11 +10,14 @@ strategies provided by :func:`sigima.proc.image.replace_special_values`.
 
 from __future__ import annotations
 
+import re
+
 import numpy as np
 import pytest
 
 import sigima.objects
 import sigima.proc.image as sipi
+from sigima.config import _
 from sigima.enums import ReplacementStrategyImage as S
 from sigima.proc.base import ReplaceSpecialValuesImageParam
 from sigima.tools.image.replace_values import count_special_values_2d
@@ -246,7 +249,12 @@ class TestEdgeCases:
             nan_strategy=S.CONSTANT,
             nan_constant_value=10.0,
         )
-        with pytest.warns(UserWarning, match="not applicable to integer images"):
+        # The message is translated: compared in the language of the session
+        message = _(
+            "Replace special values is not applicable to integer images "
+            "because they cannot contain NaN or infinite values."
+        )
+        with pytest.warns(UserWarning, match=re.escape(message)):
             dst = sipi.replace_special_values(src, p)
         assert dst is not src
         assert dst.data.dtype == np.uint16
