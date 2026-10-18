@@ -90,6 +90,16 @@ def fft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
 @computation_function(
     operation_id="sigima.image.ifft",
     contract_version=1,
+    # Units and labels saved by the FFT are restored from the metadata
+    reads_metadata={
+        "source": (
+            "orig_xunit",
+            "orig_yunit",
+            "orig_zunit",
+            "orig_xlabel",
+            "orig_ylabel",
+        )
+    },
     qualification=ReplayQualification(
         contract_version=1,
         comparison=tolerance(

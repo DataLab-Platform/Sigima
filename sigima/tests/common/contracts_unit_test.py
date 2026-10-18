@@ -280,7 +280,23 @@ def test_catalogue_contracts() -> None:
     # Metadata read by a computation are declared next to it (not fingerprinted).
     readers = {c.operation_id: c.reads_metadata for c in registry.contracts}
     assert {op: reads for op, reads in readers.items() if reads} == {
-        "sigima.signal.evaluate_fit": (("source", ("fit_params",)),)
+        "sigima.signal.evaluate_fit": (("source", ("fit_params",)),),
+        # The inverse FFT restores the units and labels saved by the FFT
+        "sigima.signal.ifft": (
+            ("source", ("orig_xunit", "orig_yunit", "orig_xlabel")),
+        ),
+        "sigima.image.ifft": (
+            (
+                "source",
+                (
+                    "orig_xunit",
+                    "orig_yunit",
+                    "orig_zunit",
+                    "orig_xlabel",
+                    "orig_ylabel",
+                ),
+            ),
+        ),
     }
     qualified = sorted(c.operation_id for c in registry.contracts if c.qualified)
     unqualified = sorted(
