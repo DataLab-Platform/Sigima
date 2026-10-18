@@ -486,8 +486,8 @@ def histogram(src: ImageObj, p: HistogramParam) -> SignalObj:
         Signal object with the histogram
     """
     data = src.get_masked_view().compressed()
-    suffix = p.get_suffix(data)  # Also updates p.lower and p.upper
-    y, bin_edges = np.histogram(data, bins=p.bins, range=(p.lower, p.upper))
+    suffix = p.get_suffix(data)
+    y, bin_edges = np.histogram(data, bins=p.bins, range=p.get_range(data))
     x = (bin_edges[:-1] + bin_edges[1:]) / 2
     dst = new_signal_result(
         src,

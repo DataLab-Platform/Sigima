@@ -156,22 +156,32 @@ class HistogramParam(gds.DataSet, title=_("Histogram")):
         ):
             raise ValueError("lower must be less than or equal to upper")
 
-    def get_suffix(self, data: np.ndarray) -> str:
+    def get_suffix(self, data: np.ndarray | None = None) -> str:
         """Return suffix for the histogram computation
+
+        Args:
+            data: data array (unused, kept for compatibility)
+        """
+        del data
+        suffix = f"bins={self.bins:d}"
+        if self.lower is not None:
+            suffix += f", ymin={self.lower:.3f}"
+        if self.upper is not None:
+            suffix += f", ymax={self.upper:.3f}"
+        return suffix
+
+    def get_range(self, data: np.ndarray) -> tuple[float, float]:
+        """Return the histogram range: the limits, or the data bounds if unset
+
+        The parameters are not modified, so that they apply to other data
+        unchanged.
 
         Args:
             data: data array
         """
-        suffix = f"bins={self.bins:d}"
-        if self.lower is not None:
-            suffix += f", ymin={self.lower:.3f}"
-        else:
-            self.lower = np.min(data)
-        if self.upper is not None:
-            suffix += f", ymax={self.upper:.3f}"
-        else:
-            self.upper = np.max(data)
-        return suffix
+        lower = np.min(data) if self.lower is None else self.lower
+        upper = np.max(data) if self.upper is None else self.upper
+        return lower, upper
 
     bins = gds.IntItem(_("Number of bins"), default=256, min=1)
     lower = gds.FloatItem(_("Lower limit"), default=None, check=False)

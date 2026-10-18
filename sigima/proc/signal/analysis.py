@@ -51,10 +51,10 @@ def histogram(src: SignalObj, p: HistogramParam) -> SignalObj:
         Result signal object
     """
     data = src.get_masked_view().compressed()
-    suffix = p.get_suffix(data)  # Also updates p.lower and p.upper
+    suffix = p.get_suffix(data)
 
     # Compute histogram:
-    y, bin_edges = np.histogram(data, bins=p.bins, range=(p.lower, p.upper))
+    y, bin_edges = np.histogram(data, bins=p.bins, range=p.get_range(data))
     x = (bin_edges[:-1] + bin_edges[1:]) / 2
 
     # Note: we use the `new_signal_result` function to create the result signal object

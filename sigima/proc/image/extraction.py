@@ -310,12 +310,12 @@ def line_profile(src: ImageObj, p: LineProfileParam) -> SignalObj:
         Signal object with the profile
     """
     data = src.get_masked_view()
-    p.row = min(p.row, data.shape[0] - 1)
-    p.col = min(p.col, data.shape[1] - 1)
+    row = min(p.row, data.shape[0] - 1)
+    col = min(p.col, data.shape[1] - 1)
     if p.direction == "horizontal":
-        suffix, shape_index, pdata = f"row={p.row}", 1, data[p.row, :]
+        suffix, shape_index, pdata = f"row={row}", 1, data[row, :]
     else:
-        suffix, shape_index, pdata = f"col={p.col}", 0, data[:, p.col]
+        suffix, shape_index, pdata = f"col={col}", 0, data[:, col]
     pdata: ma.MaskedArray
     x = np.arange(data.shape[shape_index])[~pdata.mask]
     y = np.array(pdata, dtype=float)[~pdata.mask]
@@ -375,12 +375,12 @@ def segment_profile(src: ImageObj, p: SegmentProfileParam) -> SignalObj:
         Signal object with the segment profile
     """
     data = src.get_masked_view()
-    p.row1 = min(p.row1, data.shape[0] - 1)
-    p.col1 = min(p.col1, data.shape[1] - 1)
-    p.row2 = min(p.row2, data.shape[0] - 1)
-    p.col2 = min(p.col2, data.shape[1] - 1)
-    suffix = f"({p.row1}, {p.col1})-({p.row2}, {p.col2})"
-    x, y = csline(data, p.row1, p.col1, p.row2, p.col2)
+    row1 = min(p.row1, data.shape[0] - 1)
+    col1 = min(p.col1, data.shape[1] - 1)
+    row2 = min(p.row2, data.shape[0] - 1)
+    col2 = min(p.col2, data.shape[1] - 1)
+    suffix = f"({row1}, {col1})-({row2}, {col2})"
+    x, y = csline(data, row1, col1, row2, col2)
     x, y = x[~np.isnan(y)], y[~np.isnan(y)]  # Remove NaN values
     dst = dst_1_to_1_signal(src, "segment_profile", suffix)
     dst.set_xydata(np.array(x, dtype=float), np.array(y, dtype=float))
@@ -416,24 +416,25 @@ def average_profile(src: ImageObj, p: AverageProfileParam) -> SignalObj:
         Signal object with the average profile
     """
     data = src.get_masked_view()
-    if p.row2 == -1:
-        p.row2 = data.shape[0] - 1
-    if p.col2 == -1:
-        p.col2 = data.shape[1] - 1
-    if p.row1 > p.row2:
-        p.row1, p.row2 = p.row2, p.row1
-    if p.col1 > p.col2:
-        p.col1, p.col2 = p.col2, p.col1
-    p.row1 = min(p.row1, data.shape[0] - 1)
-    p.row2 = min(p.row2, data.shape[0] - 1)
-    p.col1 = min(p.col1, data.shape[1] - 1)
-    p.col2 = min(p.col2, data.shape[1] - 1)
-    suffix = f"{p.direction}, rows=[{p.row1}, {p.row2}], cols=[{p.col1}, {p.col2}]"
+    row1, row2, col1, col2 = p.row1, p.row2, p.col1, p.col2
+    if row2 == -1:
+        row2 = data.shape[0] - 1
+    if col2 == -1:
+        col2 = data.shape[1] - 1
+    if row1 > row2:
+        row1, row2 = row2, row1
+    if col1 > col2:
+        col1, col2 = col2, col1
+    row1 = min(row1, data.shape[0] - 1)
+    row2 = min(row2, data.shape[0] - 1)
+    col1 = min(col1, data.shape[1] - 1)
+    col2 = min(col2, data.shape[1] - 1)
+    suffix = f"{p.direction}, rows=[{row1}, {row2}], cols=[{col1}, {col2}]"
     if p.direction == "horizontal":
-        x, axis = np.arange(p.col1, p.col2 + 1), 0
+        x, axis = np.arange(col1, col2 + 1), 0
     else:
-        x, axis = np.arange(p.row1, p.row2 + 1), 1
-    y = ma.mean(data[p.row1 : p.row2 + 1, p.col1 : p.col2 + 1], axis=axis)
+        x, axis = np.arange(row1, row2 + 1), 1
+    y = ma.mean(data[row1 : row2 + 1, col1 : col2 + 1], axis=axis)
     dst = dst_1_to_1_signal(src, "average_profile", suffix)
     dst.set_xydata(x, y)
     return dst

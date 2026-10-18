@@ -369,6 +369,22 @@ def test_image_clip() -> None:
         check_array_result(f"Clip[{lower},{upper}]", dst.data, exp)
 
 
+def test_histogram_parameters_apply_unchanged_to_other_objects() -> None:
+    """Unset limits are the bounds of each object, not those of the first one."""
+    p = sigima.params.HistogramParam.create(bins=4)
+    images, signals = [], []
+    for offset in (0.0, 100.0):
+        image = sigima.objects.create_image("I", np.arange(16.0).reshape(4, 4) + offset)
+        signal = sigima.objects.create_signal(
+            "S", np.arange(8.0), np.arange(8.0) + offset
+        )
+        images.append(sigima.proc.image.histogram(image, p))
+        signals.append(sigima.proc.signal.histogram(signal, p))
+    assert p.lower is None and p.upper is None
+    assert np.allclose(images[1].x, images[0].x + 100.0)
+    assert np.allclose(signals[1].x, signals[0].x + 100.0)
+
+
 @pytest.mark.validation
 def test_image_histogram() -> None:
     """Validation test for the image histogram computation function."""

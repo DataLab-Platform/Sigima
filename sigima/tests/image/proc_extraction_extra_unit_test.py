@@ -16,6 +16,8 @@ Covers:
 
 from __future__ import annotations
 
+import copy
+
 import numpy as np
 import pytest
 
@@ -46,9 +48,13 @@ def test_average_profile_swapped_bounds(direction: str) -> None:
     img = _make_image(shape=(8, 10))
     p = AverageProfileParam.create(direction=direction, row1=5, row2=2, col1=8, col2=1)
     sig = average_profile(img, p)
-    assert p.row1 < p.row2
-    assert p.col1 < p.col2
-    assert sig.y.size > 0
+    ordered = AverageProfileParam.create(
+        direction=direction, row1=2, row2=5, col1=1, col2=8
+    )
+    expected = average_profile(img, ordered)
+    assert np.array_equal(sig.x, expected.x) and np.array_equal(sig.y, expected.y)
+    # The parameters are not modified: they apply unchanged to other images
+    assert (p.row1, p.row2, p.col1, p.col2) == (5, 2, 8, 1)
 
 
 @pytest.mark.parametrize(
@@ -66,8 +72,7 @@ def test_average_profile_default_bounds_minus_one(
         direction=direction, row1=0, row2=-1, col1=0, col2=-1
     )
     sig = average_profile(img, p)
-    assert p.row2 == img.data.shape[0] - 1
-    assert p.col2 == img.data.shape[1] - 1
+    assert (p.row2, p.col2) == (-1, -1)
     assert sig.y.size == img.data.shape[expected_axis]
 
 
@@ -96,6 +101,35 @@ def test_segment_profile_basic() -> None:
     p = SegmentProfileParam.create(row1=0, col1=0, row2=5, col2=5)
     sig = segment_profile(img, p)
     assert sig.y.size > 0
+
+
+def _values(p) -> dict:
+    """Return the item values of a parameter set."""
+    return {item.get_name(): getattr(p, item.get_name()) for item in p.get_items()}
+
+
+@pytest.mark.parametrize(
+    "func, p",
+    [
+        (line_profile, LineProfileParam.create(direction="horizontal", row=6)),
+        (line_profile, LineProfileParam.create(direction="vertical", col=7)),
+        (segment_profile, SegmentProfileParam.create(row1=1, col1=1, row2=7, col2=9)),
+        (
+            average_profile,
+            AverageProfileParam.create(
+                direction="horizontal", row1=6, row2=2, col1=0, col2=-1
+            ),
+        ),
+    ],
+)
+def test_profile_parameters_apply_unchanged_to_other_images(func, p) -> None:
+    """Coordinates clamped to a small image are not clamped for the next one."""
+    small, large = _make_image(shape=(4, 5)), _make_image(shape=(8, 10))
+    before = _values(p)
+    expected = func(large, copy.deepcopy(p))
+    func(small, p)
+    assert _values(p) == before
+    assert np.array_equal(func(large, p).y, expected.y)
 
 
 if __name__ == "__main__":

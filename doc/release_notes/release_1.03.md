@@ -21,6 +21,7 @@
 
 * **Compressed TIFF files**: TIFF files compressed with LZW, JPEG or WebP could not be opened and failed with the error "requires the 'imagecodecs' package". LZW is the default compression of many acquisition and image-editing tools. The same limitation prevented format-aware TIFF export with LZW or JPEG compression. These compression schemes are now supported out of the box. CCITT compression (Group 3, Group 4, RLE), used for bilevel images, is also supported with Python 3.11 or later, as it requires `imagecodecs` 2026 or later. This closes [DataLab issue #381](https://github.com/DataLab-Platform/DataLab/issues/381).
 * **Complex signal from magnitude and phase**: when the magnitude signal had negative values, they were set to zero in the magnitude signal itself, which was modified by the computation. They are now set to zero in the result only.
+* **Parameters applied to several objects**: histograms without limits, and line, segment and average profiles whose coordinates were outside the image (or set to the last row or column), changed their parameters to the values used for the first object. Applied to several objects, the same parameters then used the bounds or coordinates of the first object for the others. The parameters are no longer modified.
 
 ### 🔧 Dependencies ###
 
