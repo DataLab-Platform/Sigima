@@ -27,6 +27,9 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
     * - :mod:`sigima.proc`
       - Computation functions, which operate on signal and image objects (:class:`sigima.objects.SignalObj` or :class:`sigima.objects.ImageObj`) and return signal or image objects, or scalar results (:class:`sigima.objects.GeometryResult` or :class:`sigima.objects.TableResult`).
 
+    * - :mod:`sigima.io`
+      - Input/output functions for reading and writing signals and images, including parameterized RAW image import and format-aware image export.
+
     * - :mod:`sigima.config`
       - Configuration management for the Sigima library, including options for data paths, translations, and other settings.
 
@@ -45,6 +48,7 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
    params
    objects
    proc
+   io
    config
    client
    viz

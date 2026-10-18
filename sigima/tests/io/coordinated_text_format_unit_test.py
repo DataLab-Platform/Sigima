@@ -9,6 +9,7 @@ import os.path as osp
 import tempfile
 
 import numpy as np
+import pytest
 
 import sigima.io
 import sigima.objects
@@ -256,6 +257,64 @@ def test_nonuniform_coordinates_io() -> None:
         execenv.print("  ✓ Coordinated text CSV round-trip verification successful")
 
     execenv.print(f"{test_nonuniform_coordinates_io.__doc__}: OK")
+
+
+@pytest.mark.parametrize(
+    ("extension", "delimiter_name", "delimiter"),
+    [
+        ("txt", "semicolon", ";"),
+        ("asc", "comma", ","),
+        ("csv", "tab", "\t"),
+    ],
+)
+def test_nonuniform_text_options_preserve_coordinates_and_metadata(
+    tmp_path, extension: str, delimiter_name: str, delimiter: str
+) -> None:
+    """Round-trip coordinated complex data with explicit text options."""
+    real = np.arange(9, dtype=float).reshape(3, 3) + 1.234567
+    imaginary = np.linspace(-0.5, 0.5, 9).reshape(3, 3)
+    data = real + 1j * imaginary
+    image = sigima.objects.create_image(
+        "Coordinated options",
+        data=data,
+        metadata={"instrument": "scanner"},
+        units=("mm", "s", "V"),
+        labels=("Position", "Time", "Amplitude"),
+    )
+    image.set_coords(
+        xcoords=np.array([0.123456, 1.987654, 4.456789]),
+        ycoords=np.array([-2.345678, 0.125678, 3.876543]),
+    )
+    precision = 4
+    param = sigima.io.ImageExportParam.create()
+    param.format_options = {"delimiter": delimiter_name, "precision": precision}
+    filename = tmp_path / f"coordinated.{extension}"
+
+    sigima.io.write_image(str(filename), image, param)
+
+    data_line = next(
+        line
+        for line in filename.read_text(encoding="utf-8").splitlines()
+        if not line.startswith("#")
+    )
+    tokens = data_line.split(delimiter)
+    assert len(tokens) == 4
+    assert all(
+        len(token.partition("e")[0].partition(".")[2]) == precision for token in tokens
+    )
+
+    loaded = sigima.io.read_image(str(filename))
+    assert not loaded.is_uniform_coords
+    assert loaded.metadata["instrument"] == "scanner"
+    assert (loaded.xlabel, loaded.ylabel, loaded.zlabel) == (
+        "Position",
+        "Time",
+        "Amplitude",
+    )
+    assert (loaded.xunit, loaded.yunit, loaded.zunit) == ("mm", "s", "V")
+    np.testing.assert_allclose(loaded.xcoords, image.xcoords, rtol=1e-4)
+    np.testing.assert_allclose(loaded.ycoords, image.ycoords, rtol=1e-4)
+    np.testing.assert_allclose(loaded.data, image.data, rtol=1e-4)
 
 
 def test_uniform_coordinates_io() -> None:

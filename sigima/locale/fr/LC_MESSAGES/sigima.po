@@ -239,11 +239,107 @@ msgstr "Écraser les fichiers existants"
 msgid "Image I/O formats"
 msgstr "Formats d'entrée/sortie d'images"
 
+msgid "Image export"
+msgstr "Exportation d'image"
+
+msgid "Normalization"
+msgstr "Normalisation"
+
+msgid "None"
+msgstr "Aucune"
+
+msgid "Min-max"
+msgstr "Min-max"
+
+msgid "Percentile"
+msgstr "Percentile"
+
+msgid "Manual"
+msgstr "Manuel"
+
+msgid "Manual minimum"
+msgstr "Minimum manuel"
+
+msgid "Manual maximum"
+msgstr "Maximum manuel"
+
+msgid "Low percentile"
+msgstr "Percentile inférieur"
+
+msgid "High percentile"
+msgstr "Percentile supérieur"
+
+msgid "Out-of-range behavior"
+msgstr "Comportement hors plage"
+
+msgid "Clip"
+msgstr "Ecrêtage"
+
+msgid "Rescale"
+msgstr "Rééchelonnage"
+
+msgid "Target data type"
+msgstr "Type de données cible"
+
+msgid "Automatic"
+msgstr "Automatique"
+
+msgid "Non-finite values"
+msgstr "Valeurs non finies"
+
+msgid "Raise an error"
+msgstr "Lever une erreur"
+
+msgid "Replace"
+msgstr "Remplacer"
+
+msgid "Replacement value"
+msgstr "Valeur de remplacement"
+
+msgid "Gamma"
+msgstr "Gamma"
+
+msgid "Invert"
+msgstr "Inverser"
+
+msgid "Format options"
+msgstr "Options de format"
+
 msgid "Text files"
 msgstr "Fichiers texte"
 
 msgid "MAT-Files"
 msgstr "Fichiers MAT"
+
+msgid "RAW image import"
+msgstr "Importation d'image RAW"
+
+msgid "Image data type"
+msgstr "Type de données de l'image"
+
+msgid "Width"
+msgstr "Largeur"
+
+msgid "Height"
+msgstr "Hauteur"
+
+msgid "Offset to first image"
+msgstr "Décalage avant la première image"
+
+msgid "Number of images"
+msgstr "Nombre d'images"
+
+msgid "Gap between images"
+msgstr "Espace entre les images"
+
+msgid "Little-endian byte order"
+msgstr "Ordre des octets petit-boutiste"
+
+msgid "White is zero"
+msgstr "Le blanc correspond à zéro"
+
+msgid "RAW image"
+msgstr "Image RAW"
 
 msgid "Signal I/O formats"
 msgstr "Formats d'entrée/sortie de signaux"
@@ -317,23 +413,14 @@ msgstr "Image sans titre"
 msgid "Title"
 msgstr "Titre"
 
-msgid "Height"
-msgstr "Hauteur"
-
 msgid "Image height: number of rows"
 msgstr "Hauteur de l'image : nombre de lignes"
-
-msgid "Width"
-msgstr "Largeur"
 
 msgid "Image width: number of columns"
 msgstr "Largeur de l'image : nombre de colonnes"
 
 msgid "Type"
 msgstr "Type"
-
-msgid "Image data type"
-msgstr "Type de données de l'image"
 
 msgid "X label"
 msgstr "Titre X"
@@ -744,9 +831,6 @@ msgstr "Mode"
 msgid "Moving median"
 msgstr "Médiane mobile"
 
-msgid "Clip"
-msgstr "Ecrêtage"
-
 msgid "Lower clipping value"
 msgstr "Borne inférieure d'écrêtage"
 
@@ -1084,9 +1168,6 @@ msgstr "Minimum"
 
 msgid "Adjust the intensity window using the histogram."
 msgstr "Ajuster la fenêtre d'intensité à l'aide de l'histogramme."
-
-msgid "Gamma"
-msgstr "Gamma"
 
 msgid "Gamma correction factor (higher values give more contrast)."
 msgstr "Facteur de correction gamma (plus la valeur est élevée, plus le contraste est important)."
@@ -1441,9 +1522,6 @@ msgstr "Ondelette"
 
 msgid "Method"
 msgstr "Méthode"
-
-msgid "Manual"
-msgstr "Manuel"
 
 msgid "Mean"
 msgstr "Moyenne"

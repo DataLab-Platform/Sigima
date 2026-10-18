@@ -154,6 +154,8 @@ class DataLabStubServer:
         self.server.register_function(self.import_h5_file, "import_h5_file")
         self.server.register_function(self.load_h5_workspace, "load_h5_workspace")
         self.server.register_function(self.save_h5_workspace, "save_h5_workspace")
+        self.server.register_function(self.load_from_files, "load_from_files")
+        self.server.register_function(self.load_from_directory, "load_from_directory")
 
         # Object operations
         self.server.register_function(self.add_signal, "add_signal")
@@ -522,27 +524,36 @@ class DataLabStubServer:
         elif self.verbose:
             print(f"set_object: no object found with UUID {obj_uuid}")
 
-    def load_from_files(self, filenames: list[str]) -> None:
+    def load_from_files(
+        self, filenames: list[str], param_data: list[str] | None = None
+    ) -> None:
         """Load objects from files (stub implementation).
 
         Args:
             filenames: list of file names
+            param_data: Optional serialized format-specific import parameters
         """
         if self.verbose:
+            param_info = "" if param_data is None else " with import parameters"
             print(
-                f"load_from_files called with {len(filenames)} files "
+                f"load_from_files called with {len(filenames)} files{param_info} "
                 "(stub - not implemented)"
             )
 
-    def load_from_directory(self, path: str) -> None:
+    def load_from_directory(
+        self, path: str, param_data: list[str] | None = None
+    ) -> None:
         """Load objects from directory (stub implementation).
 
         Args:
             path: directory path
+            param_data: Optional serialized format-specific import parameters
         """
         if self.verbose:
+            param_info = "" if param_data is None else " with import parameters"
             print(
-                f"load_from_directory called with path: {path} (stub - not implemented)"
+                f"load_from_directory called with path: {path}{param_info} "
+                "(stub - not implemented)"
             )
 
     def get_object_titles(self, panel: str | None = None) -> list[str]:
