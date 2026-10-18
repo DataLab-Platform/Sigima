@@ -47,6 +47,8 @@ def test_replay_qualification(operation_id: str) -> None:
     if not ran:
         pytest.skip("the validation test of the function did not run in this session")
     assert samples, "no call captured from the validation tests"
+    errors = [f"{o.key}: {o.detail}" for o in outcomes if o.status == "error"]
+    assert not errors, f"captured calls failed to replay: {errors}"
     proofs = [o for o in outcomes if o.status == "replayed"]
     assert proofs, f"no replayable captured call: {[o.status for o in outcomes]}"
     accepted = {"exact", "within_tolerance"}
