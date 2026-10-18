@@ -757,3 +757,36 @@ def test_package_exposes_the_public_names() -> None:
     assert contracts.execution.describe_call is contracts.describe_call
     with pytest.raises(AttributeError):
         getattr(contracts, "not_a_name")
+
+
+def _json_roi(obj) -> dict | None:
+    """Return the ROI definition of *obj* as recorded (plain JSON data)."""
+    if obj.roi is None:
+        return None
+    return json.loads(json.dumps(obj.roi.to_dict(), default=lambda a: a.tolist()))
+
+
+def test_with_roi_applies_a_recorded_definition_to_a_copy() -> None:
+    """A recorded ROI definition is applied to a copy, never to the object."""
+    x = np.linspace(0.0, 10.0, 101)
+    signal = sigima.objects.create_signal("s", x, np.sin(x))
+    signal.metadata["key"] = "value"
+    signal.roi = sigima.objects.create_signal_roi([[1.0, 3.0]])
+    recorded = _json_roi(signal)
+    signal.roi = sigima.objects.create_signal_roi([[1.0, 3.0], [5.0, 7.0]])
+    copy = contracts.with_roi(signal, recorded)
+    assert copy is not signal and _json_roi(copy) == recorded
+    assert copy.metadata["key"] == "value"
+    assert np.array_equal(copy.xydata, signal.xydata)
+    assert len(signal.roi.single_rois) == 2
+    assert contracts.with_roi(signal, None).roi is None
+    image = sigima.objects.create_image("i", np.arange(64.0).reshape(8, 8))
+    image.roi = sigima.objects.create_image_roi("rectangle", [1, 1, 4, 4])
+    recorded = _json_roi(image)
+    image.roi = None
+    copy = contracts.with_roi(image, recorded)
+    assert _json_roi(copy) == recorded and image.roi is None
+    assert copy.maskdata is not None
+    with pytest.raises(contracts.ExecutionError) as info:
+        contracts.with_roi(image, {"single_rois": [{"type": "Unknown"}]})
+    assert info.value.code == "unsupported_context"

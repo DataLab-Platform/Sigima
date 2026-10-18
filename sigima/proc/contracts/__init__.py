@@ -24,7 +24,7 @@ its modules:
   parameters actually used, rebuilt against the local classes only);
 - :mod:`~sigima.proc.contracts.execution`: description and preparation of calls,
   shared by ordinary processing and replay (:func:`describe_call`,
-  :func:`prepare_execution`, :func:`normalize_outputs`);
+  :func:`prepare_execution`, :func:`normalize_outputs`, :func:`with_roi`);
 - :mod:`~sigima.proc.contracts.policies` and
   :mod:`~sigima.proc.contracts.alignment`: X-alignment policies of signal
   operations and their algorithms.
@@ -80,6 +80,7 @@ if TYPE_CHECKING:
         implementation_of,
         normalize_outputs,
         prepare_execution,
+        with_roi,
     )
     from sigima.proc.contracts.policies import (
         XAlignmentPolicy,
@@ -143,6 +144,7 @@ _NAMES = {
         "implementation_of",
         "normalize_outputs",
         "prepare_execution",
+        "with_roi",
     ),
     "policies": (
         "XAlignmentPolicy",
@@ -208,6 +210,7 @@ __all__ = [
     "prepare_execution",
     "register_x_alignment_policy",
     "tolerance",
+    "with_roi",
     "x_alignment_policies",
 ]
 

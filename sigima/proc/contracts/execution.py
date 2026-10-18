@@ -18,6 +18,8 @@ application:
   runs it itself (:meth:`PreparedExecution.run` or :func:`execute`), in its own
   process, worker or subprocess: a prepared execution is picklable.
 - :func:`normalize_outputs` returns the outputs of a result by role.
+- :func:`with_roi` returns a copy of an input with recorded regions of interest,
+  to replay a call on an input whose regions of interest changed since.
 
 Errors carry a stable ``code`` (:class:`ExecutionError`); scientific refusals of a
 policy keep their own exception
@@ -61,6 +63,7 @@ __all__ = [
     "implementation_of",
     "normalize_outputs",
     "prepare_execution",
+    "with_roi",
 ]
 
 #: Stable codes of :class:`ExecutionError`.
@@ -450,3 +453,40 @@ def normalize_outputs(
             f"expected {role.kind}",
         )
     return [(role.name, result)]
+
+
+def with_roi(
+    obj: SignalObj | ImageObj, definition: dict[str, Any] | None
+) -> SignalObj | ImageObj:
+    """Return a copy of *obj* with the regions of interest *definition*.
+
+    Used to replay a call on a recorded input whose data are unchanged but whose
+    regions of interest changed since (e.g. regions added by a detection): the
+    recorded definition (``roi.to_dict()``) is applied to a copy, the object
+    itself is never modified.
+
+    Args:
+        obj: Signal or image.
+        definition: Regions of interest as returned by ``roi.to_dict()``, or None
+         for no region of interest.
+
+    Returns:
+        A copy of *obj* (data and metadata) with these regions of interest.
+
+    Raises:
+        ExecutionError: ``unsupported_context`` if *obj* is neither a signal nor
+         an image, or *definition* is not a valid definition for it.
+    """
+    if not isinstance(obj, (SignalObj, ImageObj)):
+        raise ExecutionError(
+            "unsupported_context", f"Not a signal or an image: {type(obj).__name__}"
+        )
+    try:
+        roi = None if definition is None else obj.get_roi_class().from_dict(definition)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ExecutionError(
+            "unsupported_context", f"Invalid region of interest definition: {exc}"
+        ) from exc
+    copy = obj.copy(all_metadata=True)
+    copy.roi = roi
+    return copy
