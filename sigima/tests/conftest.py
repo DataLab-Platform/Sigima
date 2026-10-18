@@ -170,7 +170,9 @@ def pytest_runtest_logreport(report):
         return
     outcomes = replay_probe_module.TEST_OUTCOMES
     name = report.nodeid.split("::")[-1]
-    outcomes[name] = report.outcome
+    # Test names are not unique across modules: a failure is never overwritten
+    if outcomes.get(name) != "failed":
+        outcomes[name] = report.outcome
     base = name.split("[", 1)[0]
     if base != name and outcomes.get(base) != "failed":
         if outcomes.get(base) != "passed" or report.outcome == "failed":
