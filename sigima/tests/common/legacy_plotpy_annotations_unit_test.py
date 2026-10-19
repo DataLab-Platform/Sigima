@@ -202,3 +202,32 @@ def test_migration_is_idempotent_and_preserves_unknown_payloads() -> None:
     assert second_report.converted_count == 0
     assert obj.get_annotations()[0] == opaque
     assert obj.get_annotations()[-1] == unsupported
+
+
+@pytest.mark.parametrize(
+    ("plotpy_marker", "expected_symbol"),
+    [
+        ("Cross", "cross"),
+        ("XCross", "x"),
+        ("UTriangle", "triangle-up"),
+        ("DTriangle", "triangle-down"),
+        ("LTriangle", "triangle-left"),
+        ("RTriangle", "triangle-right"),
+        ("Star1", "star"),
+        ("Star2", "asterisk"),
+    ],
+)
+def test_migrate_legacy_plotpy_marker_symbols(
+    plotpy_marker: str, expected_symbol: str
+) -> None:
+    """PlotPy SymbolParam marker names must map to their canonical symbols."""
+    payload = _legacy_payload(
+        "AnnotatedPoint",
+        {
+            "points": ["array", [[1.0, 2.0]], "float64"],
+            "shapeparam": {"symbol": {"marker": plotpy_marker}},
+        },
+    )
+    [annotation] = legacy_plotpy_payload_to_annotations(payload)
+    assert isinstance(annotation, PointAnnotation)
+    assert annotation.style.marker.symbol == expected_symbol

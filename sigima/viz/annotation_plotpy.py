@@ -89,6 +89,10 @@ _MARKERS = {
     "x": "XCross",
     "triangle-up": "UTriangle",
     "triangle-down": "DTriangle",
+    "triangle-left": "LTriangle",
+    "triangle-right": "RTriangle",
+    "star": "Star1",
+    "asterisk": "Star2",
     "none": "NoSymbol",
 }
 

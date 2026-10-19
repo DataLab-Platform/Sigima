@@ -10,11 +10,13 @@ from collections import Counter
 import pytest
 
 from sigima.objects import (
+    AnnotationStyle,
     Axis,
     CircleAnnotation,
     CursorAnnotation,
     CursorOrientation,
     EllipseAnnotation,
+    MarkerStyle,
     PointAnnotation,
     PolygonAnnotation,
     PolylineAnnotation,
@@ -97,4 +99,36 @@ def test_hidden_annotation_creates_no_artist() -> None:
     artists = add_annotations_to_axes(axes, [PointAnnotation(visible=False)])
 
     assert not artists
+    plt.close(figure)
+
+
+def test_all_marker_symbols_render_in_matplotlib() -> None:
+    """Every canonical marker symbol must map to a valid Matplotlib marker."""
+    import matplotlib.pyplot as plt
+
+    from sigima.viz.annotation_mpl import add_annotations_to_axes
+
+    symbols = (
+        "circle",
+        "square",
+        "diamond",
+        "cross",
+        "x",
+        "triangle-up",
+        "triangle-down",
+        "triangle-left",
+        "triangle-right",
+        "star",
+        "asterisk",
+        "none",
+    )
+    figure, axes = plt.subplots()
+    annotations = [
+        PointAnnotation(style=AnnotationStyle(marker=MarkerStyle(symbol=symbol)))
+        for symbol in symbols
+    ]
+
+    artists = add_annotations_to_axes(axes, annotations)
+
+    assert len(artists) == len(symbols)
     plt.close(figure)

@@ -97,6 +97,10 @@ def test_all_canonical_marker_symbols_create_valid_plotpy_markers() -> None:
         "x": "XCross",
         "triangle-up": "UTriangle",
         "triangle-down": "DTriangle",
+        "triangle-left": "LTriangle",
+        "triangle-right": "RTriangle",
+        "star": "Star1",
+        "asterisk": "Star2",
         "none": "NoSymbol",
     }
 
