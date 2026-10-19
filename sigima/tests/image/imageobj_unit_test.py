@@ -9,8 +9,10 @@ Unit tests around the `ImageObj` class and its creation from parameters.
 
 from __future__ import annotations
 
+import json
 import os.path as osp
 
+import guidata.dataset as gds
 import numpy as np
 import pytest
 
@@ -432,6 +434,105 @@ def test_image_creation_parameter_validation() -> None:
 
     with pytest.raises(ValueError, match="Zero is not"):
         Gauss2DParam.create(sigma=0.0)
+
+
+DOMAIN_IMAGE_PARAM_CLASSES = (
+    Gauss2DParam,
+    Ramp2DParam,
+    SinusoidalGrating2DParam,
+    Ring2DParam,
+    SiemensStar2DParam,
+    Sinc2DParam,
+)
+
+
+@pytest.mark.parametrize("param_class", DOMAIN_IMAGE_PARAM_CLASSES)
+def test_domain_image_physical_coordinates(param_class: type) -> None:
+    """Images computed over a domain use it as coordinates by default."""
+    param = param_class.create(
+        height=41, width=21, xmin=-2.0, xmax=8.0, ymin=10.0, ymax=30.0
+    )
+    assert isinstance(param, sigima.objects.DomainImageParam)
+    assert param.physical_coords
+    image = sigima.objects.create_image_from_param(param)
+    assert image.is_uniform_coords
+    assert (image.x0, image.y0) == (-2.0, 10.0)
+    assert image.dx == pytest.approx(10.0 / 20)
+    assert image.dy == pytest.approx(20.0 / 40)
+    assert image.xmax == pytest.approx(8.0)
+    assert image.ymax == pytest.approx(30.0)
+
+    pixel_param = param_class.create(
+        height=41,
+        width=21,
+        xmin=-2.0,
+        xmax=8.0,
+        ymin=10.0,
+        ymax=30.0,
+        physical_coords=False,
+    )
+    pixel_image = sigima.objects.create_image_from_param(pixel_param)
+    assert (pixel_image.x0, pixel_image.y0, pixel_image.dx, pixel_image.dy) == (
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+    )
+    np.testing.assert_array_equal(pixel_image.data, image.data)
+
+
+def test_sinusoidal_grating_period_matches_axes() -> None:
+    """A grating of frequency f shows one period every 1/f axis units."""
+    param = SinusoidalGrating2DParam.create(
+        height=8, width=1001, fx=0.1, fy=0.0, a=1.0, c=0.0, xmin=0.0, xmax=100.0
+    )
+    image = sigima.objects.create_image_from_param(param)
+    x = image.x0 + image.dx * np.arange(image.data.shape[1])
+    np.testing.assert_allclose(image.data[0], np.sin(2 * np.pi * 0.1 * x), atol=1e-12)
+
+
+@pytest.mark.parametrize("param_class", DOMAIN_IMAGE_PARAM_CLASSES)
+def test_domain_image_legacy_parameters_keep_pixel_coordinates(
+    param_class: type,
+) -> None:
+    """Parameters serialized before the option existed keep pixel coordinates.
+
+    Recreating an image from creation parameters stored by an earlier version
+    (object metadata, workspace, processing history) must not change its
+    coordinates.
+    """
+    for value in (True, False):
+        param = param_class.create(height=8, width=8, physical_coords=value)
+        restored = gds.json_to_dataset(gds.dataset_to_json(param))
+        assert restored.physical_coords is value
+
+    payload = json.loads(gds.dataset_to_json(param_class.create(height=8, width=8)))
+    del payload["physical_coords"]
+    legacy = gds.json_to_dataset(json.dumps(payload))
+    assert isinstance(legacy, param_class)
+    assert legacy.physical_coords is False
+    image = sigima.objects.create_image_from_param(legacy)
+    assert (image.x0, image.y0, image.dx, image.dy) == (0.0, 0.0, 1.0, 1.0)
+    # A newly created parameter set still defaults to physical coordinates
+    assert param_class().physical_coords is True
+
+
+def test_domain_image_validation() -> None:
+    """A reversed domain is only rejected when used as coordinates."""
+    with pytest.raises(ValueError, match="xmax must be greater than xmin"):
+        sigima.objects.create_image_from_param(
+            Sinc2DParam.create(height=4, width=4, xmin=1.0, xmax=-1.0)
+        )
+    image = sigima.objects.create_image_from_param(
+        Sinc2DParam.create(
+            height=4, width=4, xmin=1.0, xmax=-1.0, physical_coords=False
+        )
+    )
+    assert image.data.shape == (4, 4)
+    single = sigima.objects.create_image_from_param(
+        Ramp2DParam.create(height=1, width=1, xmin=0.0, xmax=1.0, ymin=0.0, ymax=1.0)
+    )
+    assert (single.x0, single.y0, single.dx, single.dy) == (0.0, 0.0, 1.0, 1.0)
 
 
 def test_image_copy() -> None:

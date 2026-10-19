@@ -266,8 +266,10 @@ def test_image_extract_roi() -> None:
 
 def test_roi_coordinates_validation() -> None:
     """Test ROI coordinates validation"""
-    # Create a 20x20 Gaussian image
-    param = sigima.objects.Gauss2DParam.create(a=10.0, height=20, width=20)
+    # Create a 20x20 Gaussian image, in pixel coordinates (as the ROIs below)
+    param = sigima.objects.Gauss2DParam.create(
+        a=10.0, height=20, width=20, physical_coords=False
+    )
     src = sigima.objects.create_image_from_param(param)
 
     # Create ROI coordinates

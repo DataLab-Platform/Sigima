@@ -64,7 +64,10 @@ def create_reference_signal() -> sigima.objects.SignalObj:
 
 def create_reference_image() -> sigima.objects.ImageObj:
     """Create reference image"""
-    param = sigima.objects.Gauss2DParam.create(title="2D-Gaussian")
+    # ROIs below are defined in pixel coordinates
+    param = sigima.objects.Gauss2DParam.create(
+        title="2D-Gaussian", physical_coords=False
+    )
     ima = sigima.objects.create_image_from_param(param)
     dy, dx = ima.data.shape
     ima.roi = sigima.objects.create_image_roi(

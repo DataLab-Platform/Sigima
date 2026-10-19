@@ -96,6 +96,7 @@ Images
 .. autofunction:: sigima.objects.create_image_from_param
 .. autoclass:: sigima.objects.ImageTypes
 .. autoclass:: sigima.objects.NewImageParam
+.. autoclass:: sigima.objects.DomainImageParam
 .. autodataset:: sigima.objects.Zero2DParam
 .. autodataset:: sigima.objects.UniformDistribution2DParam
 .. autodataset:: sigima.objects.NormalDistribution2DParam
@@ -131,6 +132,7 @@ __all__ = [
     "CursorAnnotation",
     "CursorOrientation",
     "CustomSignalParam",
+    "DomainImageParam",
     "EllipseAnnotation",
     "ExponentialParam",
     "FillStyle",
@@ -285,6 +287,7 @@ from sigima.objects.base import (
 from sigima.objects.image import (
     Checkerboard2DParam,
     CircularROI,
+    DomainImageParam,
     Gauss2DParam,
     ImageDatatypes,
     ImageObj,
