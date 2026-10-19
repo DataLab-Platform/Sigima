@@ -157,3 +157,13 @@ def test_inverse_rectangular_roi_overlay() -> None:
     overlay = plotly_spec.build_image_roi_overlay(image)
     shape = overlay["shapes"][0]
     assert (shape["x0"], shape["y0"], shape["x1"], shape["y1"]) == (2.0, 3.0, 6.0, 8.0)
+
+
+def test_subplot_domain_mapping() -> None:
+    """Subplot overlay helper must convert paper refs to axis domain refs."""
+    viz_plotly = importlib.import_module("sigima.viz.viz_plotly")
+
+    converted = viz_plotly._subplot_overlay_item(  # pylint: disable=protected-access
+        {"type": "line", "xref": "x", "yref": "paper"}
+    )
+    assert converted == {"type": "line", "xref": "x", "yref": "y domain"}
