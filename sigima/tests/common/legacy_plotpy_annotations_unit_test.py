@@ -228,6 +228,8 @@ def test_migrate_legacy_plotpy_marker_symbols(
             "shapeparam": {"symbol": {"marker": plotpy_marker}},
         },
     )
-    [annotation] = legacy_plotpy_payload_to_annotations(payload)
+    annotations = legacy_plotpy_payload_to_annotations(payload)
+    assert len(annotations) == 1
+    annotation = annotations[0]
     assert isinstance(annotation, PointAnnotation)
     assert annotation.style.marker.symbol == expected_symbol
