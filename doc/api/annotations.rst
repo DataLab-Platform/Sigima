@@ -109,7 +109,7 @@ rewriting them.  Migration to the canonical model is always explicit:
 
 .. code-block:: python
 
-    from sigima.viz.annotation_plotpy import migrate_legacy_plotpy_annotations
+    from sigima.objects import migrate_legacy_plotpy_annotations
 
     preview = migrate_legacy_plotpy_annotations(signal, dry_run=True)
     if not preview.diagnostics:
