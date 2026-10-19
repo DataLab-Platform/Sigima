@@ -196,7 +196,7 @@ def pytest_sessionfinish(session, exitstatus):  # pylint: disable=unused-argumen
         different = sorted(
             op
             for op, entry in report.items()
-            if op in qualified and entry["verdict"] == "different"
+            if op in qualified and entry["verdict"] in ("different", "error")
         )
         if different:
             print(

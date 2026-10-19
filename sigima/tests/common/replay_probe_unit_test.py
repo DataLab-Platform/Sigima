@@ -81,6 +81,33 @@ def test_compare_with_another_environment(captured, tmp_path, monkeypatch) -> No
     assert cross[NORMALIZE]["verdict"] == "different"
 
 
+def test_replay_error_is_recorded_in_reports(captured, tmp_path, monkeypatch) -> None:
+    """Replay exceptions must set verdict='error' in replay reports."""
+    broken_src = sigima.objects.SignalObj()
+    param = captured.args[1]
+    broken = replay_probe.Sample(
+        "test_err", 0, (broken_src, param), captured.result, "k"
+    )
+    monkeypatch.setattr(replay_probe, "SAMPLES", {NORMALIZE: [broken]})
+    capture = str(tmp_path / "capture.pkl")
+    replay_probe.dump_samples(capture)
+
+    cross = replay_probe.cross_replay(capture)
+    assert cross[NORMALIZE]["verdict"] == "error"
+    assert not cross[NORMALIZE]["exact"]
+    assert cross[NORMALIZE]["detail"]
+
+    results = str(tmp_path / "results")
+    dumped = replay_probe.replay_dump(capture, results)
+    assert dumped[NORMALIZE]["verdict"] == "error"
+    assert dumped[NORMALIZE]["statuses"] == {"error": 1}
+
+    compared = replay_probe.compare_replays(results, capture)
+    assert compared[NORMALIZE]["verdict"] == "error"
+    assert not compared[NORMALIZE]["exact"]
+    assert compared[NORMALIZE]["detail"]
+
+
 def test_input_digest_covers_roi_coordinates_and_metadata_read() -> None:
     """Calls on the same data with another ROI, grid or read metadata differ."""
     data = np.arange(16.0).reshape(4, 4)

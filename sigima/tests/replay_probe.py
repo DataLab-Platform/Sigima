@@ -487,7 +487,7 @@ def load_dump(path: str) -> Iterator[tuple[str, list[tuple[str, Any, Any]]]]:
             yield name[: -len(".pkl")], entries
 
 
-_VERDICT_ORDER = ("exact", "within_tolerance", "different")
+_VERDICT_ORDER = ("exact", "within_tolerance", "different", "error")
 
 
 def _new_entry() -> dict[str, Any]:
@@ -521,6 +521,15 @@ def _add_comparison(
         entry["max_rel_error"] = max(entry["max_rel_error"], comparison.max_rel)
 
 
+def _add_error(entry: dict[str, Any], detail: str) -> None:
+    """Record a sample whose replay raised an exception."""
+    entry["samples"] += 1
+    entry["verdict"] = "error"
+    entry["exact"] = False
+    entry["max_abs_error"] = entry["max_rel_error"] = None
+    entry["detail"] = entry["detail"] or detail
+
+
 def _registry() -> dict[str, contracts.OperationContract]:
     return {c.operation_id: c for c in contracts.build_contract_registry().contracts}
 
@@ -550,6 +559,8 @@ def cross_replay(path: str) -> dict[str, dict[str, Any]]:
             outcome = safe_replay(contract, Sample(key, 0, args, result))
             if outcome.status == "replayed":
                 _add_comparison(entry, outcome.result, result, rule)
+            elif outcome.status == "error":
+                _add_error(entry, outcome.detail)
         if entry["samples"]:
             report[op] = entry
     return report
@@ -591,6 +602,8 @@ def replay_dump(
             saved.append((key, outcome.status, outcome.result, outcome.detail))
             if outcome.status == "replayed":
                 _add_comparison(entry, outcome.result, result, rule)
+            elif outcome.status == "error":
+                _add_error(entry, outcome.detail)
         entry["statuses"] = dict(statuses)
         with open(os.path.join(out_dir, _file_name(op)), "wb") as file:
             pickle.dump(saved, file)
@@ -628,15 +641,17 @@ def compare_replays(results_dir: str, reference: str) -> dict[str, dict[str, Any
         rule = contract.comparison or EXACT
         entry = _new_entry()
         unmatched = 0
-        for key, status, result, _detail in replayed:
+        for key, status, result, detail in replayed:
             # Calls with the same inputs are matched in capture order.
             candidates = references.get(key)
             if not candidates:
-                unmatched += status == "replayed"
+                unmatched += status in ("replayed", "error")
                 continue
             reference_result = candidates.pop(0)
             if status == "replayed":
                 _add_comparison(entry, result, reference_result, rule)
+            elif status == "error":
+                _add_error(entry, detail)
         entry["unmatched"] = unmatched
         if not entry["samples"]:
             entry["exact"] = entry["verdict"] = None
