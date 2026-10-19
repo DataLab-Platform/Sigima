@@ -140,6 +140,21 @@ def test_extreme_finite_bounds_rescale_without_overflow() -> None:
     np.testing.assert_array_equal(result, np.array([0, 128, 255], dtype=np.uint8))
 
 
+def test_extreme_finite_bounds_clip_without_overflow() -> None:
+    """Check clipping when the finite bound difference exceeds float64."""
+    maximum = np.finfo(np.float64).max
+    data = np.array([-maximum, 0.0, maximum])
+    clip_param = create_export_param(normalization="minmax", behavior="clip")
+    clipped = prepare_image_for_export(data, ".npy", clip_param)
+    np.testing.assert_array_equal(clipped, data)
+
+    invert_param = create_export_param(
+        normalization="minmax", behavior="clip", invert=True
+    )
+    inverted = prepare_image_for_export(data, ".npy", invert_param)
+    np.testing.assert_array_equal(inverted, np.array([maximum, 0.0, -maximum]))
+
+
 def test_float32_export_rejects_finite_out_of_range_values() -> None:
     """Check that narrowing finite float64 values cannot produce infinity."""
     data = np.array([0.0, float(np.finfo(np.float32).max) * 2.0])

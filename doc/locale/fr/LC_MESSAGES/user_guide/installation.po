@@ -120,8 +120,8 @@ msgstr "Langage de programmation Python"
 msgid "guidata"
 msgstr "guidata"
 
-msgid ">= 3.13"
-msgstr ">= 3.13"
+msgid ">= 3.16.0"
+msgstr ">= 3.16.0"
 
 msgid "Automatic GUI generation for easy dataset editing and display"
 msgstr "Génération automatique d'interfaces graphiques pour l'édition et l'affichage de jeux de données"
@@ -156,11 +156,11 @@ msgstr "Traitement d'images en Python"
 msgid "imagecodecs"
 msgstr "imagecodecs"
 
-msgid ">= 2024.12.30"
-msgstr ">= 2024.12.30"
+msgid ">= 2024.12.30 (sys_platform != 'emscripten')"
+msgstr ">= 2024.12.30 (sys_platform != 'emscripten')"
 
 msgid "Image transformation, compression, and decompression codecs"
-msgstr "Codecs de transformation, de compression et de d?compression d'images"
+msgstr "Codecs de transformation, de compression et de décompression d'images"
 
 msgid "pandas"
 msgstr "pandas"

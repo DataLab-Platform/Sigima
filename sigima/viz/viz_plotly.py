@@ -449,6 +449,16 @@ def view_images(
     _show_spec(spec)
 
 
+def _subplot_overlay_item(item: dict[str, Any]) -> dict[str, Any]:
+    """Convert paper references to subplot-domain references."""
+    converted = dict(item)
+    if converted.get("xref") == "paper":
+        converted["xref"] = "x domain"
+    if converted.get("yref") == "paper":
+        converted["yref"] = "y domain"
+    return converted
+
+
 def view_images_side_by_side(
     images: list[np.ndarray | ImageObj],
     titles: list[str] | None = None,
@@ -498,9 +508,11 @@ def view_images_side_by_side(
         for trace in spec["data"]:
             figure.add_trace(trace, row=row, col=column)
         for shape in spec["layout"].get("shapes", []):
-            figure.add_shape(shape, row=row, col=column)
+            figure.add_shape(_subplot_overlay_item(shape), row=row, col=column)
         for annotation in spec["layout"].get("annotations", []):
-            figure.add_annotation(annotation, row=row, col=column)
+            figure.add_annotation(
+                _subplot_overlay_item(annotation), row=row, col=column
+            )
         figure.update_yaxes(
             autorange="reversed",
             scaleanchor=f"x{index + 1 if index else ''}",

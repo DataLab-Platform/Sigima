@@ -97,6 +97,10 @@ def test_all_canonical_marker_symbols_create_valid_plotpy_markers() -> None:
         "x": "XCross",
         "triangle-up": "UTriangle",
         "triangle-down": "DTriangle",
+        "triangle-left": "LTriangle",
+        "triangle-right": "RTriangle",
+        "star": "Star1",
+        "asterisk": "Star2",
         "none": "NoSymbol",
     }
 
@@ -224,3 +228,27 @@ def test_unknown_legacy_item_is_preserved() -> None:
     assert report.preserved_count == 1
     assert report.diagnostics
     assert obj.get_annotations() == [payload]
+
+
+def test_rotated_rectangle_and_ellipse_round_trip() -> None:
+    """Rotated rectangles must apply options and ellipses must keep their angle."""
+    from sigima.viz.annotation_plotpy import (
+        annotation_to_plotpy_item,
+        plotpy_item_to_annotation,
+    )
+
+    rect = RectangleAnnotation(
+        x=1.0, y=2.0, width=3.0, height=4.0, angle=0.5, title="Rotated", locked=True
+    )
+    rect_item = annotation_to_plotpy_item(rect)
+    assert rect_item.title().text() == "Rotated"
+    assert not rect_item.is_label_visible()
+    assert not rect_item.annotationparam.show_computations
+    assert not rect_item.annotationparam.show_subtitle
+    assert rect_item.is_readonly()
+
+    ellipse = EllipseAnnotation(cx=5.0, cy=6.0, radius_x=4.0, radius_y=2.0, angle=0.25)
+    ellipse_item = annotation_to_plotpy_item(ellipse)
+    round_tripped = plotpy_item_to_annotation(ellipse_item)
+    assert isinstance(round_tripped, EllipseAnnotation)
+    assert round_tripped.angle == pytest.approx(0.25)

@@ -47,6 +47,10 @@ _MARKERS = {
     "x": "x",
     "triangle-up": "^",
     "triangle-down": "v",
+    "triangle-left": "<",
+    "triangle-right": ">",
+    "star": "*",
+    "asterisk": "*",
     "none": "",
 }
 

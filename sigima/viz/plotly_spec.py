@@ -252,7 +252,8 @@ def build_image_roi_overlay(obj: ImageObj) -> dict[str, list[dict[str, Any]]]:
         label = roi.title or f"ROI {index + 1}"
         line = {"color": "#ff3333", "width": 2}
         if isinstance(roi, RectangularROI):
-            x0, y0, x1, y1 = roi.get_bounding_box(obj)
+            x0, y0, dx, dy = roi.get_physical_coords(obj)
+            x1, y1 = x0 + dx, y0 + dy
             shape = {
                 "type": "rect",
                 "x0": x0,

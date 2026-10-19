@@ -61,7 +61,7 @@ msgid ":mod:`sigima.io`"
 msgstr ":mod:`sigima.io`"
 
 msgid "Input/output functions for reading and writing signals and images, including parameterized RAW image import and format-aware image export."
-msgstr "Fonctions d'entr?e/sortie pour la lecture et l'?criture de signaux et d'images, y compris l'import param?tr? d'images RAW et l'export d'images adapt? au format."
+msgstr "Fonctions d'entrée/sortie pour la lecture et l'écriture de signaux et d'images, y compris l'import paramétré d'images RAW et l'export d'images adapté au format."
 
 msgid ":mod:`sigima.config`"
 msgstr ":mod:`sigima.config`"

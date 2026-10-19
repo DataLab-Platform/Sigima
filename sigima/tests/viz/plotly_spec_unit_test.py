@@ -144,3 +144,26 @@ def test_roi_and_geometry_overlays_are_portable_json() -> None:
     json.dumps(signal_overlay, allow_nan=False)
     json.dumps(image_overlay, allow_nan=False)
     json.dumps(geometry_overlay, allow_nan=False)
+
+
+def test_inverse_rectangular_roi_overlay() -> None:
+    """Inverse RectangularROI must outline the ROI rather than the full image."""
+    plotly_spec = importlib.import_module("sigima.viz.plotly_spec")
+
+    image = create_image("Inverse ROI image", data=np.zeros((20, 30)))
+    image.roi = create_image_roi(
+        "rectangle", [2.0, 3.0, 4.0, 5.0], title="Inverse ROI", inverse=True
+    )
+    overlay = plotly_spec.build_image_roi_overlay(image)
+    shape = overlay["shapes"][0]
+    assert (shape["x0"], shape["y0"], shape["x1"], shape["y1"]) == (2.0, 3.0, 6.0, 8.0)
+
+
+def test_subplot_domain_mapping() -> None:
+    """Subplot overlay helper must convert paper refs to axis domain refs."""
+    viz_plotly = importlib.import_module("sigima.viz.viz_plotly")
+
+    converted = viz_plotly._subplot_overlay_item(  # pylint: disable=protected-access
+        {"type": "line", "xref": "x", "yref": "paper"}
+    )
+    assert converted == {"type": "line", "xref": "x", "yref": "y domain"}

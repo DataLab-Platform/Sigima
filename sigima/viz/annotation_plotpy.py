@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 import math
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -40,6 +39,7 @@ from sigima.objects.annotations import (
     EllipseAnnotation,
     FillStyle,
     GraphicalAnnotation,
+    LegacyPlotPyMigrationReport,
     MarkerStyle,
     PointAnnotation,
     PolygonAnnotation,
@@ -51,8 +51,10 @@ from sigima.objects.annotations import (
     TextAnchor,
     TextAnnotation,
     TextStyle,
-    annotation_to_dict,
     is_graphical_annotation_dict,
+)
+from sigima.objects.annotations.legacy_plotpy import (
+    migrate_legacy_plotpy_annotations as _migrate_legacy_plotpy_annotations,
 )
 
 if TYPE_CHECKING:
@@ -89,8 +91,22 @@ _MARKERS = {
     "x": "XCross",
     "triangle-up": "UTriangle",
     "triangle-down": "DTriangle",
+    "triangle-left": "LTriangle",
+    "triangle-right": "RTriangle",
+    "star": "Star1",
+    "asterisk": "Star2",
     "none": "NoSymbol",
 }
+
+_PLOTPY_DASHES = {
+    "SolidLine": "solid",
+    "DashLine": "dash",
+    "DotLine": "dot",
+    "DashDotLine": "dashdot",
+    "DashDotDotLine": (6.0, 3.0, 1.0, 3.0, 1.0, 3.0),
+}
+
+_PLOTPY_MARKERS = {value: key for key, value in _MARKERS.items()}
 
 _PLOTPY_ANCHOR_POSITIONS = {
     "TL": (0.0, 1.0),
@@ -105,16 +121,6 @@ _PLOTPY_ANCHOR_POSITIONS = {
 }
 
 _PLOTPY_TEXT_ANCHORS = {value: key for key, value in _ANCHORS.items()}
-
-
-@dataclass(frozen=True)
-class PlotPyMigrationReport:
-    """Result of an explicit historical PlotPy migration."""
-
-    converted_count: int
-    preserved_count: int
-    diagnostics: tuple[str, ...]
-    applied: bool
 
 
 class AxesLabelItem(LabelItem):
@@ -248,6 +254,9 @@ def annotation_to_plotpy_item(annotation: GraphicalAnnotation):
             )
         else:
             item = AnnotatedObliqueRectangle(*corners.ravel())
+            for name, value in options.items():
+                setattr(item.annotationparam, name, value)
+            item.annotationparam.update_item(item)
     elif isinstance(annotation, CircleAnnotation):
         item = make.annotated_circle(
             annotation.cx - annotation.radius,
@@ -419,22 +428,26 @@ def _legacy_style(item: AnnotatedShape) -> AnnotationStyle:
     pen = item.shape.pen
     brush = item.shape.brush
     symbol = item.shape.symbol
+    shape_param = item.shape.shapeparam
     pen_color = pen.color()
     brush_color = brush.color()
     symbol_pen = symbol.pen()
     symbol_brush = symbol.brush()
+    line_style = getattr(shape_param.line, "style", "SolidLine")
+    marker_name = getattr(shape_param.symbol, "marker", "Ellipse")
     return AnnotationStyle(
         stroke=StrokeStyle(
             color=pen_color.name(),
             width=pen.widthF(),
             opacity=pen_color.alphaF(),
+            dash=_PLOTPY_DASHES.get(line_style, "solid"),
         ),
         fill=FillStyle(
             color=brush_color.name() if brush_color.alphaF() > 0 else None,
             opacity=brush_color.alphaF(),
         ),
         marker=MarkerStyle(
-            symbol="circle",
+            symbol=_PLOTPY_MARKERS.get(marker_name, "circle"),
             size=symbol.size().width(),
             color=(
                 symbol_brush.color().name()
@@ -458,8 +471,17 @@ def _legacy_common(item: Any) -> dict[str, Any]:
         common["style"] = _legacy_style(item)
         title = str(item.title().text())
         if title:
+            label_param = getattr(getattr(item, "label", None), "labelparam", None)
+            anchor_name = getattr(label_param, "anchor", "TL")
+            offset = (
+                float(getattr(label_param, "xc", 0.0)),
+                float(getattr(label_param, "yc", 0.0)),
+            )
             common["label"] = AnnotationLabel(
-                text=title, visible=item.is_label_visible()
+                text=title,
+                visible=item.is_label_visible(),
+                anchor=_PLOTPY_TEXT_ANCHORS.get(anchor_name, TextAnchor.TOP_LEFT),
+                offset=offset,
             )
     return common
 
@@ -512,7 +534,7 @@ def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
             cy=(y0 + y1) / 2,
             radius_x=math.hypot(x1 - x0, y1 - y0) / 2,
             radius_y=math.hypot(x3 - x2, y3 - y2) / 2,
-            angle=math.atan2(y1 - y0, x1 - x0),
+            angle=math.atan2(y0 - y1, x0 - x1),
             **common,
         )
     elif isinstance(item, AnnotatedPolygon):
@@ -573,6 +595,9 @@ def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
     return annotation
 
 
+PlotPyMigrationReport = LegacyPlotPyMigrationReport
+
+
 def migrate_legacy_plotpy_annotations(
     obj: BaseObj, *, dry_run: bool = False
 ) -> PlotPyMigrationReport:
@@ -588,38 +613,4 @@ def migrate_legacy_plotpy_annotations(
     Returns:
         Structured migration report.
     """
-    migrated_count = 0
-    preserved_count = 0
-    diagnostics = []
-    output = []
-    for payload in obj.get_annotations():
-        if is_graphical_annotation_dict(payload) or "plotpy_json" not in payload:
-            output.append(payload)
-            continue
-        try:
-            items = _load_legacy_plotpy_payload(payload)
-        except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
-            output.append(payload)
-            preserved_count += 1
-            diagnostics.append(
-                f"Malformed PlotPy payload preserved: {type(exc).__name__}: {exc}"
-            )
-            continue
-        converted = [plotpy_item_to_annotation(item) for item in items]
-        if not items or any(annotation is None for annotation in converted):
-            output.append(payload)
-            preserved_count += 1
-            class_names = ", ".join(type(item).__name__ for item in items) or "empty"
-            diagnostics.append(f"Unsupported PlotPy payload preserved: {class_names}")
-            continue
-        output.extend(annotation_to_dict(annotation) for annotation in converted)
-        migrated_count += len(converted)
-    applied = bool(migrated_count and not dry_run)
-    if applied:
-        obj.set_annotations(output)
-    return PlotPyMigrationReport(
-        converted_count=migrated_count,
-        preserved_count=preserved_count,
-        diagnostics=tuple(diagnostics),
-        applied=applied,
-    )
+    return _migrate_legacy_plotpy_annotations(obj, dry_run=dry_run)
