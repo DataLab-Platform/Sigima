@@ -14,9 +14,13 @@ two-half-gaussian and planckian).
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pytest
+import scipy.constants
 
+from sigima.objects import PlanckParam, create_signal_from_param
 from sigima.tools.signal import fitting as fit_mod
 
 # ===========================================================================
@@ -446,3 +450,125 @@ def test_planckian_peak_is_not_at_x0(sigma: float) -> None:
     x = np.linspace(0.05, 20.0, 20001)
     y = fit_mod.PlanckianFitComputer.evaluate(x, 1.0, 1.0, sigma, 0.0)
     assert x[np.argmax(y)] == pytest.approx(1.007 / sigma, rel=0.01)
+
+
+# ===========================================================================
+# Planckian fit — physically scaled data
+# ===========================================================================
+
+
+def _blackbody(temperature: float, xmin: float, xmax: float) -> tuple:
+    """Return a blackbody spectral radiance curve (wavelengths in meters)."""
+    param = PlanckParam.create(T=temperature, xmin=xmin, xmax=xmax)
+    signal = create_signal_from_param(param)
+    return signal.x, signal.y
+
+
+def test_planckian_initial_params_match_data_peak() -> None:
+    """The initial guess must reproduce the data peak, not a 147× lower one.
+
+    ``amp`` used to be seeded with the Y range, while the model with
+    ``sigma == 1`` peaks at ``amp / (exp(5) - 1)``.
+    """
+    x, y = _blackbody(296.0, 1e-7, 1e-4)
+    computer = fit_mod.PlanckianFitComputer(x, y)
+    initial = computer.compute_initial_params()
+    y_init = fit_mod.PlanckianFitComputer.evaluate(x, **initial)
+    assert y_init.max() == pytest.approx(y.max(), rel=0.01)
+    bounds = computer.compute_bounds(**initial)
+    for name, (low, high) in zip(fit_mod.PlanckianFitComputer.PARAMS_NAMES, bounds):
+        assert low <= initial[name] <= high, f"{name} outside its bounds"
+
+
+@pytest.mark.parametrize(
+    ("temperature", "xmin", "xmax"),
+    [
+        (296.0, 1e-7, 1e-4),  # DataLab's default blackbody signal
+        (1000.0, 1e-7, 1e-4),
+        (5800.0, 1e-7, 3e-6),
+        (296.0, 1.2e-5, 1e-4),  # peak just outside the window
+    ],
+)
+@pytest.mark.parametrize("x_scale", [1.0, 1e6, 1e9])  # m, µm, nm
+def test_planckian_fit_recovers_blackbody(
+    temperature: float, xmin: float, xmax: float, x_scale: float
+) -> None:
+    """The automatic fit converges on blackbody data whatever the units.
+
+    It used to return its initial guess unchanged when the wavelength was in
+    meters. The temperature and the emissivity are derived from the
+    identifiable combinations ``sigma / x0`` and ``amp * x0**5``.
+    """
+    x, y = _blackbody(temperature, xmin, xmax)
+    y_fitted, params = fit_mod.planckian_fit(x * x_scale, y)
+    assert np.sqrt(np.mean((y - y_fitted) ** 2)) < 1e-6 * np.ptp(y)
+    x0_m = params["x0"] / x_scale
+    c2 = scipy.constants.h * scipy.constants.c / scipy.constants.k
+    assert c2 * params["sigma"] / (5 * x0_m) == pytest.approx(temperature, rel=1e-6)
+    emissivity = (
+        params["amp"] * x0_m**5 / (2 * scipy.constants.h * scipy.constants.c**2)
+    )
+    assert emissivity == pytest.approx(1.0, rel=1e-6)
+
+
+def test_planckian_fit_with_noise_and_baseline() -> None:
+    """Noise and a baseline offset do not prevent convergence."""
+    x, y = _blackbody(296.0, 1e-7, 1e-4)
+    rng = np.random.default_rng(0)
+    y_noisy = y + 0.05 * y.max() + rng.normal(0, 0.01 * y.max(), y.size)
+    y_fitted, params = fit_mod.planckian_fit(x, y_noisy)
+    assert y_fitted.max() == pytest.approx(y_noisy.max(), rel=0.03)
+    assert np.sqrt(np.mean((y_noisy - y_fitted) ** 2)) < 0.015 * np.ptp(y_noisy)
+    assert params["y0"] == pytest.approx(0.05 * y.max(), rel=0.2)
+
+
+# ===========================================================================
+# Exponential fit — X unit independence
+# ===========================================================================
+
+
+def test_exponential_fit_short_time_constant() -> None:
+    """A 1 ms time constant with X in seconds is fitted (b = -1000).
+
+    ``b`` used to be bounded to ``[-10, 10]``, which made the initial guess
+    infeasible and the fit fall back to it.
+    """
+    x = np.linspace(0, 5e-3, 500)
+    y = 2.0 * np.exp(-x / 1e-3) + 0.1
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        y_fitted, params = fit_mod.exponential_fit(x, y)
+    assert params["b"] == pytest.approx(-1000.0, rel=1e-6)
+    assert params["a"] == pytest.approx(2.0, rel=1e-6)
+    assert params["y0"] == pytest.approx(0.1, rel=1e-6)
+    assert np.allclose(y_fitted, y)
+
+
+def test_exponential_evaluate_clips_exponent_only() -> None:
+    """``evaluate`` protects against overflow without altering large rates."""
+    x = np.linspace(0, 1e-3, 11)
+    y = fit_mod.ExponentialFitComputer.evaluate(x, 1.0, -1000.0, 0.0)
+    assert np.allclose(y, np.exp(-1000.0 * x))
+    y_big = fit_mod.ExponentialFitComputer.evaluate(np.array([1e6]), 1.0, 1.0, 0.0)
+    assert np.isfinite(y_big).all()
+
+
+# ===========================================================================
+# Model formulas
+# ===========================================================================
+
+
+@pytest.mark.parametrize("fit_type", sorted(fit_mod.FIT_TYPE_MAPPING))
+def test_every_fit_type_has_a_formula(fit_type: str) -> None:
+    """Interactive fit dialogs display ``FORMULA``: none may be missing."""
+    formula = fit_mod.FIT_TYPE_MAPPING[fit_type].FORMULA
+    assert formula.startswith("y = ")
+
+
+def test_polynomial_formula_depends_on_degree() -> None:
+    """The polynomial formula lists one term per coefficient."""
+    x = np.linspace(-1.0, 1.0, 10)
+    computer = fit_mod.PolynomialFitComputer(x, x**3, degree=3)
+    assert computer.get_formula() == "y = a x<sup>3</sup> + b x<sup>2</sup> + c x + d"
+    linear = fit_mod.LinearFitComputer(x, x)
+    assert linear.get_formula() == fit_mod.LinearFitComputer.FORMULA

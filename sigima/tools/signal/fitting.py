@@ -166,6 +166,10 @@ class FitComputer:
 
     PARAMS_NAMES: tuple[str] = ()  # To be defined by subclasses
 
+    #: Model formula, as Qt rich text (HTML subset), using the parameter symbols
+    #: shown in the interactive fit dialogs. To be defined by subclasses.
+    FORMULA: str = ""
+
     def __init__(self, x: np.ndarray, y: np.ndarray) -> None:
         self.x = x
         self.y = y
@@ -173,6 +177,14 @@ class FitComputer:
     def get_params_names(self) -> tuple[str]:
         """Return the names of the parameters used in this fit."""
         return self.PARAMS_NAMES
+
+    def get_formula(self) -> str:
+        """Return the model formula as Qt rich text (HTML subset).
+
+        Subclasses whose formula depends on the instance (e.g. the polynomial
+        degree) override this method.
+        """
+        return self.FORMULA
 
     def check_params(self, **params) -> None:
         """Check that all required parameters are provided."""
@@ -324,6 +336,7 @@ class LinearFitComputer(FitComputer):
     """Linear fit computer"""
 
     PARAMS_NAMES = ("a", "b")  # slope and intercept
+    FORMULA = "y = a x + b"
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -342,6 +355,8 @@ class LinearFitComputer(FitComputer):
 class PolynomialFitComputer(FitComputer):
     """Polynomial fit computer of given degree"""
 
+    FORMULA = "y = a x<sup>n</sup> + b x<sup>n-1</sup> + …"
+
     def __init__(self, x: np.ndarray, y: np.ndarray, degree: int = 2) -> None:
         super().__init__(x, y)
         if degree < 1:
@@ -351,6 +366,18 @@ class PolynomialFitComputer(FitComputer):
     def get_params_names(self) -> tuple[str]:
         """Return the names of the parameters used in this fit."""
         return tuple(string.ascii_lowercase[: self.degree + 1])
+
+    def get_formula(self) -> str:
+        """Return the polynomial formula for the current degree."""
+        terms = []
+        for name, power in zip(self.get_params_names(), range(self.degree, -1, -1)):
+            if power == 0:
+                terms.append(name)
+            elif power == 1:
+                terms.append(f"{name} x")
+            else:
+                terms.append(f"{name} x<sup>{power}</sup>")
+        return "y = " + " + ".join(terms)
 
     @classmethod
     def infer_param_names_from_kwargs(cls, kwargs: dict) -> tuple[str, ...]:
@@ -402,6 +429,10 @@ class GaussianFitComputer(FitComputer):
     """Gaussian fit computer"""
 
     PARAMS_NAMES = ("amplitude", "sigma", "x0", "y0")
+    FORMULA = (
+        "y = y<sub>0</sub> + A "
+        "exp(-(x - x<sub>0</sub>)<sup>2</sup> / (2 σ<sup>2</sup>))"
+    )
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -436,6 +467,7 @@ class LorentzianFitComputer(FitComputer):
     """Lorentzian fit computer"""
 
     PARAMS_NAMES = ("amplitude", "sigma", "x0", "y0")
+    FORMULA = "y = y<sub>0</sub> + A / (1 + ((x - x<sub>0</sub>) / σ)<sup>2</sup>)"
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -470,6 +502,11 @@ class VoigtFitComputer(FitComputer):
     """Voigt fit computer"""
 
     PARAMS_NAMES = ("amplitude", "sigma", "x0", "y0")
+    FORMULA = (
+        "y = y<sub>0</sub> + A Re(w(z)) / Re(w(j / √2))<br>"
+        "with w(z) = exp(-z<sup>2</sup>) erfc(-j z) and "
+        "z = (x - x<sub>0</sub> + j σ) / (σ √2)"
+    )
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -505,15 +542,23 @@ class ExponentialFitComputer(FitComputer):
     """Exponential fit computer: y = a * exp(b * x) + y0"""
 
     PARAMS_NAMES = ("a", "b", "y0")
+    FORMULA = "y = a exp(b x) + y<sub>0</sub>"
+
+    #: Bound on the exponent ``b * x`` preventing overflow (``exp(709)`` is the
+    #: largest finite double)
+    MAX_EXPONENT = 700.0
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
         """Evaluate exponential function at given x values."""
         # pylint: disable=unbalanced-tuple-unpacking
         a, b, y0 = cls.args_kwargs_to_list(*args, **kwargs)
-        # Clip b to prevent overflow
-        b_clipped = np.clip(b, -50, 50)
-        return a * np.exp(b_clipped * x) + y0
+        # Clipping the exponent rather than `b` keeps the model independent of
+        # the X unit (e.g. b = -1000 1/s for a 1 ms time constant)
+        exponent = np.clip(
+            b * np.asarray(x, dtype=float), -cls.MAX_EXPONENT, cls.MAX_EXPONENT
+        )
+        return a * np.exp(exponent) + y0
 
     def compute_initial_params(self) -> dict[str, float]:
         """Compute initial parameters for exponential fitting."""
@@ -540,19 +585,28 @@ class ExponentialFitComputer(FitComputer):
         return {"a": a, "b": b, "y0": y0}
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
-        """Compute parameter bounds for exponential fitting."""
+        """Compute parameter bounds for exponential fitting.
+
+        The bound on ``b`` scales with the inverse of the X range, so that time
+        constants down to 1/20 of the X range can be fitted whatever the X unit
+        (it is ``[-10, 10]`` for X ranges of 2 or more).
+        """
         y_range = np.max(self.y) - np.min(self.y)
         y_min = np.min(self.y)
+        x_range = np.max(self.x) - np.min(self.x)
+        b_max = max(10.0, 20.0 / x_range) if x_range > 0 else 10.0
 
         return [
             (-y_range * 1000, y_range * 1000),  # a
-            (-10, 10),  # b (reasonable range to prevent overflow)
+            (-b_max, b_max),  # b
             (y_min - 0.5 * y_range, y_min + 0.5 * y_range),  # y0
         ]
 
 
 class PlanckianFitComputer(FitComputer):
     """Planckian fit computer.
+
+    The model is ``y = y0 + amp * (x / x0)**-5 / (exp(5 * x0 / (sigma * x)) - 1)``.
 
     .. warning::
 
@@ -566,9 +620,29 @@ class PlanckianFitComputer(FitComputer):
         In particular ``x0`` is **not** the peak abscissa: the maximum sits at
         approximately ``1.007 * x0 / sigma``, so the two coincide only when
         ``sigma == 1``.
+
+    Physical quantities are derived from the identifiable combinations:
+
+    - peak abscissa: ``5 * x0 / (W * sigma)`` (about ``1.007 * x0 / sigma``),
+      where ``W`` is :attr:`WIEN_W`;
+    - when ``x`` is a wavelength in meters, the exponential term matches
+      Planck's law for a temperature ``T = h * c * sigma / (5 * k_B * x0)``
+      (about ``2.878e-3 * sigma / x0`` kelvins);
+    - for the spectral radiance of a blackbody (W·sr⁻¹·m⁻³), the amplitude is
+      ``amp = 2 * h * c**2 / x0**5``: the ratio ``amp * x0**5 / (2 * h * c**2)``
+      is the emissivity (or any other scale factor of the measurement).
     """
 
     PARAMS_NAMES = ("amp", "x0", "sigma", "y0")
+    FORMULA = (
+        "y = y<sub>0</sub> + A (x / x<sub>0</sub>)<sup>-5</sup> / "
+        "(exp(5 x<sub>0</sub> / (σ x)) - 1)"
+    )
+
+    #: Wien's displacement constant for the spectral radiance per unit
+    #: wavelength: root of ``W = 5 * (1 - exp(-W))``. With ``sigma == 1``, the
+    #: model peaks at ``x = 5 * x0 / W``.
+    WIEN_W = 4.965114231744276
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -579,7 +653,8 @@ class PlanckianFitComputer(FitComputer):
             amp: amplitude scaling factor
             x0: scale parameter (see the class-level degeneracy warning: this
              is *not* the peak wavelength unless ``sigma == 1``)
-            sigma: width parameter (larger sigma = wider peak)
+            sigma: temperature factor (a larger sigma moves the peak towards
+             shorter wavelengths, like a higher temperature)
             y0: baseline offset
         """
         # pylint: disable=unbalanced-tuple-unpacking
@@ -598,21 +673,9 @@ class PlanckianFitComputer(FitComputer):
         x_valid = x[valid_mask]
 
         try:
-            # Wien's displacement law: λ_max * T = constant
-            # For a proper Planckian curve, we need:
-            # d/dx [x^(-5) / (exp(c/x) - 1)] = 0 at x = x0
-            # This gives us c = 5*x0 for the peak condition
-
-            # The exponential argument that produces peak at x0
-            wien_constant = 5.0
-
-            # Use sigma to control the effective temperature/width
-            # sigma=1.0 gives the canonical Planck curve
-            # sigma>1.0 gives broader curves (cooler)
-            # sigma<1.0 gives sharper curves (hotter)
-            temperature_factor = sigma
-
-            exp_argument = wien_constant * x0 / (x_valid * temperature_factor)
+            # Exponential argument of Planck's law, h c / (λ k_B T), written as
+            # 5 x0 / (σ λ): σ / x0 is proportional to the temperature
+            exp_argument = 5.0 * x0 / (x_valid * sigma)
 
             # Clip to prevent overflow
             exp_argument = np.clip(exp_argument, 0, 50)
@@ -641,24 +704,71 @@ class PlanckianFitComputer(FitComputer):
 
         return y
 
+    def __y_scale(self) -> float:
+        """Return a strictly positive scale of the Y data (its range if any)."""
+        dy = float(np.max(self.y) - np.min(self.y))
+        if dy > 0:
+            return dy
+        y_abs = float(np.max(np.abs(self.y)))
+        return y_abs if y_abs > 0 else 1.0
+
+    def __positive_x(self) -> np.ndarray:
+        """Return the strictly positive X values (where the model is defined)."""
+        x_pos = self.x[self.x > 0]
+        return x_pos if x_pos.size else np.array([1.0])
+
     def compute_initial_params(self) -> dict[str, float]:
-        """Compute initial parameters for Planckian fitting."""
-        dy = np.max(self.y) - np.min(self.y)
-        x_peak = self.x[np.argmax(self.y)]
-        y_min = np.min(self.y)
-        return {"amp": dy, "x0": x_peak, "sigma": 1.0, "y0": y_min}
+        """Compute initial parameters for Planckian fitting.
+
+        With ``sigma == 1``, the model peaks at ``5 * x0 / W`` with a height of
+        ``amp * (W / 5)**5 / (exp(W) - 1)`` above ``y0``: ``x0`` and ``amp`` are
+        chosen so that this peak matches the data maximum.
+        """
+        dy = self.__y_scale()
+        x_peak = float(self.x[np.argmax(self.y)])
+        if x_peak <= 0:
+            x_peak = float(np.median(self.__positive_x()))
+        w = self.WIEN_W
+        return {
+            "amp": dy * np.expm1(w) * (5.0 / w) ** 5,
+            "x0": x_peak * w / 5.0,
+            "sigma": 1.0,
+            "y0": float(np.min(self.y)),
+        }
 
     def compute_bounds(self, **initial_params) -> list[tuple[float, float]] | None:
         """Compute parameter bounds for Planckian fitting."""
+        dy = self.__y_scale()
+        amp, x0, y0 = initial_params["amp"], initial_params["x0"], initial_params["y0"]
+        x_pos = self.__positive_x()
         return [
-            (initial_params["amp"] * 0.01, initial_params["amp"] * 100),  # amp
-            (np.min(self.x), np.max(self.x)),  # x0
+            (amp * 0.01, amp * 100),  # amp
+            (0.5 * min(np.min(x_pos), x0), 2.0 * max(np.max(x_pos), x0)),  # x0
             (0.1, 5.0),  # sigma
-            (
-                initial_params["y0"] - 0.2 * initial_params["amp"],
-                initial_params["y0"] + 0.2 * initial_params["amp"],
-            ),  # y0
+            (y0 - 0.2 * dy, y0 + 0.2 * dy),  # y0
         ]
+
+    def fit(self) -> tuple[np.ndarray, FitParams]:
+        """Fit the model to the data.
+
+        The optimization runs on data normalized by the initial ``x0`` and by
+        the Y range, then the parameters are scaled back. With physical units
+        (e.g. wavelengths in meters and spectral radiances around 1e7), the raw
+        parameters span many orders of magnitude and the optimizer would stop
+        at its first iteration.
+        """
+        x_ref = self.compute_initial_params()["x0"]
+        y_ref = self.__y_scale()
+        normalized = PlanckianFitComputer(self.x / x_ref, self.y / y_ref)
+        _y_fitted, norm_params = normalized.optimize_fit_with_scipy()
+        params = {
+            "amp": norm_params["amp"] * y_ref,
+            "x0": norm_params["x0"] * x_ref,
+            "sigma": norm_params["sigma"],
+            "y0": norm_params["y0"] * y_ref,
+        }
+        fitted_y = self.evaluate(self.x, **params)
+        return fitted_y, self.create_params(fitted_y, **params)
 
 
 class TwoHalfGaussianFitComputer(FitComputer):
@@ -672,6 +782,12 @@ class TwoHalfGaussianFitComputer(FitComputer):
         "x0",
         "y0_left",
         "y0_right",
+    )
+    FORMULA = (
+        "y = y<sub>0,L</sub> + A<sub>L</sub> exp(-(x - x<sub>0</sub>)<sup>2</sup> / "
+        "(2 σ<sub>L</sub><sup>2</sup>)) if x &lt; x<sub>0</sub><br>"
+        "y = y<sub>0,R</sub> + A<sub>R</sub> exp(-(x - x<sub>0</sub>)<sup>2</sup> / "
+        "(2 σ<sub>R</sub><sup>2</sup>)) otherwise"
     )
 
     @classmethod
@@ -796,6 +912,11 @@ class DoubleExponentialFitComputer(FitComputer):
     """
 
     PARAMS_NAMES = ("x_center", "a_left", "b_left", "a_right", "b_right", "y0")
+    FORMULA = (
+        "y = a<sub>L</sub> exp(b<sub>L</sub> x) + y<sub>0</sub> "
+        "if x &lt; x<sub>c</sub><br>"
+        "y = a<sub>R</sub> exp(b<sub>R</sub> x) + y<sub>0</sub> otherwise"
+    )
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -986,18 +1107,27 @@ class MultiGaussianFitComputer(BaseMultiPeakFitComputer):
     """Multi Gaussian fit computer"""
 
     PULSE_MODEL = pulse.GaussianModel
+    FORMULA = (
+        "y = y<sub>0</sub> + Σ<sub>i</sub> A<sub>i</sub> "
+        "exp(-(x - x<sub>0,i</sub>)<sup>2</sup> / (2 σ<sub>i</sub><sup>2</sup>))"
+    )
 
 
 class MultiLorentzianFitComputer(BaseMultiPeakFitComputer):
     """Multi Lorentzian fit computer"""
 
     PULSE_MODEL = pulse.LorentzianModel
+    FORMULA = (
+        "y = y<sub>0</sub> + Σ<sub>i</sub> A<sub>i</sub> / "
+        "(1 + ((x - x<sub>0,i</sub>) / σ<sub>i</sub>)<sup>2</sup>)"
+    )
 
 
 class SinusoidalFitComputer(FitComputer):
     """Sinusoidal fit computer."""
 
     PARAMS_NAMES = ("amplitude", "frequency", "phase", "offset")
+    FORMULA = "y = A sin(2π f x + φ) + y<sub>0</sub>"
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -1048,6 +1178,7 @@ class CDFFitComputer(FitComputer):
     """Cumulative Distribution Function (CDF) fit computer"""
 
     PARAMS_NAMES = ("amplitude", "mu", "sigma", "baseline")
+    FORMULA = "y = A erf((x - μ) / (σ √2)) + y<sub>0</sub>"
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
@@ -1092,6 +1223,7 @@ class SigmoidFitComputer(FitComputer):
     """Sigmoid fit computer."""
 
     PARAMS_NAMES = ("amplitude", "k", "x0", "offset")
+    FORMULA = "y = A / (1 + exp(-k (x - x<sub>0</sub>))) + y<sub>0</sub>"
 
     @classmethod
     def evaluate(cls, x: np.ndarray, *args, **kwargs) -> np.ndarray:
