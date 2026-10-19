@@ -150,7 +150,7 @@ jobs:
           --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
 
         python -m pip install --upgrade pip
-        python -m pip install ruff pytest opencv-python-headless
+        python -m pip install ruff pytest jsonschema opencv-python-headless
 
         # Install Sigima itself, but do NOT install its pinned deps
         python -m pip install -e . --no-deps
