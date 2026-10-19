@@ -884,8 +884,20 @@ def convert_export_data(
                 dtype_info = np.iinfo(target_dtype)
                 work = work * (dtype_info.max - dtype_info.min) + dtype_info.min
                 work = np.rint(work)
-        else:
-            work = lower + normalized * (upper - lower)
+        elif gamma is not None or invert:
+            amplitude = upper - lower
+            if np.isfinite(amplitude):
+                work = lower + normalized * amplitude
+            else:
+                scale = max(abs(lower), abs(upper))
+                scaled_lower = lower / scale
+                scaled_upper = upper / scale
+                work = (
+                    scaled_lower + normalized * (scaled_upper - scaled_lower)
+                ) * scale
+                work = np.clip(work, lower, upper)
+                work[normalized <= 0.0] = lower
+                work[normalized >= 1.0] = upper
 
     if np.issubdtype(target_dtype, np.integer):
         dtype_info = np.iinfo(target_dtype)
