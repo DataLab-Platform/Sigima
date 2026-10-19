@@ -63,6 +63,8 @@ def test_format_basenames_with_indices_and_total_count():
     objs = [make_signal("sig1"), make_signal("sig2"), make_signal("sig3")]
     names = format_basenames(objs, fmt="{index:02d}_of_{count:02d}")
     assert names == ["01_of_03", "02_of_03", "03_of_03"]
+    gen_names = format_basenames((o for o in objs), fmt="{index:02d}_of_{count:02d}")
+    assert gen_names == ["01_of_03", "02_of_03", "03_of_03"]
 
 
 def test_format_basenames_with_metadata_and_axes_placeholders():
