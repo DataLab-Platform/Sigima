@@ -676,6 +676,13 @@ class PlanckParam(
 ):
     """Planck radiation law."""
 
+    # Redefining axis labels and units: the signal is a spectral radiance (per
+    # unit wavelength) as a function of the wavelength in meters
+    xlabel = gds.StringItem(_("X label"), default=_("Wavelength"))
+    xunit = gds.StringItem(_("X unit"), default="m").set_prop("display", col=1)
+    ylabel = gds.StringItem(_("Y label"), default=_("Spectral radiance"))
+    yunit = gds.StringItem(_("Y unit"), default="W·sr⁻¹·m⁻³").set_prop("display", col=1)
+
     xmin = gds.FloatItem(
         "λ<sub>min</sub>", default=1e-7, unit="m", min=0.0, nonzero=True
     )
@@ -700,10 +707,10 @@ class PlanckParam(
 
         Args:
             wavelength: Wavelength (m).
-            T: Temperature (K).
+            temperature: Temperature (K).
 
         Returns:
-            Spectral radiance (W m<sup>-2</sup> sr<sup>-1</sup> Hz<sup>-1</sup>).
+            Spectral radiance per unit wavelength (W sr<sup>-1</sup> m<sup>-3</sup>).
         """
         h = scipy.constants.h  # Planck constant (J·s)
         c = scipy.constants.c  # Speed of light (m/s)

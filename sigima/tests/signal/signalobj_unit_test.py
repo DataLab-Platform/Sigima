@@ -306,6 +306,21 @@ def test_create_signal_from_param() -> None:
     execenv.print(f"{test_create_signal_from_param.__doc__}: OK")
 
 
+def test_planck_signal_axis_labels_and_units() -> None:
+    """The blackbody signal describes its axes (wavelength, spectral radiance)."""
+    param = sigima.objects.PlanckParam()
+    assert param.xunit == "m"
+    assert param.yunit == "W·sr⁻¹·m⁻³"
+    assert param.xlabel and param.ylabel
+    signal = sigima.objects.create_signal_from_param(param)
+    assert (signal.xunit, signal.yunit) == ("m", "W·sr⁻¹·m⁻³")
+    assert (signal.xlabel, signal.ylabel) == (param.xlabel, param.ylabel)
+    # Labels and units remain editable
+    param = sigima.objects.PlanckParam.create(xlabel="λ", yunit="a.u.")
+    signal = sigima.objects.create_signal_from_param(param)
+    assert (signal.xlabel, signal.yunit) == ("λ", "a.u.")
+
+
 def test_custom_signal_preserves_edited_array() -> None:
     """Test that editing CustomSignalParam.xyarray is preserved on regeneration"""
     execenv.print(f"{test_custom_signal_preserves_edited_array.__doc__}:")

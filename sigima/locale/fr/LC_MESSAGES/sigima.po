@@ -446,6 +446,12 @@ msgstr "Coefficients"
 msgid "Domain"
 msgstr "Domaine"
 
+msgid "Physical coordinates"
+msgstr "Coordonnées physiques"
+
+msgid "Use the domain [x<sub>min</sub>, x<sub>max</sub>] × [y<sub>min</sub>, y<sub>max</sub>] as image coordinates, so that positions, widths and frequencies match the plot axes. Otherwise, the image is displayed in pixel coordinates."
+msgstr "Utiliser le domaine [x<sub>min</sub>, x<sub>max</sub>] × [y<sub>min</sub>, y<sub>max</sub>] comme coordonnées de l'image, afin que les positions, largeurs et fréquences correspondent aux axes du graphique. Sinon, l'image est affichée en coordonnées pixel."
+
 msgid "Checkerboard pattern with alternating squares"
 msgstr "Motif en damier avec des carrés alternés"
 
@@ -704,6 +710,12 @@ msgstr "Nombre total de points dans le signal"
 
 msgid "Temperature"
 msgstr "Température"
+
+msgid "Wavelength"
+msgstr "Longueur d'onde"
+
+msgid "Spectral radiance"
+msgstr "Luminance énergétique spectrale"
 
 msgid "Initial phase"
 msgstr "Phase initiale"

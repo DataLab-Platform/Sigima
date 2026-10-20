@@ -22,6 +22,7 @@ from .creation import (
     # Constants
     DEFAULT_TITLE,
     Checkerboard2DParam,
+    DomainImageParam,
     Gauss2DParam,
     # Enums
     ImageDatatypes,
@@ -70,6 +71,7 @@ __all__ = [
     "BaseSingleImageROI",
     "Checkerboard2DParam",
     "CircularROI",
+    "DomainImageParam",
     "Gauss2DParam",
     "ImageDatatypes",
     "ImageObj",
