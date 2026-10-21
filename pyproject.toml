@@ -34,8 +34,8 @@ classifiers = [
 requires-python = ">=3.9, <4"
 dependencies = [
     "guidata >= 3.16.0",
-    "NumPy >= 1.22, < 2.5",
-    "SciPy >= 1.10.1, < 1.17",
+    "NumPy >= 1.22, < 2.6",
+    "SciPy >= 1.10.1, < 1.19",
     "scikit-image >= 0.19.2, < 0.27",
     # Not built for Pyodide (WebAssembly): tifffile then reads uncompressed TIFF
     "imagecodecs >= 2024.12.30; sys_platform != 'emscripten'",
