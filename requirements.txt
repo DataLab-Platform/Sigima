@@ -1,8 +1,8 @@
 Coverage
-NumPy >= 1.22, < 2.5
+NumPy >= 1.22, < 2.6
 PyQt5
 PyWavelets >= 1.2, < 2.0
-SciPy >= 1.10.1, < 1.17
+SciPy >= 1.10.1, < 1.19
 babel
 build
 guidata >= 3.16.0
