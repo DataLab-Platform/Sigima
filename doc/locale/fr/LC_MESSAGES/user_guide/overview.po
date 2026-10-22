@@ -6,11 +6,18 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-10-22 21:34+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
 
 msgid "Overview"
 msgstr "Vue d'ensemble"
@@ -122,6 +129,36 @@ msgstr "Considérez une mesure de température au cours du temps. Avec un simple
 
 msgid "This signal object can now be processed, analyzed, saved, and loaded while preserving all its context. When you apply operations like filtering, peak detection, or statistics, the units, labels, and error bars remain attached to your data."
 msgstr "Cet objet signal peut maintenant être traité, analysé, sauvegardé et chargé tout en préservant son contexte. Lorsque vous appliquez des opérations comme le filtrage, la détection de pics ou les statistiques, les unités, étiquettes et barres d'erreur restent attachées à vos données."
+
+msgid "Experimental Data Origin"
+msgstr "Origine des données expérimentales"
+
+msgid "Readers and instrument connectors can attach a structured ``experimental_source`` entry to a signal or image. This is opt-in: creating an object does not identify its experimental origin automatically. The existing ``source`` metadata entry is unchanged."
+msgstr "Les lecteurs et connecteurs d'instruments peuvent attacher une entrée structurée ``experimental_source`` à un signal ou une image. Cette démarche est explicite : créer un objet n'identifie pas automatiquement son origine expérimentale. L'entrée de métadonnées existante ``source`` reste inchangée."
+
+msgid "The required fields identify the source kind (for example ``nexus``, ``spec`` or ``tango``) and its location (file path or instrument address). Optional fields describe the scan or dataset (``entry``), selected columns or indices (``selection``), timestamps, applied conversions and additional details. The versioned dictionary accepts JSON-compatible values only: convert NumPy scalars and arrays to Python values or lists, and timestamps to strings. Unknown fields, unsupported versions and non-finite values are rejected."
+msgstr "Les champs obligatoires identifient le type de source (par exemple ``nexus``, ``spec`` ou ``tango``) et son emplacement (chemin de fichier ou adresse d'instrument). Les champs facultatifs décrivent le scan ou jeu de données (``entry``), les colonnes ou indices sélectionnés (``selection``), les horodatages, les conversions appliquées et des détails supplémentaires. Le dictionnaire versionné n'accepte que des valeurs compatibles JSON : convertissez les scalaires et tableaux NumPy en valeurs ou listes Python, et les horodatages en chaînes. Les champs inconnus, versions non prises en charge et valeurs non finies sont rejetés."
+
+msgid "This example records a scan, then saves and restores its origin using the native signal format:"
+msgstr "Cet exemple décrit un scan, puis enregistre et restaure son origine avec le format natif des signaux :"
+
+msgid "The native image format (``.h5ima``) preserves this entry too. The setter stores a copy, and the getter returns a copy, so editing either dictionary does not alter the other. The information remains readable without the original reader or instrument connector. It identifies a measurement; it does not make the acquisition reproducible or replace the record of subsequent processing. NeXus import and declarative HDF5 mappings are provided by SigimaX, not by these metadata helpers; naming a source kind does not install its reader or connector."
+msgstr "Le format natif des images (``.h5ima``) préserve aussi cette entrée. La fonction d'affectation stocke une copie, et la fonction de lecture renvoie une copie : modifier l'un des dictionnaires ne modifie pas l'autre. Ces informations restent lisibles sans le lecteur ou connecteur d'instrument d'origine. Elles identifient une mesure ; elles ne rendent pas l'acquisition reproductible et ne remplacent pas l'enregistrement des traitements ultérieurs. L'import NeXus et les profils HDF5 déclaratifs sont fournis par SigimaX, pas par ces fonctions de métadonnées ; nommer un type de source n'installe pas son lecteur ou connecteur."
+
+msgid "Integer Precision on Import"
+msgstr "Précision des entiers à l'import"
+
+msgid "When an integer array does not fit an integer type supported by its destination object, Sigima selects a supported floating-point type with sufficient precision when possible. For example, ``uint32`` image counts up to 4 294 967 295 are preserved exactly in ``float64`` rather than clipped to ``int32`` or rounded to ``float32``. This preserves values, not necessarily the original dtype. If no supported float type can represent the integer range exactly, Sigima emits a warning; ``float64`` guarantees exact integers only up to ``+/-2**53``."
+msgstr "Lorsqu'un tableau entier ne tient dans aucun type entier pris en charge par son objet de destination, Sigima sélectionne si possible un type flottant pris en charge suffisamment précis. Par exemple, les comptages d'image ``uint32`` jusqu'à 4 294 967 295 sont préservés exactement en ``float64`` plutôt qu'écrêtés en ``int32`` ou arrondis en ``float32``. Cela préserve les valeurs, pas nécessairement le dtype original. Si aucun type flottant pris en charge ne peut représenter exactement la plage d'entiers, Sigima émet un avertissement ; ``float64`` ne garantit les entiers exacts que jusqu'à ``+/-2**53``."
+
+msgid "Sending Acquisitions to a DataLab Group"
+msgstr "Envoi d'acquisitions dans un groupe DataLab"
+
+msgid "With a running DataLab 1.4 or later, a remote client can use the UUID returned by ``add_group`` to add measured objects to that group, without looking it up by title:"
+msgstr "Avec DataLab 1.4 ou ultérieur en cours d'exécution, un client distant peut utiliser l'UUID renvoyé par ``add_group`` pour ajouter des objets mesurés à ce groupe, sans le rechercher par son titre :"
+
+msgid "This example uses the signal defined above. Older DataLab servers return ``None`` instead of a group UUID; this grouping workflow requires DataLab 1.4."
+msgstr "Cet exemple utilise le signal défini ci-dessus. Les anciens serveurs DataLab renvoient ``None`` au lieu d'un UUID de groupe ; cette procédure de regroupement nécessite DataLab 1.4."
 
 msgid "Specialized Features"
 msgstr "Fonctionnalités spécialisées"

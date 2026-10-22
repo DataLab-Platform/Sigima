@@ -116,9 +116,11 @@ Images
 Experimental data origin
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-Objects imported from experimental files or captured from instruments record their
+Readers and instrument connectors can record their objects' experimental
 origin in the ``experimental_source`` metadata entry: a versioned dictionary made of
 JSON types only, readable without the reader or connector that created it.
+This is opt-in and identifies a measurement, not a reproducible acquisition.
+See :doc:`../user_guide/overview` for a complete creation and persistence example.
 
 .. autofunction:: sigima.objects.make_experimental_source
 .. autofunction:: sigima.objects.set_experimental_source
