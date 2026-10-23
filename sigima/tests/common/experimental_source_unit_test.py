@@ -116,6 +116,8 @@ def test_set_rejects_unknown_version_and_fields() -> None:
     with pytest.raises(ValueError):
         set_experimental_source(obj, {**_spec_source(), "version": 2})
     with pytest.raises(ValueError):
+        set_experimental_source(obj, {**_spec_source(), "version": True})
+    with pytest.raises(ValueError):
         set_experimental_source(obj, {**_spec_source(), "extra": 1})
     assert get_experimental_source(obj) is None
 
@@ -137,7 +139,8 @@ def _assert_json_types(value) -> None:
     """Assert that value is made of Python JSON types only."""
     if isinstance(value, dict):
         for key, item in value.items():
-            assert type(key) is str
+            # Exact type: str subclasses, such as numpy.str_, are not JSON types
+            assert type(key) is str  # pylint: disable=unidiomatic-typecheck
             _assert_json_types(item)
     elif isinstance(value, list):
         for item in value:
@@ -167,7 +170,8 @@ def test_source_survives_file_round_trip() -> None:
     for obj in _round_trip(signal, image):
         source = get_experimental_source(obj)
         assert source == _spec_source()
-        assert type(source["version"]) is int
+        version = source["version"]
+        assert isinstance(version, int) and not isinstance(version, bool)
         _assert_json_types(source)
         _assert_json_types(obj.metadata[EXPERIMENTAL_SOURCE_KEY])
         json.dumps(source)

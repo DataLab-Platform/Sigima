@@ -105,6 +105,26 @@ def _normalize(value: Any, where: str = "", strict: bool = True) -> Any:
             _normalize(item, f"{where}[{index}]", strict)
             for index, item in enumerate(value)
         ]
+    return _normalize_scalar(value, where, strict)
+
+
+def _normalize_scalar(value: Any, where: str, strict: bool) -> Any:
+    """Return a copy of a value that is neither a dictionary nor a sequence, made
+    of Python JSON types.
+
+    Args:
+        value: value to normalize
+        where: path of the value in the source, for error messages
+        strict: if True, raise on values that HDF5 files do not restore exactly;
+         otherwise, convert NumPy values and bytes, and copy other values as is
+
+    Returns:
+        Normalized copy of value
+
+    Raises:
+        TypeError: if the value has an unsupported type (strict mode)
+        ValueError: if the value is invalid (strict mode)
+    """
     if isinstance(value, np.generic):
         value = value.item()
     if not strict and isinstance(value, bytes):
@@ -143,7 +163,12 @@ def _validate(source: dict[str, Any]) -> dict[str, Any]:
         raise TypeError("Experimental source must be a dictionary")
     source = _normalize(source)
     version = source.get("version")
-    if type(version) is not int or version != EXPERIMENTAL_SOURCE_VERSION:
+    # bool is an int subclass: True must not be taken for version 1
+    if (
+        isinstance(version, bool)
+        or not isinstance(version, int)
+        or version != EXPERIMENTAL_SOURCE_VERSION
+    ):
         raise ValueError(f"Unsupported experimental source version: {version!r}")
     _check_text("kind", source.get("kind"))
     _check_text("location", source.get("location"))
