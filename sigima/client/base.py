@@ -312,7 +312,7 @@ class SimpleAbstractDLControl(abc.ABC):
     @abc.abstractmethod
     def add_group(
         self, title: str, panel: str | None = None, select: bool = False
-    ) -> str:
+    ) -> str | None:
         """Add group to DataLab.
 
         Args:
@@ -742,7 +742,7 @@ class SimpleBaseProxy(SimpleAbstractDLControl, metaclass=abc.ABCMeta):
 
     def add_group(
         self, title: str, panel: str | None = None, select: bool = False
-    ) -> str:
+    ) -> str | None:
         """Add group to DataLab.
 
         Args:
