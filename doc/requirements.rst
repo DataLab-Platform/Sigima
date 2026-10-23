@@ -8,16 +8,16 @@ The `sigima` package requires the following Python modules:
       - Version
       - Summary
     * - Python
-      - >=3.9, <4
+      - >=3.10, <4
       - Python programming language
     * - guidata
       - >= 3.16.0
       - Automatic GUI generation for easy dataset editing and display
     * - NumPy
-      - >= 1.22, < 2.5
+      - >= 1.22, < 2.6
       - Fundamental package for array computing in Python
     * - SciPy
-      - >= 1.10.1, < 1.17
+      - >= 1.10.1, < 1.19
       - Fundamental algorithms for scientific computing in Python
     * - scikit-image
       - >= 0.19.2, < 0.27
@@ -35,7 +35,7 @@ The `sigima` package requires the following Python modules:
       - >= 21.3
       - Core utilities for Python packages
     * - typing-extensions
-      - >= 4.0
+      - >= 4.0 (python_version < '3.11')
       - Backported and Experimental Type Hints for Python 3.9+
     * - makefun
       - >= 1.13.1

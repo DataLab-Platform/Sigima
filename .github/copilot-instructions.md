@@ -32,7 +32,7 @@ filtered_y = filtering.apply_moving_average(y, n=5)
 
 ### Technology Stack
 
-- **Python**: 3.9+ (`from __future__ import annotations`)
+- **Python**: 3.10+ (`from __future__ import annotations`)
 - **Core**: NumPy (≥1.22), SciPy (≥1.10.1), scikit-image (≥0.19.2), pandas (≥1.4)
 - **GUI Parameters**: guidata (≥3.13) for `DataSet` parameter classes
 - **Optional**: opencv-python-headless (≥4.8.1.78)

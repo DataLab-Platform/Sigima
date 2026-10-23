@@ -2,6 +2,10 @@
 
 ## Sigima Version 1.4.0 ##
 
+### Requirements ###
+
+* Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release.
+
 ### ✨ New features since version 1.3.0 ###
 
 * **Origin of experimental data**: Objects imported from experimental files or captured from instruments can record where their data came from in the new `experimental_source` metadata entry: source kind, file path or instrument address, scan or dataset, selected part, timestamps, applied conversions and other details. The entry is a versioned dictionary made of JSON types only, so it remains readable without the reader or connector that created it, and it is restored with the same Python types by Sigima's native signal and image files (and by DataLab workspaces): a restored entry can be serialized to JSON or stored again. Values are limited to what HDF5 files restore exactly: `None` and keys that are not plain names are rejected, and NumPy scalars are converted to Python values. It is created and accessed with `make_experimental_source`, `set_experimental_source` and `get_experimental_source` (`sigima.objects`). The existing `source` metadata entry is unchanged.

@@ -31,5 +31,5 @@ sphinx-copybutton
 sphinx-gallery
 sphinx_design
 sphinx_intl
-typing-extensions >= 4.0
+typing-extensions >= 4.0; python_version < '3.11'
 wheel

@@ -99,7 +99,7 @@ _ARTIFACT_CLASSES: tuple[tuple[type, str], ...] = (
 
 
 def _is_class(tp: Any) -> bool:
-    # On Python 3.9, isinstance(list[X], type) is True: exclude generic aliases.
+    # Exclude generic aliases before passing a type to issubclass.
     return isinstance(tp, type) and typing.get_origin(tp) is None
 
 
