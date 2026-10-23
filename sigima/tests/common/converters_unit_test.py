@@ -37,6 +37,30 @@ class TestConvertArrayToValidDType:
         assert result.dtype == np.int32
         np.testing.assert_array_almost_equal(result, arr, decimal=6)
 
+    @pytest.mark.parametrize(
+        "values, dtype, valid_dtypes, expected",
+        [
+            ([0, 2**32 - 1], np.uint32, ImageObj.VALID_DTYPES, np.float64),
+            ([0, 2**24 + 1], np.int32, SignalObj.VALID_DTYPES, np.float64),
+            ([0, 2**53], np.uint64, ImageObj.VALID_DTYPES, np.float64),
+            ([-(2**53), 7], np.int64, SignalObj.VALID_DTYPES, np.float64),
+        ],
+        ids=["uint32-max", "int32-above-float32", "uint64-2^53", "int64-neg-2^53"],
+    )
+    def test_int_to_float_is_exact(self, values, dtype, valid_dtypes, expected) -> None:
+        """Integers outside the supported integer types are converted exactly."""
+        arr = np.array(values, dtype=dtype)
+        result = converters.convert_array_to_valid_dtype(arr, valid_dtypes)
+        assert result.dtype == expected
+        assert [int(value) for value in result] == values
+
+    def test_int_to_float_rounding_warns(self) -> None:
+        """Integers beyond the exact range of float64 are rounded with a warning."""
+        arr = np.array([0, 2**53 + 1], dtype=np.uint64)
+        with pytest.warns(UserWarning, match="cannot be represented exactly"):
+            result = converters.convert_array_to_valid_dtype(arr, ImageObj.VALID_DTYPES)
+        assert result.dtype == np.float64
+
     def test_float_arrays(self) -> None:
         """Test conversion of float numpy arrays."""
         arr = np.array([1.1, 2.2, 3.3], dtype=np.float32)

@@ -100,6 +100,101 @@ Consider a temperature measurement over time. With a simple NumPy array, you jus
 
 This signal object can now be processed, analyzed, saved, and loaded while preserving all its context. When you apply operations like filtering, peak detection, or statistics, the units, labels, and error bars remain attached to your data.
 
+Experimental Data Origin
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Readers and instrument connectors can attach a structured ``experimental_source``
+entry to a signal or image. This is opt-in: creating an object does not identify
+its experimental origin automatically. The existing ``source`` metadata entry
+is unchanged.
+
+The required fields identify the source kind (for example ``nexus``, ``spec``
+or ``tango``) and its location (file path or instrument address). Optional
+fields describe the scan or dataset (``entry``), selected columns or indices
+(``selection``), timestamps, applied conversions and additional details.
+The versioned dictionary accepts the JSON values that HDF5 files restore
+exactly: dictionaries with non-empty string keys (without ``/`` and not
+starting with ``__``), lists, strings, booleans, 64-bit integers and finite
+numbers. ``None`` (JSON ``null``) is rejected, because HDF5 files would restore
+it as an empty string: readers use ``"."`` for a dimension without axis, as
+NeXus does. NumPy scalars and tuples are converted to Python values and lists;
+convert arrays to lists and timestamps to strings. Unknown fields, unsupported
+versions and non-finite values are rejected.
+
+This example records a scan, then saves and restores its origin using the
+native signal format:
+
+.. code-block:: python
+
+    from pathlib import Path
+    from tempfile import TemporaryDirectory
+
+    import numpy as np
+    import sigima.io
+    from sigima.objects import (
+        create_signal,
+        get_experimental_source,
+        make_experimental_source,
+        set_experimental_source,
+    )
+
+    signal = create_signal(
+        "Transmission", np.array([8.0, 8.1, 8.2]), np.array([10.0, 7.0, 4.0])
+    )
+    signal.xunit = "keV"
+    source = make_experimental_source(
+        "spec",
+        "scan.spec",
+        entry="12.1",
+        selection={"x": "Energy", "y": "I0"},
+        timestamps={"source": "2026-10-20T08:15:00+02:00"},
+        details={"command": "ascan energy 8 8.2 2 0.1"},
+    )
+    set_experimental_source(signal, source)
+    with TemporaryDirectory() as directory:
+        filename = str(Path(directory) / "transmission.h5sig")
+        sigima.io.write_signal(filename, signal)
+        restored = sigima.io.read_signal(filename)
+        assert get_experimental_source(restored) == source
+
+The native image format (``.h5ima``) preserves this entry too, with its Python
+types: a restored source can be serialized to JSON or stored again as is. The
+setter stores a copy, and the getter returns a copy, so editing either
+dictionary does not alter the other. The information remains readable without the original reader
+or instrument connector. It identifies a measurement; it does not make the
+acquisition reproducible or replace the record of subsequent processing.
+NeXus import and declarative HDF5 mappings are provided by SigimaX, not by these
+metadata helpers; naming a source kind does not install its reader or connector.
+
+Integer Precision on Import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When an integer array does not fit an integer type supported by its destination
+object, Sigima selects a supported floating-point type with sufficient precision
+when possible. For example, ``uint32`` image counts up to 4 294 967 295 are
+preserved exactly in ``float64`` rather than clipped to ``int32`` or rounded
+to ``float32``. This preserves values, not necessarily the original dtype.
+If no supported float type can represent the integer range exactly, Sigima
+emits a warning; ``float64`` guarantees exact integers only up to ``+/-2**53``.
+
+Sending Acquisitions to a DataLab Group
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+With a running DataLab 1.4 or later, a remote client can use the UUID returned by
+``add_group`` to add measured objects to that group, without looking it up by
+title:
+
+.. code-block:: python
+
+    from sigima.client import SimpleRemoteProxy
+
+    proxy = SimpleRemoteProxy()
+    group_id = proxy.add_group("Scan 12.1", panel="signal")
+    proxy.add_object(signal, group_id=group_id)
+
+This example uses the signal defined above. Older DataLab servers return
+``None`` instead of a group UUID; this grouping workflow requires DataLab 1.4.
+
 Specialized Features
 ^^^^^^^^^^^^^^^^^^^^
 
