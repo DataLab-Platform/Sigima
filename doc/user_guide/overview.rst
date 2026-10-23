@@ -112,9 +112,14 @@ The required fields identify the source kind (for example ``nexus``, ``spec``
 or ``tango``) and its location (file path or instrument address). Optional
 fields describe the scan or dataset (``entry``), selected columns or indices
 (``selection``), timestamps, applied conversions and additional details.
-The versioned dictionary accepts JSON-compatible values only: convert NumPy
-scalars and arrays to Python values or lists, and timestamps to strings.
-Unknown fields, unsupported versions and non-finite values are rejected.
+The versioned dictionary accepts the JSON values that HDF5 files restore
+exactly: dictionaries with non-empty string keys (without ``/`` and not
+starting with ``__``), lists, strings, booleans, 64-bit integers and finite
+numbers. ``None`` (JSON ``null``) is rejected, because HDF5 files would restore
+it as an empty string: readers use ``"."`` for a dimension without axis, as
+NeXus does. NumPy scalars and tuples are converted to Python values and lists;
+convert arrays to lists and timestamps to strings. Unknown fields, unsupported
+versions and non-finite values are rejected.
 
 This example records a scan, then saves and restores its origin using the
 native signal format:
@@ -152,9 +157,10 @@ native signal format:
         restored = sigima.io.read_signal(filename)
         assert get_experimental_source(restored) == source
 
-The native image format (``.h5ima``) preserves this entry too. The setter stores
-a copy, and the getter returns a copy, so editing either dictionary does not
-alter the other. The information remains readable without the original reader
+The native image format (``.h5ima``) preserves this entry too, with its Python
+types: a restored source can be serialized to JSON or stored again as is. The
+setter stores a copy, and the getter returns a copy, so editing either
+dictionary does not alter the other. The information remains readable without the original reader
 or instrument connector. It identifies a measurement; it does not make the
 acquisition reproducible or replace the record of subsequent processing.
 NeXus import and declarative HDF5 mappings are provided by SigimaX, not by these

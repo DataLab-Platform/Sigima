@@ -35,6 +35,7 @@ from numpy import ma
 from sigima.config import _
 from sigima.objects import base
 from sigima.objects.image.roi import ImageROI
+from sigima.objects.source import normalize_experimental_source_metadata
 from sigima.tools.datatypes import clip_astype
 
 
@@ -89,6 +90,15 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
         gds.DataSet.__init__(self, title, comment, icon)
         base.BaseObj.__init__(self)
         self._dicom_template = None
+
+    def deserialize(self, reader) -> None:
+        """Deserialize object, restoring the JSON types of its experimental source
+
+        Args:
+            reader: guidata reader (HDF5, JSON or INI)
+        """
+        super().deserialize(reader)
+        normalize_experimental_source_metadata(self.metadata)
 
     @staticmethod
     def get_roi_class() -> Type[ImageROI]:
