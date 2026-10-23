@@ -27,8 +27,8 @@ msgstr "Résumé"
 msgid "Python"
 msgstr "Python"
 
-msgid ">=3.9, <4"
-msgstr ">=3.9, <4"
+msgid ">=3.10, <4"
+msgstr ">=3.10, <4"
 
 msgid "Python programming language"
 msgstr "Langage de programmation Python"
@@ -108,8 +108,8 @@ msgstr "Utilitaires de base pour les paquets Python"
 msgid "typing-extensions"
 msgstr "typing-extensions"
 
-msgid ">= 4.0"
-msgstr ">= 4.0"
+msgid ">= 4.0 (python_version < '3.11')"
+msgstr ">= 4.0 (python_version < '3.11')"
 
 msgid "Backported and Experimental Type Hints for Python 3.9+"
 msgstr "Extensions de typage rétroportées et expérimentales pour Python 3.9+"
