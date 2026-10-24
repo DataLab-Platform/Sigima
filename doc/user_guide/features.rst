@@ -278,9 +278,12 @@ Region of Interest (ROI)
    Image pixels are located by their centers: the pixel of column ``i`` and row
    ``j`` is centered on ``(x0 + i*dx, y0 + j*dy)``, or on
    ``(xcoords[i], ycoords[j])`` for non-uniform coordinates. Image ROIs select
-   the pixels whose centers lie inside their shape, bounds included for
-   rectangles. A rectangular ROI defined in pixel indices covers its pixels up to
-   their outer edges.
+   the pixels whose centers lie inside their shape, boundary included. A
+   rectangular ROI defined in pixel indices covers its pixels up to their outer
+   edges. Flips, quarter turns and transpositions move ROIs, annotations and
+   analysis results with the pixels: exactly for uniform coordinates; for
+   non-uniform coordinates, circles, ellipses and polygons are moved
+   approximately when the pixels are reversed along a non-uniform axis.
 
 Calibration
 ~~~~~~~~~~~
