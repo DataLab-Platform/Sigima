@@ -140,6 +140,38 @@ def test_signal_product() -> None:
 
 
 @pytest.mark.parametrize(
+    "factors, expected_dy",
+    [
+        # One zero factor: σ = σ_a |b| (regression: NaN, i.e. no uncertainty)
+        ([(0.0, 1.0), (2.0, 0.1)], 2.0),
+        # Several zero factors: every first-order term vanishes
+        ([(0.0, 1.0), (0.0, 1.0), (2.0, 0.1)], 0.0),
+        # Negative factors
+        ([(-3.0, 0.2), (2.0, 0.1)], 0.5),
+        # Exact factors
+        ([(-3.0, 0.0), (2.0, 0.0)], 0.0),
+        # Tiny factors, whose squared terms would underflow
+        ([(1e-150, 1e-151), (1e-150, 1e-151)], np.sqrt(2.0) * 1e-301),
+        # Complex factors: moduli are used
+        ([(3.0j, 0.2), (2.0, 0.1)], 0.5),
+    ],
+)
+def test_signal_product_uncertainty(factors, expected_dy) -> None:
+    """First-order uncertainty of a product, including where a factor is zero."""
+    x = np.arange(3.0)
+    signals = [
+        sigima.objects.create_signal(
+            f"s{i}", x, np.full(3, value), dy=np.full(3, uncertainty)
+        )
+        for i, (value, uncertainty) in enumerate(factors)
+    ]
+    for order in itertools.permutations(range(len(signals))):
+        result = sigima.proc.signal.product([signals[i] for i in order])
+        assert result.dy is not None, order
+        assert np.allclose(np.real(result.dy), expected_dy, rtol=1e-12, atol=0.0)
+
+
+@pytest.mark.parametrize(
     "func, oracle",
     [
         (sigima.proc.signal.addition, lambda arr: np.sum(arr, axis=0)),
