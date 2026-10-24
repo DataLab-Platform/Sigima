@@ -76,6 +76,15 @@ def test_calibration_axis_z() -> None:
     assert np.allclose(out.data, 1.0 + 2.0 * img.data)
 
 
+def test_calibration_axis_z_keeps_complex_values() -> None:
+    """Calibrating the ``z`` axis of a complex image keeps its imaginary parts."""
+    img = create_image("complex", np.full((3, 4), 1 + 2j, dtype=np.complex64))
+    p = sigima.params.XYZCalibrateParam.create(axis="z", a0=1.0, a1=2.0, a2=0.0, a3=0.0)
+    out = igeom.calibration(img, p)
+    assert out.data.dtype == np.complex128
+    assert np.allclose(out.data, 3 + 4j)
+
+
 def test_calibration_axis_x_uniform() -> None:
     """Calibrating the ``x`` axis on a uniform-coords image populates
     ``xcoords`` with one value per column."""

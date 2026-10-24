@@ -643,6 +643,23 @@ def test_resampling_identity_keeps_every_pixel(
         check_array_result(f"Identity dxy {method}", dst_dxy.data, src.data, atol=1e-9)
 
 
+@pytest.mark.parametrize("fill_value", [None, 0.0], ids=["default fill", "fill 0"])
+def test_resampling_identity_keeps_complex_values(fill_value: float | None) -> None:
+    """Resampling a complex image onto its own grid keeps its complex values.
+
+    Regression: with the default (NaN) fill value, complex data was converted to
+    real numbers, discarding the imaginary parts.
+    """
+    data = (np.arange(12.0) + 1j * np.arange(12.0)[::-1]).reshape(3, 4)
+    src = sigima.objects.create_image("complex", data)
+    p = sigima.params.Resampling2DParam.create(
+        mode="shape", width=4, height=3, fill_value=fill_value
+    )
+    dst = sigima.proc.image.resampling(src, p)
+    assert np.iscomplexobj(dst.data)
+    check_array_result("Complex identity", dst.data, data, atol=1e-9)
+
+
 def test_resampling_linear_matches_affine_ramp() -> None:
     """Linear resampling of an affine ramp is exact at every output pixel center."""
     src = _ramp_image(5, 7, x0=1.0, y0=-2.0, dx=0.5, dy=0.25)
