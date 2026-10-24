@@ -365,32 +365,38 @@ def transpose(src: ImageObj) -> ImageObj:
 
 
 class Resampling2DParam(gds.DataSet):
-    """Resample parameters for 2D images"""
+    """Resample parameters for 2D images
+
+    ``xmin``/``xmax`` and ``ymin``/``ymax`` are the coordinates of the centers of
+    the first and last output pixels, like :attr:`ImageObj.xmin` and
+    :attr:`ImageObj.xmax`: with the default values, the output grid is the source
+    grid.
+    """
 
     # Output coordinate system
     xmin = gds.FloatItem(
         "X<sub>min</sub>",
         default=None,
         allow_none=True,
-        help=_("Minimum X-coordinate of the output image"),
+        help=_("X-coordinate of the center of the first output pixel"),
     )
     xmax = gds.FloatItem(
         "X<sub>max</sub>",
         default=None,
         allow_none=True,
-        help=_("Maximum X-coordinate of the output image"),
+        help=_("X-coordinate of the center of the last output pixel"),
     )
     ymin = gds.FloatItem(
         "Y<sub>min</sub>",
         default=None,
         allow_none=True,
-        help=_("Minimum Y-coordinate of the output image"),
+        help=_("Y-coordinate of the center of the first output pixel"),
     )
     ymax = gds.FloatItem(
         "Y<sub>max</sub>",
         default=None,
         allow_none=True,
-        help=_("Maximum Y-coordinate of the output image"),
+        help=_("Y-coordinate of the center of the last output pixel"),
     )
 
     # Mode selection
@@ -448,40 +454,35 @@ class Resampling2DParam(gds.DataSet):
         """Validate output bounds and the active sampling mode."""
         if not context or not isinstance(context[0], ImageObj):
             raise ValueError("resampling validation requires a source ImageObj")
-        src = context[0]
-        xmin = self.xmin if self.xmin is not None else src.x0
-        xmax = self.xmax if self.xmax is not None else src.x0 + src.width
-        ymin = self.ymin if self.ymin is not None else src.y0
-        ymax = self.ymax if self.ymax is not None else src.y0 + src.height
+        xmin, xmax, ymin, ymax = _resampling_bounds(context[0], self)
         x_extent = xmax - xmin
         y_extent = ymax - ymin
-        if x_extent == 0.0 or y_extent == 0.0:
-            raise ValueError("resampling coordinate extents must be nonzero")
 
         if self.mode == "dxy":
             if self.dx is None or self.dy is None:
                 raise ValueError("dx and dy must be specified in pixel size mode")
             if self.dx == 0.0 or self.dy == 0.0:
                 raise ValueError("dx and dy must be nonzero in pixel size mode")
-            x_sign_mismatch = (x_extent < 0.0) != (self.dx < 0.0)
-            y_sign_mismatch = (y_extent < 0.0) != (self.dy < 0.0)
+            x_sign_mismatch = x_extent != 0.0 and (x_extent < 0.0) != (self.dx < 0.0)
+            y_sign_mismatch = y_extent != 0.0 and (y_extent < 0.0) != (self.dy < 0.0)
             if x_sign_mismatch or y_sign_mismatch:
                 raise ValueError("pixel sizes must have the same sign as their extents")
         elif self.width is None or self.height is None:
             raise ValueError("width and height must be specified in shape mode")
         elif self.width < 1 or self.height < 1:
             raise ValueError("width and height must be at least 1 in shape mode")
+        elif (x_extent == 0.0 and self.width > 1) or (
+            y_extent == 0.0 and self.height > 1
+        ):
+            raise ValueError(
+                "resampling coordinate extents must be nonzero "
+                "for more than one output pixel"
+            )
 
     def update_from_obj(self, obj: ImageObj) -> None:
         """Update parameters from an image object."""
-        if self.xmin is None:
-            self.xmin = obj.x0
-        if self.xmax is None:
-            self.xmax = obj.x0 + obj.width
-        if self.ymin is None:
-            self.ymin = obj.y0
-        if self.ymax is None:
-            self.ymax = obj.y0 + obj.height
+        xmin, xmax, ymin, ymax = _resampling_bounds(obj, self)
+        self.xmin, self.xmax, self.ymin, self.ymax = xmin, xmax, ymin, ymax
         if self.dx is None:
             self.dx = obj.dx
         if self.dy is None:
@@ -490,6 +491,61 @@ class Resampling2DParam(gds.DataSet):
             self.width = obj.data.shape[1]
         if self.height is None:
             self.height = obj.data.shape[0]
+
+
+def _resampling_bounds(
+    src: ImageObj, p: Resampling2DParam
+) -> tuple[float, float, float, float]:
+    """Return the output bounds, the missing ones being those of the source.
+
+    Bounds are the coordinates of the first and last pixel centers: by default,
+    the output grid is the source grid.
+
+    Args:
+        src: source image
+        p: resampling parameters
+
+    Returns:
+        Tuple (xmin, xmax, ymin, ymax)
+    """
+    nrows, ncols = src.data.shape
+    xmin = p.xmin if p.xmin is not None else src.x0
+    xmax = p.xmax if p.xmax is not None else src.x0 + (ncols - 1) * src.dx
+    ymin = p.ymin if p.ymin is not None else src.y0
+    ymax = p.ymax if p.ymax is not None else src.y0 + (nrows - 1) * src.dy
+    return xmin, xmax, ymin, ymax
+
+
+def _resampling_axis(
+    vmin: float,
+    vmax: float,
+    count: int | None,
+    step: float | None,
+    default_step: float,
+) -> tuple[np.ndarray, float]:
+    """Return the pixel center coordinates and pixel size of one output axis.
+
+    Args:
+        vmin: coordinate of the first pixel center
+        vmax: coordinate of the last pixel center
+        count: number of pixels (output shape mode), or None
+        step: pixel size (pixel size mode), or None
+        default_step: pixel size of a single-pixel output over an empty extent
+
+    Returns:
+        Tuple (coordinates, pixel size)
+    """
+    if step is not None:
+        # Pixel size mode: the pixel size is exact, the last pixel center is the
+        # last one not beyond ``vmax`` (rounding absorbs floating-point noise)
+        count = int(np.floor(np.round((vmax - vmin) / step, 9))) + 1
+        return vmin + np.arange(count) * step, step
+    assert count is not None
+    if count == 1:
+        size = vmax - vmin if vmax != vmin else default_step
+        return np.array([(vmin + vmax) / 2.0]), size
+    size = (vmax - vmin) / (count - 1)
+    return vmin + np.arange(count) * size, size
 
 
 @computation_function(
@@ -513,59 +569,35 @@ def resampling(src: ImageObj, p: Resampling2DParam) -> ImageObj:
     if not src.is_uniform_coords:
         raise ValueError("Source image must have uniform coordinates for resampling")
 
-    # Set output range - use source image bounds if not specified
-    output_xmin = p.xmin if p.xmin is not None else src.x0
-    output_xmax = p.xmax if p.xmax is not None else src.x0 + src.width
-    output_ymin = p.ymin if p.ymin is not None else src.y0
-    output_ymax = p.ymax if p.ymax is not None else src.y0 + src.height
-
-    # Calculate output grid dimensions and spacing
-    output_width_phys = output_xmax - output_xmin
-    output_height_phys = output_ymax - output_ymin
+    # Output bounds are the coordinates of the first and last pixel centers
+    output_xmin, output_xmax, output_ymin, output_ymax = _resampling_bounds(src, p)
 
     # Determine output grid parameters
     method: Interpolation2DMethod = p.method
+    fill_suffix = f", fill_value={p.fill_value}" if p.fill_value is not None else ""
     if p.mode == "dxy":
-        # Calculate dimensions from pixel sizes
         if p.dx is None or p.dy is None:
             raise ValueError("dx and dy must be specified in pixel size mode")
-        output_width = int(np.ceil(output_width_phys / p.dx))
-        output_height = int(np.ceil(output_height_phys / p.dy))
-        output_dx = p.dx
-        output_dy = p.dy
-        fill_suffix = f", fill_value={p.fill_value}" if p.fill_value is not None else ""
+        out_x, output_dx = _resampling_axis(
+            output_xmin, output_xmax, None, p.dx, src.dx
+        )
+        out_y, output_dy = _resampling_axis(
+            output_ymin, output_ymax, None, p.dy, src.dy
+        )
         suffix = f"method={method.value}, dx={p.dx:.3f}, dy={p.dy:.3f}{fill_suffix}"
     else:
-        # Use specified shape
         if p.width is None or p.height is None:
             raise ValueError("width and height must be specified in shape mode")
-        output_width = p.width
-        output_height = p.height
-        output_dx = output_width_phys / p.width if p.width > 0 else src.dx
-        output_dy = output_height_phys / p.height if p.height > 0 else src.dy
-        fill_suffix = f", fill_value={p.fill_value}" if p.fill_value is not None else ""
+        out_x, output_dx = _resampling_axis(
+            output_xmin, output_xmax, p.width, None, src.dx
+        )
+        out_y, output_dy = _resampling_axis(
+            output_ymin, output_ymax, p.height, None, src.dy
+        )
         suffix = f"method={method.value}, size=({p.width}x{p.height}){fill_suffix}"
 
     # Create destination image
     dst = dst_1_to_1(src, "resample", suffix)
-
-    # Output coordinates (physical) - ensure we sample pixel centers, not boundaries
-    # For an image spanning [xmin, xmax], we want to sample at pixel centers
-    # The pixel centers should be distributed within the range,
-    # not including the exact endpoints
-    if output_width > 1:
-        out_x = np.linspace(
-            output_xmin + output_dx / 2, output_xmax - output_dx / 2, output_width
-        )
-    else:
-        out_x = np.array([(output_xmin + output_xmax) / 2])
-
-    if output_height > 1:
-        out_y = np.linspace(
-            output_ymin + output_dy / 2, output_ymax - output_dy / 2, output_height
-        )
-    else:
-        out_y = np.array([(output_ymin + output_ymax) / 2])
 
     # Create meshgrids
     out_X, out_Y = np.meshgrid(out_x, out_y, indexing="xy")
@@ -580,9 +612,16 @@ def resampling(src: ImageObj, p: Resampling2DParam) -> ImageObj:
     else:
         order = 1  # fallback to linear
 
-    # Convert physical coordinates to source image indices
+    # Convert physical coordinates to source image indices (pixel ``i`` is
+    # centered on ``x0 + i * dx``); indices within rounding noise of an integer
+    # are snapped to it, so that grid points coinciding with source pixels are
+    # neither interpolated nor considered out of bounds on the edges
     src_i = (out_X - src.x0) / src.dx
     src_j = (out_Y - src.y0) / src.dy
+    for indices in (src_i, src_j):
+        rounded = np.round(indices)
+        snap = np.isclose(indices, rounded, rtol=0.0, atol=1e-9)
+        indices[snap] = rounded[snap]
 
     # Perform interpolation using map_coordinates
     # Note: map_coordinates expects (j, i) order (row, col)
@@ -601,11 +640,11 @@ def resampling(src: ImageObj, p: Resampling2DParam) -> ImageObj:
     # Interpolate
     resampled_data = spi.map_coordinates(
         input_data, coordinates, order=order, mode="constant", cval=cval, prefilter=True
-    ).reshape(output_height, output_width)
+    ).reshape(out_y.size, out_x.size)
 
     # Set output data and coordinate system
     dst.data = resampled_data
-    dst.set_uniform_coords(output_dx, output_dy, output_xmin, output_ymin)
+    dst.set_uniform_coords(output_dx, output_dy, out_x[0], out_y[0])
 
     return dst
 

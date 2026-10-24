@@ -383,76 +383,70 @@ def test_image_resampling() -> None:
     execenv.print("*** Testing image resampling")
 
     # Create a test image
-    ima1 = get_test_image(
-        "flower.npy"
-    )  # Test 1: Identity resampling (same dimensions and coordinate range)
+    ima1 = get_test_image("flower.npy")
+    nrows, ncols = ima1.data.shape
+    xlast = ima1.x0 + (ncols - 1) * ima1.dx
+    ylast = ima1.y0 + (nrows - 1) * ima1.dy
+
+    # Test 1: Identity resampling (same grid): every pixel is kept
     p1 = sigima.params.Resampling2DParam.create(
         mode="shape",
-        width=ima1.data.shape[1],
-        height=ima1.data.shape[0],
-        xmin=ima1.x0,
-        xmax=ima1.x0 + ima1.width,
-        ymin=ima1.y0,
-        ymax=ima1.y0 + ima1.height,
+        width=ncols,
+        height=nrows,
         method=sigima.enums.Interpolation2DMethod.LINEAR,
     )
     p1.update_from_obj(ima1)
     dst1 = sigima.proc.image.resampling(ima1, p1)
 
-    # Should be very close to original (allowing for small interpolation differences)
+    check_array_result(
+        "Identity resampling", dst1.data, ima1.data.astype(float), rtol=0, atol=0
+    )
     check_scalar_result("Identity resampling X0", dst1.x0, ima1.x0)
     check_scalar_result("Identity resampling Y0", dst1.y0, ima1.y0)
-    check_scalar_result(
-        "Identity resampling shape[0]", dst1.data.shape[0], ima1.data.shape[0]
-    )
-    check_scalar_result(
-        "Identity resampling shape[1]", dst1.data.shape[1], ima1.data.shape[1]
-    )
+    check_scalar_result("Identity resampling dx", dst1.dx, ima1.dx)
+    check_scalar_result("Identity resampling dy", dst1.dy, ima1.dy)
 
-    # Test 2: Downsample by factor of 2
+    # Test 2: Downsample, same first and last pixel centers
     p2 = sigima.params.Resampling2DParam.create(
         mode="shape",
-        width=ima1.data.shape[1] // 2,
-        height=ima1.data.shape[0] // 2,
+        width=ncols // 2,
+        height=nrows // 2,
         xmin=ima1.x0,
-        xmax=ima1.x0 + ima1.width,
+        xmax=xlast,
         ymin=ima1.y0,
-        ymax=ima1.y0 + ima1.height,
+        ymax=ylast,
         method=sigima.enums.Interpolation2DMethod.LINEAR,
     )
     dst2 = sigima.proc.image.resampling(ima1, p2)
 
     check_scalar_result("Downsample X0", dst2.x0, ima1.x0)
     check_scalar_result("Downsample Y0", dst2.y0, ima1.y0)
-    check_scalar_result(
-        "Downsample shape[0]", dst2.data.shape[0], ima1.data.shape[0] // 2
-    )
-    check_scalar_result(
-        "Downsample shape[1]", dst2.data.shape[1], ima1.data.shape[1] // 2
-    )
+    check_scalar_result("Downsample shape[0]", dst2.data.shape[0], nrows // 2)
+    check_scalar_result("Downsample shape[1]", dst2.data.shape[1], ncols // 2)
 
     # Check that pixel sizes are adjusted correctly
-    expected_dx = ima1.dx * 2 if ima1.dx is not None else 2.0
-    expected_dy = ima1.dy * 2 if ima1.dy is not None else 2.0
+    expected_dx = (xlast - ima1.x0) / (ncols // 2 - 1)
+    expected_dy = (ylast - ima1.y0) / (nrows // 2 - 1)
     check_scalar_result("Downsample dx", dst2.dx, expected_dx, rtol=1e-10)
     check_scalar_result("Downsample dy", dst2.dy, expected_dy, rtol=1e-10)
+    assert dst2.data[0, 0] == ima1.data[0, 0]
+    assert dst2.data[-1, -1] == ima1.data[-1, -1]
 
-    # Test 3: Use pixel size mode
-    if ima1.dx is not None and ima1.dy is not None:
-        p3 = sigima.params.Resampling2DParam.create(
-            mode="dxy",
-            dx=ima1.dx * 1.5,
-            dy=ima1.dy * 1.5,
-            xmin=ima1.x0,
-            xmax=ima1.x0 + ima1.width,
-            ymin=ima1.y0,
-            ymax=ima1.y0 + ima1.height,
-            method=sigima.enums.Interpolation2DMethod.LINEAR,
-        )
-        dst3 = sigima.proc.image.resampling(ima1, p3)
+    # Test 3: Use pixel size mode (exact pixel size, default bounds)
+    p3 = sigima.params.Resampling2DParam.create(
+        mode="dxy",
+        dx=ima1.dx * 1.5,
+        dy=ima1.dy * 1.5,
+        method=sigima.enums.Interpolation2DMethod.LINEAR,
+    )
+    dst3 = sigima.proc.image.resampling(ima1, p3)
 
-        check_scalar_result("Pixel size mode dx", dst3.dx, ima1.dx * 1.5, rtol=1e-10)
-        check_scalar_result("Pixel size mode dy", dst3.dy, ima1.dy * 1.5, rtol=1e-10)
+    check_scalar_result("Pixel size mode dx", dst3.dx, ima1.dx * 1.5, rtol=1e-10)
+    check_scalar_result("Pixel size mode dy", dst3.dy, ima1.dy * 1.5, rtol=1e-10)
+    assert dst3.data.shape == (
+        int(np.floor((nrows - 1) / 1.5)) + 1,
+        int(np.floor((ncols - 1) / 1.5)) + 1,
+    )
 
     # Test 4: Different interpolation methods
     for method in sigima.enums.Interpolation2DMethod:
@@ -558,6 +552,101 @@ def test_image_resampling() -> None:
     # Should not contain any fill values since all within bounds
     assert not np.any(dst5d.data == 999.0), (
         "No fill values expected for within-bounds sampling"
+    )
+
+
+def _ramp_image(
+    nrows: int, ncols: int, x0: float, y0: float, dx: float, dy: float
+) -> sigima.objects.ImageObj:
+    """Return an image of the affine ramp ``2 x + 3 y`` sampled at pixel centers."""
+    x = x0 + np.arange(ncols) * dx
+    y = y0 + np.arange(nrows) * dy
+    image = sigima.objects.create_image("ramp", 2.0 * x[None, :] + 3.0 * y[:, None])
+    image.set_uniform_coords(dx, dy, x0, y0)
+    return image
+
+
+@pytest.mark.parametrize("method", list(sigima.enums.Interpolation2DMethod))
+def test_resampling_identity_keeps_every_pixel(
+    method: sigima.enums.Interpolation2DMethod,
+) -> None:
+    """Resampling an image onto its own grid keeps every pixel and its coordinates.
+
+    Regression: the default bounds used to sample half a pixel away from the
+    pixel centers, shifting the values and filling a row and a column with NaN.
+    """
+    for src in (
+        sigima.objects.create_image("arange", np.arange(12.0).reshape(3, 4)),
+        _ramp_image(5, 7, x0=-3.0, y0=10.0, dx=0.5, dy=2.0),  # anisotropic
+    ):
+        nrows, ncols = src.data.shape
+        p = sigima.params.Resampling2DParam.create(
+            mode="shape", width=ncols, height=nrows, method=method
+        )
+        dst = sigima.proc.image.resampling(src, p)
+        assert not np.isnan(dst.data).any()
+        check_array_result(f"Identity {method}", dst.data, src.data, atol=1e-9)
+        assert (dst.x0, dst.y0) == (src.x0, src.y0)
+        check_scalar_result("Identity dx", dst.dx, src.dx, rtol=1e-12)
+        check_scalar_result("Identity dy", dst.dy, src.dy, rtol=1e-12)
+
+        p_dxy = sigima.params.Resampling2DParam.create(
+            mode="dxy", dx=src.dx, dy=src.dy, method=method
+        )
+        dst_dxy = sigima.proc.image.resampling(src, p_dxy)
+        check_array_result(f"Identity dxy {method}", dst_dxy.data, src.data, atol=1e-9)
+
+
+def test_resampling_linear_matches_affine_ramp() -> None:
+    """Linear resampling of an affine ramp is exact at every output pixel center."""
+    src = _ramp_image(5, 7, x0=1.0, y0=-2.0, dx=0.5, dy=0.25)
+    p = sigima.params.Resampling2DParam.create(
+        mode="shape",
+        width=13,
+        height=9,
+        xmin=1.25,
+        xmax=3.5,
+        ymin=-2.0,
+        ymax=-1.25,
+        method=sigima.enums.Interpolation2DMethod.LINEAR,
+    )
+    dst = sigima.proc.image.resampling(src, p)
+    assert (dst.x0, dst.y0) == (1.25, -2.0)
+    check_scalar_result("Ramp dx", dst.dx, (3.5 - 1.25) / 12)
+    check_scalar_result("Ramp dy", dst.dy, 0.75 / 8)
+    x = dst.x0 + np.arange(13) * dst.dx
+    y = dst.y0 + np.arange(9) * dst.dy
+    check_array_result(
+        "Ramp values", dst.data, 2.0 * x[None, :] + 3.0 * y[:, None], atol=1e-12
+    )
+
+
+def test_resampling_single_pixel_image() -> None:
+    """A 1×1 image is resampled onto itself with the default parameters."""
+    src = sigima.objects.create_image("pixel", np.array([[7.0]]))
+    src.set_uniform_coords(0.5, 2.0, 3.0, 4.0)
+    for mode in ("shape", "dxy"):
+        p = sigima.params.Resampling2DParam.create(mode=mode)
+        p.update_from_obj(src)
+        dst = sigima.proc.image.resampling(src, p)
+        assert dst.data.tolist() == [[7.0]]
+        assert (dst.x0, dst.y0, dst.dx, dst.dy) == (3.0, 4.0, 0.5, 2.0)
+
+
+def test_resampling_pixel_size_mode_keeps_exact_pitch() -> None:
+    """In pixel size mode, the pixel size is exact even when it does not divide
+    the extent: the last pixel center is the last one not beyond ``xmax``."""
+    src = _ramp_image(4, 4, x0=0.0, y0=0.0, dx=1.0, dy=1.0)
+    p = sigima.params.Resampling2DParam.create(
+        mode="dxy", dx=0.8, dy=1.5, method=sigima.enums.Interpolation2DMethod.LINEAR
+    )
+    dst = sigima.proc.image.resampling(src, p)
+    assert dst.data.shape == (3, 4)
+    assert (dst.dx, dst.dy) == (0.8, 1.5)
+    x = np.arange(4) * 0.8
+    y = np.arange(3) * 1.5
+    check_array_result(
+        "Pixel size mode values", dst.data, 2.0 * x[None, :] + 3.0 * y[:, None]
     )
 
 

@@ -271,14 +271,14 @@ def test_resampling_param_update_from_obj_fills_defaults() -> None:
     """``Resampling2DParam.update_from_obj`` populates every field
     (``xmin``/``xmax``, ``ymin``/``ymax``, ``dx``/``dy``,
     ``width``/``height``) from the source image so the GUI shows sensible
-    defaults."""
+    defaults: the bounds are the first and last pixel centers."""
     img = _make_image()
     p = Resampling2DParam()
     p.update_from_obj(img)
     assert p.xmin == img.x0
-    assert p.xmax == img.x0 + img.width
+    assert p.xmax == img.x0 + img.width - img.dx
     assert p.ymin == img.y0
-    assert p.ymax == img.y0 + img.height
+    assert p.ymax == img.y0 + img.height - img.dy
     assert p.dx == img.dx
     assert p.dy == img.dy
     assert p.width == img.data.shape[1]
