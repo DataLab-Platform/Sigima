@@ -13,7 +13,7 @@ import sigima.params
 import sigima.proc.image
 from sigima.tests import guiutils
 from sigima.tests.data import create_multigaussian_image
-from sigima.tests.helpers import print_obj_data_dimensions
+from sigima.tests.helpers import print_obj_data_dimensions, rectangle_selection
 
 
 def test_image_roi_param() -> None:
@@ -54,10 +54,12 @@ def test_image_roi_merge() -> None:
     obj3 = sigima.proc.image.average([obj1, obj2])
     assert obj3.roi is not None, "Merged object should have a ROI"
     assert len(obj3.roi) == 2, "Merged object should have two single ROIs"
+    # (dx=dy=1, x0=y0=0: the rectangle bounds lie on pixel centers, so that the
+    # pixels on both bounds belong to the ROI)
     for single_roi in obj3.roi:
         assert single_roi.get_indices_coords(obj3) in (
-            [500, 750, 1000, 1250],
-            [600, 800, 1000, 1200],
+            [500, 750, 1001, 1251],
+            [600, 800, 1001, 1201],
         ), "Merged object should have the union of the original object's ROIs"
 
 
@@ -210,16 +212,18 @@ def test_image_extract_rois() -> None:
     im1 = sigima.proc.image.extract_rois(src, src.roi.to_params(src))
 
     mask1 = np.zeros(shape=(SIZE, SIZE), dtype=bool)
-    mask1[IROI1[1] : IROI1[1] + IROI1[3], IROI1[0] : IROI1[0] + IROI1[2]] = 1
+    mask1[rectangle_selection(src, *IROI1)] = 1
     xc, yc, r = IROI2
     mask2 = np.zeros(shape=(SIZE, SIZE), dtype=bool)
     rr, cc = draw.disk((yc, xc), r)
     mask2[rr, cc] = 1
     mask = mask1 | mask2
+    # Extracted area: pixels whose centers lie in the union of the ROI bounding
+    # boxes (dx=dy=1, x0=y0=0: the bounds lie on pixel centers, which are included)
     row_min = int(min(IROI1[1], IROI2[1] - r))
     col_min = int(min(IROI1[0], IROI2[0] - r))
-    row_max = int(max(IROI1[1] + IROI1[3], IROI2[1] + r))
-    col_max = int(max(IROI1[0] + IROI1[2], IROI2[0] + r))
+    row_max = min(SIZE, int(max(IROI1[1] + IROI1[3], IROI2[1] + r)) + 1)
+    col_max = min(SIZE, int(max(IROI1[0] + IROI1[2], IROI2[0] + r)) + 1)
     mask = mask[row_min:row_max, col_min:col_max]
 
     assert np.all(im1.data[mask] != 0), nzroi
@@ -243,9 +247,10 @@ def test_image_extract_rois_non_uniform_coords() -> None:
     )
     ix0, iy0, ix1, iy1 = param.get_bounding_box_indices(src)
     dst = sigima.proc.image.extract_rois(src, [param])
-    assert dst.data.shape == (iy1 - iy0, ix1 - ix0) == (2, 3)
-    assert dst.xcoords.tolist() == xcoords[ix0:ix1].tolist() == [3.0, 6.0, 10.0]
-    assert dst.ycoords.tolist() == ycoords[iy0:iy1].tolist() == [100.0, 101.0]
+    # The rectangle bounds lie on pixel centers, which are included
+    assert dst.data.shape == (iy1 - iy0, ix1 - ix0) == (3, 4)
+    assert dst.xcoords.tolist() == xcoords[ix0:ix1].tolist() == [3.0, 6.0, 10.0, 15.0]
+    assert dst.ycoords.tolist() == ycoords[iy0:iy1].tolist() == [100.0, 101.0, 103.0]
     for coords in (dst.xcoords, dst.ycoords):
         assert not np.shares_memory(coords, src.xcoords)
         assert not np.shares_memory(coords, src.ycoords)
@@ -268,9 +273,10 @@ def test_image_extract_roi() -> None:
     assert len(images) == 3, f"Three images expected{context}"
     im1, im2 = images[:2]  # pylint: disable=unbalanced-tuple-unpacking
     assert np.all(im1.data != 0), nzroi
-    assert im1.data.shape == (IROI1[3], IROI1[2]), roisham
+    assert np.array_equal(im1.data, src.data[rectangle_selection(src, *IROI1)]), roisham
     assert np.all(im2.data != 0), nzroi
-    assert im2.data.shape == (IROI2[2] * 2, IROI2[2] * 2), roisham
+    # The bounding box of the circle is bounded by pixel centers, which are included
+    assert im2.data.shape == (IROI2[2] * 2 + 1, IROI2[2] * 2 + 1), roisham
     mask2 = np.zeros(shape=im2.data.shape, dtype=bool)
     xc = yc = r = IROI2[2]  # Adjust for ROI origin
     rr, cc = draw.disk((yc, xc), r, shape=im2.data.shape)
@@ -314,11 +320,13 @@ def test_roi_coordinates_validation() -> None:
     assert np.all(circ_roi.get_single_roi(0).get_physical_coords(src) == circ_coords)
     assert np.all(poly_roi.get_single_roi(0).get_physical_coords(src) == poly_coords)
 
-    # Check that extracted images have correct data
-    for roi in (rect_roi, circ_roi, poly_roi):
+    # Check that extracted images have correct data: the extracted pixels are those
+    # whose centers lie in the ROI bounding box (pixel centers on integer values),
+    # e.g. columns 6 to 14 and rows 5 to 15 for the polygon
+    for roi, shape in ((rect_roi, (10, 10)), (circ_roi, (10, 10)), (poly_roi, (11, 9))):
         extracted = sigima.proc.image.extract_roi(src, roi.to_params(src)[0])
         assert np.all(extracted.data != 0), "Extracted image should have non-zero data"
-        assert extracted.data.shape == (10, 10), "Extracted image shape mismatch"
+        assert extracted.data.shape == shape, "Extracted image shape mismatch"
 
     # Display the original image and the ROIs
     if guiutils.is_gui_enabled():
@@ -446,11 +454,10 @@ def test_roi_inverse_affects_mask_generation() -> None:
         "Inside and outside masks should be inverse of each other"
     )
 
-    # Check that inside mask has True values inside the rectangle region
-    # For a rectangle [x0, y0, dx, dy], the region is [x0:x0+dx, y0:y0+dy]
-    x0, y0, dx, dy = rect_coords
+    # Check that inside mask has True values inside the rectangle region, i.e. on
+    # the pixels whose centers lie in the rectangle
     expected_inside_region = np.zeros_like(img.data, dtype=bool)
-    expected_inside_region[y0 : y0 + dy, x0 : x0 + dx] = True
+    expected_inside_region[rectangle_selection(img, *rect_coords)] = True
 
     assert np.array_equal(mask_inside, expected_inside_region), (
         "Inside mask should match expected rectangular region"
@@ -541,11 +548,11 @@ def test_multiple_rois_inverse_true() -> None:
 
     # ROI 1 area
     x1, y1, w1, h1 = roi1_coords
-    expected_mask[y1 : y1 + h1, x1 : x1 + w1] = True
+    expected_mask[rectangle_selection(img, *roi1_coords)] = True
 
     # ROI 2 area
     x2, y2, w2, h2 = roi2_coords
-    expected_mask[y2 : y2 + h2, x2 : x2 + w2] = True
+    expected_mask[rectangle_selection(img, *roi2_coords)] = True
 
     # Check that the mask has True values in both ROI areas
     assert np.any(mask[y1 : y1 + h1, x1 : x1 + w1]), (

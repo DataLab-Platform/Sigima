@@ -124,14 +124,18 @@ def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
     dst = dst_1_to_1(src, "extract_roi", p.get_suffix())
     dst.data = p.get_data(src).copy()
     dst.roi = p.get_extracted_roi(src)
-    if p.inverse:
-        x0, y0 = 0.0, 0.0
-    else:
-        x0, y0, _x1, _y1 = p.get_shape_circumscribed_rect()
+    # The extracted pixels keep their physical positions (and the kept ROI, which
+    # is expressed in physical coordinates, stays on them)
+    ix0, iy0, ix1, iy1 = p.get_bounding_box_indices(src)
+    nrows, ncols = src.data.shape
+    ix0, iy0 = max(0, ix0), max(0, iy0)
+    ix1, iy1 = min(ncols, ix1), min(nrows, iy1)
     if src.is_uniform_coords:
-        dst.set_uniform_coords(dst.dx, dst.dy, dst.x0 + x0, dst.y0 + y0)
+        dst.set_uniform_coords(
+            dst.dx, dst.dy, src.x0 + ix0 * src.dx, src.y0 + iy0 * src.dy
+        )
     else:
-        dst.set_coords(src.xcoords + x0, src.ycoords + y0)
+        dst.set_coords(src.xcoords[ix0:ix1].copy(), src.ycoords[iy0:iy1].copy())
     return dst
 
 
@@ -265,10 +269,14 @@ def generate_image_grid_roi(src: ImageObj, p: ROIGridParam) -> ImageROI:
         lbl_cols = range(p.nx - 1, -1, -1)
     ptn: str = p.name_pattern
     roi = ImageROI()
+    # The grid covers the image up to the outer edges of its pixels, so that the
+    # cells of a default grid select every pixel exactly once
+    left = float(src.axis_to_physical([-0.5], "x")[0])
+    top = float(src.axis_to_physical([-0.5], "y")[0])
     for ir in range(p.ny):
         for ic in range(p.nx):
-            x0 = src.x0 + (ic + 0.5) * dx_step + xtrans - 0.5 * dx
-            y0 = src.y0 + (ir + 0.5) * dy_step + ytrans - 0.5 * dy
+            x0 = left + (ic + 0.5) * dx_step + xtrans - 0.5 * dx
+            y0 = top + (ir + 0.5) * dy_step + ytrans - 0.5 * dy
             nir, nic = lbl_rows[ir], lbl_cols[ic]
             try:
                 title = ptn.format(base=p.base_name, r=nir + 1, c=nic + 1)

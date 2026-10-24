@@ -16,7 +16,7 @@ import sigima.params
 import sigima.proc.image
 from sigima.tests import guiutils
 from sigima.tests.data import create_multigaussian_image, get_test_image
-from sigima.tests.helpers import check_array_result
+from sigima.tests.helpers import check_array_result, rectangle_selection
 
 
 @pytest.mark.validation
@@ -97,13 +97,12 @@ def test_erase() -> None:
 
     # Single ROI erase
     coords = [600, 800, 300, 200]
-    ix0, iy0, idx, idy = coords
-    ix1, iy1 = ix0 + idx, iy0 + idy
     p = sigima.objects.ROI2DParam()
     p.x0, p.y0, p.dx, p.dy = coords
     dst = sigima.proc.image.erase(obj, p)
     exp = obj.data.copy()
-    exp[iy0:iy1, ix0:ix1] = np.ma.mean(obj.data[iy0:iy1, ix0:ix1])
+    selection = rectangle_selection(obj, *coords)
+    exp[selection] = np.ma.mean(obj.data[selection])
     guiutils.view_images_side_by_side_if_gui(
         [obj.data, dst.data, exp], ["Original", "Erased", "Expected"]
     )
@@ -123,9 +122,8 @@ def test_erase() -> None:
     dst = sigima.proc.image.erase(obj, params)
     exp = obj.data.copy()
     for p in params:
-        ix0, iy0 = int(p.x0), int(p.y0)
-        ix1, iy1 = int(p.x0 + p.dx), int(p.y0 + p.dy)
-        exp[iy0:iy1, ix0:ix1] = np.ma.mean(obj.data[iy0:iy1, ix0:ix1])
+        selection = rectangle_selection(obj, p.x0, p.y0, p.dx, p.dy)
+        exp[selection] = np.ma.mean(obj.data[selection])
     guiutils.view_images_side_by_side_if_gui(
         [obj.data, dst.data, exp], ["Original", "Erased", "Expected"]
     )

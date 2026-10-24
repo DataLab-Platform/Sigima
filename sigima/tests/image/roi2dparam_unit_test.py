@@ -149,9 +149,10 @@ class TestInverseROI2DParamExtraction:
         p.x0, p.y0, p.dx, p.dy = 5.0, 5.0, 20.0, 15.0
         p.inverse = False
         ix0, iy0, ix1, iy1 = p.get_bounding_box_indices(obj)
-        # With dx=1.0, dy=1.0, x0=0: pixel index == physical coordinate
+        # With dx=1.0, dy=1.0, x0=0: pixel index == physical coordinate, and the
+        # pixels whose centers lie on the bounds belong to the rectangle
         assert ix0 == 5 and iy0 == 5
-        assert ix1 == 25 and iy1 == 20
+        assert ix1 == 26 and iy1 == 21
 
     # ------------------------------------------------------------------
     # get_data
@@ -174,7 +175,7 @@ class TestInverseROI2DParamExtraction:
         p.x0, p.y0, p.dx, p.dy = 5.0, 5.0, 20.0, 15.0
         p.inverse = False
         data = p.get_data(obj)
-        assert data.shape == (15, 20)
+        assert data.shape == (16, 21)  # bounds on pixel centers are included
 
     # ------------------------------------------------------------------
     # get_extracted_roi
@@ -232,7 +233,7 @@ class TestInverseROI2DParamExtraction:
         p.x0, p.y0, p.dx, p.dy = 5.0, 5.0, 20.0, 15.0
         p.inverse = False
         dst = extract_roi(obj, p)
-        assert dst.data.shape == (15, 20)
+        assert dst.data.shape == (16, 21)  # bounds on pixel centers are included
         assert dst.x0 == obj.x0 + 5.0
         assert dst.y0 == obj.y0 + 5.0
 
