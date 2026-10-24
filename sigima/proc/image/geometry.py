@@ -628,9 +628,9 @@ def resampling(src: ImageObj, p: Resampling2DParam) -> ImageObj:
     # Determine fill value for interpolation
     cval = p.fill_value if p.fill_value is not None else np.nan
 
-    # For NaN fill values, we need to work with float data to preserve NaN
-    # Convert to float if necessary to allow NaN representation
-    if np.isnan(cval) and not np.issubdtype(src.data.dtype, np.floating):
+    # For NaN fill values, the data must be able to hold NaN: integer data is
+    # converted to float (floating-point and complex data are kept as they are)
+    if np.isnan(cval) and not np.issubdtype(src.data.dtype, np.inexact):
         input_data = src.data.astype(np.float64)
     else:
         input_data = src.data
@@ -763,8 +763,8 @@ def calibration(src: ImageObj, p: XYZCalibrateParam) -> ImageObj:
     shape = src.data.shape
 
     if p.axis == "z":
-        # Apply polynomial to data values
-        data = src.data.astype(float)
+        # Apply polynomial to data values (complex data is kept complex)
+        data = src.data.astype(np.result_type(src.data.dtype, np.float64))
         dst.data = p.a0 + p.a1 * data + p.a2 * data**2 + p.a3 * data**3
         restore_data_outside_roi(dst, src)
     elif p.axis == "x":

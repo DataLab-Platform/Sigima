@@ -15,6 +15,7 @@ from typing import Callable
 
 import numpy as np
 import pytest
+from skimage import measure
 
 import sigima.objects
 import sigima.params
@@ -109,6 +110,63 @@ def test_rectangle_selects_pixels_whose_centers_are_inside(bounds, expected) -> 
     assert columns == expected
 
 
+@pytest.mark.parametrize("uniform", [True, False])
+def test_circle_selects_pixels_whose_centers_are_inside(uniform: bool) -> None:
+    """A circular ROI selects the pixels whose centers lie inside it, boundary
+    included.
+
+    Regression: on non-uniform grids, the circle was drawn in index space (e.g. 2
+    pixels instead of 4 for a circle of radius 1.3 around a pixel center).
+    """
+    image = make_image(uniform)
+    x, y = np.meshgrid(
+        image.axis_to_physical(np.arange(NCOLS), "x"),
+        image.axis_to_physical(np.arange(NROWS), "y"),
+    )
+    xc, yc = pixel_center(image, 2, 3)
+    for radius in (0.3, 1.3, 2.0, 3.7, 9.9):  # 2.0: pixel centers on the circle
+        roi = sigima.objects.create_image_roi("circle", [xc, yc, radius])
+        expected = (x - xc) ** 2 + (y - yc) ** 2 <= radius**2 * (1 + 1e-12)
+        assert np.array_equal(~roi.to_mask(image), expected), radius
+
+
+@pytest.mark.parametrize("uniform", [True, False])
+def test_polygon_selects_pixels_whose_centers_are_inside(uniform: bool) -> None:
+    """A polygonal ROI selects the pixels whose centers lie inside it, edges
+    included.
+
+    Regression: the vertices were rounded to the nearest pixel indices, so that
+    pixels outside the polygon could be selected (and inside ones left out).
+    """
+    image = make_image(uniform)
+    x, y = np.meshgrid(
+        image.axis_to_physical(np.arange(NCOLS), "x"),
+        image.axis_to_physical(np.arange(NROWS), "y"),
+    )
+    # Generic vertices: no pixel center on the edges
+    xp = image.axis_to_physical([0.63, 6.37, 2.21], "x")
+    yp = image.axis_to_physical([0.71, 1.29, 4.43], "y")
+    vertices = np.column_stack([xp, yp])
+    roi = sigima.objects.create_image_roi("polygon", np.ravel(vertices).tolist())
+    points = np.column_stack([x.ravel(), y.ravel()])
+    expected = measure.points_in_poly(points, vertices).reshape(x.shape)
+    assert np.array_equal(~roi.to_mask(image), expected)
+    # Vertices on pixel centers: the pixels on the edges belong to the polygon
+    cells = [(1, 1), (1, 4), (3, 4), (3, 1)]
+    corners = [pixel_center(image, row, col) for row, col in cells]
+    roi = sigima.objects.create_image_roi("polygon", np.ravel(corners).tolist())
+    expected = np.zeros((NROWS, NCOLS), dtype=bool)
+    expected[1:4, 1:5] = True
+    assert np.array_equal(~roi.to_mask(image), expected)
+    if uniform:  # Diagonal edge through pixel centers (straight in index space)
+        cells = [(1, 1), (1, 4), (3, 1)]
+        corners = [pixel_center(image, row, col) for row, col in cells]
+        roi = sigima.objects.create_image_roi("polygon", np.ravel(corners).tolist())
+        expected[:] = False
+        expected[1, 1:5] = expected[2, 1:3] = expected[3, 1] = True
+        assert np.array_equal(~roi.to_mask(image), expected)
+
+
 def test_rectangle_roi_in_indices_covers_its_pixels() -> None:
     """A rectangular ROI in indices covers its pixels up to their outer edges."""
     for uniform in (True, False):
@@ -179,8 +237,16 @@ def test_roi_geometry_results_use_the_extracted_pixels() -> None:
     assert sipi.centroid(src).coords[0] == pytest.approx(expected)
 
 
-def _rois(image: sigima.objects.ImageObj) -> dict[str, sigima.objects.ImageROI]:
-    """Return ROIs of various shapes and conventions for an image."""
+def _rois(
+    image: sigima.objects.ImageObj, curved: bool = True
+) -> dict[str, sigima.objects.ImageROI]:
+    """Return ROIs of various shapes and conventions for an image.
+
+    Args:
+        image: image object
+        curved: whether to include circles and polygons (shapes that a non-affine
+         mapping of the coordinates does not keep)
+    """
     (xe0, xe1), (ye0, ye1) = (
         pixel_edges(image, 1, 3, "x"),
         pixel_edges(image, 1, 2, "y"),
@@ -194,8 +260,9 @@ def _rois(image: sigima.objects.ImageObj) -> dict[str, sigima.objects.ImageROI]:
         "rectangle on edges": [xe0, ye0, xe1 - xe0, ye1 - ye0],
         "rectangle on centers": [xc1, yc1, xc4 - xc1, yc3 - yc1],
         "rectangle generic": [xe0 + 0.1 * (xe1 - xe0), ye0, xg - xe0, ye1 - ye0],
-        "polygon": np.ravel(np.column_stack([xp, yp])).tolist(),
     }
+    if curved:
+        rois["polygon"] = np.ravel(np.column_stack([xp, yp])).tolist()
     result = {}
     for name, coords in rois.items():
         geometry = name.split()[0]
@@ -207,7 +274,7 @@ def _rois(image: sigima.objects.ImageObj) -> dict[str, sigima.objects.ImageROI]:
     result["rectangle in indices"] = sigima.objects.create_image_roi(
         "rectangle", [2, 1, 3, 4], indices=True
     )
-    if image.is_uniform_coords:
+    if curved:
         xc, yc = pixel_center(image, 2, 4)
         result["circle"] = sigima.objects.create_image_roi("circle", [xc, yc, 2.6])
     return result
@@ -221,10 +288,16 @@ def test_exact_operations_move_rois_with_pixels(operation: str, uniform: bool) -
     Regression: ROIs were mirrored about ``x0 + width / 2`` instead of the center of
     the pixel grid, shifting circles, polygons and rectangles drawn on pixel edges
     by one pixel (and non-uniform coordinates were ignored).
+
+    On non-uniform grids, flips and quarter turns reverse the pixels along a
+    non-uniform axis, which is not an affine mapping of the coordinates: circles
+    and polygons are then moved approximately (documented limitation), and only
+    checked for the transposition.
     """
     func, move = OPERATIONS[operation]
     src = make_image(uniform)
-    for name, roi in _rois(src).items():
+    curved = uniform or operation == "transpose"
+    for name, roi in _rois(src, curved).items():
         src.roi = roi
         dst = func(src)
         expected = move(src.roi.to_mask(src))
