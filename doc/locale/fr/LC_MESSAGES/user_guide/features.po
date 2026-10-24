@@ -492,6 +492,9 @@ msgstr ""
 msgid "Extract multiple ROIs from data"
 msgstr "Extraire plusieurs ROI des données"
 
+msgid "Image pixels are located by their centers: the pixel of column ``i`` and row ``j`` is centered on ``(x0 + i*dx, y0 + j*dy)``, or on ``(xcoords[i], ycoords[j])`` for non-uniform coordinates. Image ROIs select the pixels whose centers lie inside their shape, bounds included for rectangles. A rectangular ROI defined in pixel indices covers its pixels up to their outer edges."
+msgstr "Les pixels d'une image sont repérés par leur centre : le pixel de la colonne ``i`` et de la ligne ``j`` est centré en ``(x0 + i*dx, y0 + j*dy)``, ou en ``(xcoords[i], ycoords[j])`` pour des coordonnées non uniformes. Les ROI d'image sélectionnent les pixels dont le centre est situé dans leur forme, bornes comprises pour les rectangles. Une ROI rectangulaire définie en indices de pixels couvre ses pixels jusqu'à leurs bords extérieurs."
+
 msgid "Calibration"
 msgstr "Étalonnage"
 

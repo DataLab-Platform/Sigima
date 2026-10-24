@@ -438,6 +438,28 @@ def __idx_to_phys(obj: ImageObj, idx_coords: list[int]) -> list[float]:
     return coords_array.tolist()
 
 
+def __rect_idx_to_phys(obj: ImageObj, idx_coords: list[int]) -> list[float]:
+    """Convert rectangle index coordinates to physical coordinates.
+
+    The physical rectangle goes from the outer edges of the pixels (pixel centers
+    are at ``x0 + i * dx``).
+
+    Args:
+        obj: Image object
+        idx_coords: List of index coordinates [x0, y0, nx, ny].
+
+    Returns:
+        List of physical coordinates [x0, y0, dx, dy].
+    """
+    ix0, iy0, nx, ny = idx_coords
+    return [
+        obj.x0 + (ix0 - 0.5) * obj.dx,
+        obj.y0 + (iy0 - 0.5) * obj.dy,
+        nx * obj.dx,
+        ny * obj.dy,
+    ]
+
+
 def create_test_image_rois(obj: ImageObj) -> Generator[ImageROI, None, None]:
     """Create test image ROIs (sigima.objects.ImageROI test object)
 
@@ -453,7 +475,7 @@ def create_test_image_rois(obj: ImageObj) -> Generator[ImageROI, None, None]:
         "rectangle": {
             CLASS_NAME: "RectangularROI",
             True: rect_idx,  # indices [x0, y0, dx, dy]
-            False: __idx_to_phys(obj, rect_idx),  # physical
+            False: __rect_idx_to_phys(obj, rect_idx),  # physical
         },
         "circle": {
             CLASS_NAME: "CircularROI",
@@ -478,15 +500,15 @@ def create_test_image_rois(obj: ImageObj) -> Generator[ImageROI, None, None]:
             assert sroi.__class__.__name__ == coords[CLASS_NAME]
 
             bbox_phys = [float(val) for val in sroi.get_bounding_box(obj)]
-            if geometry in ("rectangle", "circle"):
-                # pylint: disable=unbalanced-tuple-unpacking
+            # pylint: disable=unbalanced-tuple-unpacking
+            if geometry == "rectangle":
+                x0, y0, x1, y1 = obj.physical_to_pixel_range(bbox_phys)
+                assert [x0, y0, x1 - x0, y1 - y0] == coords[True]
+            elif geometry == "circle":
                 x0, y0, x1, y1 = obj.physical_to_indices(bbox_phys)
-                if geometry == "rectangle":
-                    coords_from_bbox = [int(xy) for xy in [x0, y0, x1 - x0, y1 - y0]]
-                else:
-                    coords_from_bbox = [
-                        int(xy) for xy in [(x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2]
-                    ]
+                coords_from_bbox = [
+                    int(xy) for xy in [(x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2]
+                ]
                 assert coords_from_bbox == coords[True]
 
             cds_phys = np.array(sroi.get_physical_coords(obj), float)

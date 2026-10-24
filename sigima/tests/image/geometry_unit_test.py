@@ -107,9 +107,10 @@ def test_roi_rotate90() -> None:
     # Apply 90° rotation
     rotated = sigima.proc.image.rotate90(ima)
 
-    # Check that ROI coordinates were transformed correctly
-    # Original: [10, 10, 50, 400] -> Expected: [10, ima.height - 10 - 50, 400, 50]
-    expected_coords = np.array([10.0, ima.height - 60.0, 400.0, 50.0])
+    # Check that ROI coordinates were transformed correctly: transposition, then
+    # vertical mirror about the center of the pixel grid (original X axis)
+    # Original: [10, 10, 50, 400] -> Expected: [10, 2 * xc - 10 - 50, 400, 50]
+    expected_coords = np.array([10.0, 2 * ima.xc - 60.0, 400.0, 50.0])
     actual_coords = rotated.roi.single_rois[0].coords
 
     assert np.allclose(actual_coords, expected_coords), (
@@ -126,9 +127,10 @@ def test_roi_rotate270() -> None:
     # Apply 270° rotation
     rotated = sigima.proc.image.rotate270(ima)
 
-    # Check that ROI coordinates were transformed correctly
-    # Original: [10, 10, 50, 400] -> Expected: [ima.width - 10 - 400, 10, 400, 50]
-    expected_coords = np.array([ima.width - 410.0, 10.0, 400.0, 50.0])
+    # Check that ROI coordinates were transformed correctly: transposition, then
+    # horizontal mirror about the center of the pixel grid (original Y axis)
+    # Original: [10, 10, 50, 400] -> Expected: [2 * yc - 10 - 400, 10, 400, 50]
+    expected_coords = np.array([2 * ima.yc - 410.0, 10.0, 400.0, 50.0])
     actual_coords = rotated.roi.single_rois[0].coords
 
     assert np.allclose(actual_coords, expected_coords), (
@@ -175,8 +177,8 @@ def test_rotate90_swaps_pixel_sizes_and_axis_metadata(func: Callable) -> None:
 @pytest.mark.parametrize(
     "func,expected",
     [
-        (sigima.proc.image.rotate90, [10.0, 2.0, 10.0, 2.0]),
-        (sigima.proc.image.rotate270, [10.0, 1.0, 10.0, 2.0]),
+        (sigima.proc.image.rotate90, [10.0, 1.0, 10.0, 2.0]),
+        (sigima.proc.image.rotate270, [0.0, 1.0, 10.0, 2.0]),
     ],
 )
 def test_rotate90_maps_roi_onto_the_rotated_pixels(
@@ -187,9 +189,13 @@ def test_rotate90_maps_roi_onto_the_rotated_pixels(
     dst = func(src)
     coords = dst.roi.single_rois[0].coords
     check_array_result(f"{func.__name__} ROI", coords, np.array(expected))
-    x0, y0, width, height = coords
-    assert dst.x0 <= x0 and x0 + width <= dst.x0 + dst.width, "ROI out of bounds in X"
-    assert dst.y0 <= y0 and y0 + height <= dst.y0 + dst.height, "ROI out of bounds in Y"
+    k = 1 if func is sigima.proc.image.rotate90 else 3
+    expected_mask = np.rot90(src.roi.to_mask(src), k)
+    assert np.array_equal(dst.roi.to_mask(dst), expected_mask), "ROI pixels moved"
+    x0, y0, x1, y1 = dst.pixel_range_to_physical([0, 0, *dst.data.shape[::-1]])
+    rx0, ry0, width, height = coords
+    assert x0 <= rx0 and rx0 + width <= x1, "ROI out of bounds in X"
+    assert y0 <= ry0 and ry0 + height <= y1, "ROI out of bounds in Y"
 
 
 @pytest.mark.parametrize(

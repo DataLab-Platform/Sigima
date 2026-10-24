@@ -41,8 +41,9 @@ defining the shape in the form of a 1D array:
   where (x0, y0) is the top-left corner and (dx, dy) are the width and height.
 - Circle coordinates are represented as (x, y, r),
   where (x, y) is the center and r is the radius.
-- Ellipse coordinates are represented as (x, y, a, b),
-  where (x, y) is the center, a is the semi-major axis, and b is the semi-minor axis.
+- Ellipse coordinates are represented as (x, y, a, b, theta),
+  where (x, y) is the center, a and b are the semi-axes, and theta is the angle of
+  the a semi-axis in radians.
 - Polygon coordinates are represented as a flattened array of (x, y) pairs:
   (x1, y1, x2, y2, ..., xn, yn).
 
@@ -53,10 +54,32 @@ format for each shape type.
 from __future__ import annotations
 
 import abc
+from typing import Callable
 
 import numpy as np
 
 from sigima.objects.base import HTML_TABLE_CSS
+from sigima.tools.coordinates import local_derivative
+
+
+def _ellipse_through_linear_map(
+    a: float, b: float, theta: float, matrix: np.ndarray
+) -> tuple[float, float, float]:
+    """Return the ellipse obtained by applying a linear map to an ellipse.
+
+    Args:
+        a: semi-axis along the direction ``theta``
+        b: other semi-axis
+        theta: angle of the ``a`` semi-axis (radians)
+        matrix: 2x2 linear map
+
+    Returns:
+        Tuple (a, b, theta) of the transformed ellipse
+    """
+    cos_t, sin_t = np.cos(theta), np.sin(theta)
+    rotation = np.array([[cos_t, -sin_t], [sin_t, cos_t]], dtype=float)
+    axes, radii, _ = np.linalg.svd(matrix @ rotation @ np.diag([a, b]))
+    return float(radii[0]), float(radii[1]), float(np.arctan2(axes[1, 0], axes[0, 0]))
 
 
 class BaseCoordinates(abc.ABC):
@@ -169,6 +192,27 @@ class BaseCoordinates(abc.ABC):
         matrix = np.array([[0, 1, 0], [1, 0, 0], [0, 0, 1]], float)
         self.transform_affine(matrix)
 
+    def remap(
+        self,
+        fx: Callable[[np.ndarray], np.ndarray] | None = None,
+        fy: Callable[[np.ndarray], np.ndarray] | None = None,
+    ) -> None:
+        """Map coordinates through a monotonic function of each axis inplace.
+
+        Used for transformations that are not affine in physical coordinates, e.g.
+        the reversal of the pixels of an image with non-uniform coordinates. Points
+        are mapped exactly; sizes (radius, semi-axes) are mapped with the local
+        derivative of the functions (see subclasses).
+
+        Args:
+            fx: function mapping X coordinates (None: unchanged)
+            fy: function mapping Y coordinates (None: unchanged)
+        """
+        if fx is not None:
+            self.data[0::2] = fx(self.data[0::2])
+        if fy is not None:
+            self.data[1::2] = fy(self.data[1::2])
+
     def scale(self, sx: float, sy: float, center: tuple[float, float] = (0, 0)) -> None:
         """Scale coordinates by (sx, sy) around a center inplace.
 
@@ -267,6 +311,25 @@ class RectangleCoordinates(BaseCoordinates):
         # Update data with new (x0, y0, dx, dy)
         self.data[:] = [x_min, y_min, x_max - x_min, y_max - y_min]
 
+    def remap(
+        self,
+        fx: Callable[[np.ndarray], np.ndarray] | None = None,
+        fy: Callable[[np.ndarray], np.ndarray] | None = None,
+    ) -> None:
+        """Map the rectangle corners through a monotonic function of each axis.
+
+        Args:
+            fx: function mapping X coordinates (None: unchanged)
+            fy: function mapping Y coordinates (None: unchanged)
+        """
+        x0, y0, dx, dy = self.data
+        xs, ys = np.array([x0, x0 + dx]), np.array([y0, y0 + dy])
+        if fx is not None:
+            xs = np.sort(fx(xs))
+        if fy is not None:
+            ys = np.sort(fy(ys))
+        self.data[:] = [xs[0], ys[0], xs[1] - xs[0], ys[1] - ys[0]]
+
     def rotate(self, angle: float, center: tuple[float, float] = (0, 0)) -> None:
         """Rotate rectangle by a given angle around a center.
 
@@ -295,15 +358,80 @@ class CircleCoordinates(BaseCoordinates):
 
     VALID_SHAPE = (3,)
 
+    def remap(
+        self,
+        fx: Callable[[np.ndarray], np.ndarray] | None = None,
+        fy: Callable[[np.ndarray], np.ndarray] | None = None,
+    ) -> None:
+        """Map the circle through a monotonic function of each axis.
+
+        The center is mapped exactly; the radius is scaled by the geometric mean of
+        the local derivatives of the functions (a circle remains a circle only if
+        the mapping is locally isotropic: this is an approximation otherwise).
+
+        Args:
+            fx: function mapping X coordinates (None: unchanged)
+            fy: function mapping Y coordinates (None: unchanged)
+        """
+        x, y, r = self.data
+        jx, jy = local_derivative(fx, x, r), local_derivative(fy, y, r)
+        if fx is not None:
+            x = float(fx(np.array([x]))[0])
+        if fy is not None:
+            y = float(fy(np.array([y]))[0])
+        self.data[:] = [x, y, r * np.sqrt(abs(jx * jy))]
+
 
 class EllipseCoordinates(BaseCoordinates):
     """Class for an ellipse coordinates.
 
     Args:
-        data: 1D array point coordinates (x, y, a, b).
+        data: 1D array point coordinates (x, y, a, b, theta), where (x, y) is the
+         center, a and b are the semi-axes, and theta is the angle of the ``a``
+         semi-axis (radians), as in ellipse geometry results.
     """
 
-    VALID_SHAPE = (4,)
+    VALID_SHAPE = (5,)
+
+    def transform_affine(self, matrix: np.ndarray) -> None:
+        """Apply a 2D affine transformation to the ellipse inplace.
+
+        The center is transformed as a point, and the semi-axes and angle through the
+        linear part of the transformation (exact for any affine transformation).
+
+        Args:
+            matrix: 3x3 affine transformation matrix.
+        """
+        x, y, a, b, theta = self.data
+        cx, cy = (np.array([x, y, 1.0]) @ matrix.T)[:2]
+        a, b, theta = _ellipse_through_linear_map(a, b, theta, matrix[:2, :2])
+        self.data[:] = [cx, cy, a, b, theta]
+
+    def remap(
+        self,
+        fx: Callable[[np.ndarray], np.ndarray] | None = None,
+        fy: Callable[[np.ndarray], np.ndarray] | None = None,
+    ) -> None:
+        """Map the ellipse through a monotonic function of each axis.
+
+        The center is mapped exactly; the semi-axes and angle are mapped with the
+        local derivatives of the functions (approximation for non-affine mappings).
+
+        Args:
+            fx: function mapping X coordinates (None: unchanged)
+            fy: function mapping Y coordinates (None: unchanged)
+        """
+        x, y, a, b, theta = self.data
+        size = max(a, b)
+        jacobian = np.diag(
+            [local_derivative(fx, x, size), local_derivative(fy, y, size)]
+        )
+        if fx is not None:
+            x = float(fx(np.array([x]))[0])
+        if fy is not None:
+            y = float(fy(np.array([y]))[0])
+        a, b, theta = _ellipse_through_linear_map(a, b, theta, jacobian)
+        self.data[:] = [x, y, a, b, theta]
 
 
 class PolygonCoordinates(BaseCoordinates):

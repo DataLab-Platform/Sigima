@@ -65,6 +65,43 @@ def to_builtin(obj) -> str | int | float | list | dict | np.ndarray | None:
     return None
 
 
+#: Tolerance (in pixel index units) under which a coordinate is considered to lie
+#: on a pixel center, so that rounding noise never adds or removes a pixel row or
+#: column from a selection
+PIXEL_INDEX_TOLERANCE = 1e-9
+
+
+def _extrapolated_interp(
+    x: np.ndarray | list[float], xp: np.ndarray, fp: np.ndarray
+) -> np.ndarray:
+    """Interpolate ``fp(xp)`` linearly at ``x``, extrapolating beyond the ends.
+
+    Args:
+        x: points at which to evaluate the function
+        xp: monotonic sample points
+        fp: sample values
+
+    Returns:
+        Interpolated values, with the shape of ``x`` (extrapolated linearly from the
+        first and last intervals; with a single sample, the slope is 1)
+    """
+    x = np.asarray(x, dtype=float)
+    flat = np.atleast_1d(x).ravel()
+    if xp.size == 0:
+        return np.full(x.shape, np.nan)
+    if xp.size == 1:
+        return (fp[0] + (flat - xp[0])).reshape(x.shape)
+    if xp[0] > xp[-1]:
+        xp, fp = xp[::-1], fp[::-1]
+    result = np.interp(flat, xp, fp)
+    below, above = flat < xp[0], flat > xp[-1]
+    slope0 = (fp[1] - fp[0]) / (xp[1] - xp[0])
+    slope1 = (fp[-1] - fp[-2]) / (xp[-1] - xp[-2])
+    result[below] = fp[0] + (flat[below] - xp[0]) * slope0
+    result[above] = fp[-1] + (flat[above] - xp[-1]) * slope1
+    return result.reshape(x.shape)
+
+
 class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
     """Image object"""
 
@@ -375,13 +412,15 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
 
     @property
     def xc(self) -> float:
-        """Return image center X-axis coordinate"""
-        return self.x0 + 0.5 * self.width
+        """Return image center X-axis coordinate, i.e. the center of the pixel grid
+        (midway between the centers of the first and last columns)"""
+        return 0.5 * (self._compute_xmin() + self._compute_xmax())
 
     @property
     def yc(self) -> float:
-        """Return image center Y-axis coordinate"""
-        return self.y0 + 0.5 * self.height
+        """Return image center Y-axis coordinate, i.e. the center of the pixel grid
+        (midway between the centers of the first and last rows)"""
+        return 0.5 * (self._compute_ymin() + self._compute_ymax())
 
     def _repr_html_(self) -> str:
         """Return HTML representation for Jupyter notebook display.
@@ -512,14 +551,7 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
             view = self.data.view(ma.MaskedArray)
             view.mask = np.isnan(self.data)
             return view
-        single_roi = self.roi.get_single_roi(roi_index)
-        # pylint: disable=unbalanced-tuple-unpacking
-        x0, y0, x1, y1 = self.physical_to_indices(single_roi.get_bounding_box(self))
-        # Clip coordinates to image boundaries to handle ROIs extending beyond canvas
-        x0 = max(0, x0)
-        y0 = max(0, y0)
-        x1 = min(self.data.shape[1], x1)
-        y1 = min(self.data.shape[0], y1)
+        x0, y0, x1, y1 = self.get_roi_crop_indices(roi_index)
         # If ROI is completely outside the image, return a fully masked array
         # with a single element to avoid zero-size array errors in statistics
         if x0 >= x1 or y0 >= y1:
@@ -656,3 +688,117 @@ class ImageObj(gds.DataSet, base.BaseObj[ImageROI]):
                 coords[::2] = np.interp(coords[::2], x_indices, self.xcoords)
                 coords[1::2] = np.interp(coords[1::2], y_indices, self.ycoords)
         return coords.tolist()
+
+    def axis_to_float_indices(
+        self, values: np.ndarray | list[float], axis: Literal["x", "y"]
+    ) -> np.ndarray:
+        """Convert physical coordinates along one axis to fractional pixel indices.
+
+        Pixel ``i`` is centered on index ``i`` (pixel center convention, like
+        :meth:`physical_to_indices`). Unlike :meth:`physical_to_indices`, values
+        outside the image are extrapolated linearly (using the first or last pixel
+        spacing for non-uniform coordinates) instead of being clipped.
+
+        Args:
+            values: physical coordinates along the axis
+            axis: ``"x"`` (columns) or ``"y"`` (rows)
+
+        Returns:
+            Fractional indices
+        """
+        values = np.asarray(values, dtype=float)
+        if self.is_uniform_coords:
+            origin, step = (self.x0, self.dx) if axis == "x" else (self.y0, self.dy)
+            return (values - origin) / step
+        centers = np.asarray(self.xcoords if axis == "x" else self.ycoords, float)
+        return _extrapolated_interp(
+            values, centers, np.arange(centers.size, dtype=float)
+        )
+
+    def axis_to_physical(
+        self, indices: np.ndarray | list[float], axis: Literal["x", "y"]
+    ) -> np.ndarray:
+        """Convert fractional pixel indices along one axis to physical coordinates.
+
+        Inverse of :meth:`axis_to_float_indices` (e.g. index ``i - 0.5`` is the edge
+        between pixels ``i - 1`` and ``i``).
+
+        Args:
+            indices: fractional indices along the axis
+            axis: ``"x"`` (columns) or ``"y"`` (rows)
+
+        Returns:
+            Physical coordinates
+        """
+        indices = np.asarray(indices, dtype=float)
+        if self.is_uniform_coords:
+            origin, step = (self.x0, self.dx) if axis == "x" else (self.y0, self.dy)
+            return origin + indices * step
+        centers = np.asarray(self.xcoords if axis == "x" else self.ycoords, float)
+        return _extrapolated_interp(
+            indices, np.arange(centers.size, dtype=float), centers
+        )
+
+    def physical_to_pixel_range(self, coords: list[float]) -> list[int]:
+        """Return the pixels whose centers lie in a physical rectangle.
+
+        A pixel belongs to the rectangle when its center lies inside it, bounds
+        included (within rounding noise): this is the pixel selection of rectangular
+        ROIs and of the bounding boxes of all ROIs. A degenerate rectangle (zero
+        width or height) holds no pixel.
+
+        Args:
+            coords: rectangle ``[x0, y0, x1, y1]`` (corners in any order)
+
+        Returns:
+            ``[ix0, iy0, ix1, iy1]``: selected columns ``ix0`` to ``ix1 - 1`` and rows
+            ``iy0`` to ``iy1 - 1`` (not clipped to the image: the range may extend
+            beyond it, and is empty when ``ix1 <= ix0`` or ``iy1 <= iy0``)
+        """
+        x0, y0, x1, y1 = coords
+        ranges: list[tuple[int, int]] = []
+        for axis, bounds in (("x", (x0, x1)), ("y", (y0, y1))):
+            lo, hi = np.sort(self.axis_to_float_indices(bounds, axis))
+            start = int(np.ceil(lo - PIXEL_INDEX_TOLERANCE))
+            if bounds[0] == bounds[1]:
+                ranges.append((start, start))
+            else:
+                ranges.append((start, int(np.floor(hi + PIXEL_INDEX_TOLERANCE)) + 1))
+        (ix0, ix1), (iy0, iy1) = ranges  # pylint: disable=unbalanced-tuple-unpacking
+        return [ix0, iy0, ix1, iy1]
+
+    def pixel_range_to_physical(self, indices: list[float]) -> list[float]:
+        """Return the physical rectangle covering a range of pixels.
+
+        Inverse of :meth:`physical_to_pixel_range`: the rectangle bounds are the
+        outer edges of the pixels (midway between pixel centers).
+
+        Args:
+            indices: ``[ix0, iy0, ix1, iy1]``, i.e. columns ``ix0`` to ``ix1 - 1``
+             and rows ``iy0`` to ``iy1 - 1``
+
+        Returns:
+            Rectangle ``[x0, y0, x1, y1]``, with ``x0 <= x1`` and ``y0 <= y1``
+        """
+        ix0, iy0, ix1, iy1 = indices
+        x0, x1 = np.sort(self.axis_to_physical([ix0 - 0.5, ix1 - 0.5], "x"))
+        y0, y1 = np.sort(self.axis_to_physical([iy0 - 0.5, iy1 - 0.5], "y"))
+        return [float(x0), float(y0), float(x1), float(y1)]
+
+    def get_roi_crop_indices(self, roi_index: int) -> tuple[int, int, int, int]:
+        """Return the part of the image holding a ROI, as pixel indices.
+
+        Args:
+            roi_index: ROI index
+
+        Returns:
+            ``(ix0, iy0, ix1, iy1)``: columns ``ix0`` to ``ix1 - 1`` and rows ``iy0``
+            to ``iy1 - 1`` of the pixels whose centers lie in the ROI bounding box,
+            clipped to the image
+        """
+        single_roi = self.roi.get_single_roi(roi_index)
+        ix0, iy0, ix1, iy1 = self.physical_to_pixel_range(
+            single_roi.get_bounding_box(self)
+        )
+        nrows, ncols = self.data.shape
+        return max(0, ix0), max(0, iy0), min(ncols, ix1), min(nrows, iy1)

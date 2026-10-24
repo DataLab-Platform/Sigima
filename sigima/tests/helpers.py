@@ -587,3 +587,39 @@ def validate_detection_rois(
         assert obj.roi is None or len(obj.roi) == 0, (
             "ROI should not be created when create_rois=False or too few detections"
         )
+
+
+def rectangle_selection(
+    obj: ImageObj, x0: float, y0: float, dx: float, dy: float
+) -> tuple[slice, slice]:
+    """Return the pixels whose centers lie in a physical rectangle (test oracle).
+
+    Computed from the pixel centers themselves, independently of the conversion
+    methods of :class:`ImageObj`: this is the selection of rectangular ROIs.
+
+    Args:
+        obj: image object
+        x0: X coordinate of a corner of the rectangle
+        y0: Y coordinate of a corner of the rectangle
+        dx: width of the rectangle
+        dy: height of the rectangle
+
+    Returns:
+        Tuple (rows, columns) of slices
+    """
+    nrows, ncols = obj.data.shape
+    if obj.is_uniform_coords:
+        xcenters = obj.x0 + np.arange(ncols) * obj.dx
+        ycenters = obj.y0 + np.arange(nrows) * obj.dy
+    else:
+        xcenters, ycenters = obj.xcoords, obj.ycoords
+    slices = []
+    for centers, start, size in ((ycenters, y0, dy), (xcenters, x0, dx)):
+        if size == 0:  # A degenerate rectangle holds no pixel
+            slices.append(slice(0, 0))
+            continue
+        low, high = sorted((start, start + size))
+        tol = 1e-9 * (abs(centers[-1] - centers[0]) / max(len(centers) - 1, 1) or 1.0)
+        inside = np.flatnonzero((centers >= low - tol) & (centers <= high + tol))
+        slices.append(slice(inside[0], inside[-1] + 1) if inside.size else slice(0, 0))
+    return tuple(slices)

@@ -320,10 +320,11 @@ def compute_geometry_from_obj(
                     coords[:, 3] *= pixel_scale
                 # Column 4 (theta) is an angle: no scaling needed
             if obj.roi is not None:
-                single_roi = obj.roi.get_single_roi(i_roi)
-                x0, y0, _x1, _y1 = single_roi.get_bounding_box(obj)
-                coords[:, colx] += x0 - obj.x0
-                coords[:, coly] += y0 - obj.y0
+                # Coordinates are relative to the part of the image holding the
+                # ROI (see `ImageObj.get_data`): offset them by its first pixel
+                ix0, iy0, _ix1, _iy1 = obj.get_roi_crop_indices(i_roi)
+                coords[:, colx] += ix0 * obj.dx
+                coords[:, coly] += iy0 * obj.dy
 
             rows.append(coords)
             num_cols.append(coords.shape[1])
