@@ -191,6 +191,36 @@ def test_resize_non_uniform_raises() -> None:
         igeom.resize(obj, p)
 
 
+@pytest.mark.parametrize("reshape", [False, True])
+def test_rotate_non_uniform_raises(reshape: bool) -> None:
+    """An arbitrary rotation rejects non-uniform coordinates.
+
+    Regression: the result kept the source coordinate arrays, whose lengths no
+    longer matched the rotated data when the shape changed.
+    """
+    obj = _img(20, 16)
+    obj.set_coords(
+        xcoords=np.linspace(0.0, 1.0, obj.data.shape[1]) ** 2,
+        ycoords=np.linspace(0.0, 1.0, obj.data.shape[0]) ** 2,
+    )
+    p = sigima.params.RotateParam.create(angle=45.0, reshape=reshape)
+    with pytest.raises(ValueError, match="uniform coordinates"):
+        igeom.rotate(obj, p)
+
+
+@pytest.mark.parametrize("reshape", [False, True])
+def test_rotate_uniform_keeps_consistent_geometry(reshape: bool) -> None:
+    """An arbitrary rotation of a uniform image gives a uniform image."""
+    obj = _img(20, 16)
+    out = igeom.rotate(
+        obj, sigima.params.RotateParam.create(angle=45.0, reshape=reshape)
+    )
+    assert out.is_uniform_coords
+    assert (out.dx, out.dy) == (obj.dx, obj.dy)
+    if not reshape:
+        assert out.data.shape == obj.data.shape
+
+
 def test_transpose_with_non_uniform_coords() -> None:
     """``transpose`` swaps shape, axis units and labels even when the
     image carries non-uniform coordinates."""

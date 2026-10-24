@@ -148,7 +148,14 @@ def rotate(src: ImageObj, p: RotateParam) -> ImageObj:
 
     Returns:
         Output image object
+
+    Raises:
+        ValueError: if source image has non-uniform coordinates
     """
+    if not src.is_uniform_coords:
+        # An arbitrary rotation of the pixels does not map a non-uniform grid onto
+        # a grid: the image must be given uniform coordinates first
+        raise ValueError("Source image must have uniform coordinates for rotation")
     dst = dst_1_to_1(src, "rotate", f"α={p.angle:.3f}°, mode='{p.mode}'")
     dst.data = spi.rotate(
         src.data,
