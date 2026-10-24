@@ -206,9 +206,10 @@ def test_validation_invalid_shape() -> None:
     with pytest.raises(ValueError, match="Invalid.*coordinates shape.*expected.*3"):
         shape.CircleCoordinates([1, 2])  # 2 values instead of 3
 
-    # EllipseCoordinates expects exactly 4 values
-    with pytest.raises(ValueError, match="Invalid.*coordinates shape.*expected.*4"):
-        shape.EllipseCoordinates([1, 2, 3])  # 3 values instead of 4
+    # EllipseCoordinates expects exactly 5 values (x, y, a, b, theta), like the
+    # ellipse geometry results
+    with pytest.raises(ValueError, match="Invalid.*coordinates shape.*expected.*5"):
+        shape.EllipseCoordinates([1, 2, 3, 4])  # 4 values instead of 5
 
 
 def test_validation_odd_number_of_values() -> None:

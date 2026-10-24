@@ -11,7 +11,7 @@ using the shape coordinate system (:mod:`sigima.objects.shape`).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
 import numpy as np
 
@@ -31,9 +31,87 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "IMAGE_OPERATIONS",
     "GeometryTransformer",
+    "image_axis_mirror",
+    "image_operation_steps",
     "transformer",
 ]
+
+#: Exact image operations (pixels are moved, not resampled) whose effect on
+#: coordinates is given by :func:`image_operation_steps`
+IMAGE_OPERATIONS = ("fliph", "flipv", "transpose", "rotate90", "rotate270")
+
+
+def image_axis_mirror(
+    image: ImageObj, axis: Literal["x", "y"]
+) -> Callable[[np.ndarray], np.ndarray]:
+    """Return how the reversal of the pixels along an axis moves coordinates.
+
+    The pixel ``i`` (centered on its coordinate) receives the value of the pixel
+    ``n - 1 - i``: a point at fractional index ``u`` moves to index ``n - 1 - u``.
+    For uniform coordinates, this is the mirror symmetry about the center of the
+    pixel grid (:attr:`ImageObj.xc` or :attr:`ImageObj.yc`).
+
+    Args:
+        image: image whose pixels are reversed (its coordinates are kept)
+        axis: ``"x"`` (columns) or ``"y"`` (rows)
+
+    Returns:
+        Function mapping physical coordinates along the axis
+    """
+    size = image.data.shape[1 if axis == "x" else 0]
+
+    def mirror(values: np.ndarray) -> np.ndarray:
+        indices = image.axis_to_float_indices(values, axis)
+        return image.axis_to_physical((size - 1) - indices, axis)
+
+    return mirror
+
+
+def _mirror_step(
+    src: ImageObj, src_axis: Literal["x", "y"], axis: Literal["x", "y"]
+) -> tuple[str, dict[str, Any]]:
+    """Return the step mirroring coordinates along ``axis`` by the reversal of the
+    pixels of ``src`` along ``src_axis`` (the two differ after a transposition)."""
+    if src.is_uniform_coords:
+        if axis == "x":
+            return "fliph", {"cx": src.xc if src_axis == "x" else src.yc}
+        return "flipv", {"cy": src.xc if src_axis == "x" else src.yc}
+    return "remap", {"f" + axis: image_axis_mirror(src, src_axis)}
+
+
+def image_operation_steps(
+    src: ImageObj, operation: str
+) -> list[tuple[str, dict[str, Any]]]:
+    """Return how an exact image operation moves physical coordinates.
+
+    The steps move a point of ``src`` to the position of the same pixel content in
+    the result of the operation, for ROIs, annotations and geometry results.
+
+    Args:
+        src: source image of the operation
+        operation: one of :data:`IMAGE_OPERATIONS` (``numpy.rot90`` is a
+         transposition followed by a vertical reversal, and three quarter turns a
+         transposition followed by a horizontal reversal)
+
+    Returns:
+        List of (operation, keyword arguments) for :class:`GeometryTransformer`
+
+    Raises:
+        ValueError: if the operation is unknown
+    """
+    if operation == "fliph":
+        return [_mirror_step(src, "x", "x")]
+    if operation == "flipv":
+        return [_mirror_step(src, "y", "y")]
+    if operation == "transpose":
+        return [("transpose", {})]
+    if operation == "rotate90":
+        return [("transpose", {}), _mirror_step(src, "x", "y")]
+    if operation == "rotate270":
+        return [("transpose", {}), _mirror_step(src, "y", "x")]
+    raise ValueError(f"Unknown image operation: {operation}")
 
 
 class GeometryTransformer:
@@ -210,7 +288,9 @@ class GeometryTransformer:
             self._apply_operation(shape_coords, operation, **kwargs)
 
             new_coords = shape_coords.data
-            new_single_roi = roi_class(new_coords, single_roi.indices, single_roi.title)
+            new_single_roi = roi_class(
+                new_coords, single_roi.indices, single_roi.title, single_roi.inverse
+            )
             new_roi.add_roi(new_single_roi)
 
         image.roi = new_roi
@@ -281,8 +361,60 @@ class GeometryTransformer:
             sy = kwargs.get("sy", 1.0)
             center = kwargs.get("center", (0, 0))
             shape_coords.scale(sx, sy, center)
+        elif operation == "remap":
+            shape_coords.remap(kwargs.get("fx"), kwargs.get("fy"))
         else:
             raise ValueError(f"Unknown operation: {operation}")
+
+    def transform_like_image(
+        self, geometry: GeometryResult, src: ImageObj, operation: str
+    ) -> GeometryResult:
+        """Move a geometry result of an image as an exact image operation moves the
+        pixels (see :func:`image_operation_steps`).
+
+        Args:
+            geometry: geometry result computed on ``src``
+            src: source image of the operation
+            operation: one of :data:`IMAGE_OPERATIONS`
+
+        Returns:
+            New geometry result, expressed in the coordinates of the result image
+        """
+        for step, kwargs in image_operation_steps(src, operation):
+            geometry = self.transform_geometry(geometry, step, **kwargs)
+        return geometry
+
+    def apply_image_operation(
+        self, dst: ImageObj, src: ImageObj, operation: str
+    ) -> None:
+        """Move the ROIs and canonical annotations of the result of an exact image
+        operation with its pixels (they are copied from ``src`` beforehand).
+
+        Args:
+            dst: result image, holding the ROIs and annotations of ``src``
+            src: source image of the operation
+            operation: one of :data:`IMAGE_OPERATIONS`
+        """
+        if dst.roi is not None and any(r.indices for r in dst.roi.single_rois):
+            # Steps move physical coordinates: express ROIs defined in indices in
+            # the physical coordinates of the source image first
+            # pylint: disable=import-outside-toplevel
+            from sigima.objects.image import ImageROI
+
+            physical_roi = ImageROI()
+            for single_roi in dst.roi.single_rois:
+                physical_roi.add_roi(
+                    single_roi.__class__(
+                        np.array(single_roi.get_physical_coords(src), dtype=float),
+                        False,
+                        single_roi.title,
+                        single_roi.inverse,
+                    )
+                )
+            dst.roi = physical_roi
+        for step, kwargs in image_operation_steps(src, operation):
+            self.transform_roi(dst, step, **kwargs)
+            self.transform_annotations(dst, step, **kwargs)
 
     # Convenience methods for common operations
     def rotate(

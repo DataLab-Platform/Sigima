@@ -5,10 +5,13 @@ Pixel center convention unit tests
 ----------------------------------
 
 The center of pixel ``i`` is at ``x0 + i * dx`` (or ``xcoords[i]``): ROIs select the
-pixels whose centers they contain.
+pixels whose centers they contain, and exact geometric operations (flips, quarter
+turns, transposition) move ROIs, annotations and geometry results with the pixels.
 """
 
 from __future__ import annotations
+
+from typing import Callable
 
 import numpy as np
 import pytest
@@ -16,6 +19,18 @@ import pytest
 import sigima.objects
 import sigima.params
 import sigima.proc.image as sipi
+from sigima.objects import KindShape
+from sigima.objects.scalar import GeometryResult
+from sigima.proc.image.transformations import transformer
+
+#: Exact image operations and their effect on a pixel array
+OPERATIONS: dict[str, tuple[Callable, Callable[[np.ndarray], np.ndarray]]] = {
+    "fliph": (sipi.fliph, np.fliplr),
+    "flipv": (sipi.flipv, np.flipud),
+    "transpose": (sipi.transpose, np.transpose),
+    "rotate90": (sipi.rotate90, np.rot90),
+    "rotate270": (sipi.rotate270, lambda array: np.rot90(array, 3)),
+}
 
 #: Non-square image with anisotropic pixels and an offset origin
 NROWS, NCOLS = 6, 8
@@ -162,6 +177,112 @@ def test_roi_geometry_results_use_the_extracted_pixels() -> None:
         [x_edges[0] + 0.3, y_edges[0] + 0.1, x_edges[1] - x_edges[0], 1.2],
     )
     assert sipi.centroid(src).coords[0] == pytest.approx(expected)
+
+
+def _rois(image: sigima.objects.ImageObj) -> dict[str, sigima.objects.ImageROI]:
+    """Return ROIs of various shapes and conventions for an image."""
+    (xe0, xe1), (ye0, ye1) = (
+        pixel_edges(image, 1, 3, "x"),
+        pixel_edges(image, 1, 2, "y"),
+    )
+    (xc1, yc1), (xc4, yc3) = pixel_center(image, 1, 1), pixel_center(image, 3, 4)
+    xg = 0.3 * xe0 + 0.7 * xe1  # generic bound (neither a center nor an edge)
+    # Polygon vertices at generic positions (no pixel center on its edges)
+    xp = image.axis_to_physical([0.63, 4.37, 2.21], "x")
+    yp = image.axis_to_physical([0.71, 1.29, 4.43], "y")
+    rois = {
+        "rectangle on edges": [xe0, ye0, xe1 - xe0, ye1 - ye0],
+        "rectangle on centers": [xc1, yc1, xc4 - xc1, yc3 - yc1],
+        "rectangle generic": [xe0 + 0.1 * (xe1 - xe0), ye0, xg - xe0, ye1 - ye0],
+        "polygon": np.ravel(np.column_stack([xp, yp])).tolist(),
+    }
+    result = {}
+    for name, coords in rois.items():
+        geometry = name.split()[0]
+        result[name] = sigima.objects.create_image_roi(geometry, coords)
+        if name == "rectangle on edges":
+            result["inverse rectangle"] = sigima.objects.create_image_roi(
+                geometry, coords, inverse=True
+            )
+    result["rectangle in indices"] = sigima.objects.create_image_roi(
+        "rectangle", [2, 1, 3, 4], indices=True
+    )
+    if image.is_uniform_coords:
+        xc, yc = pixel_center(image, 2, 4)
+        result["circle"] = sigima.objects.create_image_roi("circle", [xc, yc, 2.6])
+    return result
+
+
+@pytest.mark.parametrize("uniform", [True, False])
+@pytest.mark.parametrize("operation", list(OPERATIONS))
+def test_exact_operations_move_rois_with_pixels(operation: str, uniform: bool) -> None:
+    """The ROI of the result selects the pixels coming from the source ROI.
+
+    Regression: ROIs were mirrored about ``x0 + width / 2`` instead of the center of
+    the pixel grid, shifting circles, polygons and rectangles drawn on pixel edges
+    by one pixel (and non-uniform coordinates were ignored).
+    """
+    func, move = OPERATIONS[operation]
+    src = make_image(uniform)
+    for name, roi in _rois(src).items():
+        src.roi = roi
+        dst = func(src)
+        expected = move(src.roi.to_mask(src))
+        assert np.array_equal(dst.roi.to_mask(dst), expected), name
+        assert dst.roi.single_rois[0].inverse == roi.single_rois[0].inverse, name
+
+
+@pytest.mark.parametrize("uniform", [True, False])
+@pytest.mark.parametrize("operation", list(OPERATIONS))
+def test_exact_operations_move_annotations_with_pixels(
+    operation: str, uniform: bool
+) -> None:
+    """An annotation on a pixel center stays on the center of the same pixel.
+
+    Regression: annotations were shifted by one pixel by flips and quarter turns.
+    """
+    src = _marker_image(uniform)
+    x, y = pixel_center(src, *_marker_index(src))
+    src.add_graphical_annotation(sigima.objects.PointAnnotation(x=x, y=y))
+    dst = OPERATIONS[operation][0](src)
+    annotation = dst.get_graphical_annotations()[0]
+    assert (annotation.x, annotation.y) == pytest.approx(
+        pixel_center(dst, *_marker_index(dst))
+    )
+
+
+@pytest.mark.parametrize("uniform", [True, False])
+@pytest.mark.parametrize("operation", list(OPERATIONS))
+def test_geometry_results_move_with_pixels(operation: str, uniform: bool) -> None:
+    """Geometry results move like the pixels on which they were computed."""
+    src = _marker_image(uniform)
+    x, y = pixel_center(src, *_marker_index(src))
+    result = GeometryResult("marker", KindShape.POINT, np.array([[x, y]]))
+    dst = OPERATIONS[operation][0](src)
+    moved = transformer.transform_like_image(result, src, operation)
+    assert tuple(moved.coords[0]) == pytest.approx(
+        pixel_center(dst, *_marker_index(dst))
+    )
+    if uniform:
+        # The centroid computed on the result image is the moved centroid
+        centroid = transformer.transform_like_image(sipi.centroid(src), src, operation)
+        assert centroid.coords == pytest.approx(sipi.centroid(dst).coords)
+
+
+def test_ellipse_geometry_results_are_transformed() -> None:
+    """Ellipse results (center, semi-axes, angle) follow exact operations."""
+    src = make_image()
+    ellipse = GeometryResult(
+        "ellipse", KindShape.ELLIPSE, np.array([[12.0, -4.0, 3.0, 1.0, 0.25]])
+    )
+    moved = transformer.transform_like_image(ellipse, src, "fliph")
+    x, y, a, b, theta = moved.coords[0]
+    assert (x, y, a, b) == pytest.approx((2 * src.xc - 12.0, -4.0, 3.0, 1.0))
+    assert np.tan(theta) == pytest.approx(np.tan(-0.25))
+    moved = transformer.transform_like_image(ellipse, src, "transpose")
+    x, y, a, b, theta = moved.coords[0]
+    assert (x, y, a, b) == pytest.approx((-4.0, 12.0, 3.0, 1.0))
+    assert np.tan(theta) == pytest.approx(np.tan(np.pi / 2 - 0.25))
 
 
 if __name__ == "__main__":
