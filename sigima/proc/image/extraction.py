@@ -36,6 +36,7 @@ from numpy import ma
 import sigima.tools.image
 from sigima.config import _
 from sigima.objects.image import ImageObj, ImageROI, RectangularROI, ROI2DParam
+from sigima.objects.image.object import PIXEL_INDEX_TOLERANCE
 from sigima.objects.signal import SignalObj
 from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
@@ -242,8 +243,39 @@ class ROIGridParam(gds.DataSet):
     _e_group1 = gds.EndGroup(_("ROI titles"))
 
 
+def _cell_pixel_range(
+    src: ImageObj, start: float, end: float, axis: str
+) -> tuple[int, int]:
+    """Return the pixels of a grid cell along an axis.
+
+    A pixel belongs to the cell when its center lies in ``[start, end[``, so that
+    adjacent cells never share a pixel, even when their common bound lies on a
+    pixel center.
+
+    Args:
+        src: image object
+        start: physical coordinate where the cell starts
+        end: physical coordinate where the cell ends
+        axis: ``"x"`` or ``"y"``
+
+    Returns:
+        ``(i0, i1)``: pixels ``i0`` to ``i1 - 1`` (not clipped to the image)
+    """
+    f_start, f_end = src.axis_to_float_indices([start, end], axis)
+    i0 = int(np.ceil(f_start - PIXEL_INDEX_TOLERANCE))
+    i1 = int(np.ceil(f_end - PIXEL_INDEX_TOLERANCE))
+    return i0, max(i0, i1)
+
+
 def generate_image_grid_roi(src: ImageObj, p: ROIGridParam) -> ImageROI:
     """Create a grid of rectangular ROIs from an image object.
+
+    The grid is laid out over the image up to the outer edges of its pixels (the
+    actual extent of its axes, also for non-uniform coordinates), then each cell
+    is made of the pixels whose centers lie in it, from the start of the cell
+    included to its end excluded: the cells of a grid with 100 % sizes and steps
+    tile the pixels of the image exactly. The rectangle of each ROI goes from
+    the outer edges of its pixels.
 
     Args:
         obj: The image object to create the ROI for.
@@ -252,15 +284,19 @@ def generate_image_grid_roi(src: ImageObj, p: ROIGridParam) -> ImageROI:
     Returns:
         The created ROI object.
     """
-    dx_cell = src.width / p.nx
-    dy_cell = src.height / p.ny
+    nrows, ncols = src.data.shape
+    left, right = (float(v) for v in src.axis_to_physical([-0.5, ncols - 0.5], "x"))
+    top, bottom = (float(v) for v in src.axis_to_physical([-0.5, nrows - 0.5], "y"))
+    width, height = right - left, bottom - top
+    dx_cell = width / p.nx
+    dy_cell = height / p.ny
     dx = dx_cell * p.xsize / 100.0
     dy = dy_cell * p.ysize / 100.0
     # Apply step multipliers to cell spacing
     dx_step = dx_cell * p.xstep / 100.0
     dy_step = dy_cell * p.ystep / 100.0
-    xtrans = src.width * (p.xtranslation - 50.0) / 100.0
-    ytrans = src.height * (p.ytranslation - 50.0) / 100.0
+    xtrans = width * (p.xtranslation - 50.0) / 100.0
+    ytrans = height * (p.ytranslation - 50.0) / 100.0
     lbl_rows = range(p.ny)
     if p.ydirection == Direction.DECREASING:
         lbl_rows = range(p.ny - 1, -1, -1)
@@ -269,20 +305,23 @@ def generate_image_grid_roi(src: ImageObj, p: ROIGridParam) -> ImageROI:
         lbl_cols = range(p.nx - 1, -1, -1)
     ptn: str = p.name_pattern
     roi = ImageROI()
-    # The grid covers the image up to the outer edges of its pixels, so that the
-    # cells of a default grid select every pixel exactly once
-    left = float(src.axis_to_physical([-0.5], "x")[0])
-    top = float(src.axis_to_physical([-0.5], "y")[0])
     for ir in range(p.ny):
         for ic in range(p.nx):
             x0 = left + (ic + 0.5) * dx_step + xtrans - 0.5 * dx
             y0 = top + (ir + 0.5) * dy_step + ytrans - 0.5 * dy
+            ix0, ix1 = _cell_pixel_range(src, x0, x0 + dx, "x")
+            iy0, iy1 = _cell_pixel_range(src, y0, y0 + dy, "y")
+            rx0, ry0, rx1, ry1 = src.pixel_range_to_physical([ix0, iy0, ix1, iy1])
             nir, nic = lbl_rows[ir], lbl_cols[ic]
             try:
                 title = ptn.format(base=p.base_name, r=nir + 1, c=nic + 1)
             except Exception:  # pylint: disable=broad-except
                 title = f"ROI({nir + 1},{nic + 1})"
-            roi.add_roi(RectangularROI([x0, y0, dx, dy], indices=False, title=title))
+            roi.add_roi(
+                RectangularROI(
+                    [rx0, ry0, rx1 - rx0, ry1 - ry0], indices=False, title=title
+                )
+            )
     return roi
 
 

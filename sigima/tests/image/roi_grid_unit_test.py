@@ -9,6 +9,7 @@ from copy import deepcopy
 
 import guidata.dataset as gds
 import numpy as np
+import pytest
 from numpy.testing import assert_array_equal
 from pytest import approx
 
@@ -103,7 +104,8 @@ def test_labeling_changes_with_direction_but_geometry_set_is_invariant() -> None
 
 
 def test_translation_semantics_delta() -> None:
-    """Changing translation by +10% moves rectangles by 10% of image size."""
+    """Changing translation by +10% moves rectangles by 10% of image size, rounded
+    to whole pixels (cells are made of whole pixels)."""
     img = create_grid_of_gaussian_images()
     p1 = ROIGridParam()
     p1.nx = p1.ny = 2
@@ -123,10 +125,13 @@ def test_translation_semantics_delta() -> None:
     x0_1, y0_1, dx1, dy1 = r11_1.get_physical_coords(img)
     x0_2, y0_2, dx2, dy2 = r11_2.get_physical_coords(img)
 
-    # Width should be unchanged; position should shift by exactly 10% of image width
+    # Width should be unchanged; position should shift by 10% of image width, i.e.
+    # 51.2 pixels for this 512-pixel wide image: the cells shift by 51 pixels
     assert dx1 == approx(dx2)
     assert dy1 == approx(dy2)
-    assert (x0_2 - x0_1) == approx(0.10 * img.width)
+    shift = (x0_2 - x0_1) / img.dx
+    assert shift == approx(round(shift))
+    assert abs(shift - 0.10 * img.width / img.dx) < 1.0
     assert (y0_2 - y0_1) == approx(0.00 * img.height)
 
 
@@ -376,3 +381,64 @@ def test_roi_grid_custom_step() -> None:
 if __name__ == "__main__":
     test_roi_grid_custom_step()
     test_roi_grid_import_export()
+
+
+def _grid_coverage(img: ImageObj, nx: int, ny: int) -> np.ndarray:
+    """Return how many cells of a full-size grid select each pixel."""
+    p = ROIGridParam.create(nx=nx, ny=ny, xsize=100, ysize=100, xstep=100, ystep=100)
+    roi = generate_image_grid_roi(img, p)
+    return sum((~r.to_mask(img)).astype(int) for r in roi.single_rois)
+
+
+@pytest.mark.parametrize(
+    "shape, nx, ny",
+    [
+        ((3, 3), 2, 2),  # cell bounds on pixel centers
+        ((5, 7), 2, 2),
+        ((10, 9), 4, 3),
+        ((4, 6), 4, 3),
+        ((2, 2), 3, 3),  # more cells than pixels
+    ],
+)
+def test_full_size_grid_is_a_partition_of_the_pixels(
+    shape: tuple[int, int], nx: int, ny: int
+) -> None:
+    """Every pixel belongs to exactly one cell of a full-size grid.
+
+    Regression: when the bound between two cells lay on a pixel center, both
+    cells selected the pixel (e.g. the central pixel of a 3x3 image belonged to
+    the four cells of a 2x2 grid).
+    """
+    img = create_image("grid", np.arange(float(np.prod(shape))).reshape(shape))
+    img.set_uniform_coords(0.5, 2.0, -3.0, 7.0)
+    assert np.all(_grid_coverage(img, nx, ny) == 1)
+    # The sums of the cells add up to the sum of the image
+    p = ROIGridParam.create(nx=nx, ny=ny, xsize=100, ysize=100)
+    total = sum(
+        img.data[~r.to_mask(img)].sum() for r in generate_image_grid_roi(img, p)
+    )
+    assert total == approx(img.data.sum())
+
+
+def test_full_size_grid_covers_non_uniform_images() -> None:
+    """The grid of a non-uniform image spans the actual extent of its axes.
+
+    Regression: the extent was the number of pixels times a default pixel size,
+    so that the last row and column were left out.
+    """
+    img = create_image("non-uniform", np.zeros((3, 4)))
+    img.set_coords(np.array([1.0, 2.0, 4.0, 8.0]), np.array([10.0, 11.0, 15.0]))
+    assert np.all(_grid_coverage(img, 2, 1) == 1)
+    assert np.all(_grid_coverage(img, 3, 2) == 1)
+
+
+def test_grid_cells_are_bounded_by_pixel_edges() -> None:
+    """Grid ROIs go from the outer edges of their pixels."""
+    img = create_image("grid", np.zeros((3, 3)))
+    roi = generate_image_grid_roi(
+        img, ROIGridParam.create(nx=2, ny=2, xsize=100, ysize=100)
+    )
+    coords = sorted(tuple(r.get_physical_coords(img)) for r in roi)
+    edges = {-0.5, 0.5, 1.5, 2.5}
+    for x0, y0, dx, dy in coords:
+        assert {x0, y0, x0 + dx, y0 + dy} <= edges
