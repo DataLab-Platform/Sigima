@@ -13,6 +13,7 @@ addition, multiplication, division, and more.
 
 from __future__ import annotations
 
+import itertools
 import warnings
 
 import numpy as np
@@ -136,6 +137,38 @@ def test_signal_product() -> None:
     check_array_result(f"Product of {n} signals", s1.y, exp_y)
     expected_dy = np.abs(exp_y) * np.sqrt(sum((s.dy / s.y) ** 2 for s in slist))
     check_array_result("Product error propagation", s1.dy, expected_dy)
+
+
+@pytest.mark.parametrize(
+    "func, oracle",
+    [
+        (sigima.proc.signal.addition, lambda arr: np.sum(arr, axis=0)),
+        (sigima.proc.signal.average, lambda arr: np.mean(arr, axis=0)),
+        (sigima.proc.signal.product, lambda arr: np.prod(arr, axis=0)),
+        (sigima.proc.signal.standard_deviation, lambda arr: np.std(arr, axis=0)),
+    ],
+)
+def test_signal_n_to_1_does_not_depend_on_input_order(func, oracle) -> None:
+    """n-to-1 results do not depend on the order of real and complex signals.
+
+    Regression: the signals were stacked with the data type of the first one, so
+    that the imaginary parts were discarded when a real signal came first.
+    """
+    x = np.linspace(0.0, 1.0, 5)
+    ys = [
+        np.linspace(1.0, 2.0, 5),
+        np.linspace(1.0, 2.0, 5) * (1.0 + 2.0j),
+        np.linspace(-1.0, 3.0, 5),
+    ]
+    signals = [sigima.objects.create_signal(f"s{i}", x, y) for i, y in enumerate(ys)]
+    expected = oracle(np.array(ys))
+    for order in itertools.permutations(range(len(signals))):
+        with warnings.catch_warnings():
+            # ComplexWarning moved to numpy.exceptions in NumPy 1.25
+            warnings.simplefilter("error", getattr(np, "exceptions", np).ComplexWarning)
+            result = func([signals[i] for i in order])
+        assert result.y.dtype == np.complex128
+        assert np.allclose(result.y, expected, rtol=1e-12, atol=1e-12), order
 
 
 @pytest.mark.validation

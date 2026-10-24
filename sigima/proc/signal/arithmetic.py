@@ -44,9 +44,12 @@ def __signals_y_to_array(signals: list[SignalObj]) -> np.ndarray:
         signals: List of signal objects.
 
     Returns:
-        A NumPy array stacking the `y` attribute from all signals.
+        A NumPy array stacking the `y` attribute from all signals, with a data type
+        holding all of them (e.g. complex if any signal is complex), whatever their
+        order.
     """
-    return np.array([sig.y for sig in signals], dtype=signals[0].y.dtype)
+    arrays = [sig.y for sig in signals]
+    return np.array(arrays, dtype=np.result_type(*arrays))
 
 
 def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
@@ -56,9 +59,11 @@ def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
         signals: List of signal objects.
 
     Returns:
-        A NumPy array stacking the `dy` attribute from all signals.
+        A NumPy array stacking the `dy` attribute from all signals, with a data type
+        holding all of them, whatever their order.
     """
-    return np.array([sig.dy for sig in signals], dtype=signals[0].dy.dtype)
+    arrays = [sig.dy for sig in signals]
+    return np.array(arrays, dtype=np.result_type(*arrays))
 
 
 @computation_function(
