@@ -89,6 +89,13 @@ def image_operation_steps(
     The steps move a point of ``src`` to the position of the same pixel content in
     the result of the operation, for ROIs, annotations and geometry results.
 
+    For uniform coordinates, the steps are affine and move every shape exactly.
+    For non-uniform coordinates, reversing the pixels along a non-uniform axis is
+    not an affine mapping of the coordinates: points, bounds and unrotated
+    rectangles are moved exactly, but a circle does not stay a circle and the
+    edges of a polygon do not stay straight, so that these shapes are moved
+    approximately (see :meth:`~sigima.objects.shape.BaseCoordinates.remap`).
+
     Args:
         src: source image of the operation
         operation: one of :data:`IMAGE_OPERATIONS` (``numpy.rot90`` is a

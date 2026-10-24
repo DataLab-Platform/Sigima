@@ -623,3 +623,37 @@ def rectangle_selection(
         inside = np.flatnonzero((centers >= low - tol) & (centers <= high + tol))
         slices.append(slice(inside[0], inside[-1] + 1) if inside.size else slice(0, 0))
     return tuple(slices)
+
+
+def pixel_centers(obj: ImageObj) -> tuple[np.ndarray, np.ndarray]:
+    """Return the physical coordinates of the centers of all pixels (test oracle).
+
+    Args:
+        obj: image object
+
+    Returns:
+        Tuple (X, Y) of 2D arrays with the shape of the image data
+    """
+    nrows, ncols = obj.data.shape
+    if obj.is_uniform_coords:
+        xcenters = obj.x0 + np.arange(ncols) * obj.dx
+        ycenters = obj.y0 + np.arange(nrows) * obj.dy
+    else:
+        xcenters, ycenters = obj.xcoords, obj.ycoords
+    return np.meshgrid(xcenters, ycenters)
+
+
+def circle_selection(obj: ImageObj, xc: float, yc: float, r: float) -> np.ndarray:
+    """Return the pixels whose centers lie in a physical circle (test oracle).
+
+    Args:
+        obj: image object
+        xc: X coordinate of the center
+        yc: Y coordinate of the center
+        r: radius
+
+    Returns:
+        Boolean array (True for the selected pixels)
+    """
+    x, y = pixel_centers(obj)
+    return (x - xc) ** 2 + (y - yc) ** 2 <= r**2 * (1.0 + 1e-12)

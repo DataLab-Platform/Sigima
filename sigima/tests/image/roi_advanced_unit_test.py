@@ -6,14 +6,17 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from skimage import draw
 
 import sigima.objects
 import sigima.params
 import sigima.proc.image
 from sigima.tests import guiutils
 from sigima.tests.data import create_multigaussian_image
-from sigima.tests.helpers import print_obj_data_dimensions, rectangle_selection
+from sigima.tests.helpers import (
+    circle_selection,
+    print_obj_data_dimensions,
+    rectangle_selection,
+)
 
 
 def test_image_roi_param() -> None:
@@ -214,9 +217,7 @@ def test_image_extract_rois() -> None:
     mask1 = np.zeros(shape=(SIZE, SIZE), dtype=bool)
     mask1[rectangle_selection(src, *IROI1)] = 1
     xc, yc, r = IROI2
-    mask2 = np.zeros(shape=(SIZE, SIZE), dtype=bool)
-    rr, cc = draw.disk((yc, xc), r)
-    mask2[rr, cc] = 1
+    mask2 = circle_selection(src, xc, yc, r)  # boundary included
     mask = mask1 | mask2
     # Extracted area: pixels whose centers lie in the union of the ROI bounding
     # boxes (dx=dy=1, x0=y0=0: the bounds lie on pixel centers, which are included)
@@ -277,10 +278,8 @@ def test_image_extract_roi() -> None:
     assert np.all(im2.data != 0), nzroi
     # The bounding box of the circle is bounded by pixel centers, which are included
     assert im2.data.shape == (IROI2[2] * 2 + 1, IROI2[2] * 2 + 1), roisham
-    mask2 = np.zeros(shape=im2.data.shape, dtype=bool)
-    xc = yc = r = IROI2[2]  # Adjust for ROI origin
-    rr, cc = draw.disk((yc, xc), r, shape=im2.data.shape)
-    mask2[rr, cc] = 1
+    # The extracted pixels keep their physical positions
+    mask2 = circle_selection(im2, *IROI2)  # boundary included
     assert np.all(im2.maskdata == ~mask2), f"Mask data mismatch{context}"
     # Bug fix verification: extracted images should handle ROI correctly
     # - For rectangular ROI: no ROI should be defined
