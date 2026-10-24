@@ -347,6 +347,46 @@ def test_image_transpose() -> None:
     check_array_result("Transpose", dst.data, exp)
 
 
+@pytest.mark.parametrize(
+    "func",
+    [
+        sigima.proc.image.transpose,
+        sigima.proc.image.rotate90,
+        sigima.proc.image.rotate270,
+        sigima.proc.image.fliph,
+        sigima.proc.image.flipv,
+    ],
+)
+@pytest.mark.parametrize("uniform", [True, False])
+def test_geometry_result_does_not_share_source_memory(
+    func: Callable, uniform: bool
+) -> None:
+    """Results of exact geometric transformations own their data and coordinates.
+
+    Regression: these results were views of the source arrays, so that modifying a
+    result in place also modified its source (and conversely).
+    """
+    src = sigima.objects.create_image("src", np.arange(12.0).reshape(3, 4))
+    if not uniform:
+        src.set_coords(np.array([1.0, 2.0, 4.0, 8.0]), np.array([10.0, 11.0, 15.0]))
+    data, xcoords, ycoords = src.data.copy(), src.xcoords.copy(), src.ycoords.copy()
+    dst = func(src)
+    assert not np.shares_memory(dst.data, src.data)
+    dst.data[...] = -1.0
+    src.data[0, 0] = 999.0
+    assert dst.data[0, 0] == -1.0
+    src.data[0, 0] = data[0, 0]
+    check_array_result("Unchanged source data", src.data, data)
+    if not uniform:
+        for dst_coords in (dst.xcoords, dst.ycoords):
+            for src_coords in (src.xcoords, src.ycoords):
+                assert not np.shares_memory(dst_coords, src_coords)
+        dst.xcoords[...] = -1.0
+        dst.ycoords[...] = -1.0
+        check_array_result("Unchanged source X coordinates", src.xcoords, xcoords)
+        check_array_result("Unchanged source Y coordinates", src.ycoords, ycoords)
+
+
 def test_image_geometry_nonuniform_coords() -> None:
     """Check that geometry operations propagate non-uniform coordinates.
 

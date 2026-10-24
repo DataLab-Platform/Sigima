@@ -182,7 +182,7 @@ def __swap_axes(src: ImageObj, dst: ImageObj) -> None:
     if src.is_uniform_coords:
         dst.set_uniform_coords(src.dy, src.dx, src.y0, src.x0)
     else:
-        dst.set_coords(src.ycoords, src.xcoords)
+        dst.set_coords(src.ycoords.copy(), src.xcoords.copy())
 
 
 @computation_function(
@@ -200,7 +200,7 @@ def rotate90(src: ImageObj) -> ImageObj:
         Output image object
     """
     dst = dst_1_to_1(src, "rotate90")
-    dst.data = np.rot90(src.data)
+    dst.data = np.rot90(src.data).copy()
     __swap_axes(src, dst)
     # ``numpy.rot90(a)`` is ``numpy.flipud(a.T)``: composing the ROI mapping the same
     # way keeps it aligned with the pixels, which an arbitrary rotation of the ROI
@@ -227,7 +227,7 @@ def rotate270(src: ImageObj) -> ImageObj:
         Output image object
     """
     dst = dst_1_to_1(src, "rotate270")
-    dst.data = np.rot90(src.data, 3)
+    dst.data = np.rot90(src.data, 3).copy()
     __swap_axes(src, dst)
     # ``numpy.rot90(a, 3)`` is ``numpy.fliplr(a.T)`` (see :func:`rotate90`).
     transformer.transform_roi(dst, "transpose")
@@ -252,7 +252,7 @@ def fliph(src: ImageObj) -> ImageObj:
         Output image object
     """
     dst = dst_1_to_1(src, "fliph")
-    dst.data = np.fliplr(src.data)
+    dst.data = np.fliplr(src.data).copy()
     transformer.transform_roi(dst, "fliph", cx=dst.xc)
     transformer.transform_annotations(dst, "fliph", cx=dst.xc)
     return dst
@@ -273,7 +273,7 @@ def flipv(src: ImageObj) -> ImageObj:
         Output image object
     """
     dst = dst_1_to_1(src, "flipv")
-    dst.data = np.flipud(src.data)
+    dst.data = np.flipud(src.data).copy()
     transformer.transform_roi(dst, "flipv", cy=dst.yc)
     transformer.transform_annotations(dst, "flipv", cy=dst.yc)
     return dst
@@ -357,7 +357,7 @@ def transpose(src: ImageObj) -> ImageObj:
         Output image object.
     """
     dst = dst_1_to_1(src, "transpose")
-    dst.data = np.transpose(src.data)
+    dst.data = np.transpose(src.data).copy()
     __swap_axes(src, dst)
     transformer.transform_roi(dst, "transpose")
     transformer.transform_annotations(dst, "transpose")
