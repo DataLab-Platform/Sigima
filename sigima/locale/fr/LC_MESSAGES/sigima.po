@@ -1397,17 +1397,17 @@ msgstr "Ordre de l'interpolation de type spline"
 msgid "Zoom"
 msgstr "Zoom"
 
-msgid "Minimum X-coordinate of the output image"
-msgstr "Coordonnée X minimale de l'image de sortie"
+msgid "X-coordinate of the center of the first output pixel"
+msgstr "Coordonnée X du centre du premier pixel de sortie"
 
-msgid "Maximum X-coordinate of the output image"
-msgstr "Coordonnée X maximale de l'image de sortie"
+msgid "X-coordinate of the center of the last output pixel"
+msgstr "Coordonnée X du centre du dernier pixel de sortie"
 
-msgid "Minimum Y-coordinate of the output image"
-msgstr "Coordonnée Y minimale de l'image de sortie"
+msgid "Y-coordinate of the center of the first output pixel"
+msgstr "Coordonnée Y du centre du premier pixel de sortie"
 
-msgid "Maximum Y-coordinate of the output image"
-msgstr "Coordonnée Y maximale de l'image de sortie"
+msgid "Y-coordinate of the center of the last output pixel"
+msgstr "Coordonnée Y du centre du dernier pixel de sortie"
 
 msgid "Pixel size"
 msgstr "Taille de pixel"

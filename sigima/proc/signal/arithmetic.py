@@ -44,9 +44,12 @@ def __signals_y_to_array(signals: list[SignalObj]) -> np.ndarray:
         signals: List of signal objects.
 
     Returns:
-        A NumPy array stacking the `y` attribute from all signals.
+        A NumPy array stacking the `y` attribute from all signals, with a data type
+        holding all of them (e.g. complex if any signal is complex), whatever their
+        order.
     """
-    return np.array([sig.y for sig in signals], dtype=signals[0].y.dtype)
+    arrays = [sig.y for sig in signals]
+    return np.array(arrays, dtype=np.result_type(*arrays))
 
 
 def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
@@ -56,9 +59,40 @@ def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
         signals: List of signal objects.
 
     Returns:
-        A NumPy array stacking the `dy` attribute from all signals.
+        A NumPy array stacking the `dy` attribute from all signals, with a data type
+        holding all of them, whatever their order.
     """
-    return np.array([sig.dy for sig in signals], dtype=signals[0].dy.dtype)
+    arrays = [sig.dy for sig in signals]
+    return np.array(arrays, dtype=np.result_type(*arrays))
+
+
+def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarray:
+    """Return the first-order uncertainty of the product of independent factors.
+
+    ``σ² = Σ_i σ_i² Π_{j≠i} |y_j|²`` is computed without dividing by the factors,
+    so that it is defined where a factor is zero, and scaled by its largest term,
+    so that tiny or huge terms do not underflow or overflow when squared.
+
+    Args:
+        y_array: Factors (one row per signal), real or complex.
+        dy_array: Uncertainties of the factors (one row per signal).
+
+    Returns:
+        Uncertainty of the product (NaN where it overflows).
+    """
+    abs_y = np.abs(y_array)
+    ones = np.ones_like(abs_y[:1])
+    # Products of the factors before (prefix) and after (suffix) each factor
+    prefix = np.cumprod(np.concatenate((ones, abs_y[:-1])), axis=0)
+    suffix = np.cumprod(np.concatenate((ones, abs_y[:0:-1])), axis=0)[::-1]
+    terms = np.abs(dy_array) * prefix * suffix
+    scale = np.max(terms, axis=0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        ratios = terms / np.where(scale > 0.0, scale, 1.0)
+        uncertainty = scale * np.sqrt(np.sum(ratios**2, axis=0))
+    uncertainty[np.isinf(uncertainty)] = np.nan
+    return uncertainty
 
 
 @computation_function(
@@ -194,7 +228,8 @@ def product(src_list: list[SignalObj]) -> SignalObj:
 
     .. note::
 
-        Uncertainties are propagated.
+        Uncertainties are propagated to first order for independent factors, also
+        where a factor is zero (the moduli of complex factors are used).
 
     .. warning::
 
@@ -210,14 +245,7 @@ def product(src_list: list[SignalObj]) -> SignalObj:
     y_array = __signals_y_to_array(src_list)
     dst.y = np.prod(y_array, axis=0)
     if is_uncertainty_data_available(src_list):
-        dy_array = __signals_dy_to_array(src_list)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            uncertainty = np.abs(dst.y) * np.sqrt(
-                np.sum((dy_array / y_array) ** 2, axis=0)
-            )
-            uncertainty[np.isinf(uncertainty)] = np.nan
-            dst.dy = uncertainty
+        dst.dy = __product_uncertainty(y_array, __signals_dy_to_array(src_list))
     restore_data_outside_roi(dst, src_list[0])
     return dst
 

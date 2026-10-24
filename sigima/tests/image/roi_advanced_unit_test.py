@@ -228,6 +228,29 @@ def test_image_extract_rois() -> None:
     assert im1.roi is None, f"Extracted image should not have ROI defined{context}"
 
 
+def test_image_extract_rois_non_uniform_coords() -> None:
+    """ROI extraction keeps the coordinates of the extracted columns and rows.
+
+    Regression: the coordinates of a non-uniform image were sliced with the row
+    indices for X and the column indices for Y (and shared the source arrays).
+    """
+    src = sigima.objects.create_image("src", np.arange(30.0).reshape(5, 6))
+    xcoords = np.array([0.0, 1.0, 3.0, 6.0, 10.0, 15.0])
+    ycoords = np.array([100.0, 101.0, 103.0, 106.0, 110.0])
+    src.set_coords(xcoords, ycoords)
+    param = sigima.objects.ROI2DParam.create(
+        geometry="rectangle", x0=3.0, y0=100.0, dx=12.0, dy=3.0
+    )
+    ix0, iy0, ix1, iy1 = param.get_bounding_box_indices(src)
+    dst = sigima.proc.image.extract_rois(src, [param])
+    assert dst.data.shape == (iy1 - iy0, ix1 - ix0) == (2, 3)
+    assert dst.xcoords.tolist() == xcoords[ix0:ix1].tolist() == [3.0, 6.0, 10.0]
+    assert dst.ycoords.tolist() == ycoords[iy0:iy1].tolist() == [100.0, 101.0]
+    for coords in (dst.xcoords, dst.ycoords):
+        assert not np.shares_memory(coords, src.xcoords)
+        assert not np.shares_memory(coords, src.ycoords)
+
+
 @pytest.mark.validation
 def test_image_extract_roi() -> None:
     """Validation test for image ROI extraction into multiple objects"""

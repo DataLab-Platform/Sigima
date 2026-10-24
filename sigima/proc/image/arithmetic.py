@@ -97,8 +97,9 @@ def addition(src_list: list[ImageObj]) -> ImageObj:
         Output image object (modified in place)
     """
     dst = dst_n_to_1(src_list, "Σ")  # `dst` data is initialized to `src_list[0]` data
+    # float64, or complex128 if any image is complex (see `dst_n_to_1`)
     for src in src_list[1:]:
-        dst.data = np.add(dst.data, src.data, dtype=float)
+        dst.data = np.add(dst.data, src.data, dtype=dst.data.dtype)
     restore_data_outside_roi(dst, src_list[0])
     return dst
 
@@ -118,8 +119,9 @@ def average(src_list: list[ImageObj]) -> ImageObj:
         Output image object (modified in place)
     """
     dst = dst_n_to_1(src_list, "µ")  # `dst` data is initialized to `src_list[0]` data
+    # float64, or complex128 if any image is complex (see `dst_n_to_1`)
     for src in src_list[1:]:
-        dst.data = np.add(dst.data, src.data, dtype=float)
+        dst.data = np.add(dst.data, src.data, dtype=dst.data.dtype)
     dst.data /= len(src_list)
     restore_data_outside_roi(dst, src_list[0])
     return dst
@@ -174,8 +176,9 @@ def product(src_list: list[ImageObj]) -> ImageObj:
         Output image object (modified in place)
     """
     dst = dst_n_to_1(src_list, "Π")  # `dst` data is initialized to `src_list[0]` data
+    # float64, or complex128 if any image is complex (see `dst_n_to_1`)
     for src in src_list[1:]:
-        dst.data = np.multiply(dst.data, src.data, dtype=float)
+        dst.data = np.multiply(dst.data, src.data, dtype=dst.data.dtype)
     restore_data_outside_roi(dst, src_list[0])
     return dst
 

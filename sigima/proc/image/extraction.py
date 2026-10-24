@@ -96,7 +96,7 @@ def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
             dst.dx, dst.dy, dst.x0 + ix0 * src.dx, dst.y0 + iy0 * src.dy
         )
     else:
-        dst.set_coords(src.xcoords[iy0:iy1], src.ycoords[ix0:ix1])
+        dst.set_coords(src.xcoords[ix0:ix1].copy(), src.ycoords[iy0:iy1].copy())
     dst.roi = None
 
     src2 = src.copy()
