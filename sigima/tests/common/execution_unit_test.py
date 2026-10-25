@@ -132,12 +132,65 @@ def test_describe_call_without_contract() -> None:
     assert description["qualification"]["status"] == "no_contract"
     assert description["roles"] == ["source"]
     assert description["parameters"] == {"method": "maximum"}
+    assert not description["context"]
     assert describe_call(no_contract, [src, src], roles=["a", "b"])["roles"] == [
         "a",
         "b",
     ]
     assert default_roles(2) == ["source", "operand"]
     assert default_roles(3) == ["sources"] * 3
+
+
+def test_image_roi_convention_is_recorded_and_checked() -> None:
+    """Calls on images with ROIs record the pixel convention; replays require it."""
+    rule = {"rule": "sigima.image.roi.pixel_centers", "version": 1}
+    assert dict(contracts.IMAGE_ROI_CONVENTION) == rule
+    contract = _contract(sigima.proc.image.absolute)
+    image = sigima.objects.create_image("i", np.arange(-32.0, 32.0).reshape(8, 8))
+    # Without ROI, nothing is recorded nor required
+    assert not describe_call(contract.function, [image])["context"]
+    ordinary = prepare_execution(contract, [image], param=None)
+    assert ordinary.context == {"x_alignment": None}
+    prepare_execution(contract, [image], values={}, context={})
+    # With a ROI, the rule is recorded by both the description and the preparation
+    image.roi = sigima.objects.create_image_roi("rectangle", [1, 1, 4, 4])
+    description = describe_call(contract.function, [image])
+    assert description["context"] == {"roi_convention": rule}
+    assert _json(description) == description
+    ordinary = prepare_execution(contract, [image], param=None)
+    assert ordinary.context == {"x_alignment": None, "roi_convention": rule}
+    reference = ordinary.run()
+    replay = prepare_execution(contract, [image], values={}, context=ordinary.context)
+    assert np.array_equal(replay.run().data, reference.data)
+    # Calls recorded without the rule (before Sigima 1.4) or with another one
+    for recorded in (
+        {"x_alignment": None},
+        {"roi_convention": None},
+        {"roi_convention": {"rule": "sigima.image.roi.pixel_centers", "version": 2}},
+        {"roi_convention": {"rule": "other.rule", "version": 1}},
+    ):
+        with pytest.raises(ExecutionError) as info:
+            prepare_execution(contract, [image], values={}, context=recorded)
+        assert info.value.code == "unsupported_context"
+    with pytest.raises(ExecutionError, match="before Sigima 1.4"):
+        prepare_execution(contract, [image], values={}, context={})
+    # An empty ROI selects every pixel, as before: nothing is required
+    image.roi = sigima.objects.create_image_roi("rectangle", [1, 1, 4, 4])
+    image.roi.single_rois.clear()
+    assert not describe_call(contract.function, [image])["context"]
+    # Any input image carrying ROIs (here the operand) makes the call depend on it
+    source = sigima.objects.create_image("s", np.ones((8, 8)))
+    operand = image.copy()
+    operand.roi = sigima.objects.create_image_roi("circle", [4, 4, 2])
+    difference = _contract(sigima.proc.image.difference)
+    context = describe_call(difference.function, [source, operand])["context"]
+    assert context == {"roi_convention": rule}
+    # Signal ROIs are not concerned
+    signal = _signal([0, 1, 2, 3], [-2.0, 0.0, 1.0, 4.0])
+    signal.roi = sigima.objects.create_signal_roi([[0.5, 2.5]])
+    normalize = _contract(sigima.proc.signal.normalize)
+    assert not describe_call(normalize.function, [signal], None)["context"]
+    assert contracts.image_roi_convention([signal]) is None
 
 
 def test_ordinary_and_replay_give_the_same_result() -> None:

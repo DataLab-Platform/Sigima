@@ -109,6 +109,13 @@ Follow these rules when you add or change a computation function:
   fails explicitly), nor when the change is entirely covered by a rule recorded
   in the execution context (e.g. the X-alignment policy).
 
+- Rules that apply to every operation are recorded in the execution context
+  rather than in each contract: the selection of image pixels by regions of
+  interest (:data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`, recorded when an
+  input image carries regions of interest). Increase the version of such a rule,
+  not the contract versions, when it changes: a replay refuses the calls
+  recorded with another version.
+
 - The structure of the contract (input roles, parameter arguments, outputs) is
   inferred from the annotations. Annotate every argument and the return value
   with names imported at runtime (not only under ``TYPE_CHECKING``). When roles
