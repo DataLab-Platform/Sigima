@@ -30,6 +30,12 @@ User Guide
 
             Key functionalities
 
+        .. grid-item-card:: :octicon:`versions;1em;sd-text-info`  Contracts
+            :link: contracts
+            :link-type: doc
+
+            Operation contracts and versions
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
@@ -38,3 +44,4 @@ User Guide
    getting_started
    overview
    features
+   contracts
