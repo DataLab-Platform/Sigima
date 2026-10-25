@@ -91,6 +91,26 @@ the effect of quantization or lossy compression before writing.
 .. autoclass:: ImageExportCapabilities
 .. autoclass:: ImageExportOptionSpec
 
+NPZ object archives
+^^^^^^^^^^^^^^^^^^^
+
+Signals and images can be serialized to in-memory archives of NumPy arrays and
+JSON metadata (NPZ), to transfer them between applications: the Web API of
+DataLab and its clients (such as DataLab-Kernel) use this format. Labels, units,
+uncertainties, uniform or non-uniform image coordinates and object metadata are
+kept; arrays are never pickled. The format is described in
+:mod:`sigima.io.npz`.
+
+.. code-block:: python
+
+    from sigima.io import deserialize_object_from_npz, serialize_object_to_npz
+
+    data = serialize_object_to_npz(image)
+    copy = deserialize_object_from_npz(data)
+
+.. autofunction:: serialize_object_to_npz
+.. autofunction:: deserialize_object_from_npz
+
 Errors
 ^^^^^^
 
@@ -190,6 +210,7 @@ from sigima.io.image import (
     validate_image_export_options,
     write_image_export_data,
 )
+from sigima.io.npz import deserialize_object_from_npz, serialize_object_to_npz
 from sigima.io.signal.base import SignalIORegistry
 
 __all__ = [
@@ -204,6 +225,7 @@ __all__ = [
     "RawImageImportParam",
     "SignalIORegistry",
     "UnsupportedFormatOperationError",
+    "deserialize_object_from_npz",
     "encode_image_export_data",
     "get_image_export_capabilities",
     "get_image_export_writer_kwargs",
@@ -219,6 +241,7 @@ __all__ = [
     "read_roi_grid",
     "read_signal",
     "read_signals",
+    "serialize_object_to_npz",
     "validate_image_export_configuration",
     "validate_image_export_options",
     "write_annotations",
