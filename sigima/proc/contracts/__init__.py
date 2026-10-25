@@ -24,7 +24,9 @@ its modules:
   parameters actually used, rebuilt against the local classes only);
 - :mod:`~sigima.proc.contracts.execution`: description and preparation of calls,
   shared by ordinary processing and replay (:func:`describe_call`,
-  :func:`prepare_execution`, :func:`normalize_outputs`, :func:`with_roi`);
+  :func:`prepare_execution`, :func:`normalize_outputs`, :func:`with_roi`), and
+  the conventions recorded in the execution context
+  (:func:`image_roi_convention`);
 - :mod:`~sigima.proc.contracts.policies` and
   :mod:`~sigima.proc.contracts.alignment`: X-alignment policies of signal
   operations and their algorithms.
@@ -72,11 +74,13 @@ if TYPE_CHECKING:
     )
     from sigima.proc.contracts.execution import (
         EXECUTION_ERROR_CODES,
+        IMAGE_ROI_CONVENTION,
         ExecutionError,
         PreparedExecution,
         default_roles,
         describe_call,
         execute,
+        image_roi_convention,
         implementation_of,
         normalize_outputs,
         prepare_execution,
@@ -136,11 +140,13 @@ _NAMES = {
     ),
     "execution": (
         "EXECUTION_ERROR_CODES",
+        "IMAGE_ROI_CONVENTION",
         "ExecutionError",
         "PreparedExecution",
         "default_roles",
         "describe_call",
         "execute",
+        "image_roi_convention",
         "implementation_of",
         "normalize_outputs",
         "prepare_execution",
@@ -168,6 +174,7 @@ __all__ = [
     "ARTIFACT_KINDS",
     "EXACT",
     "EXECUTION_ERROR_CODES",
+    "IMAGE_ROI_CONVENTION",
     "OBJECT_KINDS",
     "PARAMETER_CODEC_VERSION",
     "SMALLEST_GRID_LINEAR_HOLD",
@@ -203,6 +210,7 @@ __all__ = [
     "execute",
     "get_operation_contract",
     "get_x_alignment_policy",
+    "image_roi_convention",
     "implementation_of",
     "normalize_outputs",
     "parameters_from_values",

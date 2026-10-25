@@ -21,6 +21,18 @@ application:
 - :func:`with_roi` returns a copy of an input with recorded regions of interest,
   to replay a call on an input whose regions of interest changed since.
 
+The execution context also records the conventions that the result depends on
+whatever the operation. Rule ``sigima.image.roi.pixel_centers`` (version 1,
+:data:`IMAGE_ROI_CONVENTION`), recorded under ``roi_convention`` when an input
+image carries regions of interest: they select the pixels whose centers lie in
+their shape, bounds included; the part of the image holding a region of
+interest, the position of the results computed in it and the move of regions of
+interest by flips, rotations, transposition and translation follow the same
+pixels. Earlier Sigima versions (before 1.4) rounded bounds to the nearest pixel
+indices: a replay refuses a call on images carrying regions of interest
+recorded without this rule (``unsupported_context``) instead of giving another
+result.
+
 Errors carry a stable ``code`` (:class:`ExecutionError`); scientific refusals of a
 policy keep their own exception
 (:class:`~sigima.proc.contracts.alignment.XAlignmentError`) in ordinary processing
@@ -33,6 +45,7 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import sys
+import types
 from collections.abc import Iterator, Sequence
 from importlib import metadata
 from typing import Any, Callable
@@ -55,11 +68,13 @@ from sigima.proc.contracts.registry import OperationContract, contract_for_funct
 
 __all__ = [
     "EXECUTION_ERROR_CODES",
+    "IMAGE_ROI_CONVENTION",
     "ExecutionError",
     "PreparedExecution",
     "default_roles",
     "describe_call",
     "execute",
+    "image_roi_convention",
     "implementation_of",
     "normalize_outputs",
     "prepare_execution",
@@ -72,6 +87,12 @@ EXECUTION_ERROR_CODES = (
     "invalid_parameters",
     "unsupported_context",
     "unexpected_output",
+)
+
+#: Selection of image pixels by regions of interest: pixels whose centers lie in
+#: their shape, bounds included (recorded under ``roi_convention``)
+IMAGE_ROI_CONVENTION = types.MappingProxyType(
+    {"rule": "sigima.image.roi.pixel_centers", "version": 1}
 )
 
 _KINDS: tuple[tuple[type, str], ...] = (
@@ -115,6 +136,43 @@ def default_roles(count: int) -> list[str]:
     if count == 2:
         return ["source", "operand"]
     return ["sources"] * count
+
+
+def image_roi_convention(inputs: Sequence[Any]) -> dict[str, Any] | None:
+    """Return the image ROI convention a call depends on, as recorded.
+
+    Args:
+        inputs: Input objects of the call.
+
+    Returns:
+        A copy of :data:`IMAGE_ROI_CONVENTION` if an input image carries regions
+        of interest, None otherwise.
+    """
+    for obj in inputs:
+        if isinstance(obj, ImageObj) and obj.roi is not None and not obj.roi.is_empty():
+            return dict(IMAGE_ROI_CONVENTION)
+    return None
+
+
+def _check_image_roi_convention(context: dict[str, Any], inputs: list[Any]) -> None:
+    """Check that a replay on images with regions of interest recorded the rule.
+
+    Raises:
+        ExecutionError: ``unsupported_context`` if an input image carries regions
+         of interest and the recorded rule is missing or another one.
+    """
+    expected = image_roi_convention(inputs)
+    if expected is None or context.get("roi_convention") == expected:
+        return
+    recorded = context.get("roi_convention")
+    if recorded is None:
+        detail = (
+            "the selection of image pixels in regions of interest was not recorded "
+            "(call recorded before Sigima 1.4, which selected other pixels)"
+        )
+    else:
+        detail = f"unsupported image ROI convention {recorded!r}"
+    raise ExecutionError("unsupported_context", detail)
 
 
 def implementation_of(func: Callable) -> dict[str, Any]:
@@ -190,7 +248,7 @@ def describe_call(
 
     Returns:
         ``{"operation", "qualification", "pattern", "roles", "parameters",
-        "parameter_codec", "options", "metadata_read", "limits",
+        "parameter_codec", "options", "metadata_read", "context", "limits",
         "implementation"}``:
         ``operation`` is ``{"id", "contract_version"}`` or None;
         ``qualification`` is ``{"status", "comparison"}`` (status ``qualified``,
@@ -202,7 +260,10 @@ def describe_call(
         :func:`prepare_execution`), to be recorded in the execution context;
         ``metadata_read`` lists the metadata keys of the inputs read by the
         computation (``{"role", "position", "key"}``, *position* in *inputs*),
-        whose values an application records and checks before a replay.
+        whose values an application records and checks before a replay;
+        ``context`` holds the other entries to record in the execution context,
+        checked by :func:`prepare_execution` for a replay (``roi_convention``,
+        see :func:`image_roi_convention`).
     """
     if contract is _MISSING:
         contract = contract_for_function(func)
@@ -216,6 +277,7 @@ def describe_call(
         "parameter_codec": PARAMETER_CODEC_VERSION,
         "options": {},
         "metadata_read": [],
+        "context": {},
         "limits": limits,
         "implementation": implementation_of(func),
     }
@@ -237,6 +299,9 @@ def describe_call(
     }
     description["pattern"] = contract.pattern
     description["options"] = _current_options(contract)
+    convention = image_roi_convention(inputs)
+    if convention is not None:
+        description["context"]["roi_convention"] = convention
     if _inputs_match(contract, inputs):
         description["roles"] = contract.input_role_names(len(inputs))
         reads = dict(contract.reads_metadata)
@@ -284,8 +349,9 @@ class PreparedExecution:
         args: Positional arguments: prepared inputs (a list input as a list),
          then parameter arguments.
         context: Execution context to record: ``x_alignment`` (record of the
-         policy applied, or None) and, when the computation reads global options,
-         ``options`` (their values).
+         policy applied, or None), when the computation reads global options,
+         ``options`` (their values) and, when an input image carries regions of
+         interest, ``roi_convention`` (:data:`IMAGE_ROI_CONVENTION`).
         options: Global option values applied while the function runs.
     """
 
@@ -369,7 +435,9 @@ def prepare_execution(
     Raises:
         ExecutionError: ``input_mismatch`` if the inputs do not fit the roles,
          ``invalid_parameters`` if the parameters cannot be decoded or do not fit,
-         ``unsupported_context`` if a recorded global option is missing.
+         ``unsupported_context`` if a recorded global option is missing, or if an
+         input image carries regions of interest and the recorded context does
+         not name the image ROI convention (:data:`IMAGE_ROI_CONVENTION`).
         XAlignmentError: If a recorded policy is unknown or the inputs cannot be
          aligned (scientific refusal, also in ordinary processing).
     """
@@ -388,6 +456,8 @@ def prepare_execution(
     else:
         arguments = _parameter_arguments(contract, param)
     replay = context is not None
+    if replay:
+        _check_image_roi_convention(context, list(inputs))
     option_values: dict[str, Any] = {}
     if contract.reads_options:
         if replay:
@@ -414,6 +484,9 @@ def prepare_execution(
     exec_context: dict[str, Any] = {"x_alignment": record}
     if option_values:
         exec_context["options"] = dict(option_values)
+    convention = image_roi_convention(inputs)
+    if convention is not None:
+        exec_context["roi_convention"] = convention
     return PreparedExecution(
         function=contract.function,
         args=_call_arguments(contract, prepared_inputs, arguments),
