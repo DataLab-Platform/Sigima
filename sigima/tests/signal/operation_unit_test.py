@@ -154,10 +154,19 @@ def test_signal_product() -> None:
         ([(1e-150, 1e-151), (1e-150, 1e-151)], np.sqrt(2.0) * 1e-301),
         # Complex factors: moduli are used
         ([(3.0j, 0.2), (2.0, 0.1)], 0.5),
+        # Factors spanning the whole float64 range: no intermediate overflow
+        # (regression: NaN for some orders of the signals)
+        ([(1e308, 0.0), (1.0, 2.0), (1e-308, 0.0)], 2.0),
+        ([(1e300, 0.0), (1e300, 0.0), (1e-300, 0.0), (1e-300, 0.0), (1.0, 1.0)], 1.0),
+        # Product underflowing to zero, uncertainty representable
+        ([(1e-200, 1.0), (1e-200, 0.0)], 1e-200),
+        # Zero factor among huge and tiny ones
+        ([(0.0, 1.0), (1e300, 0.0), (1e-300, 0.0), (1e300, 0.0)], 1e300),
     ],
 )
 def test_signal_product_uncertainty(factors, expected_dy) -> None:
-    """First-order uncertainty of a product, including where a factor is zero."""
+    """First-order uncertainty of a product, including where a factor is zero,
+    whatever the order and the magnitudes of the factors."""
     x = np.arange(3.0)
     signals = [
         sigima.objects.create_signal(
@@ -166,9 +175,27 @@ def test_signal_product_uncertainty(factors, expected_dy) -> None:
         for i, (value, uncertainty) in enumerate(factors)
     ]
     for order in itertools.permutations(range(len(signals))):
-        result = sigima.proc.signal.product([signals[i] for i in order])
+        # The product itself may overflow for some orders: only its uncertainty
+        # is checked here
+        with np.errstate(over="ignore", invalid="ignore"):
+            result = sigima.proc.signal.product([signals[i] for i in order])
         assert result.dy is not None, order
         assert np.allclose(np.real(result.dy), expected_dy, rtol=1e-12, atol=0.0)
+
+
+def test_signal_product_uncertainty_overflow() -> None:
+    """The uncertainty of a product is NaN where its first-order value overflows."""
+    x = np.arange(3.0)
+    s1 = sigima.objects.create_signal(
+        "s1", x, np.full(3, 1e300), dy=np.array([1e10, 1.0, 0.0])
+    )
+    s2 = sigima.objects.create_signal("s2", x, np.full(3, 1.0), dy=np.zeros(3))
+    s3 = sigima.objects.create_signal("s3", x, np.full(3, 1e300), dy=np.zeros(3))
+    with np.errstate(over="ignore"):
+        result = sigima.proc.signal.product([s1, s2, s3])
+    assert result.dy is not None
+    assert np.isnan(result.dy[0])
+    assert np.array_equal(result.dy[1:], [1e300, 0.0])
 
 
 @pytest.mark.parametrize(

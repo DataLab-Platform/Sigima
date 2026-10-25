@@ -70,8 +70,11 @@ def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarr
     """Return the first-order uncertainty of the product of independent factors.
 
     ``σ² = Σ_i σ_i² Π_{j≠i} |y_j|²`` is computed without dividing by the factors,
-    so that it is defined where a factor is zero, and scaled by its largest term,
-    so that tiny or huge terms do not underflow or overflow when squared.
+    so that it is defined where a factor is zero. Each term is computed from the
+    mantissas and exponents of the factors (:func:`numpy.frexp`), so that no
+    intermediate product overflows or underflows whatever the order and the
+    magnitudes of the factors, and the terms are scaled by the largest one before
+    being squared.
 
     Args:
         y_array: Factors (one row per signal), real or complex.
@@ -81,16 +84,27 @@ def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarr
         Uncertainty of the product (NaN where it overflows).
     """
     abs_y = np.abs(y_array)
-    ones = np.ones_like(abs_y[:1])
-    # Products of the factors before (prefix) and after (suffix) each factor
-    prefix = np.cumprod(np.concatenate((ones, abs_y[:-1])), axis=0)
-    suffix = np.cumprod(np.concatenate((ones, abs_y[:0:-1])), axis=0)[::-1]
-    terms = np.abs(dy_array) * prefix * suffix
-    scale = np.max(terms, axis=0)
+    abs_dy = np.abs(dy_array)
+    ftype = np.result_type(abs_y.dtype, abs_dy.dtype, np.float32)
+    y_mant, y_exp = np.frexp(abs_y.astype(ftype, copy=False))
+    dy_mant, dy_exp = np.frexp(abs_dy.astype(ftype, copy=False))
+    ones = np.ones_like(y_mant[:1])
+    # Products of the mantissas before (prefix) and after (suffix) each factor:
+    # mantissas lie in [0.5, 1) (or are zero), so these products cannot overflow
+    prefix = np.cumprod(np.concatenate((ones, y_mant[:-1])), axis=0)
+    suffix = np.cumprod(np.concatenate((ones, y_mant[:0:-1])), axis=0)[::-1]
+    # Term i is mant[i] * 2**exp[i]
+    mant = dy_mant * prefix * suffix
+    exp = dy_exp + (np.sum(y_exp, axis=0) - y_exp)
+    positive = mant > 0.0
+    exp_max = np.max(np.where(positive, exp, np.iinfo(exp.dtype).min), axis=0)
+    exp_max = np.where(np.any(positive, axis=0), exp_max, 0)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=RuntimeWarning)
-        ratios = terms / np.where(scale > 0.0, scale, 1.0)
-        uncertainty = scale * np.sqrt(np.sum(ratios**2, axis=0))
+        ratios = np.ldexp(mant, exp - exp_max)
+        scale = np.max(ratios, axis=0)
+        ratios /= np.where(scale > 0.0, scale, 1.0)
+        uncertainty = np.ldexp(scale * np.sqrt(np.sum(ratios**2, axis=0)), exp_max)
     uncertainty[np.isinf(uncertainty)] = np.nan
     return uncertainty
 
