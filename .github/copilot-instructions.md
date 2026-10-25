@@ -182,6 +182,47 @@ result = my_processing(src, param1=10, param2="value")
 - Parameter class MUST be a `guidata.dataset.DataSet` subclass
 - Always re-export parameter classes in `sigima.params` module
 - Export computation functions in `__all__` of their module AND in `sigima/proc/{signal|image}/__init__.py`
+- Every public computation function declares an operation contract (see below)
+
+### 1b. Operation Contracts (Versioned, Replayable Identity)
+
+Every public computation function declares its contract next to it:
+
+```python
+from sigima.proc.contracts import EXACT, ReplayQualification
+
+
+@computation_function(
+    operation_id="sigima.signal.my_processing",  # stable, written in clear
+    contract_version=1,  # 1 at the first declaration
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
+def my_processing(src: SignalObj, p: MyParam) -> SignalObj: ...
+```
+
+Applications (DataLab, DataLab-Web, capsules) record `(operation_id, contract_version)` with each
+computation and replay it later, possibly with another Sigima version: a replay requires the same
+identifier and version, otherwise it is refused explicitly.
+
+**Versioning rule (mandatory)**:
+- **Increase `contract_version` (and the version of its `ReplayQualification`) in the same change
+  whenever a modification of a computation function changes the result it returns**: new, removed
+  or renamed parameters, different defaults, different outputs, a different result for the same
+  inputs (even for unusual inputs only, e.g. mixed real/complex or `float32`/`float64` data), or
+  inputs that were accepted and are now refused.
+- This is **independent of the releases of DataLab or of any other application**: Sigima is a
+  reference of its own. Never postpone or skip an increase because an application is not released
+  yet.
+- Do **not** increase it only when the result cannot change: inputs previously refused (error) are
+  now accepted; refactoring, performance or messages without effect on the result; or the change is
+  entirely covered by a versioned rule of the execution context (`IMAGE_ROI_CONVENTION`, X-alignment
+  policies), whose version is increased instead.
+- Historical one-off exception: Sigima 1.4.0 kept version 1 although results changed since 1.3.0
+  (contracts just published, not used yet). It does **not** apply to later changes.
+- Keep the identifier when renaming or moving a function (use `aliases` if it must change).
+
+Full rules: `doc/contributing/guidelines.rst` (section "Operation contracts"); user documentation:
+`doc/user_guide/contracts.rst`.
 
 ### 2. Object Model: `SignalObj` and `ImageObj`
 
@@ -303,11 +344,16 @@ result.roi = rois  # Attach to result
 1. **Implement in `sigima/proc/signal/processing.py` (or appropriate module)**:
 
 ```python
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 import sigima.params
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.my_feature",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def my_feature(src: SignalObj, p: MyFeatureParam) -> SignalObj:
     """Apply my feature to signal.
 
@@ -390,6 +436,28 @@ def test_my_feature():
 # Docstring already makes it appear in API docs
 # Add usage example in doc/examples/ if complex
 ```
+
+7. **Prove the replay qualification**: the `@pytest.mark.validation` test is required; run
+   `python scripts/run_with_env.py python -m pytest --qualification-report=report.json` (fails if a
+   declared qualification is not proven). Declare a tolerance only when justified (see guidelines).
+
+### Modifying an Existing Computation Function
+
+Checklist (see "Operation Contracts" above):
+
+1. **Can the result change?** (values, outputs, defaults, parameters, accepted inputs) If yes:
+2. **Increase `contract_version`** and the `contract_version` of its `ReplayQualification` in the
+   same change, whatever the releases of DataLab or other applications.
+3. **Update reference cases deliberately** and explain the scientific reason (never to make a test
+   pass).
+4. **Run the qualification report** (`--qualification-report=report.json`).
+5. **Release notes**: describe the change and list the contracts whose version was increased.
+6. **Downstream**: provenance tests of applications that check a contract version (e.g. DataLab
+   `datalab/tests/features/common/provenance_*_test.py`) must follow.
+
+No increase when the result cannot change (previously refused inputs now accepted, refactoring
+without effect) or when the change is entirely covered by a versioned rule of the execution context
+(increase that rule's version instead).
 
 ### Adding Low-Level NumPy Functions to `tools`
 
@@ -559,6 +627,8 @@ Sigima functions are **consumed by DataLab processors**:
 | `sigima/objects/signal/object.py` | `SignalObj` implementation |
 | `sigima/objects/image/object.py` | `ImageObj` implementation |
 | `sigima/proc/decorator.py` | `@computation_function` decorator system |
+| `sigima/proc/contracts/` | Operation contracts: registry, codec, execution, replay qualification |
+| `doc/contributing/guidelines.rst` | Contract rules (identifiers, version increases, qualification) |
 | `sigima/proc/signal/processing.py` | Signal processing functions (normalize, calibrate, etc.) |
 | `sigima/proc/image/detection.py` | Image detection (blobs, peaks, contours) |
 | `sigima/tools/checks.py` | Input validation (`check_1d_array`, `check_2d_array`) |
@@ -585,6 +655,9 @@ Sigima functions are **consumed by DataLab processors**:
 - Entirely new computation type (e.g., new parametric images)
 - New analysis methods
 
+**Contract versions are independent of this classification**: a bug fix that changes the result
+of a computation function increases its `contract_version` too.
+
 ## Getting Help
 
 - **Documentation**: https://sigima.readthedocs.io/
@@ -593,4 +666,4 @@ Sigima functions are **consumed by DataLab processors**:
 
 ---
 
-**Remember**: Always use `scripts/run_with_env.py`, test headlessly with pytest, and export all parameters through `sigima.params`.
+**Remember**: Always use `scripts/run_with_env.py`, test headlessly with pytest, export all parameters through `sigima.params`, and increase `contract_version` whenever a change modifies the result of a computation function.

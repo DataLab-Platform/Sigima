@@ -10,7 +10,11 @@ stable identifier and version, X-alignment policy, global options read and
 replay qualification. The structure of the contract (input roles, parameter
 arguments, outputs) is inferred from the annotations of the function.
 Applications use contracts to record what was computed and to replay it later,
-possibly with another Sigima version, with the same meaning.
+possibly with another Sigima version, with the same meaning. The version of a
+contract is increased whenever a change of the function changes the result it
+returns, whatever the releases of the applications using Sigima; a call recorded
+with another version is refused instead of being replayed (see the user guide,
+"Operation contracts and versions", and the contributing guidelines).
 
 This package is the public API of contracts; import from it rather than from
 its modules:

@@ -1,0 +1,76 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2025, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Operation contracts and versions"
+msgstr "Contrats d'opération et versions"
+
+msgid "Every public computation function of Sigima declares an **operation contract**: a stable identifier (e.g. ``sigima.signal.normalize``) and a version, the roles of its inputs, its parameters and outputs, and the rules its result depends on besides them. Applications such as DataLab record the identifier and the version of each computation with the processed data (provenance), so that the computation can be replayed later, possibly with another Sigima version, and compared with the recorded result."
+msgstr "Chaque fonction de calcul publique de Sigima déclare un **contrat d'opération** : un identifiant stable (par exemple ``sigima.signal.normalize``) et une version, les rôles de ses entrées, ses paramètres et ses sorties, et les règles dont son résultat dépend en plus de ceux-ci. Les applications comme DataLab enregistrent l'identifiant et la version de chaque calcul avec les données traitées (provenance), afin que le calcul puisse être rejoué plus tard, éventuellement avec une autre version de Sigima, et comparé au résultat enregistré."
+
+msgid "What a version guarantees"
+msgstr "Ce que garantit une version"
+
+msgid "For a given identifier and version, the same inputs, parameters and execution context give the same result, compared under the rule declared by the replay qualification of the contract: exact by default, or within a justified tolerance for some computations (transforms, fits, reductions...) whose results differ slightly between numerical libraries or platforms. Contracts that are not qualified keep their identity but are never replayed."
+msgstr "Pour un identifiant et une version donnés, les mêmes entrées, paramètres et contexte d'exécution donnent le même résultat, comparé selon la règle déclarée par la qualification de rejeu du contrat : exacte par défaut, ou dans une tolérance justifiée pour certains calculs (transformées, ajustements, réductions…) dont les résultats diffèrent légèrement d'une bibliothèque numérique ou d'une plateforme à l'autre. Les contrats non qualifiés conservent leur identité mais ne sont jamais rejoués."
+
+msgid "When a version is increased"
+msgstr "Quand une version est augmentée"
+
+msgid "Sigima increases the version of a contract whenever a change of the computation function changes the result it returns: new, removed or renamed parameters, a different default behavior, different outputs or a different result for the same inputs (even for unusual inputs only), or inputs that were accepted and are now refused. This is done in the Sigima release that brings the change, whatever the releases of the applications using Sigima: Sigima is a reference of its own."
+msgstr "Sigima augmente la version d'un contrat dès qu'une modification de la fonction de calcul change le résultat qu'elle renvoie : paramètres ajoutés, supprimés ou renommés, comportement par défaut différent, sorties différentes ou résultat différent pour les mêmes entrées (même pour des entrées inhabituelles seulement), ou entrées acceptées qui sont désormais refusées. Cela est fait dans la version de Sigima qui apporte la modification, indépendamment des publications des applications qui utilisent Sigima : Sigima est une référence en soi."
+
+msgid "The version is not increased when the result cannot change:"
+msgstr "La version n'est pas augmentée lorsque le résultat ne peut pas changer :"
+
+msgid "inputs that were refused (with an error) are now accepted;"
+msgstr "des entrées auparavant refusées (avec une erreur) sont désormais acceptées ;"
+
+msgid "the change has no effect on the result (refactoring, performance, messages);"
+msgstr "la modification est sans effet sur le résultat (refactorisation, performances, messages) ;"
+
+msgid "the change is entirely covered by a versioned rule of the execution context (see below), whose version is increased instead."
+msgstr "la modification est entièrement couverte par une règle versionnée du contexte d'exécution (voir ci-dessous), dont la version est augmentée à la place."
+
+msgid "The release notes list the contracts whose version was increased."
+msgstr "Les notes de version listent les contrats dont la version a été augmentée."
+
+msgid "Rules of the execution context"
+msgstr "Règles du contexte d'exécution"
+
+msgid "Some rules apply to every operation, or to a family of operations, and are recorded with each call rather than in each contract, with their own identifier and version:"
+msgstr "Certaines règles s'appliquent à toutes les opérations, ou à une famille d'opérations, et sont enregistrées avec chaque appel plutôt que dans chaque contrat, avec leurs propres identifiant et version :"
+
+msgid "the selection of image pixels by regions of interest (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), recorded when an input image carries regions of interest;"
+msgstr "la sélection des pixels d'une image par les régions d'intérêt (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), enregistrée lorsqu'une image d'entrée porte des régions d'intérêt ;"
+
+msgid "the alignment of signals on a common X grid, for operations combining several signals (``sigima.signal.x_alignment.*`` policies);"
+msgstr "l'alignement des signaux sur une grille X commune, pour les opérations combinant plusieurs signaux (politiques ``sigima.signal.x_alignment.*``) ;"
+
+msgid "the global options read by a computation and the metadata of its inputs it reads."
+msgstr "les options globales lues par un calcul et les métadonnées de ses entrées qu'il lit."
+
+msgid "When such a rule changes, its version is increased and the contracts keep theirs."
+msgstr "Lorsqu'une telle règle change, sa version est augmentée et les contrats conservent la leur."
+
+msgid "Consequences for replay"
+msgstr "Conséquences pour le rejeu"
+
+msgid "An application replays a recorded call only with a local contract of the same identifier and version, qualified for that version, and with the recorded execution context. A call recorded with another version of the contract, or with a rule of the context that Sigima no longer supports, is refused explicitly (unsupported contract or unsupported context): it is never replayed to give a silently different result. To obtain a record with the current version, compute the result again."
+msgstr "Une application ne rejoue un appel enregistré qu'avec un contrat local de même identifiant et de même version, qualifié pour cette version, et avec le contexte d'exécution enregistré. Un appel enregistré avec une autre version du contrat, ou avec une règle du contexte que Sigima ne prend plus en charge, est refusé explicitement (contrat ou contexte non pris en charge) : il n'est jamais rejoué pour donner silencieusement un résultat différent. Pour obtenir un enregistrement avec la version actuelle, recalculez le résultat."
+
+msgid "The contracts were published with Sigima 1.3.0 and kept version 1 in Sigima 1.4.0 although several results changed, because they had just been published and were not used yet. This one-off exception does not apply to later releases."
+msgstr "Les contrats, publiés avec Sigima 1.3.0, ont conservé la version 1 dans Sigima 1.4.0 bien que plusieurs résultats aient changé, car ils venaient d'être publiés et n'étaient pas encore exploités. Cette exception ponctuelle ne s'applique pas aux versions ultérieures."
+
+msgid "See also the rules followed by contributors (:doc:`/contributing/guidelines`, section \"Operation contracts\") and the API of :mod:`sigima.proc.contracts`."
+msgstr "Voir aussi les règles suivies par les contributeurs (:doc:`/contributing/guidelines`, section « Operation contracts ») et l'API de :mod:`sigima.proc.contracts`."

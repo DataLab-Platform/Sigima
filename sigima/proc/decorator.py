@@ -418,7 +418,10 @@ def computation_function(
         description: Optional custom description or docstring.
         operation_id: Optional stable operation identifier (see
          :mod:`sigima.proc.contracts`). Never derived from the Python name.
-        contract_version: Contract version, required with ``operation_id``.
+        contract_version: Contract version, required with ``operation_id``: 1 at
+         the first declaration, increased whenever a change of the function changes
+         the result it returns, whatever the releases of the applications using
+         Sigima (see the contributing guidelines, "Operation contracts").
         aliases: Earlier operation identifiers, only with ``operation_id``.
         qualification: Replay qualification of the tested contract version
          (see :class:`sigima.proc.contracts.declarations.ReplayQualification`), only

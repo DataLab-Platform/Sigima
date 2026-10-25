@@ -96,30 +96,40 @@ Follow these rules when you add or change a computation function:
 
 - If the identifier itself must change, keep the previous one in ``aliases``.
 
-- Increase ``contract_version`` for any change of meaning: new, removed or
-  renamed parameters, a different default behavior, different outputs or a
-  different scientific result for the same inputs.
+- Increase ``contract_version`` whenever a change of the computation function
+  changes the result it returns: new, removed or renamed parameters, a
+  different default behavior, different outputs or a different scientific
+  result for the same inputs, even for unusual inputs only (e.g. mixed real and
+  complex, or ``float32`` and ``float64``, data), and inputs that were accepted
+  and are now refused. Do it in the change itself, whatever the releases of
+  DataLab or of any other application using Sigima: Sigima is a reference of
+  its own, and a replay of an activity recorded with the earlier version is
+  then refused explicitly instead of giving another result.
 
-- In particular, increase it whenever a call that succeeded may now give
-  another result, even for unusual inputs only (e.g. mixed real and complex, or
-  ``float32`` and ``float64``, data): a replay of an activity recorded with the
-  earlier version is then refused explicitly instead of being reported as
-  different. Do not increase it when only inputs that were refused are now
-  accepted, or when inputs that were accepted are now refused (the replay then
-  fails explicitly), nor when the change is entirely covered by a rule recorded
-  in the execution context (e.g. the X-alignment policy).
+- Do not increase it when the result cannot change: only inputs that were
+  refused (with an error) are now accepted, the change has no effect on the
+  result (refactoring, performance, messages), or the change is entirely
+  covered by a versioned rule of the execution context (see below), whose
+  version is increased instead.
 
-- Version 1 of the contracts is settled by the first stable release of an
-  application recording them (DataLab 1.4): until then, no recorded activity
-  has to be refused, and contract versions are not increased (the changes of
-  Sigima 1.4 are part of version 1).
+- Checklist for any change of an existing computation function: decide whether
+  the result can change; if so, increase ``contract_version`` and the version
+  of its ``ReplayQualification`` (after proving it, see below), update the
+  reference cases deliberately, run ``pytest --qualification-report``, list the
+  increased contracts in the release notes, and update the provenance tests of
+  the applications that check a contract version (e.g. DataLab).
+
+- Historical exception: the contracts were published with Sigima 1.3.0 and
+  kept version 1 in Sigima 1.4.0 although several results changed, because they
+  had just been published and were not used yet. This one-off decision does not
+  apply to later changes.
 
 - Rules that apply to every operation are recorded in the execution context
   rather than in each contract: the selection of image pixels by regions of
   interest (:data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`, recorded when an
-  input image carries regions of interest). Increase the version of such a rule,
-  not the contract versions, when it changes: a replay refuses the calls
-  recorded with another version.
+  input image carries regions of interest) and the X-alignment policies (see
+  below). Increase the version of such a rule, not the contract versions, when
+  it changes: a replay refuses the calls recorded with another version.
 
 - The structure of the contract (input roles, parameter arguments, outputs) is
   inferred from the annotations. Annotate every argument and the return value
