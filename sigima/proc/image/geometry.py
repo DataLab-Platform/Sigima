@@ -548,8 +548,8 @@ def _resampling_axis(
 
 @computation_function(
     operation_id="sigima.image.resampling",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def resampling(src: ImageObj, p: Resampling2DParam) -> ImageObj:
     """Resample image to new coordinate grid using interpolation
@@ -731,8 +731,8 @@ class XYZCalibrateParam(gds.DataSet):
 
 @computation_function(
     operation_id="sigima.image.calibration",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def calibration(src: ImageObj, p: XYZCalibrateParam) -> ImageObj:
     """Compute polynomial calibration

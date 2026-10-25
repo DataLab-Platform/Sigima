@@ -100,6 +100,15 @@ Follow these rules when you add or change a computation function:
   renamed parameters, a different default behavior, different outputs or a
   different scientific result for the same inputs.
 
+- In particular, increase it whenever a call that succeeded may now give
+  another result, even for unusual inputs only (e.g. mixed real and complex, or
+  ``float32`` and ``float64``, data): a replay of an activity recorded with the
+  earlier version is then refused explicitly instead of being reported as
+  different. Do not increase it when only inputs that were refused are now
+  accepted, or when inputs that were accepted are now refused (the replay then
+  fails explicitly), nor when the change is entirely covered by a rule recorded
+  in the execution context (e.g. the X-alignment policy).
+
 - The structure of the contract (input roles, parameter arguments, outputs) is
   inferred from the annotations. Annotate every argument and the return value
   with names imported at runtime (not only under ``TYPE_CHECKING``). When roles
