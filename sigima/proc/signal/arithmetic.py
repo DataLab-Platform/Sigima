@@ -111,9 +111,9 @@ def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarr
 
 @computation_function(
     operation_id="sigima.signal.addition",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def addition(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise sum of multiple signals.
@@ -150,9 +150,9 @@ def addition(src_list: list[SignalObj]) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.average",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def average(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise average of multiple signals.
@@ -190,9 +190,9 @@ def average(src_list: list[SignalObj]) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.standard_deviation",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise standard deviation of multiple signals.
@@ -225,9 +225,9 @@ def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.product",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def product(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise product of multiple signals.
@@ -467,9 +467,9 @@ def arithmetic(src1: SignalObj, src2: SignalObj, p: ArithmeticParam) -> SignalOb
 
 @computation_function(
     operation_id="sigima.signal.difference",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SOURCE_GRID_LINEAR,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def difference(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Compute the element-wise difference between two signals.
@@ -583,9 +583,9 @@ def division(src1: SignalObj, src2: SignalObj) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.signals_to_image",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def signals_to_image(src_list: list[SignalObj], p: SignalsToImageParam) -> ImageObj:
     """Combine multiple signals into an image.

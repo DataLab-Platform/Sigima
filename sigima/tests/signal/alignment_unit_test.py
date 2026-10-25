@@ -136,7 +136,7 @@ def test_uncertainties_are_never_interpolated() -> None:
 
 def test_recorded_rule_is_checked_on_replay() -> None:
     """A replay accepts only a recorded, supported rule and version."""
-    contract = contracts.get_operation_contract("sigima.signal.difference", 1)
+    contract = contracts.get_operation_contract("sigima.signal.difference", 2)
     source = _signal([0, 1, 2], [0, 1, 2])
     operand = _signal([0, 0.5, 2], [0, 0.5, 2])
     context = prepare_execution(contract, [source, operand], param=None).context

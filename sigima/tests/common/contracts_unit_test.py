@@ -354,7 +354,7 @@ def test_normalize_contract() -> None:
 
 def test_difference_contract() -> None:
     """The difference contract is qualified, signal 2-to-1, with X alignment."""
-    contract = contracts.get_operation_contract("sigima.signal.difference", 1)
+    contract = contracts.get_operation_contract("sigima.signal.difference", 2)
     assert contract.function is sigima.proc.signal.difference
     assert contract.pattern == "2_to_1" and contract.qualified
     assert contract.inputs == (
@@ -366,6 +366,33 @@ def test_difference_contract() -> None:
     assert contract.x_alignment == "sigima.signal.x_alignment.source_grid_linear"
     assert contracts.contract_for_function(sigima.proc.signal.difference) is contract
     assert contracts.parameters_from_values(contract, {}) is None
+
+
+#: Contracts whose result changed for some inputs in Sigima 1.4 (see the release
+#: notes): calls recorded with version 1 must be refused, not replayed
+CONTRACTS_V2 = (
+    "sigima.signal.addition",
+    "sigima.signal.average",
+    "sigima.signal.standard_deviation",
+    "sigima.signal.product",
+    "sigima.signal.difference",
+    "sigima.signal.signals_to_image",
+    "sigima.image.resampling",
+    "sigima.image.calibration",
+    "sigima.image.extract_roi",
+    "sigima.image.extract_rois",
+    "sigima.image.radial_profile",
+)
+
+
+@pytest.mark.parametrize("operation_id", CONTRACTS_V2)
+def test_contracts_changed_in_version_2(operation_id: str) -> None:
+    """Contracts whose result changed are qualified at version 2 and refuse 1."""
+    contract = contracts.get_operation_contract(operation_id, 2)
+    assert contract.qualified
+    assert contract.qualification.contract_version == 2
+    with pytest.raises(contracts.IncompatibleContractError):
+        contracts.get_operation_contract(operation_id, 1)
 
 
 def test_signature_calls_and_pickling_unchanged() -> None:
@@ -679,7 +706,7 @@ def test_comparison_rules() -> None:
 
 def test_contract_descriptors_pickle() -> None:
     """Descriptors and decorated functions with declarations are picklable."""
-    contract = contracts.get_operation_contract("sigima.signal.difference", 1)
+    contract = contracts.get_operation_contract("sigima.signal.difference", 2)
     for value in (
         contract.inputs,
         contract.outputs,

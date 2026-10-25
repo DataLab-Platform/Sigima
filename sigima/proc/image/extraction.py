@@ -64,8 +64,8 @@ __all__ = [
 
 @computation_function(
     operation_id="sigima.image.extract_rois",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
     """Extract multiple regions of interest from data
@@ -109,8 +109,8 @@ def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
 
 @computation_function(
     operation_id="sigima.image.extract_roi",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
     """Extract single ROI
@@ -534,8 +534,8 @@ class RadialProfileParam(gds.DataSet):
 
 @computation_function(
     operation_id="sigima.image.radial_profile",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def radial_profile(src: ImageObj, p: RadialProfileParam) -> SignalObj:
     """Compute radial profile around the centroid

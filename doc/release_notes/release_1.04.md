@@ -24,6 +24,7 @@ The [user guide](../user_guide/overview.rst) shows how readers and connectors at
 * **ROIs saved with earlier versions**: The ROIs of objects saved with earlier versions are not converted: they select pixels according to the rules above, so that processing and analysis in these ROIs may give different results when they are recomputed.
 * **Image center**: `ImageObj.xc` and `ImageObj.yc` are now the center of the pixel grid (halfway between the centers of the first and last pixels), for uniform and non-uniform coordinates: they were half a pixel off for uniform coordinates. `width` and `height` are unchanged.
 * **Ellipse coordinates**: `EllipseCoordinates` (`sigima.objects.shape`) now holds the 5 values `(x, y, a, b, theta)` of ellipse geometry results, which can thus be transformed.
+* **Operation contracts**: The operations whose result changed for some inputs now declare version 2 of their contract: `sigima.signal.addition`, `average`, `standard_deviation`, `product`, `difference` and `signals_to_image` (inputs of different data types, uncertainty of a product), and `sigima.image.resampling`, `calibration`, `extract_roi`, `extract_rois` and `radial_profile` (pixel grid, complex data, pixels selected by their centers). Applications that replay recorded processing (e.g. DataLab capsules) now refuse to replay calls of these operations recorded with earlier versions, instead of reporting a different result.
 
 ### 🛠️ Bug Fixes since version 1.3.0 ###
 
