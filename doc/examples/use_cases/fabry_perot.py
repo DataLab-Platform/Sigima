@@ -116,11 +116,11 @@ print(contour_df)
 # Configure line profile extraction
 profile_param = sigima.proc.image.LineProfileParam()
 profile_param.direction = "horizontal"
-profile_param.row = center_y  # Extract profile through image center
+profile_param.y = center_y  # Extract profile through image center (Y coordinate)
 
 print("\n✓ Horizontal profile configured:")
 print(f"Direction: {profile_param.direction}")
-print(f"Row: {profile_param.row} (image center)")
+print(f"Y: {profile_param.y} (image center)")
 
 # Extract intensity profile
 profile_signal1 = sigima.proc.image.line_profile(img1, profile_param)
