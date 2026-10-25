@@ -1812,3 +1812,17 @@ msgstr "Barycentre"
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
 
+msgid "Y coordinate of the row (nearest pixel center)"
+msgstr "Coordonnée Y de la ligne (centre de pixel le plus proche)"
+
+msgid "X coordinate of the column (nearest pixel center)"
+msgstr "Coordonnée X de la colonne (centre de pixel le plus proche)"
+
+msgid "Start point"
+msgstr "Point de départ"
+
+msgid "End point"
+msgstr "Point d'arrivée"
+
+msgid "None: edge of the image"
+msgstr "Aucune valeur : bord de l'image"
