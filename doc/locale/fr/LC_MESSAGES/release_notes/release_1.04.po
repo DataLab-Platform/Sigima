@@ -76,10 +76,6 @@ msgstr "**Centre de l'image** : `ImageObj.xc` et `ImageObj.yc` sont désormais l
 msgid "**Ellipse coordinates**: `EllipseCoordinates` (`sigima.objects.shape`) now holds the 5 values `(x, y, a, b, theta)` of ellipse geometry results, which can thus be transformed."
 msgstr "**Coordonnées d'ellipse** : `EllipseCoordinates` (`sigima.objects.shape`) contient désormais les 5 valeurs `(x, y, a, b, theta)` des résultats géométriques d'ellipse, qui peuvent ainsi être transformés."
 
-#, python-format
-msgid "**Operation contracts**: The operations whose result changed for some inputs now declare version 2 of their contract: `sigima.signal.addition`, `average`, `standard_deviation`, `product`, `difference` and `signals_to_image` (inputs of different data types, uncertainty of a product), and `sigima.image.resampling`, `calibration`, `extract_roi`, `extract_rois` and `radial_profile` (pixel grid, complex data, pixels selected by their centers). Applications that replay recorded processing (e.g. DataLab capsules) now refuse to replay calls of these operations recorded with earlier versions, instead of reporting a different result."
-msgstr "**Contrats d'opérations** : les opérations dont le résultat a changé pour certaines entrées déclarent désormais la version 2 de leur contrat : `sigima.signal.addition`, `average`, `standard_deviation`, `product`, `difference` et `signals_to_image` (entrées de types de données différents, incertitude d'un produit), et `sigima.image.resampling`, `calibration`, `extract_roi`, `extract_rois` et `radial_profile` (grille de pixels, données complexes, pixels sélectionnés par leur centre). Les applications qui rejouent des traitements enregistrés (par exemple les capsules DataLab) refusent désormais de rejouer les appels de ces opérations enregistrés avec des versions antérieures, au lieu de signaler un résultat différent."
-
 msgid "🛠️ Bug Fixes since version 1.3.0"
 msgstr "🛠️ Corrections de bugs depuis la version 1.3.0"
 

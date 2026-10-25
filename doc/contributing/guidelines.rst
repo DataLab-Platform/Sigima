@@ -109,6 +109,11 @@ Follow these rules when you add or change a computation function:
   fails explicitly), nor when the change is entirely covered by a rule recorded
   in the execution context (e.g. the X-alignment policy).
 
+- Version 1 of the contracts is settled by the first stable release of an
+  application recording them (DataLab 1.4): until then, no recorded activity
+  has to be refused, and contract versions are not increased (the changes of
+  Sigima 1.4 are part of version 1).
+
 - Rules that apply to every operation are recorded in the execution context
   rather than in each contract: the selection of image pixels by regions of
   interest (:data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`, recorded when an
