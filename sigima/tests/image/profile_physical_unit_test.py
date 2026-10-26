@@ -107,3 +107,91 @@ def test_default_parameters_from_image() -> None:
     radial = sigima.params.RadialProfileParam()
     radial.update_from_obj(obj)
     assert (radial.xc, radial.yc) == (obj.xc, obj.yc)
+
+
+SEGMENT_DATA = np.arange(100.0).reshape(10, 10)
+
+
+def _segment(x1, y1, x2, y2, obj=None) -> sigima.objects.SignalObj:
+    """Return the segment profile from (x1, y1) to (x2, y2)."""
+    obj = _image(SEGMENT_DATA) if obj is None else obj
+    param = sigima.params.SegmentProfileParam.create(x1=x1, y1=y1, x2=x2, y2=y2)
+    return sipi.segment_profile(obj, param)
+
+
+def _segment_profile_1_3(data, row0, col0, row1, col1) -> np.ndarray:
+    """Segment profile of Sigima 1.3 (``csline``, in pixel indices), without its
+    reordering of rows and columns, which mirrored anti-diagonal segments."""
+    count = max(abs(row1 - row0), abs(col1 - col0)) + 1
+    rows = np.linspace(row0, row1, count).astype(int)
+    cols = np.linspace(col0, col1, count).astype(int)
+    return data[rows, cols].astype(float)
+
+
+def test_segment_profile_end_points_included() -> None:
+    """Both end points are sampled (regression: the diagonal of a 10 x 10 image
+    was sampled in steps of the pixel size, up to pixel (8, 8), duplicating some
+    pixels and omitting the last one)."""
+    sig = _segment(0, 0, 9, 9)
+    assert np.array_equal(sig.y, np.diag(SEGMENT_DATA))
+    assert sig.y[-1] == 99.0
+    assert np.allclose(sig.x, np.linspace(0.0, 9.0 * np.sqrt(2.0), 10))
+    # Oblique segment: one sample per column (the axis spanning the most pixels),
+    # each taking the nearest pixel, the end pixel included
+    sig = _segment(0, 0, 9, 4)
+    rows = np.floor(4 * np.arange(10) / 9 + 0.5).astype(int)
+    assert np.array_equal(sig.y, SEGMENT_DATA[rows, np.arange(10)])
+    assert sig.y[-1] == SEGMENT_DATA[4, 9]
+    assert np.allclose(sig.x, np.linspace(0.0, np.hypot(9.0, 4.0), 10))
+
+
+@pytest.mark.parametrize(
+    "start, end",
+    [
+        ((0, 0), (9, 9)),  # diagonal
+        ((9, 0), (0, 9)),  # anti-diagonal
+        ((8, 1), (2, 7)),  # anti-diagonal, inside the image
+        ((0, 4), (9, 4)),  # horizontal
+        ((9, 4), (0, 4)),  # horizontal, reversed
+        ((3, 0), (3, 9)),  # vertical
+    ],
+)
+def test_segment_profile_like_sigima_1_3(start, end) -> None:
+    """On images without calibration, axis-aligned and diagonal segments give the
+    profiles of Sigima 1.3."""
+    (x1, y1), (x2, y2) = start, end
+    expected = _segment_profile_1_3(SEGMENT_DATA, y1, x1, y2, x2)
+    assert np.array_equal(_segment(x1, y1, x2, y2).y, expected)
+
+
+@pytest.mark.parametrize(
+    "x1, y1, x2, y2, expected",
+    [
+        (0, 0, 0.6, 0, [0.0, 1.0]),  # shorter than a pixel: end pixel sampled
+        (0, 0, 0.4, 0.3, [0.0]),  # both end points in the same pixel
+        (2, 3, 2, 3, [32.0]),  # zero length
+    ],
+)
+def test_segment_profile_short_segments(x1, y1, x2, y2, expected) -> None:
+    """Segments shorter than a pixel sample the pixels of both end points."""
+    sig = _segment(x1, y1, x2, y2)
+    assert np.array_equal(sig.y, expected)
+    assert np.allclose(sig.x, np.linspace(0, np.hypot(x2 - x1, y2 - y1), len(sig.x)))
+
+
+def test_segment_profile_tiny_spacings() -> None:
+    """The number of samples does not depend on the pixel spacings (regression:
+    a tiny spacing gave hundreds of millions of samples for a few pixels)."""
+    data = np.arange(25.0).reshape(5, 5)
+    # Non-uniform coordinates with a tiny spacing
+    obj = _image(data)
+    obj.set_coords(np.array([0.0, 1e-8, 1.0, 2.0, 3.0]), np.arange(5.0))
+    sig = _segment(0, 0, 3, 4, obj)
+    assert sig.y.size == 5
+    assert sig.y[0] == data[0, 0] and sig.y[-1] == data[4, 4]
+    # Strongly anisotropic pixels
+    obj = _image(data)
+    obj.set_uniform_coords(1e-8, 1.0, 0.0, 0.0)
+    sig = _segment(0, 0, 4e-8, 4, obj)
+    assert np.array_equal(sig.y, np.diag(data))
+    assert np.allclose(sig.x, np.linspace(0.0, np.hypot(4e-8, 4.0), 5))
