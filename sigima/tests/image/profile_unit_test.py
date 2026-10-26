@@ -86,18 +86,20 @@ def test_segment_profile() -> None:
     assert sig.xunit == "mm"
 
     # Anti-diagonal segment: sampled from its start point (row 0, column 30) to its
-    # end point (row 30, column 0), each sample taking the nearest pixel
+    # end point (row 30, column 0) included, one sample per pixel along the
+    # diagonal, each sample taking the nearest pixel
     param = sigima.params.SegmentProfileParam.create(
         x1=X0 + 30 * 0.5, y1=Y0, x2=X0, y2=Y0 + 30 * 0.5
     )
     sig = sigima.proc.image.segment_profile(ima, param)
-    fraction = np.arange(43) * 0.5 / np.hypot(15.0, 15.0)
-    rows = np.floor(30 * fraction + 0.5).astype(int)
-    cols = np.floor(30 - 30 * fraction + 0.5).astype(int)
+    rows = np.arange(31)
     check_array_result(
-        "Anti-diagonal segment", sig.y, ima.data[rows, cols].astype(float)
+        "Anti-diagonal segment", sig.y, ima.data[rows, 30 - rows].astype(float)
     )
-    assert sig.y[0] == ima.data[0, 30]
+    check_array_result(
+        "Anti-diagonal distances", sig.x, np.linspace(0, np.hypot(15.0, 15.0), 31)
+    )
+    assert sig.y[0] == ima.data[0, 30] and sig.y[-1] == ima.data[30, 0]
 
     # End points outside the image and different X/Y units are refused
     param = sigima.params.SegmentProfileParam.create(x1=X0, y1=Y0, x2=X0, y2=Y0 + 1e3)

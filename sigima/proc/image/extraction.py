@@ -532,11 +532,14 @@ def csline(data: np.ndarray, row0, col0, row1, col1) -> tuple[np.ndarray, np.nda
 def segment_profile(src: ImageObj, p: SegmentProfileParam) -> SignalObj:
     """Compute segment profile
 
-    The segment is sampled at regular steps, equal to the smallest distance between
-    the centers of neighboring pixels, from (X1, Y1) to (X2, Y2): each sample takes
-    the value of the pixel whose center is the nearest (no interpolation). The X
-    axis of the profile is the distance from the start point, in the units of the
-    image.
+    The segment is sampled at regular steps from (X1, Y1) to (X2, Y2), both end
+    points included, with one sample per pixel along the axis where it spans the
+    most pixels (as many samples as pixels from the pixel nearest to its start
+    point to the pixel nearest to its end point, along this axis): each sample
+    takes the value of the pixel whose center is the nearest (no interpolation).
+    The number of samples thus never exceeds the number of rows or columns of the
+    image, whatever the pixel sizes. The X axis of the profile is the distance
+    from the start point, in the units of the image.
 
     Args:
         src: input image object
@@ -550,15 +553,14 @@ def segment_profile(src: ImageObj, p: SegmentProfileParam) -> SignalObj:
          of the image differ
     """
     _check_same_units(src, "Segment profile")
-    _nearest_pixels(src, [p.x1, p.x2], "x", "X")
-    _nearest_pixels(src, [p.y1, p.y2], "y", "Y")
-    length = float(np.hypot(p.x2 - p.x1, p.y2 - p.y1))
-    step = _pixel_spacing(src)
-    count = int(np.floor(length / step + PIXEL_INDEX_TOLERANCE)) + 1
-    dist = np.arange(count) * step
-    fraction = dist / length if length > 0 else np.zeros(count)
-    cols = _nearest_pixels(src, p.x1 + (p.x2 - p.x1) * fraction, "x", "X")
-    rows = _nearest_pixels(src, p.y1 + (p.y2 - p.y1) * fraction, "y", "Y")
+    col1, col2 = _nearest_pixels(src, [p.x1, p.x2], "x", "X")
+    row1, row2 = _nearest_pixels(src, [p.y1, p.y2], "y", "Y")
+    count = int(max(abs(col2 - col1), abs(row2 - row1))) + 1
+    fraction = np.linspace(0.0, 1.0, count)
+    # Weighted form: the first and last samples are exactly the end points
+    cols = _nearest_pixels(src, p.x1 * (1.0 - fraction) + p.x2 * fraction, "x", "X")
+    rows = _nearest_pixels(src, p.y1 * (1.0 - fraction) + p.y2 * fraction, "y", "Y")
+    dist = fraction * float(np.hypot(p.x2 - p.x1, p.y2 - p.y1))
     values = src.get_masked_view()[rows, cols]
     keep = ~ma.getmaskarray(values)
     suffix = f"({p.x1:g}, {p.y1:g})-({p.x2:g}, {p.y2:g})"
