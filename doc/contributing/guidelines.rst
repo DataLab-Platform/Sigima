@@ -127,7 +127,8 @@ Follow these rules when you add or change a computation function:
 - Rules that apply to every operation are recorded in the execution context
   rather than in each contract: the selection of image pixels by regions of
   interest (:data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`, recorded when an
-  input image carries regions of interest) and the X-alignment policies (see
+  input image carries regions of interest or when the operation takes image
+  regions of interest as parameters) and the X-alignment policies (see
   below). Increase the version of such a rule, not the contract versions, when
   it changes: a replay refuses the calls recorded with another version.
 

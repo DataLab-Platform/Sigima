@@ -193,6 +193,78 @@ def test_image_roi_convention_is_recorded_and_checked() -> None:
     assert contracts.image_roi_convention([signal]) is None
 
 
+def _roi_params(count: int) -> list[sigima.objects.ROI2DParam]:
+    """Rectangles whose bounds do not lie on pixel centers."""
+    return [
+        sigima.objects.ROI2DParam.create(
+            geometry="rectangle", x0=1.5 + 3 * i, y0=2.5, dx=2.0, dy=3.0
+        )
+        for i in range(count)
+    ]
+
+
+@pytest.mark.parametrize(
+    "func, param",
+    [
+        (sigima.proc.image.extract_roi, _roi_params(1)[0]),
+        (sigima.proc.image.extract_rois, _roi_params(2)),
+        (sigima.proc.image.erase, _roi_params(1)[0]),
+        (sigima.proc.image.erase, _roi_params(2)),
+        (sigima.proc.image.offset_correction, _roi_params(1)[0]),
+    ],
+)
+def test_image_roi_parameters_depend_on_the_convention(func, param) -> None:
+    """Operations taking image ROIs as parameters record and require the pixel
+    convention, also on images without regions of interest (regression: a replay
+    recorded before Sigima 1.4, which selected other pixels, was accepted)."""
+    rule = dict(contracts.IMAGE_ROI_CONVENTION)
+    contract = _contract(func)
+    image = sigima.objects.create_image("i", np.arange(64.0).reshape(8, 8))
+    assert image.roi is None
+    assert contracts.image_roi_convention([image], contract) == rule
+    description = _json(describe_call(func, [image], param))
+    assert description["context"] == {"roi_convention": rule}
+    assert not description["limits"]
+    ordinary = prepare_execution(contract, [image], param=param)
+    assert ordinary.context == {"x_alignment": None, "roi_convention": rule}
+    reference = ordinary.run()
+    values = description["parameters"]
+    replay = prepare_execution(
+        contract, [image], values=values, context=ordinary.context
+    )
+    assert np.array_equal(replay.run().data, reference.data)
+    for recorded in (
+        {},
+        {"x_alignment": None},
+        {"roi_convention": None},
+        {"roi_convention": {"rule": "sigima.image.roi.pixel_centers", "version": 2}},
+    ):
+        with pytest.raises(ExecutionError) as info:
+            prepare_execution(contract, [image], values=values, context=recorded)
+        assert info.value.code == "unsupported_context"
+
+
+def test_operations_taking_image_roi_parameters() -> None:
+    """The operations depending on the convention through their parameters are
+    detected from their contracts; signal ROI parameters are not concerned."""
+    registry = contracts.build_contract_registry()
+    found = {
+        contract.operation_id
+        for contract in registry.contracts
+        if contracts.image_roi_convention([], contract) is not None
+    }
+    assert found == {
+        "sigima.image.erase",
+        "sigima.image.extract_roi",
+        "sigima.image.extract_rois",
+        "sigima.image.offset_correction",
+    }
+    signal = _signal([0, 1, 2, 3], [-2.0, 0.0, 1.0, 4.0])
+    roi = sigima.objects.ROI1DParam.create(xmin=0.5, xmax=2.5)
+    description = describe_call(sigima.proc.signal.extract_roi, [signal], roi)
+    assert not description["context"]
+
+
 def test_ordinary_and_replay_give_the_same_result() -> None:
     """Ordinary processing and replay share the same preparation."""
     src = _signal([0, 1, 2, 3], [-2.0, 0.0, 1.0, 4.0])
