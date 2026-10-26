@@ -66,13 +66,36 @@ def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
     return np.array(arrays, dtype=np.result_type(*arrays))
 
 
+def __mantissa_products(mant: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Return the products of the mantissas preceding each factor.
+
+    Args:
+        mant: Mantissas of the factors (one row per factor), in [0.5, 1) or zero.
+
+    Returns:
+        Mantissas and exponents of the products: row i is the product of the rows
+        before row i (1 for the first row). The running product is renormalized
+        at each step, so that it never underflows whatever the number of factors.
+    """
+    prod_mant = np.empty_like(mant)
+    prod_exp = np.empty(mant.shape, dtype=np.int64)
+    current = np.ones_like(mant[0])
+    exponent = np.zeros(mant.shape[1:], dtype=np.int64)
+    for i, row in enumerate(mant):
+        prod_mant[i], prod_exp[i] = current, exponent
+        current, shift = np.frexp(current * row)
+        exponent = exponent + shift
+    return prod_mant, prod_exp
+
+
 def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarray:
     """Return the first-order uncertainty of the product of independent factors.
 
     ``σ² = Σ_i σ_i² Π_{j≠i} |y_j|²`` is computed without dividing by the factors,
     so that it is defined where a factor is zero. Each term is computed from the
-    mantissas and exponents of the factors (:func:`numpy.frexp`), so that no
-    intermediate product overflows or underflows whatever the order and the
+    mantissas and exponents of the factors (:func:`numpy.frexp`), the products of
+    the mantissas being renormalized at each step, so that no intermediate
+    product overflows or underflows whatever the number, the order and the
     magnitudes of the factors, and the terms are scaled by the largest one before
     being squared.
 
@@ -88,14 +111,13 @@ def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarr
     ftype = np.result_type(abs_y.dtype, abs_dy.dtype, np.float32)
     y_mant, y_exp = np.frexp(abs_y.astype(ftype, copy=False))
     dy_mant, dy_exp = np.frexp(abs_dy.astype(ftype, copy=False))
-    ones = np.ones_like(y_mant[:1])
-    # Products of the mantissas before (prefix) and after (suffix) each factor:
-    # mantissas lie in [0.5, 1) (or are zero), so these products cannot overflow
-    prefix = np.cumprod(np.concatenate((ones, y_mant[:-1])), axis=0)
-    suffix = np.cumprod(np.concatenate((ones, y_mant[:0:-1])), axis=0)[::-1]
+    # Products of the mantissas before (prefix) and after (suffix) each factor
+    prefix_mant, prefix_exp = __mantissa_products(y_mant)
+    suffix_mant, suffix_exp = __mantissa_products(y_mant[::-1])
+    suffix_mant, suffix_exp = suffix_mant[::-1], suffix_exp[::-1]
     # Term i is mant[i] * 2**exp[i]
-    mant = dy_mant * prefix * suffix
-    exp = dy_exp + (np.sum(y_exp, axis=0) - y_exp)
+    mant = dy_mant * prefix_mant * suffix_mant
+    exp = dy_exp + (np.sum(y_exp, axis=0) - y_exp) + prefix_exp + suffix_exp
     positive = mant > 0.0
     exp_max = np.max(np.where(positive, exp, np.iinfo(exp.dtype).min), axis=0)
     exp_max = np.where(np.any(positive, axis=0), exp_max, 0)
@@ -225,9 +247,9 @@ def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.product",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def product(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise product of multiple signals.
