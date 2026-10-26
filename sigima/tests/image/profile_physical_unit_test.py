@@ -9,12 +9,15 @@ coordinates, refusals and renamed parameters.
 
 from __future__ import annotations
 
+import tracemalloc
+
 import numpy as np
 import pytest
 
 import sigima.objects
 import sigima.params
 import sigima.proc.image as sipi
+import sigima.tools.image
 
 
 def _image(data: np.ndarray) -> sigima.objects.ImageObj:
@@ -75,6 +78,82 @@ def test_radial_profile_refuses_different_units() -> None:
     obj.yunit = "s"
     with pytest.raises(ValueError, match="units"):
         sipi.radial_profile(obj, sigima.params.RadialProfileParam.create())
+
+
+def _radial_profile_all_bins(data, center, xcoords, ycoords, step):
+    """Former implementation of ``get_radial_profile``, allocating every bin from
+    the center to the largest distance."""
+    x, y = np.meshgrid(xcoords, ycoords)
+    r = np.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2)
+    r = np.floor(r / step + 1e-9).astype(int)
+    tbin = np.bincount(r.ravel(), data.ravel())
+    nr = np.bincount(r.ravel())
+    bins = np.flatnonzero(nr)
+    yhalf = tbin[bins] / nr[bins]
+    xhalf = bins * step
+    skip = 1 if bins[0] == 0 else 0
+    return (
+        np.concatenate((-xhalf[::-1], xhalf[skip:])),
+        np.concatenate((yhalf[::-1], yhalf[skip:])),
+    )
+
+
+@pytest.mark.parametrize(
+    "xcoords, ycoords, center, step",
+    [
+        (np.arange(53.0), np.arange(37.0), (17.3, 20.6), 1.0),  # uniform
+        (np.arange(53.0), np.arange(37.0), (26.0, 18.0), 1.0),  # pixel center
+        (np.arange(53) * 0.1, np.arange(37) * 0.2, (2.6, 3.5), 0.1),  # anisotropic
+        (np.cumsum(np.linspace(0.1, 2.0, 53)), np.arange(37.0), (30.0, 9.5), 0.1),
+    ],
+)
+def test_radial_profile_same_as_all_bins(xcoords, ycoords, center, step) -> None:
+    """Accumulating only the bins holding pixels gives bit-identical profiles."""
+    rng = np.random.default_rng(0)
+    data = rng.normal(100.0, 20.0, (ycoords.size, xcoords.size))
+    for values in (data, data.astype(np.uint16), np.ma.masked_less(data, 90.0)):
+        x, y = sigima.tools.image.get_radial_profile(
+            values, center, xcoords=xcoords, ycoords=ycoords, step=step
+        )
+        xref, yref = _radial_profile_all_bins(values, center, xcoords, ycoords, step)
+        assert np.array_equal(x, xref) and np.array_equal(y, yref)
+
+
+def test_radial_profile_tiny_spacing() -> None:
+    """The memory used does not depend on the pixel spacing (regression: a tiny
+    spacing allocated one bin per step up to the largest distance, i.e. several
+    GB for a few pixels)."""
+    data = np.arange(25.0).reshape(5, 5)
+    obj = _image(data)
+    obj.set_coords(np.array([0.0, 1e-8, 1.0, 2.0, 3.0]), np.arange(5.0))
+    param = sigima.params.RadialProfileParam.create(center="user", xc=0.0, yc=0.0)
+    tracemalloc.start()
+    try:
+        sig = sipi.radial_profile(obj, param)
+        _current, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    assert peak < 10e6
+    assert sig.x.size <= 2 * data.size - 1
+    assert np.all(np.isfinite(sig.y)) and np.allclose(sig.x, -sig.x[::-1])
+    assert sig.y[sig.x.size // 2] == data[0, 0]
+
+
+def test_radial_profile_refusals() -> None:
+    """Coincident pixel centers, invalid bin widths and centers are refused
+    explicitly (regression: obscure error after divisions by zero)."""
+    obj = _image(np.ones((5, 5)))
+    obj.set_coords(np.array([0.0, 0.0, 1.0, 2.0, 3.0]), np.arange(5.0))
+    param = sigima.params.RadialProfileParam.create(center="user", xc=1.0, yc=1.0)
+    with pytest.raises(ValueError, match="coincide along X"):
+        sipi.radial_profile(obj, param)
+    data = np.ones((5, 5))
+    for step in (0.0, -1.0, np.nan, np.inf):
+        with pytest.raises(ValueError, match="bin width"):
+            sigima.tools.image.get_radial_profile(data, (2.0, 2.0), step=step)
+    for center in ((np.nan, 2.0), (2.0, np.inf)):
+        with pytest.raises(ValueError, match="finite"):
+            sigima.tools.image.get_radial_profile(data, center)
 
 
 @pytest.mark.parametrize(

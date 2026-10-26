@@ -378,12 +378,21 @@ def _pixel_spacing(src: ImageObj) -> float:
 
     Returns:
         Smallest pixel spacing along X and Y (uniform or non-uniform coordinates)
+
+    Raises:
+        ValueError: if the centers of neighboring pixels coincide
     """
     spacings = []
     for axis in ("x", "y"):
         centers = _pixel_centers(src, axis)
         if centers.size > 1:
-            spacings.append(float(np.min(np.abs(np.diff(centers)))))
+            spacing = float(np.min(np.abs(np.diff(centers))))
+            if spacing == 0.0:
+                raise ValueError(
+                    f"Pixel centers coincide along {axis.upper()}: distances "
+                    f"between pixels are undefined"
+                )
+            spacings.append(spacing)
     if not spacings:
         # Single pixel: any positive step gives the same profile
         spacings = [abs(float(src.dx)) if src.is_uniform_coords else 1.0]
@@ -708,8 +717,10 @@ def radial_profile(src: ImageObj, p: RadialProfileParam) -> SignalObj:
     The center and the distances are physical: the pixels are binned by their
     distance to the center, in steps equal to the smallest distance between the
     centers of neighboring pixels, so that the profile is circular whatever the
-    pixel sizes and for non-uniform coordinates. The X axis of the profile is the
-    distance to the center (mirrored), in the units of the image.
+    pixel sizes and for non-uniform coordinates. Only the distances holding pixels
+    are kept, so that the memory used never exceeds the size of the image. The X
+    axis of the profile is the distance to the center (mirrored), in the units of
+    the image.
 
     Args:
         src: input image object
@@ -719,7 +730,8 @@ def radial_profile(src: ImageObj, p: RadialProfileParam) -> SignalObj:
         Signal object with the radial profile
 
     Raises:
-        ValueError: if the X and Y units of the image differ
+        ValueError: if the X and Y units of the image differ, if the centers of
+         neighboring pixels coincide, or if the center is not finite
     """
     _check_same_units(src, "Radial profile")
     data = src.get_masked_view()
