@@ -60,7 +60,8 @@ and version:
 - the selection of image pixels by regions of interest
   (``sigima.image.roi.pixel_centers``,
   :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), recorded when an input
-  image carries regions of interest;
+  image carries regions of interest or when the operation takes image regions of
+  interest as parameters (ROI extraction, erasing, offset correction);
 - the alignment of signals on a common X grid, for operations combining several
   signals (``sigima.signal.x_alignment.*`` policies);
 - the global options read by a computation and the metadata of its inputs it

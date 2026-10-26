@@ -24,14 +24,15 @@ application:
 The execution context also records the conventions that the result depends on
 whatever the operation. Rule ``sigima.image.roi.pixel_centers`` (version 1,
 :data:`IMAGE_ROI_CONVENTION`), recorded under ``roi_convention`` when an input
-image carries regions of interest: they select the pixels whose centers lie in
+image carries regions of interest or when the operation takes image regions of
+interest as parameters (:class:`~sigima.objects.ROI2DParam`: ROI extraction,
+erasing, offset correction): they select the pixels whose centers lie in
 their shape, bounds included; the part of the image holding a region of
 interest, the position of the results computed in it and the move of regions of
 interest by flips, rotations, transposition and translation follow the same
 pixels. Earlier Sigima versions (before 1.4) rounded bounds to the nearest pixel
-indices: a replay refuses a call on images carrying regions of interest
-recorded without this rule (``unsupported_context``) instead of giving another
-result.
+indices: a replay refuses such a call recorded without this rule
+(``unsupported_context``) instead of giving another result.
 
 Errors carry a stable ``code`` (:class:`ExecutionError`); scientific refusals of a
 policy keep their own exception
@@ -51,7 +52,7 @@ from importlib import metadata
 from typing import Any, Callable
 
 from sigima.config import options
-from sigima.objects import ImageObj, SignalObj
+from sigima.objects import ImageObj, ROI2DParam, SignalObj
 from sigima.objects.scalar.geometry import GeometryResult
 from sigima.objects.scalar.table import TableResult
 from sigima.proc.contracts.codec import PARAMETER_CODEC_VERSION, encode_value
@@ -138,30 +139,52 @@ def default_roles(count: int) -> list[str]:
     return ["sources"] * count
 
 
-def image_roi_convention(inputs: Sequence[Any]) -> dict[str, Any] | None:
+def _takes_image_roi_parameters(contract: OperationContract) -> bool:
+    """Return True if the operation takes image regions of interest as parameters.
+
+    Such an operation (e.g. ROI extraction, erasing, offset correction) selects
+    image pixels by regions of interest whatever its inputs.
+    """
+    return any(role.kind == "image" for role in contract.inputs) and any(
+        issubclass(spec.paramclass, ROI2DParam) for spec in contract.parameters
+    )
+
+
+def image_roi_convention(
+    inputs: Sequence[Any], contract: OperationContract | None = None
+) -> dict[str, Any] | None:
     """Return the image ROI convention a call depends on, as recorded.
 
     Args:
         inputs: Input objects of the call.
+        contract: Contract of the operation, if known: an operation taking image
+         regions of interest as parameters (:class:`~sigima.objects.ROI2DParam`,
+         single or list) depends on the convention whatever its inputs.
 
     Returns:
         A copy of :data:`IMAGE_ROI_CONVENTION` if an input image carries regions
-        of interest, None otherwise.
+        of interest or if the operation takes image regions of interest as
+        parameters, None otherwise.
     """
+    if contract is not None and _takes_image_roi_parameters(contract):
+        return dict(IMAGE_ROI_CONVENTION)
     for obj in inputs:
         if isinstance(obj, ImageObj) and obj.roi is not None and not obj.roi.is_empty():
             return dict(IMAGE_ROI_CONVENTION)
     return None
 
 
-def _check_image_roi_convention(context: dict[str, Any], inputs: list[Any]) -> None:
-    """Check that a replay on images with regions of interest recorded the rule.
+def _check_image_roi_convention(
+    context: dict[str, Any], inputs: list[Any], contract: OperationContract
+) -> None:
+    """Check that a replay depending on image regions of interest recorded the rule.
 
     Raises:
         ExecutionError: ``unsupported_context`` if an input image carries regions
-         of interest and the recorded rule is missing or another one.
+         of interest or the operation takes image regions of interest as
+         parameters, and the recorded rule is missing or another one.
     """
-    expected = image_roi_convention(inputs)
+    expected = image_roi_convention(inputs, contract)
     if expected is None or context.get("roi_convention") == expected:
         return
     recorded = context.get("roi_convention")
@@ -299,7 +322,7 @@ def describe_call(
     }
     description["pattern"] = contract.pattern
     description["options"] = _current_options(contract)
-    convention = image_roi_convention(inputs)
+    convention = image_roi_convention(inputs, contract)
     if convention is not None:
         description["context"]["roi_convention"] = convention
     if _inputs_match(contract, inputs):
@@ -351,7 +374,8 @@ class PreparedExecution:
         context: Execution context to record: ``x_alignment`` (record of the
          policy applied, or None), when the computation reads global options,
          ``options`` (their values) and, when an input image carries regions of
-         interest, ``roi_convention`` (:data:`IMAGE_ROI_CONVENTION`).
+         interest or the operation takes image regions of interest as
+         parameters, ``roi_convention`` (:data:`IMAGE_ROI_CONVENTION`).
         options: Global option values applied while the function runs.
     """
 
@@ -436,8 +460,9 @@ def prepare_execution(
         ExecutionError: ``input_mismatch`` if the inputs do not fit the roles,
          ``invalid_parameters`` if the parameters cannot be decoded or do not fit,
          ``unsupported_context`` if a recorded global option is missing, or if an
-         input image carries regions of interest and the recorded context does
-         not name the image ROI convention (:data:`IMAGE_ROI_CONVENTION`).
+         input image carries regions of interest (or the operation takes image
+         regions of interest as parameters) and the recorded context does not
+         name the image ROI convention (:data:`IMAGE_ROI_CONVENTION`).
         XAlignmentError: If a recorded policy is unknown or the inputs cannot be
          aligned (scientific refusal, also in ordinary processing).
     """
@@ -457,7 +482,7 @@ def prepare_execution(
         arguments = _parameter_arguments(contract, param)
     replay = context is not None
     if replay:
-        _check_image_roi_convention(context, list(inputs))
+        _check_image_roi_convention(context, list(inputs), contract)
     option_values: dict[str, Any] = {}
     if contract.reads_options:
         if replay:
@@ -484,7 +509,7 @@ def prepare_execution(
     exec_context: dict[str, Any] = {"x_alignment": record}
     if option_values:
         exec_context["options"] = dict(option_values)
-    convention = image_roi_convention(inputs)
+    convention = image_roi_convention(inputs, contract)
     if convention is not None:
         exec_context["roi_convention"] = convention
     return PreparedExecution(

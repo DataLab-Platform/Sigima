@@ -51,8 +51,8 @@ msgstr "Règles du contexte d'exécution"
 msgid "Some rules apply to every operation, or to a family of operations, and are recorded with each call rather than in each contract, with their own identifier and version:"
 msgstr "Certaines règles s'appliquent à toutes les opérations, ou à une famille d'opérations, et sont enregistrées avec chaque appel plutôt que dans chaque contrat, avec leurs propres identifiant et version :"
 
-msgid "the selection of image pixels by regions of interest (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), recorded when an input image carries regions of interest;"
-msgstr "la sélection des pixels d'une image par les régions d'intérêt (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), enregistrée lorsqu'une image d'entrée porte des régions d'intérêt ;"
+msgid "the selection of image pixels by regions of interest (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), recorded when an input image carries regions of interest or when the operation takes image regions of interest as parameters (ROI extraction, erasing, offset correction);"
+msgstr "la sélection des pixels d'une image par les régions d'intérêt (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), enregistrée lorsqu'une image d'entrée porte des régions d'intérêt ou lorsque l'opération prend des régions d'intérêt d'image en paramètres (extraction de ROI, effacement, correction d'offset) ;"
 
 msgid "the alignment of signals on a common X grid, for operations combining several signals (``sigima.signal.x_alignment.*`` policies);"
 msgstr "l'alignement des signaux sur une grille X commune, pour les opérations combinant plusieurs signaux (politiques ``sigima.signal.x_alignment.*``) ;"
