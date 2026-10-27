@@ -165,6 +165,49 @@ class BaseIORegistry(Generic[TypeObj], type):
         return cls._io_format_instances
 
     @classmethod
+    def register_format(cls, format_class: type[FormatBase]) -> bool:
+        """Register the handler of a format class, if it is not registered
+
+        Format classes are registered when they are defined: this method registers
+        again a format class removed with :meth:`unregister_format`.
+
+        Args:
+            format_class: format class of this registry
+
+        Returns:
+            True if the format was registered, False if it already was
+
+        Raises:
+            TypeError: if format_class is not a format class of this registry
+        """
+        if not isinstance(format_class, cls):
+            raise TypeError(f"{format_class!r} is not a {cls.__name__} format class")
+        if any(fmt.__class__ is format_class for fmt in cls._io_format_instances):
+            return False
+        cls._io_format_instances.append(format_class())
+        return True
+
+    @classmethod
+    def unregister_format(cls, format_class: type[FormatBase]) -> bool:
+        """Unregister the handler of a format class, e.g. when the plugin defining
+        it is unloaded
+
+        Handlers of subclasses of format_class are kept: they are formats of their
+        own.
+
+        Args:
+            format_class: format class of this registry
+
+        Returns:
+            True if the format was unregistered, False if it was not registered
+        """
+        instances = cls._io_format_instances
+        kept = [fmt for fmt in instances if fmt.__class__ is not format_class]
+        removed = len(kept) != len(instances)
+        instances[:] = kept
+        return removed
+
+    @classmethod
     def get_format_info(cls, mode: Literal["rst", "text"] = "rst") -> str:
         """Return I/O format info
 
