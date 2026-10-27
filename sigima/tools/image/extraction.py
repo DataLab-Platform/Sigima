@@ -28,9 +28,10 @@ def get_radial_profile(
     """Return radial profile of image data
 
     The pixels are binned by their distance to the center (distance divided by
-    *step*, rounded down), and the values of each bin are averaged. Only the bins
-    holding pixels are allocated, so that the memory used never exceeds the size
-    of the image, whatever the step.
+    *step*, rounded down), and the values of each bin are averaged. The bins are
+    accumulated directly by index when they are no more numerous than the pixels
+    (usual case), and otherwise only the bins holding pixels are allocated, so
+    that the memory used never exceeds the size of the image, whatever the step.
 
     Args:
         data: Input data (2D array)
@@ -64,16 +65,27 @@ def get_radial_profile(
     if not np.all(np.isfinite(r)):
         raise ValueError("The center and the pixel coordinates must be finite")
     # Bin of each pixel, robust to rounding noise when distances are multiples of
-    # the step: only the bins holding pixels are kept (sorted), each pixel being
-    # given the position of its bin among them
-    bins, index = np.unique(np.floor(r / step + 1e-9).ravel(), return_inverse=True)
+    # the step
+    k = np.floor(r / step + 1e-9).ravel()
 
     # Average over the same distance (distances holding no pixel, possible with
     # anisotropic pixels or non-uniform coordinates, are left out of the profile)
-    tbin = np.bincount(index, data.ravel())  # Sum of pixel values at each distance
-    nr = np.bincount(index)  # Number of pixels at each distance
-
-    yhalf = tbin / nr  # this is the half radial profile
+    if k.max() < k.size:
+        # Dense bins: accumulating every bin by index allocates no more entries
+        # than pixels, without sorting (integer conversion only after this test,
+        # bin indices being unbounded for tiny steps)
+        k = k.astype(np.intp)
+        tbin = np.bincount(k, data.ravel())  # Sum of pixel values at each distance
+        nr = np.bincount(k)  # Number of pixels at each distance
+        bins = np.flatnonzero(nr)
+        yhalf = tbin[bins] / nr[bins]  # this is the half radial profile
+    else:
+        # Sparse bins (tiny step): only the bins holding pixels are kept (sorted),
+        # each pixel being given the position of its bin among them
+        bins, index = np.unique(k, return_inverse=True)
+        tbin = np.bincount(index, data.ravel())
+        nr = np.bincount(index)
+        yhalf = tbin / nr
     xhalf = bins * step
     # Mirror it to get the full radial profile (the first element is the center)
     skip = 1 if bins[0] == 0 else 0
