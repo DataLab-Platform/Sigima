@@ -105,10 +105,13 @@ def _radial_profile_all_bins(data, center, xcoords, ycoords, step):
         (np.arange(53.0), np.arange(37.0), (26.0, 18.0), 1.0),  # pixel center
         (np.arange(53) * 0.1, np.arange(37) * 0.2, (2.6, 3.5), 0.1),  # anisotropic
         (np.cumsum(np.linspace(0.1, 2.0, 53)), np.arange(37.0), (30.0, 9.5), 0.1),
+        # Sparse bins (more bins than pixels): tiny gap between two pixel centers
+        (np.r_[0.0, 1e-4, np.arange(1.0, 19.0)], np.arange(15.0), (7.3, 6.1), 1e-4),
     ],
 )
 def test_radial_profile_same_as_all_bins(xcoords, ycoords, center, step) -> None:
-    """Accumulating only the bins holding pixels gives bit-identical profiles."""
+    """Accumulating the bins directly (dense bins) or only those holding pixels
+    (sparse bins) gives bit-identical profiles."""
     rng = np.random.default_rng(0)
     data = rng.normal(100.0, 20.0, (ycoords.size, xcoords.size))
     for values in (data, data.astype(np.uint16), np.ma.masked_less(data, 90.0)):
@@ -117,6 +120,39 @@ def test_radial_profile_same_as_all_bins(xcoords, ycoords, center, step) -> None
         )
         xref, yref = _radial_profile_all_bins(values, center, xcoords, ycoords, step)
         assert np.array_equal(x, xref) and np.array_equal(y, yref)
+
+
+@pytest.mark.parametrize(
+    "xcoords, step, sparse",
+    [
+        (np.arange(40.0), 1.0, False),  # Dense bins: no more bins than pixels
+        (np.r_[0.0, 1e-4, np.arange(1.0, 39.0)], 1e-4, True),  # Sparse bins
+    ],
+)
+def test_radial_profile_sorts_only_sparse_bins(
+    monkeypatch: pytest.MonkeyPatch, xcoords: np.ndarray, step: float, sparse: bool
+) -> None:
+    """Dense bins are accumulated directly, without sorting (regression: sorting
+    every bin made radial profiles of large images 2 to 3 times slower); only
+    sparse bins are sorted to keep the bins holding pixels."""
+    calls = []
+    unique = np.unique
+
+    def spy(*args, **kwargs):
+        calls.append(args)
+        return unique(*args, **kwargs)
+
+    monkeypatch.setattr(np, "unique", spy)
+    ycoords = np.arange(30.0)
+    data = np.arange(ycoords.size * xcoords.size, dtype=float)
+    sigima.tools.image.get_radial_profile(
+        data.reshape(ycoords.size, xcoords.size),
+        (12.3, 14.6),
+        xcoords=xcoords,
+        ycoords=ycoords,
+        step=step,
+    )
+    assert bool(calls) == sparse
 
 
 def test_radial_profile_tiny_spacing() -> None:
