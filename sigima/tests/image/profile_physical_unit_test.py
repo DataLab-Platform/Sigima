@@ -192,6 +192,14 @@ def test_radial_profile_refusals() -> None:
             sigima.tools.image.get_radial_profile(data, center)
 
 
+@pytest.mark.parametrize("shape", [(0, 0), (3, 0), (0, 4)])
+def test_radial_profile_empty_image_refused(shape) -> None:
+    """An image holding no pixel is refused explicitly (regression: obscure
+    NumPy error on a zero-size reduction)."""
+    with pytest.raises(ValueError, match="holds no pixel"):
+        sigima.tools.image.get_radial_profile(np.zeros(shape), (0.0, 0.0))
+
+
 @pytest.mark.parametrize(
     "paramclass, kwargs",
     [

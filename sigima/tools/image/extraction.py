@@ -50,11 +50,16 @@ def get_radial_profile(
         pixels at this distance (1D array)
 
     Raises:
-        ValueError: if *step* is not positive and finite, or if the center or the
-         pixel coordinates are not finite
+        ValueError: if *step* is not positive and finite, if the image holds no
+         pixel, or if the center or the pixel coordinates are not finite
     """
     if not (np.isfinite(step) and step > 0):
         raise ValueError(f"The bin width must be positive and finite (got {step})")
+    if data.size == 0:
+        raise ValueError(
+            f"The image holds no pixel (shape {data.shape}): its radial profile "
+            f"is undefined"
+        )
     if xcoords is None:
         xcoords = np.arange(data.shape[1], dtype=float)
     if ycoords is None:
