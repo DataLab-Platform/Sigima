@@ -32,7 +32,7 @@ classifiers = [
 ]
 requires-python = ">=3.10, <4"
 dependencies = [
-    "guidata >= 3.16.0",
+    "guidata >= 3.17.0",
     "NumPy >= 1.22, < 2.6",
     "SciPy >= 1.10.1, < 1.19",
     "scikit-image >= 0.19.2, < 0.27",
