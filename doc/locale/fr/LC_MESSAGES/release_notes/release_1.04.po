@@ -25,6 +25,9 @@ msgstr "Prérequis"
 msgid "Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release."
 msgstr "Python 3.10 ou ultérieur est désormais requis. Les utilisateurs de Python 3.9 doivent conserver une version antérieure compatible."
 
+msgid "guidata 3.17.0 or later is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English)."
+msgstr "guidata 3.17.0 ou ultérieur est désormais requis : l'import de Sigima n'échoue plus lorsqu'un catalogue de traduction est corrompu (les messages reviennent à l'anglais)."
+
 msgid "Version 1.4"
 msgstr "Version 1.4"
 

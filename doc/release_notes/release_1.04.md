@@ -5,6 +5,7 @@
 ### Requirements ###
 
 * Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release.
+* guidata 3.17.0 or later is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English).
 
 ### ✨ New features since version 1.3.0 ###
 

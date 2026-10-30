@@ -11,7 +11,7 @@ The `sigima` package requires the following Python modules:
       - >=3.10, <4
       - Python programming language
     * - guidata
-      - >= 3.16.0
+      - >= 3.17.0
       - Automatic GUI generation for easy dataset editing and display
     * - NumPy
       - >= 1.22, < 2.6
