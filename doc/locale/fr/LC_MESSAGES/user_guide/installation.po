@@ -120,8 +120,8 @@ msgstr "Langage de programmation Python"
 msgid "guidata"
 msgstr "guidata"
 
-msgid ">= 3.16.0"
-msgstr ">= 3.16.0"
+msgid ">= 3.17.0"
+msgstr ">= 3.17.0"
 
 msgid "Automatic GUI generation for easy dataset editing and display"
 msgstr "Génération automatique d'interfaces graphiques pour l'édition et l'affichage de jeux de données"

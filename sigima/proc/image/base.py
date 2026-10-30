@@ -213,6 +213,49 @@ def dst_1_to_1_signal(src: ImageObj, name: str, suffix: str | None = None) -> Si
     )
 
 
+def _indices_to_nonuniform_physical(
+    obj: ImageObj,
+    coords: np.ndarray,
+    colx: slice | int,
+    coly: slice | int,
+    ix0: int,
+    iy0: int,
+) -> None:
+    """Convert geometry coordinates from pixel indices to physical coordinates, in
+    place, for an image with non-uniform coordinates.
+
+    Points are interpolated linearly between the pixel centers (see
+    :meth:`~sigima.objects.ImageObj.axis_to_physical`). Distance-like values
+    (radius, semi-axes) are scaled by the local pixel size at the shape center,
+    i.e. the mean of the X and Y distances between the edges of the pixel there.
+
+    Args:
+        obj: image object with non-uniform coordinates
+        coords: coordinates in pixel indices, relative to the part of the image
+         starting at column ``ix0`` and row ``iy0`` (NaN padding is kept)
+        colx: X columns of *coords*
+        coly: Y columns of *coords*
+        ix0: first column of the part of the image
+        iy0: first row of the part of the image
+    """
+    xi = coords[:, colx] + ix0
+    yi = coords[:, coly] + iy0
+    if coords.shape[1] % 2 != 0:
+        # Circle [x0, y0, r] or ellipse [x0, y0, a, b, theta] (theta is an angle)
+        size_x = np.abs(
+            obj.axis_to_physical(xi + 0.5, "x") - obj.axis_to_physical(xi - 0.5, "x")
+        )
+        size_y = np.abs(
+            obj.axis_to_physical(yi + 0.5, "y") - obj.axis_to_physical(yi - 0.5, "y")
+        )
+        pixel_scale = (size_x + size_y) / 2
+        coords[:, 2] *= pixel_scale
+        if coords.shape[1] >= 4:
+            coords[:, 3] *= pixel_scale
+    coords[:, colx] = obj.axis_to_physical(xi, "x")
+    coords[:, coly] = obj.axis_to_physical(yi, "y")
+
+
 def compute_geometry_from_obj(
     title: str,
     shape: KindShape,
@@ -243,7 +286,11 @@ def compute_geometry_from_obj(
 
         The conversion is performed using the image's calibration parameters:
         ``physical_x = obj.dx * pixel_x + obj.x0`` and
-        ``physical_y = obj.dy * pixel_y + obj.y0``
+        ``physical_y = obj.dy * pixel_y + obj.y0`` for uniform coordinates, and a
+        linear interpolation between the pixel centers (``obj.xcoords``,
+        ``obj.ycoords``) for non-uniform coordinates. Distance-like values (radius,
+        semi-axes) are scaled by the mean pixel size: ``(obj.dx + obj.dy) / 2``, or
+        the local pixel size at the shape center for non-uniform coordinates.
 
     .. warning::
 
@@ -306,25 +353,30 @@ def compute_geometry_from_obj(
             else:
                 # Circle [x0, y0, r] or ellipse coordinates [x0, y0, a, b, theta]
                 colx, coly = 0, 1
-            coords[:, colx] = obj.dx * coords[:, colx] + obj.x0
-            coords[:, coly] = obj.dy * coords[:, coly] + obj.y0
-            if coords.shape[1] % 2 != 0:
-                # Scale distance-like values (radius, semi-axes) from pixel to
-                # physical units. Use average pixel size for isotropic scaling.
-                pixel_scale = (obj.dx + obj.dy) / 2
-                if coords.shape[1] >= 3:
-                    # Column 2: radius (circle) or semi-axis a (ellipse)
-                    coords[:, 2] *= pixel_scale
-                if coords.shape[1] >= 4:
-                    # Column 3: semi-axis b (ellipse)
-                    coords[:, 3] *= pixel_scale
-                # Column 4 (theta) is an angle: no scaling needed
+            ix0 = iy0 = 0
             if obj.roi is not None:
                 # Coordinates are relative to the part of the image holding the
                 # ROI (see `ImageObj.get_data`): offset them by its first pixel
                 ix0, iy0, _ix1, _iy1 = obj.get_roi_crop_indices(i_roi)
-                coords[:, colx] += ix0 * obj.dx
-                coords[:, coly] += iy0 * obj.dy
+            if obj.is_uniform_coords:
+                coords[:, colx] = obj.dx * coords[:, colx] + obj.x0
+                coords[:, coly] = obj.dy * coords[:, coly] + obj.y0
+                if coords.shape[1] % 2 != 0:
+                    # Scale distance-like values (radius, semi-axes) from pixel to
+                    # physical units. Use average pixel size for isotropic scaling.
+                    pixel_scale = (obj.dx + obj.dy) / 2
+                    if coords.shape[1] >= 3:
+                        # Column 2: radius (circle) or semi-axis a (ellipse)
+                        coords[:, 2] *= pixel_scale
+                    if coords.shape[1] >= 4:
+                        # Column 3: semi-axis b (ellipse)
+                        coords[:, 3] *= pixel_scale
+                    # Column 4 (theta) is an angle: no scaling needed
+                if obj.roi is not None:
+                    coords[:, colx] += ix0 * obj.dx
+                    coords[:, coly] += iy0 * obj.dy
+            else:
+                _indices_to_nonuniform_physical(obj, coords, colx, coly, ix0, iy0)
 
             rows.append(coords)
             num_cols.append(coords.shape[1])

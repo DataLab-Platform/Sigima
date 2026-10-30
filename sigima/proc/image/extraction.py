@@ -65,8 +65,8 @@ __all__ = [
 
 @computation_function(
     operation_id="sigima.image.extract_rois",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
     """Extract multiple regions of interest from data
@@ -77,7 +77,15 @@ def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
 
     Returns:
         Output image object
+
+    Raises:
+        ValueError: if the regions of interest hold no pixel of the image
     """
+    mask = ImageROI.from_params(src, params).to_mask(src)
+    if mask.all():
+        raise ValueError(
+            "The regions of interest hold no pixel of the image: nothing to extract"
+        )
     # Initialize ix0, iy0 with maximum values:
     iy0, ix0 = iymax, ixmax = src.data.shape
     # Initialize ix1, iy1 with minimum values:
@@ -101,17 +109,16 @@ def extract_rois(src: ImageObj, params: list[ROI2DParam]) -> ImageObj:
         dst.set_coords(src.xcoords[ix0:ix1].copy(), src.ycoords[iy0:iy1].copy())
     dst.roi = None
 
-    src2 = src.copy()
-    src2.roi = ImageROI.from_params(src2, params)
-    src2.data[src2.maskdata] = 0
-    dst.data = src2.data[iy0:iy1, ix0:ix1]
+    data = np.array(src.data, copy=True)
+    data[mask] = 0
+    dst.data = data[iy0:iy1, ix0:ix1]
     return dst
 
 
 @computation_function(
     operation_id="sigima.image.extract_roi",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
     """Extract single ROI
@@ -122,7 +129,14 @@ def extract_roi(src: ImageObj, p: ROI2DParam) -> ImageObj:
 
     Returns:
         Output image object
+
+    Raises:
+        ValueError: if the region of interest holds no pixel of the image
     """
+    if p.to_single_roi(src).to_mask(src).all():
+        raise ValueError(
+            "The region of interest holds no pixel of the image: nothing to extract"
+        )
     dst = dst_1_to_1(src, "extract_roi", p.get_suffix())
     dst.data = p.get_data(src).copy()
     dst.roi = p.get_extracted_roi(src)

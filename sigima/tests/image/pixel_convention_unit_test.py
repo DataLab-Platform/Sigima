@@ -209,6 +209,56 @@ def test_extract_roi_keeps_pixel_positions(uniform: bool) -> None:
         assert pixel_center(dst, 2, 3) == pytest.approx(pixel_center(src, 3, 5))
 
 
+@pytest.mark.parametrize("uniform", [True, False])
+def test_extract_roi_holding_no_pixel_is_refused(uniform: bool) -> None:
+    """Extracting regions of interest holding no pixel is refused explicitly.
+
+    Regression: an empty image was created silently.
+    """
+    src = make_image(uniform)
+    (xa, ya), (xb, yb) = pixel_center(src, 1, 2), pixel_center(src, 2, 3)
+    hx, hy = abs(xb - xa) / 2, abs(yb - ya) / 2
+    create = sigima.objects.ROI2DParam.create
+    no_pixel = [
+        create(geometry="rectangle", x0=1e6, y0=1e6, dx=1.0, dy=1.0),
+        # Between the centers of two columns
+        create(geometry="rectangle", x0=xa + hx / 2, y0=ya - hy, dx=hx, dy=2 * hy),
+        # No width, on a pixel center
+        create(geometry="rectangle", x0=xa, y0=ya - hy, dx=0.0, dy=2 * hy),
+        # Bounding box holding pixel centers, circle holding none
+        create(
+            geometry="circle",
+            xc=xa + hx,
+            yc=ya + hy,
+            r=(max(hx, hy) + np.hypot(hx, hy)) / 2,
+        ),
+    ]
+    for param in no_pixel:
+        with pytest.raises(ValueError, match="holds no pixel"):
+            sipi.extract_roi(src, param)
+        with pytest.raises(ValueError, match="hold no pixel"):
+            sipi.extract_rois(src, [param])
+    # Regions of interest holding pixels are extracted with those holding none
+    with_pixels = create(geometry="rectangle", x0=xa, y0=ya, dx=2 * hx, dy=2 * hy)
+    assert sipi.extract_rois(src, no_pixel + [with_pixels]).data.size > 0
+
+
+def test_extract_roi_grid_cells_holding_no_pixel() -> None:
+    """The cells of a ROI grid narrower than a pixel hold no pixel: extracting
+    them is refused, the other cells are extracted."""
+    src = sigima.objects.create_image("i", np.arange(16.0).reshape(4, 4))
+    grid = sipi.generate_image_grid_roi(src, sigima.params.ROIGridParam())
+    params = grid.to_params(src)
+    empty = [param.to_single_roi(src).to_mask(src).all() for param in params]
+    assert any(empty) and not all(empty)
+    for param, is_empty in zip(params, empty):
+        if is_empty:
+            with pytest.raises(ValueError, match="holds no pixel"):
+                sipi.extract_roi(src, param)
+        else:
+            assert sipi.extract_roi(src, param).data.size > 0
+
+
 def test_roi_grid_selects_every_pixel_once() -> None:
     """The cells of a full-size ROI grid tile the image exactly."""
     src = make_image()

@@ -198,9 +198,9 @@ def test_empty_image_roi() -> None:
             f"Source object ROI should be empty or None{context}"
         )
         if src.roi is not None:
-            # No ROI has been set in the source image
-            im1 = sigima.proc.image.extract_roi(src, src.roi.to_params(src))
-            assert im1.data.shape == (0, 0), f"Extracted image should be empty{context}"
+            # No ROI has been set in the source image: nothing to extract
+            with pytest.raises(ValueError, match="holds no pixel"):
+                sigima.proc.image.extract_roi(src, src.roi.to_params(src))
 
 
 @pytest.mark.validation
