@@ -6,18 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Sigima VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-22 21:34+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
-"Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.18.0\n"
+
+msgid "Version 1.4"
+msgstr "Version 1.4"
+
+msgid "Sigima Version 1.4.0"
+msgstr "Sigima Version 1.4.0"
 
 msgid "Requirements"
 msgstr "Prérequis"
@@ -28,12 +27,6 @@ msgstr "Python 3.10 ou ultérieur est désormais requis. Les utilisateurs de Pyt
 msgid "guidata 3.17.0 or later is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English)."
 msgstr "guidata 3.17.0 ou ultérieur est désormais requis : l'import de Sigima n'échoue plus lorsqu'un catalogue de traduction est corrompu (les messages reviennent à l'anglais)."
 
-msgid "Version 1.4"
-msgstr "Version 1.4"
-
-msgid "Sigima Version 1.4.0"
-msgstr "Sigima Version 1.4.0"
-
 msgid "✨ New features since version 1.3.0"
 msgstr "✨ Nouveautés depuis la version 1.3.0"
 
@@ -43,14 +36,17 @@ msgstr "**Origine des données expérimentales** : les objets importés depuis d
 msgid "**Group UUID from the remote client**: `add_group` of the remote client (`sigima.client`) now returns the UUID of the created group, so that objects can be added to it with `group_id=...` (DataLab ≥ 1.4.0; older versions return `None`)."
 msgstr "**UUID de groupe depuis le client distant** : `add_group` du client distant (`sigima.client`) renvoie désormais l'UUID du groupe créé, afin d'y ajouter des objets avec `group_id=...` (DataLab ≥ 1.4.0 ; les versions antérieures renvoient `None`)."
 
-msgid "The [user guide](../user_guide/overview.rst) shows how readers and connectors attach experimental-source metadata, save and restore it, and send an acquisition to a DataLab group. Source recording is opt-in and does not make the experiment reproducible."
-msgstr "Le [guide utilisateur](../user_guide/overview.rst) montre comment les lecteurs et connecteurs attachent les métadonnées d'origine expérimentale, les enregistrent et les restaurent, et envoient une acquisition dans un groupe DataLab. L'enregistrement de l'origine est explicite et ne rend pas l'expérience reproductible."
-
 msgid "**Pixel grid conversions**: New `ImageObj` methods convert between physical coordinates and pixel indices consistently with ROIs: `physical_to_pixel_range` and `pixel_range_to_physical` (rectangle and range of pixels), `axis_to_float_indices` and `axis_to_physical` (fractional indices, for uniform and non-uniform coordinates) and `get_roi_crop_indices` (part of the image holding a ROI). `transformer.transform_like_image` (`sigima.proc.image`) moves a geometry result as a flip, a transposition or a 90° or 270° rotation moves the pixels of the image."
 msgstr "**Conversions de la grille de pixels** : de nouvelles méthodes d'`ImageObj` convertissent coordonnées physiques et indices de pixels de façon cohérente avec les ROI : `physical_to_pixel_range` et `pixel_range_to_physical` (rectangle et plage de pixels), `axis_to_float_indices` et `axis_to_physical` (indices fractionnaires, pour des coordonnées uniformes ou non) et `get_roi_crop_indices` (partie de l'image contenant une ROI). `transformer.transform_like_image` (`sigima.proc.image`) déplace un résultat géométrique comme un retournement, une transposition ou une rotation de 90° ou 270° déplace les pixels de l'image."
 
+msgid "**Removal of file formats**: The I/O registries (`SignalIORegistry`, `ImageIORegistry`) have new `unregister_format` and `register_format` methods, so that a plugin defining file formats can remove them from Sigima when it is unloaded, and register them again, without accessing the registry internals."
+msgstr "**Retrait des formats de fichiers** : les registres d'entrée/sortie (`SignalIORegistry`, `ImageIORegistry`) disposent de nouvelles méthodes `unregister_format` et `register_format`. Un plugin définissant des formats de fichiers peut ainsi les retirer de Sigima lors de son déchargement, puis les enregistrer à nouveau, sans accéder aux mécanismes internes des registres."
+
 msgid "**NPZ object archives**: New functions `serialize_object_to_npz` and `deserialize_object_from_npz` (`sigima.io`) convert a signal or an image to and from an in-memory archive of NumPy arrays and JSON metadata, keeping labels, units, uncertainties, uniform or non-uniform image coordinates and object metadata, without ever pickling arrays. This is the format used by the Web API of DataLab to transfer objects, so that DataLab and its clients (such as DataLab-Kernel) share one implementation."
 msgstr "**Archives NPZ d'objets** : les nouvelles fonctions `serialize_object_to_npz` et `deserialize_object_from_npz` (`sigima.io`) convertissent un signal ou une image vers et depuis une archive en mémoire de tableaux NumPy et de métadonnées JSON, en conservant les libellés, les unités, les incertitudes, les coordonnées uniformes ou non uniformes des images et les métadonnées de l'objet, sans jamais sérialiser les tableaux avec pickle. C'est le format utilisé par l'API Web de DataLab pour transférer les objets, de sorte que DataLab et ses clients (comme DataLab-Kernel) partagent une seule implémentation."
+
+msgid "The [user guide](../user_guide/overview.rst) shows how readers and connectors attach experimental-source metadata, save and restore it, and send an acquisition to a DataLab group. Source recording is opt-in and does not make the experiment reproducible."
+msgstr "Le [guide utilisateur](../user_guide/overview.rst) montre comment les lecteurs et connecteurs attachent les métadonnées d'origine expérimentale, les enregistrent et les restaurent, et envoient une acquisition dans un groupe DataLab. L'enregistrement de l'origine est explicite et ne rend pas l'expérience reproductible."
 
 msgid "💥 Breaking changes since version 1.3.0"
 msgstr "💥 Changements incompatibles depuis la version 1.3.0"
@@ -61,6 +57,7 @@ msgstr "**Sélection des pixels des ROI rectangulaires** : une ROI rectangulaire
 msgid "**Pixel selection of circular and polygonal ROIs**: Circular and polygonal ROIs now also select the pixels whose centers lie inside their shape, boundary included. The vertices of polygons were rounded to the nearest pixel indices, so that the selected pixels could differ from the polygon drawn on screen. Circles excluded the pixels whose centers lie on the circle, and were drawn in index space for non-uniform coordinates, which does not give a circle in physical coordinates."
 msgstr "**Sélection des pixels des ROI circulaires et polygonales** : les ROI circulaires et polygonales sélectionnent elles aussi désormais les pixels dont le centre est situé dans leur forme, bord compris. Les sommets des polygones étaient arrondis aux indices de pixels les plus proches, de sorte que les pixels sélectionnés pouvaient différer du polygone affiché. Les cercles excluaient les pixels dont le centre est situé sur le cercle, et étaient tracés dans l'espace des indices pour des coordonnées non uniformes, ce qui ne donne pas un cercle en coordonnées physiques."
 
+#, python-format
 msgid "**Grids of ROIs**: The cells of ROI grids are now made of whole pixels: each cell holds the pixels whose centers lie in it, from its start included to its end excluded, and its ROI goes from the outer edges of these pixels. Adjacent cells thus never share a pixel, and the cells of a grid with 100 % sizes and steps tile the image exactly; cell positions are rounded to whole pixels. The grid of an image with non-uniform coordinates now spans the actual extent of its axes: its last rows and columns were left out."
 msgstr "**Grilles de ROI** : les cellules des grilles de ROI sont désormais formées de pixels entiers : chaque cellule contient les pixels dont le centre y est situé, de son début inclus à sa fin exclue, et sa ROI va des bords extérieurs de ces pixels. Des cellules adjacentes n'ont donc jamais de pixel en commun, et les cellules d'une grille dont les tailles et les pas valent 100 % pavent exactement l'image ; les positions des cellules sont arrondies à des pixels entiers. La grille d'une image à coordonnées non uniformes couvre désormais l'étendue réelle de ses axes : ses dernières lignes et colonnes étaient omises."
 

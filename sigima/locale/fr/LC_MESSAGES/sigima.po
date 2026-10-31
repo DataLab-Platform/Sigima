@@ -29,11 +29,11 @@ msgid ""
 "additional formats. Each entry should be a tuple of (file extension, description).\n"
 msgstr ""
 "Liste des formats d'entrée/sortie d'images pris en charge. Chaque format est un tuple de\n"
-"(extension de fichier, description).\n"
+"``(file_extension, description)``.\n"
 "\n"
 "La bibliothèque ``sigima`` prend en charge tout format d'image qui peut être lu par la bibliothèque ``imageio``\n"
-"à condition que le(s) plugin(s) associé(s) soient installés (voir la documentation ``imageio\n"
-"<https://imageio.readthedocs.io/en/stable/formats/index.html>``)\n"
+"à condition que le(s) plugin(s) associé(s) soient installés (voir la `documentation imageio\n"
+"<https://imageio.readthedocs.io/en/stable/formats/index.html>`_)\n"
 "et que le type de données et la forme du tableau NumPy de sortie soient pris en charge par ``sigima``.\n"
 "\n"
 "Pour ajouter un nouveau format de fichier, vous pouvez utiliser l'option ``imageio_formats`` pour spécifier\n"
@@ -53,7 +53,7 @@ msgid ""
 "variable. Note that Matplotlib backend does not support all features of PlotPy\n"
 "(e.g., ``create_segment()``, ``create_cursor()``, etc. will raise NotImplementedError).\n"
 msgstr ""
-"Bibliothèque backend pour la visualisation des tests (tests interactifs uniquement).\n"
+"Bibliothèque backend pour la visualisation (module sigima.viz).\n"
 "\n"
 "Valeurs valides : ``\"auto\"``, ``\"plotpy\"``, ``\"matplotlib\"``, ``\"plotly\"``.\n"
 "\n"
@@ -272,11 +272,11 @@ msgstr "Percentile supérieur"
 msgid "Out-of-range behavior"
 msgstr "Comportement hors plage"
 
-msgid "Clip"
-msgstr "Ecrêtage"
-
 msgid "Rescale"
 msgstr "Rééchelonnage"
+
+msgid "Clip"
+msgstr "Ecrêtage"
 
 msgid "Target data type"
 msgstr "Type de données cible"
@@ -440,17 +440,17 @@ msgstr "Titre Z"
 msgid "Z unit"
 msgstr "Unité Z"
 
-msgid "Coefficients"
-msgstr "Coefficients"
-
-msgid "Domain"
-msgstr "Domaine"
-
 msgid "Physical coordinates"
 msgstr "Coordonnées physiques"
 
 msgid "Use the domain [x<sub>min</sub>, x<sub>max</sub>] × [y<sub>min</sub>, y<sub>max</sub>] as image coordinates, so that positions, widths and frequencies match the plot axes. Otherwise, the image is displayed in pixel coordinates."
 msgstr "Utiliser le domaine [x<sub>min</sub>, x<sub>max</sub>] × [y<sub>min</sub>, y<sub>max</sub>] comme coordonnées de l'image, afin que les positions, largeurs et fréquences correspondent aux axes du graphique. Sinon, l'image est affichée en coordonnées pixel."
+
+msgid "Coefficients"
+msgstr "Coefficients"
+
+msgid "Domain"
+msgstr "Domaine"
 
 msgid "Checkerboard pattern with alternating squares"
 msgstr "Motif en damier avec des carrés alternés"
@@ -467,17 +467,17 @@ msgstr "Décalage X"
 msgid "Y offset"
 msgstr "Décalage Y"
 
-msgid "Minimum value"
-msgstr "Minimum"
-
 msgid "Value for dark squares"
 msgstr "Valeur des carrés foncés"
 
-msgid "Maximum value"
-msgstr "Maximum"
+msgid "Minimum value"
+msgstr "Minimum"
 
 msgid "Value for light squares"
 msgstr "Valeur des carrés clairs"
+
+msgid "Maximum value"
+msgstr "Maximum"
 
 msgid "Amplitude and offset"
 msgstr "Amplitude et décalage"
@@ -554,11 +554,11 @@ msgstr "Facteur d'échelle"
 msgid "Data and metadata"
 msgstr "Données et métadonnées"
 
-msgid "Untitled"
-msgstr "Sans titre"
-
 msgid "Image title"
 msgstr "Titre de l'image"
+
+msgid "Untitled"
+msgstr "Sans titre"
 
 msgid "Data"
 msgstr "Données"
@@ -708,14 +708,14 @@ msgstr "N<sub>points</sub>"
 msgid "Total number of points in the signal"
 msgstr "Nombre total de points dans le signal"
 
-msgid "Temperature"
-msgstr "Température"
-
 msgid "Wavelength"
 msgstr "Longueur d'onde"
 
 msgid "Spectral radiance"
 msgstr "Luminance énergétique spectrale"
+
+msgid "Temperature"
+msgstr "Température"
 
 msgid "Initial phase"
 msgstr "Phase initiale"
@@ -1289,38 +1289,23 @@ msgstr "vertical"
 msgid "Direction"
 msgstr "Direction"
 
-msgid "Row"
-msgstr "Ligne"
+msgid "Y coordinate of the row (nearest pixel center)"
+msgstr "Coordonnée Y de la ligne (centre de pixel le plus proche)"
 
-msgid "Column"
-msgstr "Colonne"
+msgid "X coordinate of the column (nearest pixel center)"
+msgstr "Coordonnée X de la colonne (centre de pixel le plus proche)"
 
-msgid "Start row"
-msgstr "Ligne (début)"
+msgid "Start point"
+msgstr "Point de départ"
 
-msgid "Start column"
-msgstr "Colonne (début)"
-
-msgid "End row"
-msgstr "Ligne (fin)"
-
-msgid "End column"
-msgstr "Colonne (fin)"
+msgid "End point"
+msgstr "Point d'arrivée"
 
 msgid "Profile rectangular area"
 msgstr "Zone rectangulaire du profil"
 
-msgid "Row 1"
-msgstr "Ligne 1"
-
-msgid "Row 2"
-msgstr "Ligne 2"
-
-msgid "Column 1"
-msgstr "Colonne 1"
-
-msgid "Column 2"
-msgstr "Colonne 2"
+msgid "None: edge of the image"
+msgstr "Aucune valeur : bord de l'image"
 
 msgid "Center position"
 msgstr "Position du centre"
@@ -1811,18 +1796,3 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
-
-msgid "Y coordinate of the row (nearest pixel center)"
-msgstr "Coordonnée Y de la ligne (centre de pixel le plus proche)"
-
-msgid "X coordinate of the column (nearest pixel center)"
-msgstr "Coordonnée X de la colonne (centre de pixel le plus proche)"
-
-msgid "Start point"
-msgstr "Point de départ"
-
-msgid "End point"
-msgstr "Point d'arrivée"
-
-msgid "None: edge of the image"
-msgstr "Aucune valeur : bord de l'image"

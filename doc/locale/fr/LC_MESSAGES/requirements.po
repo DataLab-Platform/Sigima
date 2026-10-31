@@ -45,8 +45,8 @@ msgstr "Génération automatique d'interface graphique pour une édition et un a
 msgid "NumPy"
 msgstr "NumPy"
 
-msgid ">= 1.22, < 2.5"
-msgstr ">= 1.22, < 2.5"
+msgid ">= 1.22, < 2.6"
+msgstr ""
 
 msgid "Fundamental package for array computing in Python"
 msgstr "Paquet fondamental pour le calcul sur tableaux en Python"
@@ -54,8 +54,8 @@ msgstr "Paquet fondamental pour le calcul sur tableaux en Python"
 msgid "SciPy"
 msgstr "SciPy"
 
-msgid ">= 1.10.1, < 1.17"
-msgstr ">= 1.10.1, < 1.17"
+msgid ">= 1.10.1, < 1.19"
+msgstr ""
 
 msgid "Fundamental algorithms for scientific computing in Python"
 msgstr "Algorithmes fondamentaux pour le calcul scientifique en Python"
@@ -151,7 +151,7 @@ msgid "build"
 msgstr "build"
 
 msgid "A simple, correct Python build frontend"
-msgstr "Un frontend de construction Python simple et correct"
+msgstr "Une interface simple et fiable pour la construction de paquets Python"
 
 msgid "babel"
 msgstr "babel"
@@ -181,7 +181,7 @@ msgid "pre-commit"
 msgstr "pre-commit"
 
 msgid "A framework for managing and maintaining multi-language pre-commit hooks."
-msgstr "Un framework pour gérer et maintenir des hooks de pré-commit multi-langages."
+msgstr "Un framework pour gérer et maintenir des hooks de pré-commit pour plusieurs langages."
 
 msgid "setuptools"
 msgstr "setuptools"
@@ -275,3 +275,12 @@ msgstr "pytest-xvfb"
 
 msgid "A pytest plugin to run Xvfb (or Xephyr/Xvnc) for tests."
 msgstr "Un plugin pytest pour exécuter Xvfb (ou Xephyr/Xvnc) pour les tests."
+
+msgid "jsonschema"
+msgstr ""
+
+msgid ">= 4"
+msgstr ""
+
+msgid "An implementation of JSON Schema validation for Python"
+msgstr "Une implémentation de la validation JSON Schema pour Python"
