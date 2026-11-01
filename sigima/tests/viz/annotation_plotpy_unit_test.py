@@ -4,6 +4,7 @@
 
 # pylint: disable=import-outside-toplevel
 
+import dataclasses
 import importlib.util
 import math
 
@@ -206,6 +207,134 @@ def test_all_known_legacy_plotpy_types_are_migrated() -> None:
         RangeAnnotation,
         RangeAnnotation,
     ]
+
+
+def _assert_same_geometry(first, second) -> None:
+    """Check that two canonical annotations have the same type and geometry."""
+    assert type(first) is type(second)
+    for annotation_field in dataclasses.fields(first):
+        name = annotation_field.name
+        if name in ("id", "style", "label", "metadata", "extensions"):
+            continue
+        first_value, second_value = getattr(first, name), getattr(second, name)
+        if isinstance(first_value, (float, tuple)):
+            np.testing.assert_allclose(
+                np.asarray(first_value, dtype=float),
+                np.asarray(second_value, dtype=float),
+                atol=1e-12,
+                err_msg=name,
+            )
+        else:
+            assert first_value == second_value, name
+
+
+def _make_plain_shapes() -> list:
+    """Return one plain PlotPy shape of each supported family."""
+    from plotpy.builder import make
+    from plotpy.items import (
+        ObliqueRectangleShape,
+        PointShape,
+        XRangeSelection,
+        YRangeSelection,
+    )
+
+    rectangle = make.rectangle(1, 2, 5, 4, "Plain rectangle")
+    rectangle.shapeparam.update_param(rectangle)
+    rectangle.shapeparam.line.color = "#112233"
+    rectangle.shapeparam.update_item(rectangle)
+    return [
+        PointShape(1, 2),
+        make.segment(0, 1, 3, 5, "Plain segment"),
+        rectangle,
+        ObliqueRectangleShape(0, 0, 4, 0, 4, 2, 0, 2),
+        make.circle(0, 0, 2, 0),
+        make.ellipse(0, 0, 4, 0, 2, -1, 2, 1),
+        make.polygon(np.array([0.0, 2.0, 1.0]), np.array([0.0, 0.0, 3.0]), True),
+        make.polygon(np.array([0.0, 2.0]), np.array([0.0, 1.0]), False),
+        XRangeSelection(1, 2),
+        YRangeSelection(3, 4),
+    ]
+
+
+_PLAIN_SHAPE_ANNOTATION_TYPES = [
+    PointAnnotation,
+    SegmentAnnotation,
+    RectangleAnnotation,
+    RectangleAnnotation,
+    EllipseAnnotation,
+    EllipseAnnotation,
+    PolygonAnnotation,
+    PolylineAnnotation,
+    RangeAnnotation,
+    RangeAnnotation,
+]
+
+
+def test_plain_plotpy_shapes_are_converted() -> None:
+    """Plain PlotPy shapes must convert like their annotated variants.
+
+    Live items and their historical JSON payloads must give the same annotation, and
+    rendering the annotation back must keep its geometry.
+    """
+    from guidata.io import JSONWriter
+    from plotpy.io import save_items
+
+    from sigima.objects.annotations.legacy_plotpy import (
+        legacy_plotpy_payload_to_annotations,
+    )
+    from sigima.viz.annotation_plotpy import (
+        annotation_to_plotpy_item,
+        plotpy_item_to_annotation,
+    )
+
+    items = _make_plain_shapes()
+    annotations = [plotpy_item_to_annotation(item) for item in items]
+    assert [type(annotation) for annotation in annotations] == (
+        _PLAIN_SHAPE_ANNOTATION_TYPES
+    )
+
+    for item, annotation in zip(items, annotations):
+        writer = JSONWriter(None)
+        save_items(writer, [item])
+        payload = {
+            "type": "plotpy_item",
+            "item_class": type(item).__name__,
+            "plotpy_json": writer.get_json(),
+        }
+        [migrated] = legacy_plotpy_payload_to_annotations(payload)
+        _assert_same_geometry(migrated, annotation)
+        assert migrated.title == annotation.title
+        _assert_same_geometry(
+            plotpy_item_to_annotation(annotation_to_plotpy_item(annotation)),
+            annotation,
+        )
+
+    point, segment, rectangle = annotations[:3]
+    assert (point.x, point.y) == (1.0, 2.0)
+    assert point.style.marker.symbol == "none"  # Shape whose style was never set
+    assert (segment.x0, segment.y0, segment.x1, segment.y1) == (0.0, 1.0, 3.0, 5.0)
+    assert segment.title == "Plain segment"
+    assert (rectangle.x, rectangle.y, rectangle.width, rectangle.height) == (
+        3.0,
+        3.0,
+        4.0,
+        2.0,
+    )
+    assert rectangle.title == "Plain rectangle"
+    assert rectangle.style.stroke.color == "#112233"
+    assert rectangle.extensions == {"plotpy": {"item_class": "RectangleShape"}}
+
+
+def test_specialized_plotpy_shapes_are_not_converted() -> None:
+    """Subclasses of plain PlotPy shapes may hold data that would be lost."""
+    from plotpy.items import RectangleShape
+
+    from sigima.viz.annotation_plotpy import plotpy_item_to_annotation
+
+    class SpecializedRectangle(RectangleShape):
+        """Rectangle holding application-specific data."""
+
+    assert plotpy_item_to_annotation(SpecializedRectangle(0, 0, 1, 1)) is None
 
 
 def test_unknown_legacy_item_is_preserved() -> None:
