@@ -301,7 +301,9 @@ def test_plain_plotpy_shapes_are_converted() -> None:
             "item_class": type(item).__name__,
             "plotpy_json": writer.get_json(),
         }
-        [migrated] = legacy_plotpy_payload_to_annotations(payload)
+        migrated_annotations = legacy_plotpy_payload_to_annotations(payload)
+        assert len(migrated_annotations) == 1
+        migrated = migrated_annotations[0]
         _assert_same_geometry(migrated, annotation)
         assert migrated.title == annotation.title
         _assert_same_geometry(

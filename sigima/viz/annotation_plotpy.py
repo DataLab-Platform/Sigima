@@ -574,16 +574,16 @@ def _shape_to_annotation(
     """
     if family is AnnotatedPoint:
         x, y = shape.get_pos()
-        return PointAnnotation(x=x, y=y, **common)
-    if family is AnnotatedSegment:
+        annotation = PointAnnotation(x=x, y=y, **common)
+    elif family is AnnotatedSegment:
         x0, y0, x1, y1 = shape.get_rect()
-        return SegmentAnnotation(x0=x0, y0=y0, x1=x1, y1=y1, **common)
-    if family is AnnotatedObliqueRectangle:
+        annotation = SegmentAnnotation(x0=x0, y0=y0, x1=x1, y1=y1, **common)
+    elif family is AnnotatedObliqueRectangle:
         points = np.asarray(shape.points)
         center = points.mean(axis=0)
         edge_x = points[1] - points[0]
         edge_y = points[3] - points[0]
-        return RectangleAnnotation(
+        annotation = RectangleAnnotation(
             x=center[0],
             y=center[1],
             width=np.linalg.norm(edge_x),
@@ -591,27 +591,27 @@ def _shape_to_annotation(
             angle=math.atan2(edge_x[1], edge_x[0]),
             **common,
         )
-    if family is AnnotatedRectangle:
+    elif family is AnnotatedRectangle:
         x0, y0, x1, y1 = shape.get_rect()
-        return RectangleAnnotation(
+        annotation = RectangleAnnotation(
             x=(x0 + x1) / 2,
             y=(y0 + y1) / 2,
             width=abs(x1 - x0),
             height=abs(y1 - y0),
             **common,
         )
-    if family is AnnotatedCircle:
+    elif family is AnnotatedCircle:
         x0, y0, x1, y1 = shape.get_xdiameter()
-        return CircleAnnotation(
+        annotation = CircleAnnotation(
             cx=(x0 + x1) / 2,
             cy=(y0 + y1) / 2,
             radius=math.hypot(x1 - x0, y1 - y0) / 2,
             **common,
         )
-    if family is AnnotatedEllipse:
+    elif family is AnnotatedEllipse:
         x0, y0, x1, y1 = shape.get_xdiameter()
         x2, y2, x3, y3 = shape.get_ydiameter()
-        return EllipseAnnotation(
+        annotation = EllipseAnnotation(
             cx=(x0 + x1) / 2,
             cy=(y0 + y1) / 2,
             radius_x=math.hypot(x1 - x0, y1 - y0) / 2,
@@ -619,15 +619,17 @@ def _shape_to_annotation(
             angle=math.atan2(y0 - y1, x0 - x1),
             **common,
         )
-    if family is AnnotatedPolygon:
+    elif family is AnnotatedPolygon:
         points = tuple(map(tuple, shape.get_points()))
         annotation_class = (
             PolygonAnnotation if shape.is_closed() else PolylineAnnotation
         )
-        return annotation_class(points=points, **common)
-    start, end = shape.get_range()
-    axis = Axis.X if family is AnnotatedXRange else Axis.Y
-    return RangeAnnotation(axis=axis, start=start, end=end, **common)
+        annotation = annotation_class(points=points, **common)
+    else:
+        start, end = shape.get_range()
+        axis = Axis.X if family is AnnotatedXRange else Axis.Y
+        annotation = RangeAnnotation(axis=axis, start=start, end=end, **common)
+    return annotation
 
 
 def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
