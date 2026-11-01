@@ -23,11 +23,19 @@ from plotpy.items import (
     AnnotatedShape,
     AnnotatedXRange,
     AnnotatedYRange,
+    EllipseShape,
     LabelItem,
     Marker,
+    ObliqueRectangleShape,
+    PointShape,
+    PolygonShape,
+    RectangleShape,
+    SegmentShape,
+    XRangeSelection,
+    YRangeSelection,
 )
 from qtpy import QtCore as QC
-from qwt import QwtPlotMarker
+from qwt import QwtPlotMarker, QwtSymbol
 
 from sigima.objects.annotations import (
     AnnotationLabel,
@@ -423,18 +431,37 @@ def _legacy_title(item: AnnotatedShape) -> str:
     return str(item.title().text())
 
 
-def _legacy_style(item: AnnotatedShape) -> AnnotationStyle:
-    """Convert the portable part of a PlotPy annotated-shape style."""
-    pen = item.shape.pen
-    brush = item.shape.brush
-    symbol = item.shape.symbol
-    shape_param = item.shape.shapeparam
+def _legacy_style(shape: Any) -> AnnotationStyle:
+    """Convert the portable part of a PlotPy shape style.
+
+    Args:
+        shape: Plain PlotPy shape (the shape of an annotated shape item, or a plain
+         shape item)
+    """
+    pen = shape.pen
+    brush = shape.brush
+    symbol = shape.symbol
+    shape_param = shape.shapeparam
     pen_color = pen.color()
     brush_color = brush.color()
-    symbol_pen = symbol.pen()
-    symbol_brush = symbol.brush()
     line_style = getattr(shape_param.line, "style", "SolidLine")
-    marker_name = getattr(shape_param.symbol, "marker", "Ellipse")
+    if isinstance(symbol, QwtSymbol):
+        symbol_pen = symbol.pen()
+        symbol_brush = symbol.brush()
+        marker = MarkerStyle(
+            symbol=_PLOTPY_MARKERS.get(
+                getattr(shape_param.symbol, "marker", "Ellipse"), "circle"
+            ),
+            size=symbol.size().width(),
+            color=(
+                symbol_brush.color().name()
+                if symbol_brush.color().alphaF() > 0
+                else symbol_pen.color().name()
+            ),
+        )
+    else:
+        # Shapes whose style was never set hold a symbol style instead of a symbol
+        marker = MarkerStyle(symbol="none")
     return AnnotationStyle(
         stroke=StrokeStyle(
             color=pen_color.name(),
@@ -446,20 +473,17 @@ def _legacy_style(item: AnnotatedShape) -> AnnotationStyle:
             color=brush_color.name() if brush_color.alphaF() > 0 else None,
             opacity=brush_color.alphaF(),
         ),
-        marker=MarkerStyle(
-            symbol=_PLOTPY_MARKERS.get(marker_name, "circle"),
-            size=symbol.size().width(),
-            color=(
-                symbol_brush.color().name()
-                if symbol_brush.color().alphaF() > 0
-                else symbol_pen.color().name()
-            ),
-        ),
+        marker=marker,
     )
 
 
-def _legacy_common(item: Any) -> dict[str, Any]:
-    """Return canonical fields shared by migrated PlotPy items."""
+def _legacy_common(item: Any, shape: Any | None = None) -> dict[str, Any]:
+    """Return canonical fields shared by migrated PlotPy items.
+
+    Args:
+        item: PlotPy item
+        shape: Plain PlotPy shape holding the style of *item*, if any
+    """
     common = {
         "title": str(item.title().text()),
         "visible": item.isVisible(),
@@ -467,8 +491,9 @@ def _legacy_common(item: Any) -> dict[str, Any]:
         "z_index": round(item.z()),
         "extensions": {"plotpy": {"item_class": type(item).__name__}},
     }
+    if shape is not None:
+        common["style"] = _legacy_style(shape)
     if isinstance(item, AnnotatedShape):
-        common["style"] = _legacy_style(item)
         title = str(item.title().text())
         if title:
             label_param = getattr(getattr(item, "label", None), "labelparam", None)
@@ -486,18 +511,75 @@ def _legacy_common(item: Any) -> dict[str, Any]:
     return common
 
 
-def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
-    """Convert a known historical PlotPy item to a canonical annotation."""
-    common = _legacy_common(item)
-    annotation = None
-    if isinstance(item, AnnotatedPoint):
-        x, y = item.get_pos()
+# Plain PlotPy shapes, with the annotated shape class of the same family. They are
+# matched by exact class, so that specialized subclasses (SVG shapes, axes...),
+# whose specific data would be lost, remain unsupported.
+_PLAIN_SHAPE_FAMILIES = {
+    PointShape: AnnotatedPoint,
+    SegmentShape: AnnotatedSegment,
+    RectangleShape: AnnotatedRectangle,
+    ObliqueRectangleShape: AnnotatedObliqueRectangle,
+    EllipseShape: AnnotatedEllipse,
+    PolygonShape: AnnotatedPolygon,
+    XRangeSelection: AnnotatedXRange,
+    YRangeSelection: AnnotatedYRange,
+}
+
+# Subclasses first: AnnotatedObliqueRectangle derives from AnnotatedRectangle, and
+# AnnotatedCircle from AnnotatedEllipse.
+_ANNOTATED_SHAPE_FAMILIES = (
+    AnnotatedPoint,
+    AnnotatedSegment,
+    AnnotatedObliqueRectangle,
+    AnnotatedRectangle,
+    AnnotatedCircle,
+    AnnotatedEllipse,
+    AnnotatedPolygon,
+    AnnotatedXRange,
+    AnnotatedYRange,
+)
+
+
+def _shape_family(item: Any) -> tuple[type, Any] | None:
+    """Return the shape family of a PlotPy item and the shape holding its geometry.
+
+    Args:
+        item: PlotPy item
+
+    Returns:
+        Annotated shape class of the item's family and plain shape holding its
+        geometry and style, or None if *item* is not a supported shape
+    """
+    family = _PLAIN_SHAPE_FAMILIES.get(type(item))
+    if family is not None:
+        return family, item
+    for family in _ANNOTATED_SHAPE_FAMILIES:
+        if isinstance(item, family):
+            return family, item.shape
+    return None
+
+
+def _shape_to_annotation(
+    family: type, shape: Any, common: dict[str, Any]
+) -> GraphicalAnnotation:
+    """Convert the geometry of a PlotPy shape to a canonical annotation.
+
+    Args:
+        family: Annotated shape class of the shape's family
+        shape: Plain PlotPy shape holding the geometry
+        common: Canonical fields shared by all annotations
+
+    Returns:
+        Canonical annotation
+    """
+    if family is AnnotatedPoint:
+        x, y = shape.get_pos()
         annotation = PointAnnotation(x=x, y=y, **common)
-    elif isinstance(item, AnnotatedSegment):
-        x0, y0, x1, y1 = item.get_rect()
+    elif family is AnnotatedSegment:
+        x0, y0, x1, y1 = shape.get_rect()
         annotation = SegmentAnnotation(x0=x0, y0=y0, x1=x1, y1=y1, **common)
-    elif isinstance(item, AnnotatedObliqueRectangle):
-        points = np.asarray(item.shape.points)
+    elif family is AnnotatedObliqueRectangle:
+        points = np.asarray(shape.points)
         center = points.mean(axis=0)
         edge_x = points[1] - points[0]
         edge_y = points[3] - points[0]
@@ -509,8 +591,8 @@ def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
             angle=math.atan2(edge_x[1], edge_x[0]),
             **common,
         )
-    elif isinstance(item, AnnotatedRectangle):
-        x0, y0, x1, y1 = item.get_rect()
+    elif family is AnnotatedRectangle:
+        x0, y0, x1, y1 = shape.get_rect()
         annotation = RectangleAnnotation(
             x=(x0 + x1) / 2,
             y=(y0 + y1) / 2,
@@ -518,17 +600,17 @@ def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
             height=abs(y1 - y0),
             **common,
         )
-    elif isinstance(item, AnnotatedCircle):
-        x0, y0, x1, y1 = item.get_xdiameter()
+    elif family is AnnotatedCircle:
+        x0, y0, x1, y1 = shape.get_xdiameter()
         annotation = CircleAnnotation(
             cx=(x0 + x1) / 2,
             cy=(y0 + y1) / 2,
             radius=math.hypot(x1 - x0, y1 - y0) / 2,
             **common,
         )
-    elif isinstance(item, AnnotatedEllipse):
-        x0, y0, x1, y1 = item.get_xdiameter()
-        x2, y2, x3, y3 = item.get_ydiameter()
+    elif family is AnnotatedEllipse:
+        x0, y0, x1, y1 = shape.get_xdiameter()
+        x2, y2, x3, y3 = shape.get_ydiameter()
         annotation = EllipseAnnotation(
             cx=(x0 + x1) / 2,
             cy=(y0 + y1) / 2,
@@ -537,15 +619,39 @@ def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
             angle=math.atan2(y0 - y1, x0 - x1),
             **common,
         )
-    elif isinstance(item, AnnotatedPolygon):
-        points = tuple(map(tuple, item.get_points()))
-        annotation_class = PolygonAnnotation if item.is_closed() else PolylineAnnotation
+    elif family is AnnotatedPolygon:
+        points = tuple(map(tuple, shape.get_points()))
+        annotation_class = (
+            PolygonAnnotation if shape.is_closed() else PolylineAnnotation
+        )
         annotation = annotation_class(points=points, **common)
-    elif isinstance(item, (AnnotatedXRange, AnnotatedYRange)):
-        start, end = item.get_range()
-        axis = Axis.X if isinstance(item, AnnotatedXRange) else Axis.Y
+    else:
+        start, end = shape.get_range()
+        axis = Axis.X if family is AnnotatedXRange else Axis.Y
         annotation = RangeAnnotation(axis=axis, start=start, end=end, **common)
-    elif isinstance(item, LabelItem):
+    return annotation
+
+
+def plotpy_item_to_annotation(item: Any) -> GraphicalAnnotation | None:
+    """Convert a PlotPy item to a canonical annotation.
+
+    Supported items are annotated shapes, plain shapes of the same families (point,
+    segment, rectangle, ellipse, polygon and range selection, matched by exact class),
+    labels and markers.
+
+    Args:
+        item: PlotPy item
+
+    Returns:
+        Canonical annotation, or None if *item* is not supported
+    """
+    family_and_shape = _shape_family(item)
+    if family_and_shape is not None:
+        family, shape = family_and_shape
+        return _shape_to_annotation(family, shape, _legacy_common(item, shape))
+    common = _legacy_common(item)
+    annotation = None
+    if isinstance(item, LabelItem):
         if item.G in _PLOTPY_ANCHOR_POSITIONS:
             x, y = _PLOTPY_ANCHOR_POSITIONS[item.G]
             coordinate_space = "axes"

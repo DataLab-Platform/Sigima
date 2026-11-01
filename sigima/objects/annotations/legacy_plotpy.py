@@ -297,18 +297,28 @@ def _common(item: Mapping[str, Any], item_class: str) -> dict[str, Any]:
 def _item_to_annotation(
     item_class: str, item: Mapping[str, Any]
 ) -> GraphicalAnnotation:
-    """Convert one decoded PlotPy item to a canonical annotation."""
+    """Convert one decoded PlotPy item to a canonical annotation.
+
+    Plain PlotPy shapes (e.g. ``RectangleShape``) are serialized like the shape of
+    their annotated variant (e.g. ``AnnotatedRectangle``), without annotation and
+    label parameters: they are converted the same way.
+    """
     common = _common(item, item_class)
-    if item_class == "AnnotatedPoint":
+    if item_class in ("AnnotatedPoint", "PointShape"):
         point = _points(item, 1)[0]
         annotation = PointAnnotation(x=point[0], y=point[1], **common)
-    elif item_class == "AnnotatedSegment":
+    elif item_class in ("AnnotatedSegment", "SegmentShape"):
         points = _points(item, 2)
         first, second = points[0], points[1]
         annotation = SegmentAnnotation(
             x0=first[0], y0=first[1], x1=second[0], y1=second[1], **common
         )
-    elif item_class in ("AnnotatedRectangle", "AnnotatedObliqueRectangle"):
+    elif item_class in (
+        "AnnotatedRectangle",
+        "AnnotatedObliqueRectangle",
+        "RectangleShape",
+        "ObliqueRectangleShape",
+    ):
         points = _points(item, 4)
         center = _center(points[0], points[2])
         annotation = RectangleAnnotation(
@@ -326,7 +336,7 @@ def _item_to_annotation(
         annotation = CircleAnnotation(
             cx=center[0], cy=center[1], radius=_distance(first, second) / 2.0, **common
         )
-    elif item_class == "AnnotatedEllipse":
+    elif item_class in ("AnnotatedEllipse", "EllipseShape"):
         points = _points(item, 4)
         first, second, third, fourth = points[0], points[1], points[2], points[3]
         center = _center(first, second)
@@ -338,7 +348,7 @@ def _item_to_annotation(
             angle=math.atan2(first[1] - second[1], first[0] - second[0]),
             **common,
         )
-    elif item_class == "AnnotatedPolygon":
+    elif item_class in ("AnnotatedPolygon", "PolygonShape"):
         points = _points(item, 2)
         if bool(item.get("closed", True)):
             annotation = PolygonAnnotation(points=tuple(points), **common)
