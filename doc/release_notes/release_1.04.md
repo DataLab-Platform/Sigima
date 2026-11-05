@@ -4,8 +4,11 @@
 
 ### Requirements ###
 
-* Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release.
-* guidata 3.17.0 or later is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English).
+* **PlotPyStack**:
+  * guidata 3.17.0 or later is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English).
+* **Third-party**:
+  * Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release.
+  * NumPy up to 2.5 (`>= 1.22, < 2.6`) and SciPy up to 1.18 (`>= 1.10.1, < 1.19`) are now supported.
 
 ### ✨ New features since version 1.3.0 ###
 

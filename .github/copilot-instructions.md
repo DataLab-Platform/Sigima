@@ -34,7 +34,7 @@ filtered_y = filtering.apply_moving_average(y, n=5)
 
 - **Python**: 3.10+ (`from __future__ import annotations`)
 - **Core**: NumPy (≥1.22), SciPy (≥1.10.1), scikit-image (≥0.19.2), pandas (≥1.4)
-- **GUI Parameters**: guidata (≥3.13) for `DataSet` parameter classes
+- **GUI Parameters**: guidata (≥3.17.0) for `DataSet` parameter classes
 - **Optional**: opencv-python-headless (≥4.8.1.78)
 - **Testing**: pytest with `--gui` flag for visual validation
 - **Linting**: Ruff (preferred), Pylint
@@ -657,6 +657,34 @@ Sigima functions are **consumed by DataLab processors**:
 
 **Contract versions are independent of this classification**: a bug fix that changes the result
 of a computation function increases its `contract_version` too.
+
+## Release Notes Guidelines
+
+**Location**: `doc/release_notes/release_MAJOR.MINOR.md` where MINOR is zero-padded to 2 digits (e.g., `release_1.00.md` for v1.0.x, `release_1.04.md` for v1.4.x).
+
+### Dependency Version Tracking (`Requirements` section)
+
+Every new release entry in the release notes must include a dedicated **`### Requirements ###`** section tracking minimum version updates from `pyproject.toml` (`requires-python`, `[project.dependencies]`, and relevant `[project.optional-dependencies]`).
+
+Distinguish three categories of dependencies (include only categories relevant to the release / project):
+
+1. **DataLab-Platform** (`datalab-platform` ecosystem packages): `Sigima`, `SigimaX`, `datalab-capsule` (not applicable for Sigima, which has no upstream DataLab-Platform dependency)
+2. **PlotPyStack**: `guidata`, `PlotPy`, `PythonQwt` (for Sigima: `guidata` ≥ 3.17.0, optional `plotpy`)
+3. **Third-party** (and Python runtime): `Python` (`requires-python`), `NumPy`, `SciPy`, `scikit-image`, `pandas`, `PyWavelets`, `imagecodecs`, `packaging`, `makefun`, `opencv-python-headless`, `plotly`, etc.
+
+**Rules**:
+- Whenever a minimum required version is bumped or a dependency is added/updated in `pyproject.toml`, document it in the release's `### Requirements ###` section, grouped/distinguished according to these three categories, and briefly state the user-visible reason for the update.
+- Keep `requirements.txt` and `doc/requirements.rst` synchronized with `pyproject.toml` (via `python -m guidata.utils.genreqs all`), along with the French documentation `.po` catalogs.
+
+**Example**:
+```markdown
+### Requirements ###
+
+* **PlotPyStack**:
+  * guidata ≥ 3.17.0 is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English).
+* **Third-party**:
+  * Python ≥ 3.10 is now required. Python 3.9 users must keep an earlier compatible release.
+```
 
 ## Getting Help
 
