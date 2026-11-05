@@ -58,8 +58,9 @@ def get_cdl_xmlrpc_port():
 
     This function attempts to read the XML-RPC port from DataLab's configuration file.
     It first tries the versioned configuration folders (starting with the latest
-    version), and falls back to the legacy .DataLab folder for backward compatibility
-    with DataLab v0.x.
+    version), preferring the typed configuration file written by DataLab >= 1.3 over
+    the legacy INI file, and falls back to the legacy .DataLab folder for backward
+    compatibility with DataLab v0.x.
 
     Returns:
         str: XML-RPC port number
@@ -73,27 +74,23 @@ def get_cdl_xmlrpc_port():
 
     config_basedir = get_config_basedir()
 
-    # List of configuration folders to try, in order of preference
-    # Try versioned folders first (v3, v2, v1), then legacy .DataLab
-    config_folders = [
-        (".DataLab_v3", "DataLab_v3.ini"),  # Future versions
-        (".DataLab_v2", "DataLab_v2.ini"),
-        (".DataLab_v1", "DataLab_v1.ini"),  # Current stable (v1.x)
-        (".DataLab", "DataLab.ini"),  # Legacy (v0.x)
-    ]
+    # Configuration folders to try, newest major version first. For each folder,
+    # the typed file (DataLab >= 1.3) takes precedence over the legacy one, which
+    # is no longer written and may hold a stale port.
+    config_folders = [".DataLab_v3", ".DataLab_v2", ".DataLab_v1", ".DataLab"]
 
-    # Try each configuration folder in order
-    for folder_name, ini_name in config_folders:
-        fname = osp.join(config_basedir, folder_name, ini_name)
-        if osp.exists(fname):
+    for folder_name in config_folders:
+        basename = folder_name.lstrip(".")
+        for ini_name in (f"{basename}_typed.ini", f"{basename}.ini"):
+            fname = osp.join(config_basedir, folder_name, ini_name)
+            if not osp.exists(fname):
+                continue
             ini = cp.ConfigParser()
             try:
                 ini.read(fname)
-                port = ini.get("main", "rpc_server_port")
-                # Successfully read port from this version's config
-                return port
+                return ini.get("main", "rpc_server_port")
             except (cp.NoSectionError, cp.NoOptionError):
-                # Config file exists but doesn't have the port yet, try next version
+                # Config file exists but doesn't have the port yet, try next candidate
                 continue
 
     # No valid configuration found
