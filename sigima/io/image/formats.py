@@ -815,10 +815,30 @@ class TextImageFormat(SingleImageFormatBase):
                         # Handle the extra column created with trailing delimiters.
                         df = df.dropna(axis=1, how="all")
                         data = df.to_numpy()
+                        if data.dtype == object:
+                            data = TextImageFormat.parse_complex_cells(data)
                         return convert_array_to_valid_dtype(data, ImageObj.VALID_DTYPES)
                     except ValueError:
                         continue
         raise ValueError(f"Could not read image data from file {filename}.")
+
+    @staticmethod
+    def parse_complex_cells(data: np.ndarray) -> np.ndarray:
+        """Parse text cells holding complex numbers, as written by ``np.savetxt``.
+
+        Args:
+            data: Array of text cells, e.g. ``" (1.0e+00-2.0e+00j)"``
+
+        Returns:
+            Complex array
+
+        Raises:
+            ValueError: If the cells do not hold complex numbers
+        """
+        cells = [str(value).strip() for value in data.ravel()]
+        if not any(cell.endswith("j)") for cell in cells):
+            raise ValueError("Text cells do not hold complex numbers")
+        return np.array([complex(cell) for cell in cells]).reshape(data.shape)
 
     @staticmethod
     def write_data(filename: str, data: np.ndarray) -> None:
