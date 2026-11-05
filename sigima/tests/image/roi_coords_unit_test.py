@@ -51,17 +51,22 @@ class TestRectangularROISetters:
         # Create ROI in indices mode: rectangle from (10, 20) with delta (20, 20)
         roi = RectangularROI([10, 20, 20, 20], indices=True, title="Test ROI")
 
-        # Set new physical coordinates: (15.0, 25.0) with size (10.0, 10.0)
-        new_physical = np.array([15.0, 25.0, 10.0, 10.0])
+        # Set new physical coordinates: (14.75, 24.75) with size (10.0, 10.0)
+        new_physical = np.array([14.75, 24.75, 10.0, 10.0])
         roi.set_physical_coords(obj, new_physical)
 
         # Verify coords were converted and stored as indices (deltas)
         assert roi.indices is True
-        # Physical (15.0, 25.0, 10.0, 10.0) means corners (15.0, 25.0) to (25.0, 35.0)
-        # x0: (15.0 - 10.0) / 0.5 = 10, x1: (25.0 - 10.0) / 0.5 = 30
-        # y0: (25.0 - 20.0) / 0.5 = 10, y1: (35.0 - 20.0) / 0.5 = 30
+        # Physical (14.75, 24.75, 10.0, 10.0) means corners (14.75, 24.75) to
+        # (24.75, 34.75), i.e. the outer edges of the pixels whose centers are at
+        # x = 10.0 + i * 0.5 for i in 10..29 and y = 20.0 + j * 0.5 for j in 10..29
         # Stored as [ix0, iy0, dx, dy] = [10, 10, 20, 20]
         np.testing.assert_array_equal(roi.coords, [10, 10, 20, 20])
+
+        # A rectangle bounded by pixel centers includes the pixels on its bounds
+        roi.set_physical_coords(obj, np.array([15.0, 25.0, 10.0, 10.0]))
+        np.testing.assert_array_equal(roi.coords, [10, 10, 21, 21])
+        roi.set_physical_coords(obj, new_physical)
 
         # Verify we can retrieve the same physical coords
         retrieved = roi.get_physical_coords(obj)
@@ -118,10 +123,11 @@ class TestRectangularROISetters:
 
         # Verify coords were converted to physical and stored
         assert roi.indices is False
-        # Indices (10, 10, 20, 20) -> Physical (15.0, 25.0, 10.0, 10.0)
-        # x0: 10 * 0.5 + 10.0 = 15.0, y0: 10 * 0.5 + 20.0 = 25.0
+        # Indices (10, 10, 20, 20) -> Physical (14.75, 24.75, 10.0, 10.0): outer
+        # edges of the pixels, half a pixel before the first pixel center
+        # x0: (10 - 0.5) * 0.5 + 10.0 = 14.75, y0: (10 - 0.5) * 0.5 + 20.0 = 24.75
         # dx: 20 * 0.5 = 10.0, dy: 20 * 0.5 = 10.0
-        expected_physical = np.array([15.0, 25.0, 10.0, 10.0])
+        expected_physical = np.array([14.75, 24.75, 10.0, 10.0])
         np.testing.assert_allclose(roi.coords, expected_physical, rtol=1e-10)
 
         # Verify we can retrieve the same indices coords
@@ -129,10 +135,13 @@ class TestRectangularROISetters:
         np.testing.assert_array_equal(retrieved, new_indices)
 
     def test_roundtrip_physical_to_indices(self):
-        """Test roundtrip conversion: physical -> indices -> physical"""
+        """Test roundtrip conversion: physical -> indices -> physical
+
+        The roundtrip is exact for a rectangle bounded by pixel edges.
+        """
         obj = create_test_image(dx=2.0, dy=3.0, x0=5.0, y0=7.0)
 
-        roi = RectangularROI([25.0, 37.0, 20.0, 30.0], indices=False, title="Test ROI")
+        roi = RectangularROI([24.0, 35.5, 20.0, 30.0], indices=False, title="Test ROI")
 
         # Get physical coords
         original_physical = roi.get_physical_coords(obj)
@@ -159,10 +168,10 @@ class TestRectangularROISetters:
 
         # Convert to physical and back
         physical = roi.get_physical_coords(obj)
-        # physical should be [25.0, 37.0, 40.0, 45.0] based on:
-        # ix0=10 -> 10*2+5=25, iy0=10 -> 10*3+7=37
+        # physical should be [24.0, 35.5, 40.0, 45.0] (outer pixel edges) based on:
+        # ix0=10 -> (10-0.5)*2+5=24, iy0=10 -> (10-0.5)*3+7=35.5
         # dx=20 -> 20*2=40, dy=15 -> 15*3=45
-        assert physical == [25.0, 37.0, 40.0, 45.0]
+        assert physical == [24.0, 35.5, 40.0, 45.0]
 
         roi.set_physical_coords(obj, np.array(physical))
         # Should store deltas: [ix0, iy0, dx, dy] = [10, 10, 20, 15]
@@ -447,31 +456,38 @@ class TestEdgeCases:
         assert physical[2] == 0.0  # Width should be 0
 
         # Setting coords should work
-        roi.set_physical_coords(obj, np.array([5.0, 5.0, 0.0, 10.0]))
-        # [5.0, 5.0, 0.0, 10.0] means x0=5, y0=5, dx=0, dy=10
-        # So corners are (5, 5) to (5, 15)
-        # In indices (with dx=1, dy=1, x0=0, y0=0): (5, 5) to (5, 15)
+        roi.set_physical_coords(obj, np.array([5.0, 4.5, 0.0, 10.0]))
+        # [5.0, 4.5, 0.0, 10.0] means x0=5, y0=4.5, dx=0, dy=10
+        # So corners are (5, 4.5) to (5, 14.5)
+        # In indices (with dx=1, dy=1, x0=0, y0=0): no column (zero width), and
+        # rows 5 to 14 (centers between 4.5 and 14.5)
         # Stored as [ix0, iy0, dx, dy] = [5, 5, 0, 10]
         assert roi.coords[0] == 5  # ix0
         assert roi.coords[1] == 5  # iy0
         assert roi.coords[2] == 0  # dx (zero width)
         assert roi.coords[3] == 10  # dy
 
+        # A degenerate rectangle holds no pixel, even on pixel centers
+        roi_physical = RectangularROI([5.0, 5.0, 0.0, 10.0], indices=False)
+        for single_roi in (roi, roi_physical):
+            assert single_roi.to_mask(obj).all()
+
     def test_negative_coordinates(self):
         """Test ROI with negative coordinates"""
         obj = create_test_image(dx=1.0, dy=1.0, x0=-50.0, y0=-50.0)
 
-        # Create rectangle with negative physical coordinates
+        # Create rectangle with negative physical coordinates (on pixel edges)
         roi = RectangularROI(
-            [-10.0, -10.0, 20.0, 20.0], indices=False, title="Negative"
+            [-10.5, -10.5, 20.0, 20.0], indices=False, title="Negative"
         )
 
         # Convert to indices and back
         indices = roi.get_indices_coords(obj)
+        assert indices == [40, 40, 20, 20]
         roi.set_indices_coords(obj, np.array(indices))
         retrieved_physical = roi.get_physical_coords(obj)
 
-        np.testing.assert_allclose(retrieved_physical, [-10.0, -10.0, 20.0, 20.0])
+        np.testing.assert_allclose(retrieved_physical, [-10.5, -10.5, 20.0, 20.0])
 
     def test_large_offset_coordinates(self):
         """Test ROI with large coordinate offsets"""
@@ -532,7 +548,8 @@ class TestInverseROIBoundingBox:
 
     1. Data extraction (``ImageObj.get_data``, ``compute_geometry_from_obj``):
        an inverse ROI receives the *full* image, so its bounding box must cover
-       the entire image → ``(x0, y0, x0+width, y0+height)``.
+       the entire image → outer edges of the image pixels, i.e.
+       ``(x0 - dx/2, y0 - dy/2, x0 - dx/2 + width, y0 - dy/2 + height)``.
     2. Shape rendering (``get_indices_coords`` → ``to_mask``):
        the actual shape bounds are always needed regardless of the inverse flag,
        so ``_shape_circumscribed_rect`` (and the ``get_indices_coords`` that calls
@@ -551,6 +568,12 @@ class TestInverseROIBoundingBox:
         obj.set_uniform_coords(dx, dy, x0, y0)
         return obj
 
+    @staticmethod
+    def _full_image_bbox(obj: ImageObj) -> tuple[float, float, float, float]:
+        """Return the outer edges of the image pixels (pixel centers on the grid)."""
+        x0, y0 = obj.x0 - 0.5 * obj.dx, obj.y0 - 0.5 * obj.dy
+        return (x0, y0, x0 + obj.width, y0 + obj.height)
+
     # ------------------------------------------------------------------
     # get_bounding_box: inverse=True → full image extent
     # ------------------------------------------------------------------
@@ -560,24 +583,14 @@ class TestInverseROIBoundingBox:
         obj = self._img()
         roi = RectangularROI([20.0, 20.0, 30.0, 30.0], indices=False, inverse=True)
         x0, y0, x1, y1 = roi.get_bounding_box(obj)
-        assert (x0, y0, x1, y1) == (
-            obj.x0,
-            obj.y0,
-            obj.x0 + obj.width,
-            obj.y0 + obj.height,
-        )
+        assert (x0, y0, x1, y1) == self._full_image_bbox(obj)
 
     def test_circular_inverse_bbox_is_full_image(self):
         """CircularROI with inverse=True: bounding box is the full image."""
         obj = self._img()
         roi = CircularROI([50.0, 50.0, 15.0], indices=False, inverse=True)
         x0, y0, x1, y1 = roi.get_bounding_box(obj)
-        assert (x0, y0, x1, y1) == (
-            obj.x0,
-            obj.y0,
-            obj.x0 + obj.width,
-            obj.y0 + obj.height,
-        )
+        assert (x0, y0, x1, y1) == self._full_image_bbox(obj)
 
     def test_polygonal_inverse_bbox_is_full_image(self):
         """PolygonalROI with inverse=True: bounding box is the full image."""
@@ -586,22 +599,17 @@ class TestInverseROIBoundingBox:
             [10.0, 10.0, 40.0, 10.0, 25.0, 40.0], indices=False, inverse=True
         )
         x0, y0, x1, y1 = roi.get_bounding_box(obj)
-        assert (x0, y0, x1, y1) == (
-            obj.x0,
-            obj.y0,
-            obj.x0 + obj.width,
-            obj.y0 + obj.height,
-        )
+        assert (x0, y0, x1, y1) == self._full_image_bbox(obj)
 
     def test_inverse_bbox_respects_pixel_spacing_and_origin(self):
         """Full-image bounding box uses obj.width/height, not pixel counts."""
         obj = self._img(dx=0.5, dy=2.0, x0=10.0, y0=-5.0)
         roi = RectangularROI([12.0, 0.0, 5.0, 5.0], indices=False, inverse=True)
         x0, y0, x1, y1 = roi.get_bounding_box(obj)
-        assert x0 == pytest.approx(10.0)
-        assert y0 == pytest.approx(-5.0)
-        assert x1 == pytest.approx(10.0 + 0.5 * 100)  # x0 + dx * cols
-        assert y1 == pytest.approx(-5.0 + 2.0 * 100)  # y0 + dy * rows
+        assert x0 == pytest.approx(10.0 - 0.25)  # x0 - dx / 2
+        assert y0 == pytest.approx(-5.0 - 1.0)  # y0 - dy / 2
+        assert x1 == pytest.approx(10.0 - 0.25 + 0.5 * 100)  # ... + dx * cols
+        assert y1 == pytest.approx(-5.0 - 1.0 + 2.0 * 100)  # ... + dy * rows
 
     # ------------------------------------------------------------------
     # get_bounding_box: inverse=False → shape's actual bounds (unchanged)
@@ -651,7 +659,8 @@ class TestInverseROIBoundingBox:
         roi = RectangularROI([20.0, 30.0, 40.0, 25.0], indices=False, inverse=True)
         ix0, iy0, idx, idy = roi.get_indices_coords(obj)
         # Must match the rectangle (x0=20, y0=30, dx=40, dy=25), not the full 100×100
-        assert ix0 == 20 and iy0 == 30 and idx == 40 and idy == 25
+        # (pixel centers on the rectangle bounds included)
+        assert ix0 == 20 and iy0 == 30 and idx == 41 and idy == 26
 
     def test_circular_inverse_indices_coords_are_shape_not_full_image(self):
         """For an inverse CircularROI, get_indices_coords returns the circle's
@@ -711,7 +720,7 @@ class TestInverseROIBoundingBox:
             "rectangle", [20.0, 30.0, 40.0, 25.0], inverse=False
         )
         data = obj.get_data(0)
-        assert data.shape == (25, 40)
+        assert data.shape == (26, 41)  # pixel centers on the bounds are included
 
     # ------------------------------------------------------------------
     # compute_geometry_from_obj: inverse ROI → no coordinate offset applied

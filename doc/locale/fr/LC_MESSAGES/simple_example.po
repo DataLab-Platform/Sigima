@@ -24,7 +24,5 @@ msgstr "Afficher les résultats"
 msgid "ℹ️ The following code use `viz` Matplotlib backend which has been introduced in Sigima V1.1"
 msgstr "ℹ️ Le code suivant utilise le backend Matplotlib de `viz` qui a été introduit dans Sigima V1.1"
 
-#, fuzzy
 msgid "Sigima V1.0 uses an internal version of `viz` for image display based on PlotPy (`tests.vistools`)."
-msgstr "Sigima V1.0 utilise une version interne de `viz` pour l'affichage des images basée sur PlotPy"
-
+msgstr "Sigima V1.0 utilise une version interne de `viz` pour l'affichage des images, basée sur PlotPy (`tests.vistools`)."

@@ -22,7 +22,8 @@ import numpy as np
 import pytest
 from guidata.env import execenv
 
-from sigima.client.remote import SimpleRemoteProxy
+import sigima.client.remote as remote_mod
+from sigima.client.remote import SimpleRemoteProxy, get_cdl_xmlrpc_port
 from sigima.client.stub import datalab_stub_server
 
 
@@ -483,6 +484,36 @@ def test_comprehensive_remote_client():
         tester.run_comprehensive_test()
     finally:
         tester.close_datalab()
+
+
+def test_get_cdl_xmlrpc_port(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """Test XML-RPC port discovery across typed and legacy DataLab INI files."""
+    monkeypatch.setattr(remote_mod, "get_config_basedir", lambda: str(tmp_path))
+
+    # 5. Nothing present -> raises ConnectionRefusedError
+    with pytest.raises(ConnectionRefusedError):
+        get_cdl_xmlrpc_port()
+
+    v1_dir = tmp_path / ".DataLab_v1"
+    v1_dir.mkdir()
+    typed_ini = v1_dir / "DataLab_v1_typed.ini"
+    legacy_ini = v1_dir / "DataLab_v1.ini"
+
+    # 1. Typed file only -> returns its port
+    typed_ini.write_text("[main]\nrpc_server_port = 60766\n", encoding="utf-8")
+    assert get_cdl_xmlrpc_port() == "60766"
+
+    # 2. Both files present with different ports -> returns the typed one
+    legacy_ini.write_text("[main]\nrpc_server_port = 60887\n", encoding="utf-8")
+    assert get_cdl_xmlrpc_port() == "60766"
+
+    # 4. Typed file present but without rpc_server_port -> falls back to legacy file
+    typed_ini.write_text("[main]\nother_option = 1\n", encoding="utf-8")
+    assert get_cdl_xmlrpc_port() == "60887"
+
+    # 3. Legacy file only -> returns its port (DataLab <= 1.2 backward compatibility)
+    typed_ini.unlink()
+    assert get_cdl_xmlrpc_port() == "60887"
 
 
 if __name__ == "__main__":

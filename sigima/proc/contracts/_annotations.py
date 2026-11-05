@@ -5,8 +5,7 @@ Annotation analysis for operation contracts
 ===========================================
 
 Computation modules use ``from __future__ import annotations``: their
-annotations are strings. On Python 3.9, :func:`typing.get_type_hints` cannot
-evaluate ``X | None``. This module resolves such strings without :func:`eval`:
+annotations are strings. This module resolves them without :func:`eval`:
 the string is parsed with :mod:`ast` and only names, attribute accesses,
 subscripts and ``|`` unions are resolved, against the namespace of the module
 that defines the function.
@@ -35,7 +34,7 @@ NoneType = type(None)
 
 # Origins of a union: ``typing.Union``, and ``types.UnionType`` for ``X | Y``
 # evaluated at runtime (Python >= 3.10).
-_UNION_ORIGINS = (Union,) + ((types.UnionType,) if hasattr(types, "UnionType") else ())
+_UNION_ORIGINS = (Union, types.UnionType)
 
 _SEQUENCE_ORIGINS = (list, tuple, collections.abc.Sequence)
 

@@ -16,10 +16,9 @@ import inspect
 import os.path as osp
 import pkgutil
 import re
-import sys
 import typing
 from collections.abc import Iterator, Mapping, Sequence
-from typing import Any, Callable, Literal, TypeVar
+from typing import Any, Callable, Literal, ParamSpec, TypeVar
 
 import guidata.dataset as gds
 import makefun
@@ -33,13 +32,6 @@ from sigima.proc.contracts._annotations import (
 )
 from sigima.proc.contracts.declarations import NAME_PATTERN, ReplayQualification
 from sigima.validation import validate_dataset
-
-if sys.version_info >= (3, 10):
-    # Use ParamSpec from typing module in Python 3.10+
-    from typing import ParamSpec
-else:
-    # Use ParamSpec from typing_extensions module in Python < 3.10
-    from typing_extensions import ParamSpec
 
 # NOTE: Parameter classes should NOT be included in __all__ to avoid Sphinx
 # cross-reference conflicts. All parameter classes are re-exported through
@@ -251,8 +243,8 @@ def _dataset_class(annotation: Any, namespace: dict[str, Any]) -> type | None:
     """Return the parameter class of an annotation, if it designates one.
 
     ``SomeParam`` and ``SomeParam | None`` (or ``Optional[SomeParam]``) designate
-    ``SomeParam``. String annotations are resolved without :func:`eval`, also
-    on Python 3.9 (see :mod:`sigima.proc.contracts._annotations`).
+    ``SomeParam``. String annotations are resolved without :func:`eval`
+    (see :mod:`sigima.proc.contracts._annotations`).
     """
     if annotation is inspect.Signature.empty:
         return None
@@ -426,7 +418,10 @@ def computation_function(
         description: Optional custom description or docstring.
         operation_id: Optional stable operation identifier (see
          :mod:`sigima.proc.contracts`). Never derived from the Python name.
-        contract_version: Contract version, required with ``operation_id``.
+        contract_version: Contract version, required with ``operation_id``: 1 at
+         the first declaration, increased whenever a change of the function changes
+         the result it returns, whatever the releases of the applications using
+         Sigima (see the contributing guidelines, "Operation contracts").
         aliases: Earlier operation identifiers, only with ``operation_id``.
         qualification: Replay qualification of the tested contract version
          (see :class:`sigima.proc.contracts.declarations.ReplayQualification`), only

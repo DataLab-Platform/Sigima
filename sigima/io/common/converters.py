@@ -8,6 +8,7 @@ I/O conversion functions
 
 from __future__ import annotations
 
+import warnings
 from typing import Any, Sequence
 
 import numpy as np
@@ -69,8 +70,9 @@ def _convert_int_array(
     """Convert an integer array to a standard type.
 
     Select the smallest supported integer dtype that can represent all values in the
-    array. If no suitable integer dtype is found, convert the array to a supported
-    float type.
+    array. If no suitable integer dtype is found, convert the array to the smallest
+    supported float type, at least as large as the input, that represents all values
+    exactly. A warning is emitted when no supported float type is exact.
 
     Args:
         array: Input numpy array of integer type.
@@ -92,9 +94,46 @@ def _convert_int_array(
             new_type = np.dtype(code).newbyteorder("=")
             break
     else:
-        new_type = _convert_float_array(array, supported_data_types).dtype
+        new_type = _exact_float_dtype(array, amin, amax, supported_data_types)
 
     return array.astype(new_type, copy=False)
+
+
+def _exact_float_dtype(
+    array: np.ndarray, amin: Any, amax: Any, supported_data_types: tuple[np.dtype]
+) -> np.dtype:
+    """Return the float dtype used to store an integer array.
+
+    Args:
+        array: Input numpy array of integer type.
+        amin: Minimum value of the array.
+        amax: Maximum value of the array.
+        supported_data_types: Tuple of supported numpy dtypes for destination object.
+
+    Returns:
+        Smallest supported float dtype, at least as large as the input, whose
+        significand represents all values exactly (the largest one otherwise).
+
+    Raises:
+        ValueError: If no supported float dtype exists.
+    """
+    float_codes = dtypes_to_sorted_short_codes(supported_data_types, kind_filter="f")
+    if not float_codes:
+        raise ValueError("Unsupported data type")
+    magnitude = max(abs(int(amin)), abs(int(amax)))
+    for code in float_codes:
+        dtype = np.dtype(code)
+        exact_limit = 2 ** (np.finfo(dtype).nmant + 1)
+        if dtype.itemsize >= array.dtype.itemsize and magnitude <= exact_limit:
+            return dtype.newbyteorder("=")
+    dtype = np.dtype(float_codes[-1])
+    warnings.warn(
+        f"Integer values up to {magnitude} ({array.dtype}) cannot be represented "
+        f"exactly as {dtype}: they are rounded to the nearest {dtype} value.",
+        UserWarning,
+        stacklevel=4,
+    )
+    return dtype.newbyteorder("=")
 
 
 def _convert_float_array(

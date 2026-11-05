@@ -17,6 +17,7 @@ import sigima.params
 import sigima.proc.image
 from sigima.tests import guiutils
 from sigima.tests.data import create_noisy_gaussian_image
+from sigima.tests.helpers import rectangle_selection
 
 
 @pytest.mark.gui
@@ -59,10 +60,9 @@ def test_image_offset_correction() -> None:
     p = sigima.objects.ROI2DParam.create(x0=0, y0=0, dx=10, dy=10)
     i2 = sigima.proc.image.offset_correction(i1, p)
 
-    # Check that the offset correction has been applied
-    ix0, iy0 = int(p.x0), int(p.y0)
-    ix1, iy1 = int(p.x0 + p.dx), int(p.y0 + p.dy)
-    offset = np.mean(i1.data[iy0:iy1, ix0:ix1])
+    # Check that the offset correction has been applied (the background area is
+    # made of the pixels whose centers lie in the rectangle)
+    offset = np.mean(i1.data[rectangle_selection(i1, p.x0, p.y0, p.dx, p.dy)])
     assert np.allclose(i2.data, i1.data - offset), "Offset correction failed"
 
 

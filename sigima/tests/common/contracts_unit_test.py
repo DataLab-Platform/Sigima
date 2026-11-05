@@ -694,7 +694,7 @@ def test_contract_descriptors_pickle() -> None:
 
 
 def test_annotation_resolution() -> None:
-    """String annotations are resolved without evaluation, also on Python 3.9."""
+    """String annotations are resolved without evaluation."""
     namespace = {"SignalObj": SignalObj, "sigima": sigima}
     assert resolve_annotation("SignalObj", namespace) is SignalObj
     assert resolve_annotation(SignalObj, namespace) is SignalObj

@@ -167,16 +167,17 @@ print("\n--- Extracting Line Profiles ---")
 
 line_profiles = []
 for i, (img, centroid_coords) in enumerate(zip(clipped_images, centroids)):
-    # Create line profile parameters for horizontal line through centroid
+    # Create line profile parameters for horizontal line through centroid (the
+    # centroid and the profile coordinates are in the physical units of the image)
     line_param = sigima.proc.image.LineProfileParam()
     line_param.direction = "horizontal"
-    line_param.row = int(centroid_coords[1])  # Use centroid y-coordinate as row
+    line_param.y = centroid_coords[1]  # Use centroid y-coordinate
 
     # Extract line profile
     profile = sigima.proc.image.line_profile(img, line_param)
     profile.title = f"Line_profile_{img.title}"
     line_profiles.append(profile)
-    print(f"  ✓ Extracted line profile for {img.title} at row {line_param.row}")
+    print(f"  ✓ Extracted line profile for {img.title} at y = {line_param.y:.1f}")
 
 print(f"\n✓ Generated {len(line_profiles)} line profiles")
 

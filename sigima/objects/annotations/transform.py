@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import replace
-from typing import Any
+from typing import Any, Callable
 
 import numpy as np
 
@@ -25,6 +25,7 @@ from sigima.objects.annotations.model import (
     SegmentAnnotation,
     TextAnnotation,
 )
+from sigima.tools.coordinates import local_derivative
 
 
 class AnnotationTransformError(ValueError):
@@ -462,7 +463,7 @@ def scale_annotation(
     return transformed
 
 
-def transform_annotation(
+def transform_annotation(  # pylint: disable=too-many-return-statements
     annotation: GraphicalAnnotation, operation: str, **kwargs: Any
 ) -> GraphicalAnnotation:
     """Apply a named geometric operation and return a new annotation."""
@@ -487,4 +488,82 @@ def transform_annotation(
             kwargs.get("sy", 1),
             kwargs.get("center", (0, 0)),
         )
+    if operation == "remap":
+        return remap_annotation(annotation, kwargs.get("fx"), kwargs.get("fy"))
     raise ValueError(f"Unknown annotation transformation: {operation}")
+
+
+def remap_annotation(  # pylint: disable=too-many-return-statements
+    annotation: GraphicalAnnotation,
+    fx: Callable[[np.ndarray], np.ndarray] | None = None,
+    fy: Callable[[np.ndarray], np.ndarray] | None = None,
+) -> GraphicalAnnotation:
+    """Map an annotation through a monotonic function of each axis.
+
+    Used for transformations that are not affine in physical coordinates, e.g. the
+    reversal of the pixels of an image with non-uniform coordinates. Points, cursor
+    positions, range bounds and the corners of unrotated rectangles are mapped
+    exactly; circles, ellipses and rotated rectangles are mapped with the local
+    derivatives of the functions around their anchor (approximation).
+
+    Args:
+        annotation: annotation to map
+        fx: function mapping X coordinates (None: unchanged)
+        fy: function mapping Y coordinates (None: unchanged)
+
+    Returns:
+        Mapped annotation
+    """
+
+    def map_x(value: float) -> float:
+        return value if fx is None else float(fx(np.array([value], dtype=float))[0])
+
+    def map_y(value: float) -> float:
+        return value if fy is None else float(fy(np.array([value], dtype=float))[0])
+
+    if isinstance(
+        annotation,
+        (
+            PointAnnotation,
+            SegmentAnnotation,
+            PolylineAnnotation,
+            PolygonAnnotation,
+            TextAnnotation,
+        ),
+    ):
+        return _map_points(annotation, lambda x, y: (map_x(x), map_y(y)))
+    if isinstance(annotation, CursorAnnotation):
+        if annotation.orientation == CursorOrientation.CROSSHAIR:
+            assert isinstance(annotation.position, tuple)
+            x, y = annotation.position
+            return replace(annotation, position=(map_x(x), map_y(y)))
+        assert isinstance(annotation.position, float)
+        if annotation.orientation == CursorOrientation.HORIZONTAL:
+            return replace(annotation, position=map_y(annotation.position))
+        return replace(annotation, position=map_x(annotation.position))
+    if isinstance(annotation, RangeAnnotation):
+        function = map_x if annotation.axis == Axis.X else map_y
+        start, end = sorted((function(annotation.start), function(annotation.end)))
+        return replace(annotation, start=start, end=end)
+    if isinstance(annotation, RectangleAnnotation) and annotation.angle == 0.0:
+        xs = sorted((map_x(annotation.x), map_x(annotation.x + annotation.width)))
+        ys = sorted((map_y(annotation.y), map_y(annotation.y + annotation.height)))
+        return replace(
+            annotation, x=xs[0], y=ys[0], width=xs[1] - xs[0], height=ys[1] - ys[0]
+        )
+    if isinstance(annotation, RectangleAnnotation):
+        anchor = (annotation.x, annotation.y)
+        size = max(annotation.width, annotation.height)
+    elif isinstance(annotation, CircleAnnotation):
+        anchor, size = (annotation.cx, annotation.cy), annotation.radius
+    elif isinstance(annotation, EllipseAnnotation):
+        anchor = (annotation.cx, annotation.cy)
+        size = max(annotation.radius_x, annotation.radius_y)
+    else:
+        raise TypeError(f"Unsupported annotation type: {type(annotation).__name__}")
+    jx = local_derivative(fx, anchor[0], size)
+    jy = local_derivative(fy, anchor[1], size)
+    scaled = scale_annotation(annotation, jx, jy, center=anchor)
+    return translate_annotation(
+        scaled, map_x(anchor[0]) - anchor[0], map_y(anchor[1]) - anchor[1]
+    )

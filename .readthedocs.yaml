@@ -17,6 +17,9 @@ build:
     - libxcb-xinerama0
     - libxcb-xfixes0
   jobs:
+    pre_install:
+      # Development builds may require dependency versions not yet released on PyPI
+      - "python scripts/rtd_install_dev_deps.py"
     pre_build:
       # Start Xvfb before building docs
       - "Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &"

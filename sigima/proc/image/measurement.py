@@ -75,9 +75,9 @@ def get_centroid_coords(data: np.ndarray) -> np.ndarray:
 
 @computation_function(
     operation_id="sigima.image.centroid",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
@@ -120,9 +120,9 @@ def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
 
 @computation_function(
     operation_id="sigima.image.enclosing_circle",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "The fitted circle center is truncated to whole pixels: "

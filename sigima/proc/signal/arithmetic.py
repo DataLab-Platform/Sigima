@@ -44,9 +44,12 @@ def __signals_y_to_array(signals: list[SignalObj]) -> np.ndarray:
         signals: List of signal objects.
 
     Returns:
-        A NumPy array stacking the `y` attribute from all signals.
+        A NumPy array stacking the `y` attribute from all signals, with a data type
+        holding all of them (e.g. complex if any signal is complex), whatever their
+        order.
     """
-    return np.array([sig.y for sig in signals], dtype=signals[0].y.dtype)
+    arrays = [sig.y for sig in signals]
+    return np.array(arrays, dtype=np.result_type(*arrays))
 
 
 def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
@@ -56,9 +59,76 @@ def __signals_dy_to_array(signals: list[SignalObj]) -> np.ndarray:
         signals: List of signal objects.
 
     Returns:
-        A NumPy array stacking the `dy` attribute from all signals.
+        A NumPy array stacking the `dy` attribute from all signals, with a data type
+        holding all of them, whatever their order.
     """
-    return np.array([sig.dy for sig in signals], dtype=signals[0].dy.dtype)
+    arrays = [sig.dy for sig in signals]
+    return np.array(arrays, dtype=np.result_type(*arrays))
+
+
+def __mantissa_products(mant: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Return the products of the mantissas preceding each factor.
+
+    Args:
+        mant: Mantissas of the factors (one row per factor), in [0.5, 1) or zero.
+
+    Returns:
+        Mantissas and exponents of the products: row i is the product of the rows
+        before row i (1 for the first row). The running product is renormalized
+        at each step, so that it never underflows whatever the number of factors.
+    """
+    prod_mant = np.empty_like(mant)
+    prod_exp = np.empty(mant.shape, dtype=np.int64)
+    current = np.ones_like(mant[0])
+    exponent = np.zeros(mant.shape[1:], dtype=np.int64)
+    for i, row in enumerate(mant):
+        prod_mant[i], prod_exp[i] = current, exponent
+        current, shift = np.frexp(current * row)
+        exponent = exponent + shift
+    return prod_mant, prod_exp
+
+
+def __product_uncertainty(y_array: np.ndarray, dy_array: np.ndarray) -> np.ndarray:
+    """Return the first-order uncertainty of the product of independent factors.
+
+    ``σ² = Σ_i σ_i² Π_{j≠i} |y_j|²`` is computed without dividing by the factors,
+    so that it is defined where a factor is zero. Each term is computed from the
+    mantissas and exponents of the factors (:func:`numpy.frexp`), the products of
+    the mantissas being renormalized at each step, so that no intermediate
+    product overflows or underflows whatever the number, the order and the
+    magnitudes of the factors, and the terms are scaled by the largest one before
+    being squared.
+
+    Args:
+        y_array: Factors (one row per signal), real or complex.
+        dy_array: Uncertainties of the factors (one row per signal).
+
+    Returns:
+        Uncertainty of the product (NaN where it overflows).
+    """
+    abs_y = np.abs(y_array)
+    abs_dy = np.abs(dy_array)
+    ftype = np.result_type(abs_y.dtype, abs_dy.dtype, np.float32)
+    y_mant, y_exp = np.frexp(abs_y.astype(ftype, copy=False))
+    dy_mant, dy_exp = np.frexp(abs_dy.astype(ftype, copy=False))
+    # Products of the mantissas before (prefix) and after (suffix) each factor
+    prefix_mant, prefix_exp = __mantissa_products(y_mant)
+    suffix_mant, suffix_exp = __mantissa_products(y_mant[::-1])
+    suffix_mant, suffix_exp = suffix_mant[::-1], suffix_exp[::-1]
+    # Term i is mant[i] * 2**exp[i]
+    mant = dy_mant * prefix_mant * suffix_mant
+    exp = dy_exp + (np.sum(y_exp, axis=0) - y_exp) + prefix_exp + suffix_exp
+    positive = mant > 0.0
+    exp_max = np.max(np.where(positive, exp, np.iinfo(exp.dtype).min), axis=0)
+    exp_max = np.where(np.any(positive, axis=0), exp_max, 0)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        ratios = np.ldexp(mant, exp - exp_max)
+        scale = np.max(ratios, axis=0)
+        ratios /= np.where(scale > 0.0, scale, 1.0)
+        uncertainty = np.ldexp(scale * np.sqrt(np.sum(ratios**2, axis=0)), exp_max)
+    uncertainty[np.isinf(uncertainty)] = np.nan
+    return uncertainty
 
 
 @computation_function(
@@ -177,9 +247,9 @@ def standard_deviation(src_list: list[SignalObj]) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.product",
-    contract_version=1,
+    contract_version=2,
     x_alignment=SMALLEST_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def product(src_list: list[SignalObj]) -> SignalObj:
     """Compute the element-wise product of multiple signals.
@@ -194,7 +264,8 @@ def product(src_list: list[SignalObj]) -> SignalObj:
 
     .. note::
 
-        Uncertainties are propagated.
+        Uncertainties are propagated to first order for independent factors, also
+        where a factor is zero (the moduli of complex factors are used).
 
     .. warning::
 
@@ -210,14 +281,7 @@ def product(src_list: list[SignalObj]) -> SignalObj:
     y_array = __signals_y_to_array(src_list)
     dst.y = np.prod(y_array, axis=0)
     if is_uncertainty_data_available(src_list):
-        dy_array = __signals_dy_to_array(src_list)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            uncertainty = np.abs(dst.y) * np.sqrt(
-                np.sum((dy_array / y_array) ** 2, axis=0)
-            )
-            uncertainty[np.isinf(uncertainty)] = np.nan
-            dst.dy = uncertainty
+        dst.dy = __product_uncertainty(y_array, __signals_dy_to_array(src_list))
     restore_data_outside_roi(dst, src_list[0])
     return dst
 

@@ -34,7 +34,7 @@ from typing import TYPE_CHECKING, Literal, Type
 
 import guidata.dataset as gds
 import numpy as np
-from skimage import draw
+from skimage import measure
 
 import sigima.enums
 import sigima.tools.image
@@ -117,8 +117,8 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
     _cfp = gds.FuncProp(_geometry_prop, lambda x: x != "circle")
     _pfp = gds.FuncProp(_geometry_prop, lambda x: x != "polygon")
 
-    # Do not declare it as a static method: not supported by Python 3.9
-    def _lbl(name: str, index: int):  # pylint: disable=no-self-argument
+    @staticmethod
+    def _lbl(name: str, index: int | str) -> str:
         """Returns name<sub>index</sub>"""
         return f"{name}<sub>{index}</sub>"
 
@@ -240,8 +240,7 @@ class ROI2DParam(base.BaseROIParam["ImageObj", "BaseSingleImageROI"]):
         if self.inverse:
             return 0, 0, obj.data.shape[1], obj.data.shape[0]
         x0, y0, x1, y1 = self.get_shape_circumscribed_rect()
-        ix0, iy0 = obj.physical_to_indices((x0, y0))
-        ix1, iy1 = obj.physical_to_indices((x1, y1))
+        ix0, iy0, ix1, iy1 = obj.physical_to_pixel_range([x0, y0, x1, y1])
         return ix0, iy0, ix1, iy1
 
     def get_data(self, obj: ImageObj) -> np.ndarray:
@@ -339,16 +338,98 @@ class BaseSingleImageROI(base.BaseSingleROI["ImageObj", ROI2DParam], abc.ABC):
     def get_bounding_box(self, obj: ImageObj) -> tuple[float, float, float, float]:
         """Get bounding box (physical coordinates).
 
-        For inverse ROIs the bounding box is the entire image, because the
-        computation function receives the full image data.  For normal ROIs the
-        bounding box is the shape's actual extent.
+        For inverse ROIs the bounding box is the entire image (up to the outer edges
+        of its pixels), because the computation function receives the full image
+        data.  For normal ROIs the bounding box is the shape's actual extent.
 
         Args:
             obj: image object
         """
         if self.inverse:
-            return obj.x0, obj.y0, obj.x0 + obj.width, obj.y0 + obj.height
+            nrows, ncols = obj.data.shape
+            return tuple(obj.pixel_range_to_physical([0, 0, ncols, nrows]))
         return self._shape_circumscribed_rect(obj)
+
+
+def _pixel_centers_in_box(
+    obj: ImageObj, box: Sequence[float]
+) -> tuple[tuple[slice, slice], np.ndarray, np.ndarray]:
+    """Return the pixels whose centers lie in a physical rectangle, with their centers.
+
+    Args:
+        obj: image object
+        box: rectangle ``[x0, y0, x1, y1]`` (physical coordinates)
+
+    Returns:
+        ``((rows, columns), x, y)``: slices of the pixels (clipped to the image) and
+        the physical coordinates of their centers along each axis
+    """
+    ix0, iy0, ix1, iy1 = obj.physical_to_pixel_range(box)
+    nrows, ncols = obj.data.shape
+    ix0, iy0 = min(max(ix0, 0), ncols), min(max(iy0, 0), nrows)
+    ix1, iy1 = max(min(ix1, ncols), ix0), max(min(iy1, nrows), iy0)
+    x = obj.axis_to_physical(np.arange(ix0, ix1), "x")
+    y = obj.axis_to_physical(np.arange(iy0, iy1), "y")
+    return (slice(iy0, iy1), slice(ix0, ix1)), x, y
+
+
+def _distance_tolerance(obj: ImageObj) -> float:
+    """Return the distance below which a pixel center is on a shape boundary.
+
+    Args:
+        obj: image object
+
+    Returns:
+        Tolerance in physical units (rounding noise, relative to the pixel size)
+    """
+    # pylint: disable-next=import-outside-toplevel
+    from sigima.objects.image.object import PIXEL_INDEX_TOLERANCE
+
+    if obj.is_uniform_coords:
+        step = min(abs(obj.dx), abs(obj.dy))
+    else:
+        steps = [
+            np.abs(np.diff(np.asarray(coords, dtype=float))).min()
+            for coords in (obj.xcoords, obj.ycoords)
+            if len(coords) > 1
+        ]
+        step = min(steps) if steps else 1.0
+    return PIXEL_INDEX_TOLERANCE * (step or 1.0)
+
+
+def _near_polygon_edges(
+    x: np.ndarray, y: np.ndarray, vertices: np.ndarray, tolerance: float
+) -> np.ndarray:
+    """Return which points of a grid lie on the edges of a polygon.
+
+    Args:
+        x: X coordinates of the grid columns (monotonic)
+        y: Y coordinates of the grid rows (monotonic)
+        vertices: polygon vertices, shape (n, 2)
+        tolerance: distance below which a point is on an edge
+
+    Returns:
+        Boolean array of shape ``(y.size, x.size)``
+    """
+    near = np.zeros((y.size, x.size), dtype=bool)
+    for (xa, ya), (xb, yb) in zip(vertices, np.roll(vertices, -1, axis=0)):
+        cols = np.flatnonzero(
+            (x >= min(xa, xb) - tolerance) & (x <= max(xa, xb) + tolerance)
+        )
+        rows = np.flatnonzero(
+            (y >= min(ya, yb) - tolerance) & (y <= max(ya, yb) + tolerance)
+        )
+        if cols.size == 0 or rows.size == 0:
+            continue
+        rsl, csl = slice(rows[0], rows[-1] + 1), slice(cols[0], cols[-1] + 1)
+        px, py = x[csl][None, :], y[rsl][:, None]
+        ex, ey = xb - xa, yb - ya
+        length2 = ex * ex + ey * ey
+        t = 0.0
+        if length2 > 0.0:
+            t = np.clip(((px - xa) * ex + (py - ya) * ey) / length2, 0.0, 1.0)
+        near[rsl, csl] |= np.hypot(px - xa - t * ex, py - ya - t * ey) <= tolerance
+    return near
 
 
 class PolygonalROI(BaseSingleImageROI):
@@ -362,7 +443,10 @@ class PolygonalROI(BaseSingleImageROI):
     Raises:
         ValueError: if number of coordinates is odd
 
-    .. note:: The image ROI coords are expressed in physical coordinates (floats)
+    .. note::
+
+        The image ROI coords are expressed in physical coordinates (floats). A pixel
+        belongs to the ROI when its center lies inside the polygon, edges included.
     """
 
     def check_coords(self) -> None:
@@ -429,20 +513,22 @@ class PolygonalROI(BaseSingleImageROI):
         Returns:
             Mask (boolean array where True values are inside the ROI)
         """
-        roi_mask = np.ones_like(obj.data, dtype=bool)
-        indices = self.get_indices_coords(obj)
-        rows = np.array(indices[1::2], dtype=float)  # y coordinates
-        cols = np.array(indices[::2], dtype=float)  # x coordinates
-        rr, cc = draw.polygon(rows, cols, shape=obj.data.shape)
-
-        if self.inverse:
-            # Inverse ROI: mask inside the polygon (True inside, False outside)
-            roi_mask[:] = False
-            roi_mask[rr, cc] = True
-        else:
-            # Normal ROI: mask outside the polygon (False inside, True outside)
-            roi_mask[rr, cc] = False
-        return roi_mask
+        inside = np.zeros(obj.data.shape, dtype=bool)
+        vertices = np.reshape(
+            np.asarray(self.get_physical_coords(obj), dtype=float), (-1, 2)
+        )
+        if len(vertices) >= 3:
+            (x0, y0), (x1, y1) = vertices.min(axis=0), vertices.max(axis=0)
+            pixels, x, y = _pixel_centers_in_box(obj, [x0, y0, x1, y1])
+            if x.size and y.size:
+                xx, yy = np.meshgrid(x, y)
+                points = np.column_stack([xx.ravel(), yy.ravel()])
+                in_polygon = measure.points_in_poly(points, vertices).reshape(xx.shape)
+                tolerance = _distance_tolerance(obj)
+                in_polygon |= _near_polygon_edges(x, y, vertices, tolerance)
+                inside[pixels] = in_polygon
+        # Inverse ROI: mask inside the polygon; normal ROI: mask outside
+        return inside if self.inverse else ~inside
 
     def to_param(self, obj: ImageObj, index: int) -> ROI2DParam:
         """Convert ROI to parameters
@@ -468,7 +554,13 @@ class RectangularROI(BaseSingleImageROI):
         title: title
         inverse: inverse ROI logic (default: False)
 
-    .. note:: The image ROI coords are expressed in physical coordinates (floats)
+    .. note::
+
+        The image ROI coords are expressed in physical coordinates (floats). A pixel
+        belongs to the ROI when its center lies inside the rectangle, bounds
+        included. In indices, the coords ``(ix0, iy0, nx, ny)`` designate columns
+        ``ix0`` to ``ix0 + nx - 1`` and rows ``iy0`` to ``iy0 + ny - 1``: the
+        corresponding physical rectangle goes from the outer edges of these pixels.
     """
 
     def check_coords(self) -> None:
@@ -535,7 +627,9 @@ class RectangularROI(BaseSingleImageROI):
         """
         if self.indices:
             ix0, iy0, idx, idy = self.coords
-            x0, y0, x1, y1 = obj.indices_to_physical([ix0, iy0, ix0 + idx, iy0 + idy])
+            x0, y0, x1, y1 = obj.pixel_range_to_physical(
+                [ix0, iy0, ix0 + idx, iy0 + idy]
+            )
             return [x0, y0, x1 - x0, y1 - y0]
         return self.coords
 
@@ -548,7 +642,7 @@ class RectangularROI(BaseSingleImageROI):
         """
         if self.indices:
             x0, y0, dx, dy = coords
-            ix0, iy0, ix1, iy1 = obj.physical_to_indices([x0, y0, x0 + dx, y0 + dy])
+            ix0, iy0, ix1, iy1 = obj.physical_to_pixel_range([x0, y0, x0 + dx, y0 + dy])
             self.coords = np.array([ix0, iy0, ix1 - ix0, iy1 - iy0], dtype=int)
         else:
             self.coords = np.array(coords, dtype=float)
@@ -564,7 +658,7 @@ class RectangularROI(BaseSingleImageROI):
         """
         if self.indices:
             return self.coords.tolist()
-        ix0, iy0, ix1, iy1 = obj.physical_to_indices(
+        ix0, iy0, ix1, iy1 = obj.physical_to_pixel_range(
             self._shape_circumscribed_rect(obj)
         )
         return [ix0, iy0, ix1 - ix0, iy1 - iy0]
@@ -580,7 +674,9 @@ class RectangularROI(BaseSingleImageROI):
             self.coords = coords
         else:
             ix0, iy0, idx, idy = coords
-            x0, y0, x1, y1 = obj.indices_to_physical([ix0, iy0, ix0 + idx, iy0 + idy])
+            x0, y0, x1, y1 = obj.pixel_range_to_physical(
+                [ix0, iy0, ix0 + idx, iy0 + idy]
+            )
             self.coords = np.array([x0, y0, x1 - x0, y1 - y0])
 
     def to_mask(self, obj: ImageObj) -> np.ndarray:
@@ -592,17 +688,24 @@ class RectangularROI(BaseSingleImageROI):
         Returns:
             Mask (boolean array where True values are inside the ROI)
         """
-        roi_mask = np.ones_like(obj.data, dtype=bool)
-        ix0, iy0, idx, idy = self.get_indices_coords(obj)
-        rr, cc = draw.rectangle((iy0, ix0), extent=(idy, idx), shape=obj.data.shape)
-
+        ix0, iy0, idx, idy = (int(value) for value in self.get_indices_coords(obj))
+        if idx < 0:  # Rectangle given from its opposite corner
+            ix0, idx = ix0 + idx, -idx
+        if idy < 0:
+            iy0, idy = iy0 + idy, -idy
+        nrows, ncols = obj.data.shape
+        inside = (
+            slice(min(max(iy0, 0), nrows), min(max(iy0 + idy, 0), nrows)),
+            slice(min(max(ix0, 0), ncols), min(max(ix0 + idx, 0), ncols)),
+        )
         if self.inverse:
             # Inverse ROI: mask inside the rectangle (True inside, False outside)
-            roi_mask[:] = False
-            roi_mask[rr, cc] = True
+            roi_mask = np.zeros_like(obj.data, dtype=bool)
+            roi_mask[inside] = True
         else:
             # Normal ROI: mask outside the rectangle (False inside, True outside)
-            roi_mask[rr, cc] = False
+            roi_mask = np.ones_like(obj.data, dtype=bool)
+            roi_mask[inside] = False
         return roi_mask
 
     def to_param(self, obj: ImageObj, index: int) -> ROI2DParam:
@@ -653,7 +756,11 @@ class CircularROI(BaseSingleImageROI):
         title: title
         inverse: inverse ROI logic (default: False)
 
-    .. note:: The image ROI coords are expressed in physical coordinates (floats)
+    .. note::
+
+        The image ROI coords are expressed in physical coordinates (floats). A pixel
+        belongs to the ROI when its center lies inside the circle, boundary
+        included.
     """
 
     # pylint: disable=unused-argument
@@ -787,19 +894,15 @@ class CircularROI(BaseSingleImageROI):
         Returns:
             Mask (boolean array where True values are inside the ROI)
         """
-        roi_mask = np.ones_like(obj.data, dtype=bool)
-        ixc, iyc, ir = self.get_indices_coords(obj)
-        yxratio = obj.dy / obj.dx
-        rr, cc = draw.ellipse(iyc, ixc, ir / yxratio, ir, shape=obj.data.shape)
-
-        if self.inverse:
-            # Inverse ROI: mask inside the circle (True inside, False outside)
-            roi_mask[:] = False
-            roi_mask[rr, cc] = True
-        else:
-            # Normal ROI: mask outside the circle (False inside, True outside)
-            roi_mask[rr, cc] = False
-        return roi_mask
+        inside = np.zeros(obj.data.shape, dtype=bool)
+        xc, yc, r = (float(value) for value in self.get_physical_coords(obj))
+        r = abs(r)
+        pixels, x, y = _pixel_centers_in_box(obj, [xc - r, yc - r, xc + r, yc + r])
+        if r > 0.0 and x.size and y.size:
+            distance = np.hypot(x[None, :] - xc, y[:, None] - yc)
+            inside[pixels] = distance <= r + _distance_tolerance(obj)
+        # Inverse ROI: mask inside the circle; normal ROI: mask outside
+        return inside if self.inverse else ~inside
 
     def to_param(self, obj: ImageObj, index: int) -> ROI2DParam:
         """Convert ROI to parameters

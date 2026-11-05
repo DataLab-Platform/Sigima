@@ -13,6 +13,7 @@ addition, multiplication, division, and more.
 
 from __future__ import annotations
 
+import itertools
 import warnings
 
 import numpy as np
@@ -136,6 +137,146 @@ def test_signal_product() -> None:
     check_array_result(f"Product of {n} signals", s1.y, exp_y)
     expected_dy = np.abs(exp_y) * np.sqrt(sum((s.dy / s.y) ** 2 for s in slist))
     check_array_result("Product error propagation", s1.dy, expected_dy)
+
+
+@pytest.mark.parametrize(
+    "factors, expected_dy",
+    [
+        # One zero factor: σ = σ_a |b| (regression: NaN, i.e. no uncertainty)
+        ([(0.0, 1.0), (2.0, 0.1)], 2.0),
+        # Several zero factors: every first-order term vanishes
+        ([(0.0, 1.0), (0.0, 1.0), (2.0, 0.1)], 0.0),
+        # Negative factors
+        ([(-3.0, 0.2), (2.0, 0.1)], 0.5),
+        # Exact factors
+        ([(-3.0, 0.0), (2.0, 0.0)], 0.0),
+        # Tiny factors, whose squared terms would underflow
+        ([(1e-150, 1e-151), (1e-150, 1e-151)], np.sqrt(2.0) * 1e-301),
+        # Complex factors: moduli are used
+        ([(3.0j, 0.2), (2.0, 0.1)], 0.5),
+        # Factors spanning the whole float64 range: no intermediate overflow
+        # (regression: NaN for some orders of the signals)
+        ([(1e308, 0.0), (1.0, 2.0), (1e-308, 0.0)], 2.0),
+        ([(1e300, 0.0), (1e300, 0.0), (1e-300, 0.0), (1e-300, 0.0), (1.0, 1.0)], 1.0),
+        # Product underflowing to zero, uncertainty representable
+        ([(1e-200, 1.0), (1e-200, 0.0)], 1e-200),
+        # Zero factor among huge and tiny ones
+        ([(0.0, 1.0), (1e300, 0.0), (1e-300, 0.0), (1e300, 0.0)], 1e300),
+    ],
+)
+def test_signal_product_uncertainty(factors, expected_dy) -> None:
+    """First-order uncertainty of a product, including where a factor is zero,
+    whatever the order and the magnitudes of the factors."""
+    x = np.arange(3.0)
+    signals = [
+        sigima.objects.create_signal(
+            f"s{i}", x, np.full(3, value), dy=np.full(3, uncertainty)
+        )
+        for i, (value, uncertainty) in enumerate(factors)
+    ]
+    for order in itertools.permutations(range(len(signals))):
+        # The product itself may overflow for some orders: only its uncertainty
+        # is checked here
+        with np.errstate(over="ignore", invalid="ignore"):
+            result = sigima.proc.signal.product([signals[i] for i in order])
+        assert result.dy is not None, order
+        assert np.allclose(np.real(result.dy), expected_dy, rtol=1e-12, atol=0.0)
+
+
+def __factor_signals(values, rel: float, dtype=np.float64) -> list:
+    """Return signals of 3 points, each equal to a factor with a relative
+    uncertainty *rel*."""
+    x = np.arange(3, dtype=dtype)
+    return [
+        sigima.objects.create_signal(
+            f"s{i}",
+            x,
+            np.full(3, value, dtype=dtype),
+            dy=np.full(3, abs(value) * rel, dtype=dtype),
+        )
+        for i, value in enumerate(values)
+    ]
+
+
+@pytest.mark.parametrize(
+    "dtype, count, rtol",
+    [
+        (np.float64, 300, 1e-12),
+        (np.float64, 1100, 1e-12),
+        (np.float64, 5000, 1e-12),
+        (np.float32, 200, 1e-6),
+        (np.float32, 1000, 1e-6),
+    ],
+)
+def test_signal_product_uncertainty_many_factors(dtype, count, rtol) -> None:
+    """The uncertainty of a product of many factors does not vanish (regression:
+    the products of the mantissas underflowed, so that the uncertainty was wrong,
+    then zero, from about 150 float32 or 1074 float64 factors)."""
+    result = sigima.proc.signal.product(__factor_signals([1.0] * count, 0.01, dtype))
+    assert np.array_equal(result.y, np.ones(3))
+    expected = 0.01 * np.sqrt(count)
+    assert np.allclose(result.dy, expected, rtol=rtol, atol=0.0)
+
+
+def test_signal_product_uncertainty_many_unequal_factors() -> None:
+    """Many factors of various magnitudes: σ = |Π y| sqrt(Σ (σ_i / y_i)²)."""
+    # A representable product much smaller than each factor: 0.6 ** 1000
+    result = sigima.proc.signal.product(__factor_signals([0.6] * 1000, 0.01))
+    expected = 0.6**1000 * 0.01 * np.sqrt(1000)
+    assert np.allclose(result.dy, expected, rtol=1e-11, atol=0.0)
+    # Alternating large and small factors: the product is close to 1, while the
+    # product of their mantissas (about 0.5 ** 2000) underflowed
+    values = [1e3, -1e-3] * 2000
+    result = sigima.proc.signal.product(__factor_signals(values, 0.01))
+    expected = np.abs(np.prod(values)) * 0.01 * np.sqrt(len(values))
+    assert np.allclose(result.dy, expected, rtol=1e-11, atol=0.0)
+
+
+def test_signal_product_uncertainty_overflow() -> None:
+    """The uncertainty of a product is NaN where its first-order value overflows."""
+    x = np.arange(3.0)
+    s1 = sigima.objects.create_signal(
+        "s1", x, np.full(3, 1e300), dy=np.array([1e10, 1.0, 0.0])
+    )
+    s2 = sigima.objects.create_signal("s2", x, np.full(3, 1.0), dy=np.zeros(3))
+    s3 = sigima.objects.create_signal("s3", x, np.full(3, 1e300), dy=np.zeros(3))
+    with np.errstate(over="ignore"):
+        result = sigima.proc.signal.product([s1, s2, s3])
+    assert result.dy is not None
+    assert np.isnan(result.dy[0])
+    assert np.array_equal(result.dy[1:], [1e300, 0.0])
+
+
+@pytest.mark.parametrize(
+    "func, oracle",
+    [
+        (sigima.proc.signal.addition, lambda arr: np.sum(arr, axis=0)),
+        (sigima.proc.signal.average, lambda arr: np.mean(arr, axis=0)),
+        (sigima.proc.signal.product, lambda arr: np.prod(arr, axis=0)),
+        (sigima.proc.signal.standard_deviation, lambda arr: np.std(arr, axis=0)),
+    ],
+)
+def test_signal_n_to_1_does_not_depend_on_input_order(func, oracle) -> None:
+    """n-to-1 results do not depend on the order of real and complex signals.
+
+    Regression: the signals were stacked with the data type of the first one, so
+    that the imaginary parts were discarded when a real signal came first.
+    """
+    x = np.linspace(0.0, 1.0, 5)
+    ys = [
+        np.linspace(1.0, 2.0, 5),
+        np.linspace(1.0, 2.0, 5) * (1.0 + 2.0j),
+        np.linspace(-1.0, 3.0, 5),
+    ]
+    signals = [sigima.objects.create_signal(f"s{i}", x, y) for i, y in enumerate(ys)]
+    expected = oracle(np.array(ys))
+    for order in itertools.permutations(range(len(signals))):
+        with warnings.catch_warnings():
+            # ComplexWarning moved to numpy.exceptions in NumPy 1.25
+            warnings.simplefilter("error", getattr(np, "exceptions", np).ComplexWarning)
+            result = func([signals[i] for i in order])
+        assert result.y.dtype == np.complex128
+        assert np.allclose(result.y, expected, rtol=1e-12, atol=1e-12), order
 
 
 @pytest.mark.validation

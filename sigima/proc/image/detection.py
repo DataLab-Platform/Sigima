@@ -341,8 +341,8 @@ class Peak2DDetectionParam(DetectionROIParam, GenericDetectionParam):
 
 @computation_function(
     operation_id="sigima.image.peak_detection",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def peak_detection(obj: ImageObj, p: Peak2DDetectionParam) -> GeometryResult | None:
     """Compute 2D peak detection
@@ -389,9 +389,9 @@ class ContourShapeParam(GenericDetectionParam):
 
 @computation_function(
     operation_id="sigima.image.contour_shape",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
@@ -480,8 +480,8 @@ class BlobDOGParam(DetectionROIParam, BaseBlobParam):
 
 @computation_function(
     operation_id="sigima.image.blob_dog",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def blob_dog(image: ImageObj, p: BlobDOGParam) -> GeometryResult | None:
     """Compute blobs using Difference of Gaussian method
@@ -524,8 +524,8 @@ class BlobDOHParam(DetectionROIParam, BaseBlobParam):
 
 @computation_function(
     operation_id="sigima.image.blob_doh",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def blob_doh(image: ImageObj, p: BlobDOHParam) -> GeometryResult | None:
     """Compute blobs using Determinant of Hessian method
@@ -564,8 +564,8 @@ class BlobLOGParam(BlobDOHParam):
 
 @computation_function(
     operation_id="sigima.image.blob_log",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def blob_log(image: ImageObj, p: BlobLOGParam) -> GeometryResult | None:
     """Compute blobs using Laplacian of Gaussian method
@@ -768,8 +768,8 @@ class BlobOpenCVParam(DetectionROIParam, gds.DataSet):
 
 @computation_function(
     operation_id="sigima.image.blob_opencv",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def blob_opencv(image: ImageObj, p: BlobOpenCVParam) -> GeometryResult | None:
     """Compute blobs using OpenCV
@@ -829,8 +829,8 @@ class HoughCircleParam(DetectionROIParam, gds.DataSet):
 
 @computation_function(
     operation_id="sigima.image.hough_circle_peaks",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def hough_circle_peaks(image: ImageObj, p: HoughCircleParam) -> GeometryResult | None:
     """Compute Hough circles

@@ -13,6 +13,7 @@ Those classes and functions are defined in submodules:
 - :mod:`sigima.objects.scalar`
 - :mod:`sigima.objects.image`
 - :mod:`sigima.objects.signal`
+- :mod:`sigima.objects.source`
 
 .. code-block:: python
 
@@ -111,12 +112,27 @@ Images
 .. autodataset:: sigima.objects.ROI2DParam
 .. autoclass:: sigima.objects.ImageROI
 .. autoclass:: sigima.objects.ImageDatatypes
+
+Experimental data origin
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Readers and instrument connectors can record their objects' experimental
+origin in the ``experimental_source`` metadata entry: a versioned dictionary made of
+JSON types only, readable without the reader or connector that created it.
+This is opt-in and identifies a measurement, not a reproducible acquisition.
+See :doc:`../user_guide/overview` for a complete creation and persistence example.
+
+.. autofunction:: sigima.objects.make_experimental_source
+.. autofunction:: sigima.objects.set_experimental_source
+.. autofunction:: sigima.objects.get_experimental_source
 """
 
 __all__ = [
     "ANNOTATION_FORMAT",
     "ANNOTATION_VERSION",
     "CREATION_PARAMS_VERSION",
+    "EXPERIMENTAL_SOURCE_KEY",
+    "EXPERIMENTAL_SOURCE_VERSION",
     "NO_ROI",
     "PEAK_PARAMETERIZATION",
     "AnnotationKind",
@@ -224,11 +240,14 @@ __all__ = [
     "filter_table_by_roi",
     "flip_annotation_horizontally",
     "flip_annotation_vertically",
+    "get_experimental_source",
     "is_graphical_annotation_dict",
     "legacy_plotpy_payload_to_annotations",
+    "make_experimental_source",
     "migrate_legacy_plotpy_annotations",
     "rotate_annotation",
     "scale_annotation",
+    "set_experimental_source",
     "transform_annotation",
     "translate_annotation",
     "transpose_annotation",
@@ -363,4 +382,11 @@ from sigima.objects.signal import (
     create_signal_parameters,
     create_signal_roi,
     validate_peak_creation_params,
+)
+from sigima.objects.source import (
+    EXPERIMENTAL_SOURCE_KEY,
+    EXPERIMENTAL_SOURCE_VERSION,
+    get_experimental_source,
+    make_experimental_source,
+    set_experimental_source,
 )

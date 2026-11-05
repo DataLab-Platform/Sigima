@@ -204,9 +204,9 @@ def test_resampling_accepts_descending_axes() -> None:
     source = create_test_image()
     shape_param = Resampling2DParam.create(
         mode="shape",
-        xmin=6.0,
+        xmin=5.0,
         xmax=0.0,
-        ymin=4.0,
+        ymin=3.0,
         ymax=0.0,
         dx=0.0,
         dy=0.0,
@@ -220,9 +220,9 @@ def test_resampling_accepts_descending_axes() -> None:
 
     dxy_param = Resampling2DParam.create(
         mode="dxy",
-        xmin=6.0,
+        xmin=5.0,
         xmax=0.0,
-        ymin=4.0,
+        ymin=3.0,
         ymax=0.0,
         dx=-1.0,
         dy=-1.0,

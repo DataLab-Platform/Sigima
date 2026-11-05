@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Type
 
 import numpy as np
+import pytest
 
 from sigima.io import ImageIORegistry, SignalIORegistry
 from sigima.io.base import FormatInfo
@@ -120,6 +121,28 @@ def test_add_signal_format() -> None:
     assert finfo_str in SignalIORegistry.get_format_info(mode="text")
 
 
+def test_unregister_and_register_format() -> None:
+    """Test removing a format from the registry, then registering it again"""
+    signal_class = _add_signal_format()
+    image_class = _add_image_format()
+    for registry, fmt_class in (
+        (SignalIORegistry, signal_class),
+        (ImageIORegistry, image_class),
+    ):
+        count = len(registry.get_formats())
+        assert registry.unregister_format(fmt_class)
+        assert len(registry.get_formats()) == count - 1
+        assert not any(fmt.__class__ is fmt_class for fmt in registry.get_formats())
+        assert not registry.unregister_format(fmt_class)
+        assert registry.register_format(fmt_class)
+        assert not registry.register_format(fmt_class)
+        assert sum(fmt.__class__ is fmt_class for fmt in registry.get_formats()) == 1
+        assert registry.unregister_format(fmt_class)
+    with pytest.raises(TypeError, match="is not a SignalIORegistry format class"):
+        SignalIORegistry.register_format(image_class)
+
+
 if __name__ == "__main__":
     test_add_image_format()
     test_add_signal_format()
+    test_unregister_and_register_format()

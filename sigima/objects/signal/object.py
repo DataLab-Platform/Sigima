@@ -38,6 +38,7 @@ from sigima.objects.signal.constants import (
     VALID_TIME_UNITS,
 )
 from sigima.objects.signal.roi import SignalROI
+from sigima.objects.source import normalize_experimental_source_metadata
 from sigima.tools.datatypes import datetime64_to_seconds
 
 
@@ -133,6 +134,15 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
         """
         gds.DataSet.__init__(self, title, comment, icon)
         base.BaseObj.__init__(self)
+
+    def deserialize(self, reader) -> None:
+        """Deserialize object, restoring the JSON types of its experimental source
+
+        Args:
+            reader: guidata reader (HDF5, JSON or INI)
+        """
+        super().deserialize(reader)
+        normalize_experimental_source_metadata(self.metadata)
 
     @staticmethod
     def get_roi_class() -> Type[SignalROI]:

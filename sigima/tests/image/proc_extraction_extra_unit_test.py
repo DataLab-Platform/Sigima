@@ -5,9 +5,8 @@ Additional unit tests for :mod:`sigima.proc.image.extraction`.
 
 Covers:
 
-* ``average_profile`` boundary handling: swapped row/col bounds and
-  ``-1`` default sentinel values for both vertical and horizontal
-  directions.
+* ``average_profile`` boundary handling: swapped corners and default
+  (``None``) bounds for both vertical and horizontal directions.
 * ``line_profile`` vertical / horizontal direction branches.
 * ``segment_profile`` basic execution.
 """
@@ -42,45 +41,40 @@ def _make_image(shape: tuple[int, int] = (8, 10)) -> ImageObj:
 
 @pytest.mark.parametrize("direction", ["horizontal", "vertical"])
 def test_average_profile_swapped_bounds(direction: str) -> None:
-    """``average_profile`` must transparently swap inverted bounds (e.g.
-    ``row1=5, row2=2``) so the user can pass them in either order without
-    getting an empty profile, regardless of direction."""
+    """``average_profile`` accepts the corners of its rectangle in any order, so
+    that the user can pass them in either order without getting an empty profile,
+    regardless of direction."""
     img = _make_image(shape=(8, 10))
-    p = AverageProfileParam.create(direction=direction, row1=5, row2=2, col1=8, col2=1)
+    p = AverageProfileParam.create(direction=direction, x1=8, y1=5, x2=1, y2=2)
     sig = average_profile(img, p)
-    ordered = AverageProfileParam.create(
-        direction=direction, row1=2, row2=5, col1=1, col2=8
-    )
+    ordered = AverageProfileParam.create(direction=direction, x1=1, y1=2, x2=8, y2=5)
     expected = average_profile(img, ordered)
     assert np.array_equal(sig.x, expected.x) and np.array_equal(sig.y, expected.y)
     # The parameters are not modified: they apply unchanged to other images
-    assert (p.row1, p.row2, p.col1, p.col2) == (5, 2, 8, 1)
+    assert (p.x1, p.y1, p.x2, p.y2) == (8, 5, 1, 2)
 
 
 @pytest.mark.parametrize(
     "direction, expected_axis",
     [("horizontal", 1), ("vertical", 0)],
 )
-def test_average_profile_default_bounds_minus_one(
+def test_average_profile_default_bounds_none(
     direction: str, expected_axis: int
 ) -> None:
-    """The sentinel value ``-1`` for ``row2`` / ``col2`` is resolved to the
-    last valid index of the image, covering the whole array by default,
-    for both directions."""
+    """Bounds left to None are the edges of the image, covering the whole array by
+    default, for both directions."""
     img = _make_image(shape=(4, 5))
-    p = AverageProfileParam.create(
-        direction=direction, row1=0, row2=-1, col1=0, col2=-1
-    )
+    p = AverageProfileParam.create(direction=direction)
     sig = average_profile(img, p)
-    assert (p.row2, p.col2) == (-1, -1)
+    assert (p.x1, p.y1, p.x2, p.y2) == (None, None, None, None)
     assert sig.y.size == img.data.shape[expected_axis]
 
 
 @pytest.mark.parametrize(
     "direction, kwargs, expected_axis",
     [
-        ("vertical", {"col": 2}, 0),
-        ("horizontal", {"row": 3}, 1),
+        ("vertical", {"x": 2}, 0),
+        ("horizontal", {"y": 3}, 1),
     ],
 )
 def test_line_profile_directions(
@@ -98,7 +92,7 @@ def test_segment_profile_basic() -> None:
     """Smoke test: ``segment_profile`` returns a non-empty signal for an
     arbitrary diagonal segment inside the image."""
     img = _make_image()
-    p = SegmentProfileParam.create(row1=0, col1=0, row2=5, col2=5)
+    p = SegmentProfileParam.create(x1=0, y1=0, x2=5, y2=5)
     sig = segment_profile(img, p)
     assert sig.y.size > 0
 
@@ -111,19 +105,18 @@ def _values(p) -> dict:
 @pytest.mark.parametrize(
     "func, p",
     [
-        (line_profile, LineProfileParam.create(direction="horizontal", row=6)),
-        (line_profile, LineProfileParam.create(direction="vertical", col=7)),
-        (segment_profile, SegmentProfileParam.create(row1=1, col1=1, row2=7, col2=9)),
+        (line_profile, LineProfileParam.create(direction="horizontal", y=3)),
+        (line_profile, LineProfileParam.create(direction="vertical", x=4)),
+        (segment_profile, SegmentProfileParam.create(x1=1, y1=1, x2=4, y2=3)),
         (
             average_profile,
-            AverageProfileParam.create(
-                direction="horizontal", row1=6, row2=2, col1=0, col2=-1
-            ),
+            AverageProfileParam.create(direction="horizontal", y1=3, y2=1),
         ),
     ],
 )
 def test_profile_parameters_apply_unchanged_to_other_images(func, p) -> None:
-    """Coordinates clamped to a small image are not clamped for the next one."""
+    """Parameters are not modified by a computation: they apply unchanged to
+    another image."""
     small, large = _make_image(shape=(4, 5)), _make_image(shape=(8, 10))
     before = _values(p)
     expected = func(large, copy.deepcopy(p))

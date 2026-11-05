@@ -8,7 +8,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Callable, Literal
 
 import numpy as np
 
@@ -306,3 +306,23 @@ def polar_to_complex(
     if unit == "°":
         theta = np.deg2rad(theta)
     return r * np.exp(1j * theta)
+
+
+def local_derivative(
+    function: Callable[[np.ndarray], np.ndarray] | None, value: float, step: float
+) -> float:
+    """Return the derivative of a coordinate mapping around a value.
+
+    Args:
+        function: coordinate mapping (None: identity)
+        value: coordinate around which the derivative is computed
+        step: half-width of the central difference (e.g. a shape size)
+
+    Returns:
+        Derivative (signed: negative for a reversal)
+    """
+    if function is None:
+        return 1.0
+    step = abs(step) if step else 1.0
+    lower, upper = function(np.array([value - step, value + step], dtype=float))
+    return float((upper - lower) / (2.0 * step))

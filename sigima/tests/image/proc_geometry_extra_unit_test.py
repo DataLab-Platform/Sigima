@@ -76,6 +76,15 @@ def test_calibration_axis_z() -> None:
     assert np.allclose(out.data, 1.0 + 2.0 * img.data)
 
 
+def test_calibration_axis_z_keeps_complex_values() -> None:
+    """Calibrating the ``z`` axis of a complex image keeps its imaginary parts."""
+    img = create_image("complex", np.full((3, 4), 1 + 2j, dtype=np.complex64))
+    p = sigima.params.XYZCalibrateParam.create(axis="z", a0=1.0, a1=2.0, a2=0.0, a3=0.0)
+    out = igeom.calibration(img, p)
+    assert out.data.dtype == np.complex128
+    assert np.allclose(out.data, 3 + 4j)
+
+
 def test_calibration_axis_x_uniform() -> None:
     """Calibrating the ``x`` axis on a uniform-coords image populates
     ``xcoords`` with one value per column."""
@@ -191,6 +200,36 @@ def test_resize_non_uniform_raises() -> None:
         igeom.resize(obj, p)
 
 
+@pytest.mark.parametrize("reshape", [False, True])
+def test_rotate_non_uniform_raises(reshape: bool) -> None:
+    """An arbitrary rotation rejects non-uniform coordinates.
+
+    Regression: the result kept the source coordinate arrays, whose lengths no
+    longer matched the rotated data when the shape changed.
+    """
+    obj = _img(20, 16)
+    obj.set_coords(
+        xcoords=np.linspace(0.0, 1.0, obj.data.shape[1]) ** 2,
+        ycoords=np.linspace(0.0, 1.0, obj.data.shape[0]) ** 2,
+    )
+    p = sigima.params.RotateParam.create(angle=45.0, reshape=reshape)
+    with pytest.raises(ValueError, match="uniform coordinates"):
+        igeom.rotate(obj, p)
+
+
+@pytest.mark.parametrize("reshape", [False, True])
+def test_rotate_uniform_keeps_consistent_geometry(reshape: bool) -> None:
+    """An arbitrary rotation of a uniform image gives a uniform image."""
+    obj = _img(20, 16)
+    out = igeom.rotate(
+        obj, sigima.params.RotateParam.create(angle=45.0, reshape=reshape)
+    )
+    assert out.is_uniform_coords
+    assert (out.dx, out.dy) == (obj.dx, obj.dy)
+    if not reshape:
+        assert out.data.shape == obj.data.shape
+
+
 def test_transpose_with_non_uniform_coords() -> None:
     """``transpose`` swaps shape, axis units and labels even when the
     image carries non-uniform coordinates."""
@@ -271,14 +310,14 @@ def test_resampling_param_update_from_obj_fills_defaults() -> None:
     """``Resampling2DParam.update_from_obj`` populates every field
     (``xmin``/``xmax``, ``ymin``/``ymax``, ``dx``/``dy``,
     ``width``/``height``) from the source image so the GUI shows sensible
-    defaults."""
+    defaults: the bounds are the first and last pixel centers."""
     img = _make_image()
     p = Resampling2DParam()
     p.update_from_obj(img)
     assert p.xmin == img.x0
-    assert p.xmax == img.x0 + img.width
+    assert p.xmax == img.x0 + img.width - img.dx
     assert p.ymin == img.y0
-    assert p.ymax == img.y0 + img.height
+    assert p.ymax == img.y0 + img.height - img.dy
     assert p.dx == img.dx
     assert p.dy == img.dy
     assert p.width == img.data.shape[1]

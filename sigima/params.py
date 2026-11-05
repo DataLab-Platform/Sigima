@@ -80,7 +80,9 @@ Parameter classes that require ``update_from_obj()``:
 - :class:`Resampling2DParam`: Updates bounds based on signal range
 - :class:`ResizeParam`: Updates bounds based on image dimensions
 - :class:`TranslateParam`: Updates bounds based on image dimensions
-- :class:`LineProfileParam`: Updates line coordinates based on image dimensions
+- :class:`LineProfileParam`, :class:`SegmentProfileParam`,
+  :class:`RadialProfileParam`: Set profile coordinates inside the image (physical
+  units)
 - :class:`BandPassFilterParam`, :class:`BandStopFilterParam`,
   :class:`HighPassFilterParam`, :class:`LowPassFilterParam`: Update frequency bounds
 

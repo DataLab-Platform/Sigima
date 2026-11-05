@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import itertools
 import math
 import warnings
 from typing import Generator
@@ -99,6 +100,47 @@ def test_image_standard_deviation() -> None:
         exp += (ima.data - average) ** 2
     exp = np.sqrt(exp / n)
     check_array_result(f"Standard Deviation of {n} images", s1.data, exp)
+
+
+@pytest.mark.parametrize(
+    "func, oracle",
+    [
+        (sigima.proc.image.addition, lambda arr: np.sum(arr, axis=0)),
+        (sigima.proc.image.average, lambda arr: np.mean(arr, axis=0)),
+        (sigima.proc.image.product, lambda arr: np.prod(arr, axis=0)),
+        (sigima.proc.image.standard_deviation, lambda arr: np.std(arr, axis=0)),
+    ],
+)
+@pytest.mark.parametrize("with_complex", [False, True])
+def test_image_n_to_1_does_not_depend_on_input_order(
+    func, oracle, with_complex: bool
+) -> None:
+    """n-to-1 results do not depend on the order of the images, whatever their data
+    types; complex images give complex results (a real one for the standard
+    deviation).
+
+    Regression: addition, average and product of complex images raised a
+    UFuncTypeError (they were computed in float).
+    """
+    images = [
+        sigima.objects.create_image("u8", np.array([[0, 10], [200, 255]], np.uint8)),
+        sigima.objects.create_image(
+            "u16", np.array([[1000, 20], [300, 65535]], np.uint16)
+        ),
+        sigima.objects.create_image("f32", np.array([[0.5, -1], [2, 3]], np.float32)),
+    ]
+    if with_complex:
+        cdata = np.array([[1 + 2j, -3j], [0.5, 2 - 1j]], np.complex128)
+        images.append(sigima.objects.create_image("c128", cdata))
+    arrays = np.array(
+        [ima.data.astype(complex if with_complex else float) for ima in images]
+    )
+    expected = oracle(arrays)
+    for order in itertools.permutations(range(len(images))):
+        result = func([images[i] for i in order])
+        if func is not sigima.proc.image.standard_deviation:
+            assert result.data.dtype == (complex if with_complex else float)
+        assert np.allclose(result.data, expected, rtol=1e-12, atol=0), order
 
 
 @pytest.mark.validation

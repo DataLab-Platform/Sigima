@@ -24,7 +24,11 @@ import sigima.objects
 import sigima.params
 import sigima.proc.image
 from sigima.tests.data import get_test_image
-from sigima.tests.helpers import check_array_result, check_scalar_result
+from sigima.tests.helpers import (
+    check_array_result,
+    check_scalar_result,
+    rectangle_selection,
+)
 from sigima.tools.image import exposure as image_exposure
 
 
@@ -420,9 +424,8 @@ def test_image_offset_correction() -> None:
     # Defining the ROI that will be used to estimate the offset
     p = sigima.objects.ROI2DParam.create(x0=0, y0=0, dx=50, dy=20)
     dst = sigima.proc.image.offset_correction(src, p)
-    ix0, iy0 = int(p.x0), int(p.y0)
-    ix1, iy1 = int(p.x0 + p.dx), int(p.y0 + p.dy)
-    exp = src.data - np.mean(src.data[iy0:iy1, ix0:ix1])
+    selection = rectangle_selection(src, p.x0, p.y0, p.dx, p.dy)
+    exp = src.data - np.mean(src.data[selection])
     check_array_result("OffsetCorrection", dst.data, exp)
 
 

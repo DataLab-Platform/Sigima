@@ -40,7 +40,7 @@ msgid "Effects of different kernel parameters"
 msgstr "Effets des différents paramètres de noyau"
 
 msgid "Custom edge detection and sharpening kernels"
-msgstr "Kernels personnalisés de détection de contours et d'accentuation"
+msgstr "Noyaux personnalisés pour la détection de contours et l'accentuation"
 
 msgid "This tutorial uses PlotPy for visualization, providing interactive plots that allow you to explore the convolution results in detail."
 msgstr "Ce tutoriel utilise PlotPy pour la visualisation, fournissant des graphiques interactifs qui vous permettent d'explorer les résultats de convolution en détail."
@@ -88,7 +88,7 @@ msgid "Qt widget 2"
 msgstr "Qt widget 2"
 
 msgid "Custom convolution kernels"
-msgstr "Kernels de convolution personnalisés"
+msgstr "Noyaux de convolution personnalisés"
 
 msgid "Besides Gaussian kernels, we can create custom kernels for specific image processing tasks like edge detection and sharpening."
 msgstr "En plus des noyaux gaussiens, nous pouvons créer des noyaux personnalisés pour des tâches spécifiques de traitement d'image telles que la détection de contours et l'accentuation."

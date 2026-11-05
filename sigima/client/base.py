@@ -312,13 +312,16 @@ class SimpleAbstractDLControl(abc.ABC):
     @abc.abstractmethod
     def add_group(
         self, title: str, panel: str | None = None, select: bool = False
-    ) -> None:
+    ) -> str | None:
         """Add group to DataLab.
 
         Args:
             title: Group title
             panel: Panel name (valid values: "signal", "image"). Defaults to None.
             select: Select the group after creation. Defaults to False.
+
+        Returns:
+            UUID of the created group (None with DataLab versions before 1.4)
         """
 
     @abc.abstractmethod
@@ -739,15 +742,18 @@ class SimpleBaseProxy(SimpleAbstractDLControl, metaclass=abc.ABCMeta):
 
     def add_group(
         self, title: str, panel: str | None = None, select: bool = False
-    ) -> None:
+    ) -> str | None:
         """Add group to DataLab.
 
         Args:
             title: Group title
             panel: Panel name (valid values: "signal", "image"). Defaults to None.
             select: Select the group after creation. Defaults to False.
+
+        Returns:
+            UUID of the created group (None with DataLab versions before 1.4)
         """
-        self._datalab.add_group(title, panel, select)
+        return self._datalab.add_group(title, panel, select)
 
     def get_sel_object_uuids(self, include_groups: bool = False) -> list[str]:
         """Return selected objects uuids.
