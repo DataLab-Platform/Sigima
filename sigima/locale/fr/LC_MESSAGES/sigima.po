@@ -272,11 +272,11 @@ msgstr "Percentile supérieur"
 msgid "Out-of-range behavior"
 msgstr "Comportement hors plage"
 
-msgid "Rescale"
-msgstr "Rééchelonnage"
-
 msgid "Clip"
 msgstr "Ecrêtage"
+
+msgid "Rescale"
+msgstr "Rééchelonnage"
 
 msgid "Target data type"
 msgstr "Type de données cible"
@@ -467,17 +467,17 @@ msgstr "Décalage X"
 msgid "Y offset"
 msgstr "Décalage Y"
 
-msgid "Value for dark squares"
-msgstr "Valeur des carrés foncés"
-
 msgid "Minimum value"
 msgstr "Minimum"
 
-msgid "Value for light squares"
-msgstr "Valeur des carrés clairs"
+msgid "Value for dark squares"
+msgstr "Valeur des carrés foncés"
 
 msgid "Maximum value"
 msgstr "Maximum"
+
+msgid "Value for light squares"
+msgstr "Valeur des carrés clairs"
 
 msgid "Amplitude and offset"
 msgstr "Amplitude et décalage"
@@ -554,11 +554,11 @@ msgstr "Facteur d'échelle"
 msgid "Data and metadata"
 msgstr "Données et métadonnées"
 
-msgid "Image title"
-msgstr "Titre de l'image"
-
 msgid "Untitled"
 msgstr "Sans titre"
+
+msgid "Image title"
+msgstr "Titre de l'image"
 
 msgid "Data"
 msgstr "Données"
@@ -1796,3 +1796,4 @@ msgstr "Barycentre"
 
 msgid "Plot dialog"
 msgstr "Fenêtre de tracé"
+

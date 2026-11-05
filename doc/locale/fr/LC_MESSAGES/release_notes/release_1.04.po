@@ -21,11 +21,20 @@ msgstr "Sigima Version 1.4.0"
 msgid "Requirements"
 msgstr "Prérequis"
 
-msgid "Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release."
-msgstr "Python 3.10 ou ultérieur est désormais requis. Les utilisateurs de Python 3.9 doivent conserver une version antérieure compatible."
+msgid "**PlotPyStack**:"
+msgstr "**PlotPyStack** :"
 
 msgid "guidata 3.17.0 or later is now required: importing Sigima no longer fails when a translation catalog is corrupted (messages fall back to English)."
 msgstr "guidata 3.17.0 ou ultérieur est désormais requis : l'import de Sigima n'échoue plus lorsqu'un catalogue de traduction est corrompu (les messages reviennent à l'anglais)."
+
+msgid "**Third-party**:"
+msgstr "**Bibliothèques tierces** :"
+
+msgid "Python 3.10 or later is now required. Python 3.9 users must keep an earlier compatible release."
+msgstr "Python 3.10 ou ultérieur est désormais requis. Les utilisateurs de Python 3.9 doivent conserver une version antérieure compatible."
+
+msgid "NumPy up to 2.5 (`>= 1.22, < 2.6`) and SciPy up to 1.18 (`>= 1.10.1, < 1.19`) are now supported."
+msgstr "NumPy jusqu'à la version 2.5 (`>= 1.22, < 2.6`) et SciPy jusqu'à la version 1.18 (`>= 1.10.1, < 1.19`) sont désormais pris en charge."
 
 msgid "✨ New features since version 1.3.0"
 msgstr "✨ Nouveautés depuis la version 1.3.0"
