@@ -273,7 +273,9 @@ When ready to release a patch version (e.g., 1.0.1, 1.0.2):
          git tag -a v1.0.1 -m "Release version 1.0.1"
          git push origin main --tags
 
-4. Keep the ``release`` branch for additional patches in the same minor version series.
+4. Pushing the tag starts the **Release** workflow, which checks the tag, runs the tests and builds the release files, then creates a draft GitHub release. Review the draft release and publish it: this uploads the package to PyPI. Never create a GitHub release by hand (see ``RELEASING.md`` at the root of the repository).
+
+5. Keep the ``release`` branch for additional patches in the same minor version series.
 
 Workflow for Minor/Major Releases
 ----------------------------------
@@ -294,7 +296,9 @@ When ready to release a new minor or major version (e.g., 1.1.0, 2.0.0):
          git tag -a v1.1.0 -m "Release version 1.1.0"
          git push origin main --tags
 
-3. Fast-forward ``develop`` to the released ``main`` commit:
+3. Pushing the tag starts the **Release** workflow, which checks the tag, runs the tests and builds the release files, then creates a draft GitHub release. Review the draft release and publish it: this uploads the package to PyPI. Never create a GitHub release by hand (see ``RELEASING.md`` at the root of the repository).
+
+4. Fast-forward ``develop`` to the released ``main`` commit:
 
    .. code-block:: sh
 
@@ -307,14 +311,14 @@ When ready to release a new minor or major version (e.g., 1.1.0, 2.0.0):
    fast-forward fails, stop and reconcile ``main`` and ``develop`` through a
    reviewed merge; never rebase or force-push either shared branch.
 
-4. Delete the old ``release`` branch (if exists):
+5. Delete the old ``release`` branch (if exists):
 
    .. code-block:: sh
 
          git branch -d release
          git push origin --delete release
 
-5. Create a new ``release`` branch from ``main`` when the first patch for 1.1.1 is needed:
+6. Create a new ``release`` branch from ``main`` when the first patch for 1.1.1 is needed:
 
    .. code-block:: sh
 
