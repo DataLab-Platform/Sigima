@@ -686,6 +686,10 @@ Distinguish three categories of dependencies (include only categories relevant t
   * Python ≥ 3.10 is now required. Python 3.9 users must keep an earlier compatible release.
 ```
 
+## Releasing
+
+Follow [RELEASING.md](../RELEASING.md). **Never create a GitHub release by hand** (with `gh release create` or from the GitHub web page): pushing a tag `vX.Y.Z` (on `main`) or `vX.Y.Z-rcN` makes `.github/workflows/release.yml` (based on the shared [release actions](https://github.com/DataLab-Platform/release-actions)) create a draft release, and only publishing that draft uploads to PyPI (or TestPyPI). Each final version needs a `## Sigima Version X.Y.Z ##` section in `doc/release_notes/release_X.YY.md`: it becomes the description of the GitHub release.
+
 ## Getting Help
 
 - **Documentation**: https://sigima.readthedocs.io/
