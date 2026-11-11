@@ -99,8 +99,9 @@ viz.view_images_side_by_side([gaussian_img, ramp_img], title="Synthetic Images")
 # Supported formats include:
 #
 # - Common formats: BMP, JPEG, PNG, TIFF, JPEG 2000
-# - Scientific formats: DICOM, Andor SIF, Spiricon, Dürr NDT
-# - Data formats: NumPy (.npy), MATLAB (.mat), HDF5 (.h5img)
+# - Scientific formats: DICOM (requires the optional ``pydicom`` package), Andor SIF,
+#   Princeton Instruments SPE, PCO Camera REC, Spiricon, Dürr NDT, raw binary data
+# - Data formats: NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)
 # - Text formats: CSV, TXT, ASC (with coordinate support)
 
 # Load an image from a JPEG file

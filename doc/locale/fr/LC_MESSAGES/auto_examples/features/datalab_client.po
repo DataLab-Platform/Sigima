@@ -24,8 +24,8 @@ msgstr "Exemple de contrôle à distance de la session actuelle de DataLab, à p
 msgid "This example demonstrates how to control DataLab remotely using the SimpleRemoteProxy from Sigima. The script can be run from any Python environment outside of DataLab to interact with an active DataLab session."
 msgstr "Cet exemple démontre comment contrôler DataLab à distance en utilisant le SimpleRemoteProxy de Sigima. Le script peut être exécuté depuis n'importe quel environnement Python en dehors de DataLab pour interagir avec une session DataLab active."
 
-msgid "This example is not executed during documentation build as it requires an active DataLab session to connect to. It is included in the gallery for reference and can be run manually when DataLab is running."
-msgstr "Cet exemple n'est pas exécuté lors de la construction de la documentation car il nécessite une session DataLab active à laquelle se connecter. Il est inclus dans la galerie à titre de référence et peut être exécuté manuellement lorsque DataLab est en cours d'exécution."
+msgid "This example requires an active DataLab session to connect to: run it manually when DataLab is running. During the documentation build, it is executed against a stub XML-RPC server that emulates DataLab, so the outputs shown in the gallery do not come from a real DataLab session."
+msgstr "Cet exemple nécessite une session DataLab active à laquelle se connecter : exécutez-le manuellement lorsque DataLab est en cours d'exécution. Lors de la construction de la documentation, il est exécuté avec un serveur XML-RPC factice qui émule DataLab : les sorties affichées dans la galerie ne proviennent donc pas d'une véritable session DataLab."
 
 msgid ":download:`Download Jupyter notebook: datalab_client.ipynb <datalab_client.ipynb>`"
 msgstr ":download:`Télécharger le notebook Jupyter : datalab_client.ipynb <datalab_client.ipynb>`"

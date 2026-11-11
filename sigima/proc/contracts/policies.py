@@ -2,7 +2,7 @@
 
 """
 Execution policies of operation contracts
-=========================================
+-----------------------------------------
 
 A computation function may declare an X-alignment policy by identifier
 (``@computation_function(x_alignment=...)``). The algorithm of each policy is

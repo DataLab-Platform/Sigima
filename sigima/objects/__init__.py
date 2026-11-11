@@ -40,6 +40,18 @@ Scalar results
 
 .. autoclass:: sigima.objects.GeometryResult
 .. autoclass:: sigima.objects.TableResult
+.. autoclass:: sigima.objects.KindShape
+.. autoclass:: sigima.objects.TableKind
+.. autoclass:: sigima.objects.TableResultBuilder
+.. autofunction:: sigima.objects.calc_table_from_data
+.. autofunction:: sigima.objects.concat_geometries
+.. autofunction:: sigima.objects.concat_tables
+.. autofunction:: sigima.objects.filter_geometry_by_roi
+.. autofunction:: sigima.objects.filter_table_by_roi
+.. py:data:: NO_ROI
+    :type: int
+
+    ROI index of the results computed on the whole signal or image (no ROI).
 
 Common features of signals and images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -82,8 +94,16 @@ Signals
 .. autodataset:: sigima.objects.PulseParam
 .. autodataset:: sigima.objects.PolyParam
 .. autodataset:: sigima.objects.CustomSignalParam
+.. autodataset:: sigima.objects.LinearChirpParam
+.. autodataset:: sigima.objects.LogisticParam
+.. autodataset:: sigima.objects.PlanckParam
+.. autodataset:: sigima.objects.SquarePulseParam
+.. autodataset:: sigima.objects.StepPulseParam
+.. autofunction:: sigima.objects.validate_peak_creation_params
+.. autofunction:: sigima.objects.convert_legacy_peak_creation_params
 .. autodataset:: sigima.objects.ROI1DParam
 .. autoclass:: sigima.objects.SignalROI
+.. autoclass:: sigima.objects.SegmentROI
 
 Images
 ^^^^^^
@@ -111,6 +131,10 @@ Images
 .. autodataset:: sigima.objects.Sinc2DParam
 .. autodataset:: sigima.objects.ROI2DParam
 .. autoclass:: sigima.objects.ImageROI
+.. autoclass:: sigima.objects.RectangularROI
+.. autoclass:: sigima.objects.CircularROI
+.. autoclass:: sigima.objects.PolygonalROI
+.. autofunction:: sigima.objects.create_image_roi_around_points
 .. autoclass:: sigima.objects.ImageDatatypes
 
 Experimental data origin
@@ -125,6 +149,21 @@ See :doc:`../user_guide/overview` for a complete creation and persistence exampl
 .. autofunction:: sigima.objects.make_experimental_source
 .. autofunction:: sigima.objects.set_experimental_source
 .. autofunction:: sigima.objects.get_experimental_source
+.. py:data:: EXPERIMENTAL_SOURCE_KEY
+    :type: str
+
+    Metadata key of the experimental data origin.
+
+.. py:data:: EXPERIMENTAL_SOURCE_VERSION
+    :type: int
+
+    Version of the ``experimental_source`` dictionary layout.
+
+Graphical annotations
+^^^^^^^^^^^^^^^^^^^^^
+
+The renderer-independent graphical annotations of signals and images are
+described in :doc:`annotations`.
 """
 
 __all__ = [

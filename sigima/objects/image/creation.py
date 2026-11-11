@@ -277,8 +277,8 @@ class DomainImageParam(NewImageParam):
             shape: Tuple (height, width) of the image data.
 
         Returns:
-            Tuple (dx, dy, x0, y0): pixel spacing and coordinates of the first
-            pixel center.
+            Pixel spacing and coordinates of the first pixel center, as a
+            ``(dx, dy, x0, y0)`` tuple.
         """
         height, width = shape
         dx = (self.xmax - self.xmin) / (width - 1) if width > 1 else 1.0

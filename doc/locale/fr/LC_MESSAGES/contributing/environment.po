@@ -15,8 +15,8 @@ msgstr ""
 msgid "Setting up Development Environment"
 msgstr "Mise en place de l'environnement de développement"
 
-msgid "Getting started with DataLab development is easy."
-msgstr "Démarrer le développement dans le cadre du projet DataLab est facile."
+msgid "Getting started with Sigima development is easy."
+msgstr "Démarrer le développement dans le cadre du projet Sigima est facile."
 
 msgid "Here is what you will need:"
 msgstr "Voici ce dont vous aurez besoin :"
@@ -132,17 +132,11 @@ msgstr "Statut"
 msgid "WinPython version"
 msgstr "Version de WinPython"
 
-msgid "3.9"
-msgstr "3.9"
+msgid "3.10"
+msgstr "3.10"
 
 msgid "OK"
 msgstr "OK"
-
-msgid "3.9.10.0"
-msgstr "3.9.10.0"
-
-msgid "3.10"
-msgstr "3.10"
 
 msgid "3.10.11.1"
 msgstr "3.10.11.1"
@@ -164,6 +158,12 @@ msgstr "3.13"
 
 msgid "3.13.2.0"
 msgstr "3.13.2.0"
+
+msgid "3.14"
+msgstr "3.14"
+
+msgid "3.14.5.0"
+msgstr "3.14.5.0"
 
 msgid "⚠ We strongly recommend using the `.dot` versions of WinPython which are lightweight and can be customized to your needs (using `pip install -r requirements.txt`)."
 msgstr "⚠ Nous recommandons fortement d'utiliser les versions `.dot` de WinPython qui sont légères et peuvent être personnalisées selon vos besoins (en utilisant `pip install -r requirements.txt`)."

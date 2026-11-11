@@ -5,6 +5,8 @@
 Graphical annotations
 =====================
 
+.. py:module:: sigima.objects.annotations
+
 Sigima provides a renderer-independent model for editorial graphics attached to
 signals and images.  Graphical annotations are distinct from two other concepts:
 
@@ -38,6 +40,21 @@ JSON-compatible values and are copied into immutable containers.
 .. autoclass:: sigima.objects.TextAnnotation
 .. autoclass:: sigima.objects.CursorAnnotation
 .. autoclass:: sigima.objects.RangeAnnotation
+
+The geometry and the appearance of annotations are described with the
+following enumerations and style descriptors:
+
+.. autoclass:: sigima.objects.AnnotationKind
+.. autoclass:: sigima.objects.CoordinateSpace
+.. autoclass:: sigima.objects.Axis
+.. autoclass:: sigima.objects.CursorOrientation
+.. autoclass:: sigima.objects.TextAnchor
+.. autoclass:: sigima.objects.AnnotationStyle
+.. autoclass:: sigima.objects.StrokeStyle
+.. autoclass:: sigima.objects.FillStyle
+.. autoclass:: sigima.objects.MarkerStyle
+.. autoclass:: sigima.objects.TextStyle
+.. autoclass:: sigima.objects.AnnotationLabel
 
 Object API
 ----------
@@ -74,8 +91,20 @@ historical object wrapper version and from the ``.dlabann`` container version.
 
 .. autofunction:: sigima.objects.annotation_to_dict
 .. autofunction:: sigima.objects.annotation_from_dict
+.. autofunction:: sigima.objects.is_graphical_annotation_dict
 .. autofunction:: sigima.io.write_graphical_annotations
 .. autofunction:: sigima.io.read_graphical_annotations
+.. py:data:: ANNOTATION_FORMAT
+    :module: sigima.objects
+    :type: str
+
+    Value of the ``format`` key of canonical annotation dictionaries.
+
+.. py:data:: ANNOTATION_VERSION
+    :module: sigima.objects
+    :type: str
+
+    Value of the ``version`` key of canonical annotation dictionaries.
 
 Canonical annotations survive object copies and the normal ``.h5sig``,
 ``.h5ima``, and ``.dlabann`` round trips without a renderer dependency.
@@ -84,8 +113,8 @@ Transformations
 ---------------
 
 Pure transformation functions return a new annotation and preserve its UUID
-and non-geometric fields.  Translation, quarter turns, flips, transposition,
-and scaling are also applied by the corresponding image operations.  Resizing
+and non-geometric fields.  Translation, quarter turns, flips and transposition
+are also applied by the corresponding image operations.  Resizing
 does not move annotations because their coordinates are calibrated data values.
 Arbitrary image rotation clears canonical annotations, like regions of interest,
 when the output coordinate mapping is not reliable; opaque payloads are kept.
@@ -96,10 +125,13 @@ when the output coordinate mapping is not reliable; opaque payloads are kept.
 .. autofunction:: sigima.objects.flip_annotation_vertically
 .. autofunction:: sigima.objects.transpose_annotation
 .. autofunction:: sigima.objects.scale_annotation
+.. autofunction:: sigima.objects.transform_annotation
 
 An exact transform may change the primitive type, for example from a circle to
 an ellipse under anisotropic scaling.  A transform that cannot be represented
 exactly raises :class:`~sigima.objects.AnnotationTransformError`.
+
+.. autoexception:: sigima.objects.AnnotationTransformError
 
 PlotPy migration
 ----------------
@@ -118,3 +150,7 @@ rewriting them.  Migration to the canonical model is always explicit:
 Known PlotPy annotation types are converted.  A malformed payload, an unknown
 item class, or a payload containing a partially unsupported item is preserved
 and reported.  Running migration again is idempotent.
+
+.. autofunction:: sigima.objects.migrate_legacy_plotpy_annotations
+.. autofunction:: sigima.objects.legacy_plotpy_payload_to_annotations
+.. autoclass:: sigima.objects.LegacyPlotPyMigrationReport

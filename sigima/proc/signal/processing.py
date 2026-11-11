@@ -293,7 +293,7 @@ def deconvolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def normalize(src: SignalObj, p: NormalizeParam) -> SignalObj:
-    """Normalize data with :py:func:`sigima.tools.signal.level.normalize`
+    """Normalize data with :py:func:`sigima.tools.signal.scaling.normalize`
 
     Args:
         src: source signal

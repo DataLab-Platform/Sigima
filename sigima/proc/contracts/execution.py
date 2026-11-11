@@ -2,7 +2,7 @@
 
 """
 Execution of operation contracts
-================================
+--------------------------------
 
 One scientific path for ordinary processing and replay, whatever the
 application:

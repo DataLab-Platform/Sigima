@@ -10,9 +10,10 @@ SimpleRemoteProxy from Sigima. The script can be run from any Python
 environment outside of DataLab to interact with an active DataLab session.
 
 .. note::
-   This example is not executed during documentation build as it requires
-   an active DataLab session to connect to. It is included in the gallery
-   for reference and can be run manually when DataLab is running.
+   This example requires an active DataLab session to connect to: run it
+   manually when DataLab is running. During the documentation build, it is
+   executed against a stub XML-RPC server that emulates DataLab, so the outputs
+   shown in the gallery do not come from a real DataLab session.
 """
 
 # %% Importing necessary modules

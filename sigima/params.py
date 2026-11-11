@@ -77,14 +77,16 @@ Parameter classes that require ``update_from_obj()``:
 - :class:`ZeroPadding1DParam`: Computes ``n`` based on strategy and signal size
 - :class:`ZeroPadding2DParam`: Computes padding based on strategy and image size
 - :class:`Resampling1DParam`: Updates bounds based on signal range
-- :class:`Resampling2DParam`: Updates bounds based on signal range
-- :class:`ResizeParam`: Updates bounds based on image dimensions
-- :class:`TranslateParam`: Updates bounds based on image dimensions
+- :class:`Resampling2DParam`: Updates bounds and sampling based on image extent
 - :class:`LineProfileParam`, :class:`SegmentProfileParam`,
   :class:`RadialProfileParam`: Set profile coordinates inside the image (physical
   units)
 - :class:`BandPassFilterParam`, :class:`BandStopFilterParam`,
   :class:`HighPassFilterParam`, :class:`LowPassFilterParam`: Update frequency bounds
+- :class:`PulseFeaturesParam`: Updates start and end ranges based on signal range
+- :class:`BrightnessContrastParam`: Initializes range and histogram from the image
+- :class:`UniformCoordsParam`: Initializes uniform coordinates from the image
+  coordinates
 
 .. note::
 
@@ -133,6 +135,14 @@ Common parameters
     :no-index:
 .. autodataset:: sigima.params.NormalizeParam
     :no-index:
+.. autodataset:: sigima.params.PhaseParam
+    :no-index:
+.. autodataset:: sigima.params.ReplaceSpecialValuesImageParam
+    :no-index:
+.. autodataset:: sigima.params.ReplaceSpecialValuesSignalParam
+    :no-index:
+.. autodataset:: sigima.params.SignalsToImageParam
+    :no-index:
 .. autodataset:: sigima.params.SpectrumParam
     :no-index:
 
@@ -175,8 +185,6 @@ Signal parameters
     :no-index:
 .. autodataset:: sigima.params.Resampling1DParam
     :no-index:
-.. autodataset:: sigima.params.Resampling2DParam
-    :no-index:
 .. autodataset:: sigima.params.WindowingParam
     :no-index:
 .. autodataset:: sigima.params.XYCalibrateParam
@@ -206,6 +214,8 @@ Detection parameters
     :no-index:
 .. autodataset:: sigima.params.ContourShapeParam
     :no-index:
+.. autodataset:: sigima.params.DetectionROIParam
+    :no-index:
 .. autodataset:: sigima.params.Peak2DDetectionParam
     :no-index:
 .. autodataset:: sigima.params.HoughCircleParam
@@ -225,6 +235,8 @@ Exposure correction parameters
 .. autodataset:: sigima.params.AdjustLogParam
     :no-index:
 .. autodataset:: sigima.params.AdjustSigmoidParam
+    :no-index:
+.. autodataset:: sigima.params.BrightnessContrastParam
     :no-index:
 .. autodataset:: sigima.params.EqualizeAdaptHistParam
     :no-index:
@@ -258,7 +270,7 @@ Filtering parameters
 
 .. autodataset:: sigima.params.ButterworthParam
     :no-index:
-.. autofunction:: sigima.params.GaussianFreqFilterParam
+.. autodataset:: sigima.params.GaussianFreqFilterParam
     :no-index:
 
 Fourier analysis parameters
@@ -272,11 +284,15 @@ Geometry parameters
 
 .. autodataset:: sigima.params.BinningParam
     :no-index:
+.. autodataset:: sigima.params.Resampling2DParam
+    :no-index:
 .. autodataset:: sigima.params.ResizeParam
     :no-index:
 .. autodataset:: sigima.params.RotateParam
     :no-index:
 .. autodataset:: sigima.params.TranslateParam
+    :no-index:
+.. autodataset:: sigima.params.UniformCoordsParam
     :no-index:
 
 Mathematical operation parameters

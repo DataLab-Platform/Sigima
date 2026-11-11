@@ -177,7 +177,7 @@ def phase_spectrum(x: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray
         y: Y data.
 
     Returns:
-        Tuple (f, phase): Frequency values and phase spectrum in degrees.
+        Frequency values and phase spectrum in degrees, as a ``(f, phase)`` tuple.
     """
     f, spectrum = fft1d(x, y)
     phase = np.rad2deg(np.angle(spectrum))

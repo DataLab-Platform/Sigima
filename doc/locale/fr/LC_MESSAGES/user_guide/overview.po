@@ -276,20 +276,20 @@ msgstr "Sigima peut lire et écrire directement des images depuis divers formats
 msgid "**Common formats**: BMP, JPEG, PNG, TIFF, JPEG 2000"
 msgstr "**Formats courants** : BMP, JPEG, PNG, TIFF, JPEG 2000"
 
-msgid "**Scientific formats**: DICOM (medical imaging), Andor SIF (spectroscopy cameras)"
-msgstr "**Formats scientifiques** : DICOM (imagerie médicale), Andor SIF (caméras de spectroscopie)"
+msgid "**Scientific formats**: DICOM (medical imaging, requires the optional ``pydicom`` package), Andor SIF (spectroscopy cameras), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI"
+msgstr "**Formats scientifiques** : DICOM (imagerie médicale, nécessite le paquet optionnel ``pydicom``), Andor SIF (caméras de spectroscopie), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI"
 
-msgid "**Data exchange**: NumPy (.npy), MATLAB (.mat), HDF5 (.h5img)"
-msgstr "**Échange de données** : NumPy (.npy), MATLAB (.mat), HDF5 (.h5img)"
+msgid "**Data exchange**: NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)"
+msgstr "**Échange de données** : NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)"
 
 msgid "**Text-based**: CSV, TXT, ASC (with coordinate metadata support)"
 msgstr "**Basés sur du texte** : CSV, TXT, ASC (avec support des métadonnées de coordonnées)"
 
-msgid "**Specialized**: Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima)"
-msgstr "**Spécialisés** : Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima)"
+msgid "**Specialized**: Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima), raw binary data (.raw, with user-defined import parameters)"
+msgstr "**Spécialisés** : Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima), données binaires brutes (.raw, avec des paramètres d'importation définis par l'utilisateur)"
 
-msgid "Each format preserves relevant metadata when available, such as DICOM medical imaging headers or acquisition parameters from scientific instruments."
-msgstr "Chaque format préserve les métadonnées pertinentes lorsqu'elles sont disponibles, comme les en-têtes d'imagerie médicale DICOM ou les paramètres d'acquisition d'instruments scientifiques."
+msgid "Each format preserves relevant metadata when available, such as DICOM medical imaging headers or acquisition parameters from scientific instruments. Scientific and specialized formats are read-only."
+msgstr "Chaque format préserve les métadonnées pertinentes lorsqu'elles sont disponibles, comme les en-têtes d'imagerie médicale DICOM ou les paramètres d'acquisition d'instruments scientifiques. Les formats scientifiques et spécialisés sont en lecture seule."
 
 msgid "Define rectangular, circular, or polygonal regions of interest for localized analysis or processing."
 msgstr "Définissez des régions d'intérêt rectangulaires, circulaires ou polygonales pour une analyse ou un traitement localisé."

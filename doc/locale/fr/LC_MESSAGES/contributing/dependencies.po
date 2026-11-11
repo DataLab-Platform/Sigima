@@ -39,6 +39,9 @@ msgstr "Parmi les dépendances optionnelles, nous avons les groupes suivants :"
 msgid "`opencv`: computer vision tasks requiring OpenCV."
 msgstr "`opencv`: tâches de traitement d'image nécessitant OpenCV."
 
+msgid "`plotly`: browser-based visualization with Plotly (Plotly backend of `sigima.viz`)."
+msgstr "`plotly`: visualisation dans le navigateur avec Plotly (backend Plotly de `sigima.viz`)."
+
 msgid "`dev`: development and testing (linters, formatters, etc.)."
 msgstr "`dev`: développement et tests (analyseurs de code, formateurs, etc.)."
 
@@ -60,8 +63,8 @@ msgstr "En production"
 msgid "In production, we recommend using the package manager that is most suitable for your environment and that you are most comfortable with. All package managers (e.g., `pip`, `conda`) are directly or indirectly using the information from the `pyproject.toml` file to install the dependencies."
 msgstr "En production, nous recommandons d'utiliser le gestionnaire de paquets qui convient le mieux à votre environnement et avec lequel vous êtes le plus à l'aise. Tous les gestionnaires de paquets (par exemple, `pip`, `conda`) utilisent directement ou indirectement les informations du fichier `pyproject.toml` pour installer les dépendances."
 
-msgid "See :ref:`installation` for more information on how to install DataLab and its dependencies."
-msgstr "Voir :ref:`installation` pour plus d'informations sur la façon d'installer DataLab et ses dépendances."
+msgid "See :ref:`installation` for more information on how to install Sigima and its dependencies."
+msgstr "Voir :ref:`installation` pour plus d'informations sur la façon d'installer Sigima et ses dépendances."
 
 msgid "Development"
 msgstr "En développement"
@@ -87,11 +90,11 @@ msgstr "Si c'est une dépendance directe, c'est-à-dire un paquet dont l'applica
 msgid "If it is an optional dependency, that is a package that can be installed to enable additional features, add it to the appropriate section in the `[project.optional-dependencies]` section in the `pyproject.toml` file."
 msgstr "Si c'est une dépendance optionnelle, c'est-à-dire un paquet qui peut être installé pour activer des fonctionnalités supplémentaires, ajoutez-le à la section appropriée dans la section `[project.optional-dependencies]` du fichier `pyproject.toml`."
 
-msgid "For the `dev` dependencies, unless it's absolutely necessary, do not specify a version range, as it may limit the ability to use the latest version of the package."
-msgstr "Pour les dépendances `dev`, sauf si c'est absolument nécessaire, ne spécifiez pas de plage de versions, car cela peut limiter la capacité à utiliser la dernière version du paquet."
+msgid "For the dependencies of the development tools (`dev`, `doc`, `test` and `qt` groups), unless it's absolutely necessary, do not specify a version range, as it may limit the ability to use the latest version of the package."
+msgstr "Pour les dépendances des outils de développement (groupes `dev`, `doc`, `test` et `qt`), sauf si c'est absolument nécessaire, ne spécifiez pas de plage de versions, car cela peut limiter la capacité à utiliser la dernière version du paquet."
 
-msgid "For the other optional dependencies, specify the version range that is compatible with the application, in order to avoid breaking changes."
-msgstr "Pour les autres dépendances optionnelles, spécifiez la plage de versions compatible avec l'application, afin d'éviter les changements incompatibles."
+msgid "For the optional dependencies enabling features of Sigima (e.g. `opencv`, `plotly`), specify the version range that is compatible with the application, in order to avoid breaking changes."
+msgstr "Pour les dépendances optionnelles qui activent des fonctionnalités de Sigima (par exemple `opencv`, `plotly`), spécifiez la plage de versions compatible avec l'application, afin d'éviter les changements incompatibles."
 
-msgid "In other words, except for the `dev` dependencies, always specify a version range that is compatible with the application."
-msgstr "En d'autres termes, sauf pour les dépendances `dev`, spécifiez toujours une plage de versions compatible avec l'application."
+msgid "In other words, except for the dependencies of the development tools, always specify a version range that is compatible with the application."
+msgstr "En d'autres termes, sauf pour les dépendances des outils de développement, spécifiez toujours une plage de versions compatible avec l'application."

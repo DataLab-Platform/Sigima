@@ -24,7 +24,8 @@ Backend selection logic:
 - "plotly": Use Plotly (raise ImportError if not available)
 
 Module exports:
-- BACKEND_NAME: Name of the selected backend ("plotpy" or "matplotlib")
+- BACKEND_NAME: Name of the selected backend ("plotpy", "matplotlib" or "plotly"),
+  None until the backend is selected on first access to a function of the module
 - BACKEND_SOURCE: How the backend was selected ("env", "config", or "auto")
 - All public functions from the selected backend module
 
@@ -317,7 +318,7 @@ _INITIALIZING = False  # Flag to prevent recursion
 
 # Public API: Set default values for BACKEND_NAME and BACKEND_SOURCE
 # These will be updated when the backend is initialized
-BACKEND_NAME = None  # Will be "plotpy" or "matplotlib" after initialization
+BACKEND_NAME = None  # "plotpy", "matplotlib" or "plotly" after initialization
 BACKEND_SOURCE = None  # Will be "env", "config", or "auto" after initialization
 
 

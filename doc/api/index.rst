@@ -18,6 +18,9 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
     * - :mod:`sigima.params`
       - Sets of parameters for configuring computation functions (these parameters are instances of :class:`guidata.dataset.DataSet` objects)
 
+    * - :mod:`sigima.enums`
+      - Enumerations used by the parameters of computation functions
+
     * - :mod:`sigima.objects`
       - Object model for signals and images (:class:`sigima.objects.SignalObj` and :class:`sigima.objects.ImageObj`), scalar results (:class:`sigima.objects.GeometryResult` and :class:`sigima.objects.TableResult`), and related functions
 
@@ -26,6 +29,9 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
 
     * - :mod:`sigima.proc`
       - Computation functions, which operate on signal and image objects (:class:`sigima.objects.SignalObj` or :class:`sigima.objects.ImageObj`) and return signal or image objects, or scalar results (:class:`sigima.objects.GeometryResult` or :class:`sigima.objects.TableResult`).
+
+    * - :mod:`sigima.proc.contracts`
+      - Operation contracts of computation functions (stable identifiers and versions, replay qualification, execution context), used by applications to record and replay computations (see :ref:`contracts`)
 
     * - :mod:`sigima.io`
       - Input/output functions for reading and writing signals and images, including parameterized RAW image import and format-aware image export.
@@ -37,7 +43,7 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
       - Client interface for connecting to DataLab application through XML-RPC protocol, providing remote control capabilities for signal and image processing workflows.
 
     * - :mod:`sigima.viz`
-      - Visualization tools for interactive display of signal and image objects, supporting PlotPy and Matplotlib backends for testing, debugging, and Jupyter notebook analysis.
+      - Visualization tools for interactive display of signal and image objects, supporting PlotPy, Matplotlib and Plotly backends for testing, debugging, and Jupyter notebook analysis.
 
 
 .. toctree::
@@ -46,8 +52,10 @@ The public Application Programming Interface (API) of Sigima offers a set of fun
 
    tools
    params
+   enums
    objects
    proc
+   contracts
    io
    config
    client

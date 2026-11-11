@@ -1,6 +1,13 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
-"""Common enum definitions for Sigima processing."""
+"""
+Enumerations (:mod:`sigima.enums`)
+----------------------------------
+
+Common enum definitions for Sigima processing: the :mod:`sigima.enums` module
+defines the choices of the parameters of computation functions (e.g. the
+normalization method of :class:`sigima.params.NormalizeParam`).
+"""
 
 from __future__ import annotations
 

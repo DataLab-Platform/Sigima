@@ -21,6 +21,9 @@ msgstr "Sigima offre une suite complète de fonctionnalités de traitement des s
 msgid "All computation functions are available in the :mod:`sigima.proc` module. The :mod:`sigima.tools` modules provide lower-level utility functions used internally by the proc functions."
 msgstr "Toutes les fonctions de calcul sont disponibles dans le module :mod:`sigima.proc`. Les modules :mod:`sigima.tools` fournissent des fonctions utilitaires de bas niveau utilisées en interne par les fonctions proc."
 
+msgid "The functions marked as helpers below are not computation functions: they declare no operation contract (see :ref:`contracts`), so applications neither record nor replay them."
+msgstr "Les fonctions signalées ci-dessous comme auxiliaires ne sont pas des fonctions de calcul : elles ne déclarent aucun contrat d'opération (voir :ref:`contracts`), si bien que les applications ne les enregistrent ni ne les rejouent."
+
 msgid "Common Operations"
 msgstr "Opérations courantes"
 
@@ -549,8 +552,8 @@ msgstr "Filtre coupe-bande"
 msgid ":func:`frequency_filter <sigima.proc.signal.frequency_filter>`"
 msgstr ""
 
-msgid "Generic frequency filtering"
-msgstr "Filtrage fréquentiel générique"
+msgid "Generic frequency filtering (helper)"
+msgstr "Filtrage fréquentiel générique (auxiliaire)"
 
 msgid "Signal Conditioning & Processing"
 msgstr "Conditionnement et traitement du signal"
@@ -588,8 +591,8 @@ msgstr "Inverser l'ordre de l'axe des x"
 msgid ":func:`xy_mode <sigima.proc.signal.xy_mode>`"
 msgstr ""
 
-msgid "Handle XY coordinate modes"
-msgstr "Gérer les modes de coordonnées XY"
+msgid "Oscilloscope X-Y mode: use a first signal as X and a second one as Y"
+msgstr "Mode X-Y d'oscilloscope : utiliser un premier signal comme X et un second comme Y"
 
 msgid ":func:`replace_x_by_other_y <sigima.proc.signal.replace_x_by_other_y>`"
 msgstr ""
@@ -654,8 +657,8 @@ msgstr "Extraire les positions des pics sous forme de table de marqueurs XY (poi
 msgid ":func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`"
 msgstr ":func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`"
 
-msgid "Convert an XY-markers table back into a sticks signal"
-msgstr "Convertir une table de marqueurs XY en un signal de type bâtons"
+msgid "Convert an XY-markers table back into a sticks signal (helper)"
+msgstr "Convertir une table de marqueurs XY en un signal de type bâtons (auxiliaire)"
 
 msgid ":func:`peak_detection <sigima.proc.signal.peak_detection>`"
 msgstr ""
@@ -795,8 +798,8 @@ msgstr "Évaluer la fonction ajustée"
 msgid ":func:`extract_fit_params <sigima.proc.signal.extract_fit_params>`"
 msgstr ""
 
-msgid "Extract fitting parameters"
-msgstr "Extraire les paramètres d'ajustement"
+msgid "Extract fitting parameters (helper)"
+msgstr "Extraire les paramètres d'ajustement (auxiliaire)"
 
 msgid "Stability Analysis"
 msgstr "Analyse de stabilité"
@@ -858,14 +861,14 @@ msgstr "Fonctions utilitaires"
 msgid ":func:`check_same_sample_rate <sigima.proc.signal.check_same_sample_rate>`"
 msgstr ""
 
-msgid "Verify consistent sampling rates"
-msgstr "Vérifier la cohérence des taux d'échantillonnage"
+msgid "Verify consistent sampling rates (helper)"
+msgstr "Vérifier la cohérence des taux d'échantillonnage (auxiliaire)"
 
 msgid ":func:`get_nyquist_frequency <sigima.proc.signal.get_nyquist_frequency>`"
 msgstr ""
 
-msgid "Calculate Nyquist frequency"
-msgstr "Calculer la fréquence de Nyquist"
+msgid "Calculate Nyquist frequency (helper)"
+msgstr "Calculer la fréquence de Nyquist (auxiliaire)"
 
 msgid "Image Processing"
 msgstr "Traitement d'image"
@@ -882,14 +885,14 @@ msgstr "Faire pivoter l'image d'un angle quelconque"
 msgid ":func:`rotate90 <sigima.proc.image.rotate90>`"
 msgstr ""
 
-msgid "Rotate image 90° clockwise"
-msgstr "Faire pivoter l'image de 90° dans le sens horaire"
+msgid "Rotate image 90° counter-clockwise (to the left)"
+msgstr "Faire pivoter l'image de 90° dans le sens antihoraire (vers la gauche)"
 
 msgid ":func:`rotate270 <sigima.proc.image.rotate270>`"
 msgstr ""
 
-msgid "Rotate image 270° clockwise"
-msgstr "Faire pivoter l'image de 270° dans le sens horaire"
+msgid "Rotate image 270° counter-clockwise, i.e. 90° clockwise (to the right)"
+msgstr "Faire pivoter l'image de 270° dans le sens antihoraire, soit 90° dans le sens horaire (vers la droite)"
 
 msgid ":func:`fliph <sigima.proc.image.fliph>`"
 msgstr ""
@@ -912,8 +915,8 @@ msgstr "Translater l'image d'un décalage spécifié"
 msgid ":func:`resize <sigima.proc.image.resize>`"
 msgstr ""
 
-msgid "Resize image to specified dimensions"
-msgstr "Redimensionner l'image aux dimensions spécifiées"
+msgid "Resize image by a zoom factor"
+msgstr "Redimensionner l'image selon un facteur de zoom"
 
 msgid ":func:`resampling <sigima.proc.image.resampling>`"
 msgstr ""
@@ -936,8 +939,8 @@ msgstr "Définir un système de coordonnées uniforme"
 msgid ":data:`transformer <sigima.proc.image.transformer>`"
 msgstr ""
 
-msgid "Apply custom geometric transformations"
-msgstr "Appliquer des transformations géométriques personnalisées"
+msgid "Apply custom geometric transformations (helper)"
+msgstr "Appliquer des transformations géométriques personnalisées (auxiliaire)"
 
 msgid "Frequency Domain Filtering"
 msgstr "Filtrage dans le domaine fréquentiel"

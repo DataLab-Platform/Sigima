@@ -18,6 +18,7 @@ The `pyproject.toml` file contains many sections, but the most relevant for depe
 Among the optional dependencies, we have the following groups:
 
 - `opencv`: computer vision tasks requiring OpenCV.
+- `plotly`: browser-based visualization with Plotly (Plotly backend of `sigima.viz`).
 - `dev`: development and testing (linters, formatters, etc.).
 - `doc`: building the documentation (Sphinx, etc.).
 - `test`: running the tests (pytest, etc.).
@@ -31,7 +32,7 @@ Production
 
 In production, we recommend using the package manager that is most suitable for your environment and that you are most comfortable with. All package managers (e.g., `pip`, `conda`) are directly or indirectly using the information from the `pyproject.toml` file to install the dependencies.
 
-See :ref:`installation` for more information on how to install DataLab and its dependencies.
+See :ref:`installation` for more information on how to install Sigima and its dependencies.
 
 Development
 ^^^^^^^^^^^
@@ -57,10 +58,10 @@ When adding new dependencies to the project, please follow these rules:
 
 2. If it is an optional dependency, that is a package that can be installed to enable additional features, add it to the appropriate section in the `[project.optional-dependencies]` section in the `pyproject.toml` file.
 
-  - For the `dev` dependencies, unless it's absolutely necessary, do not specify a version range, as it may limit the ability to use the latest version of the package.
+  - For the dependencies of the development tools (`dev`, `doc`, `test` and `qt` groups), unless it's absolutely necessary, do not specify a version range, as it may limit the ability to use the latest version of the package.
 
-  - For the other optional dependencies, specify the version range that is compatible with the application, in order to avoid breaking changes.
+  - For the optional dependencies enabling features of Sigima (e.g. `opencv`, `plotly`), specify the version range that is compatible with the application, in order to avoid breaking changes.
 
 .. note::
 
-    In other words, except for the `dev` dependencies, always specify a version range that is compatible with the application.
+    In other words, except for the dependencies of the development tools, always specify a version range that is compatible with the application.

@@ -55,6 +55,8 @@ applications can invert the display. Writing RAW files is not supported.
     )
     images = read_images("acquisition.raw", param=param)
 
+.. autodataset:: sigima.io.RawImageImportParam
+
 Format-aware image export
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -82,14 +84,27 @@ the effect of quantization or lossy compression before writing.
     param.format_options = {"compress_level": 9}
     write_image("result.png", image, param)
 
+.. autodataset:: sigima.io.ImageExportParam
 .. autofunction:: get_image_export_capabilities
 .. autofunction:: get_supported_export_dtypes
 .. autofunction:: prepare_image_for_export
 .. autofunction:: prepare_image_export_preview
 .. autofunction:: validate_image_export_options
 .. autofunction:: validate_image_export_configuration
+.. autofunction:: get_image_export_writer_kwargs
+.. autofunction:: encode_image_export_data
+.. autofunction:: write_image_export_data
 .. autoclass:: ImageExportCapabilities
 .. autoclass:: ImageExportOptionSpec
+.. py:data:: ImageExportOptionKind
+
+    Kinds of the format-specific writer options.
+
+.. py:data:: IMAGE_EXPORT_CAPABILITIES
+    :type: types.MappingProxyType[str, ImageExportCapabilities]
+
+    Export capabilities of the image formats, by format identifier (see
+    :py:func:`get_image_export_capabilities`).
 
 NPZ object archives
 ^^^^^^^^^^^^^^^^^^^
@@ -98,8 +113,8 @@ Signals and images can be serialized to in-memory archives of NumPy arrays and
 JSON metadata (NPZ), to transfer them between applications: the Web API of
 DataLab and its clients (such as DataLab-Kernel) use this format. Labels, units,
 uncertainties, uniform or non-uniform image coordinates and object metadata are
-kept; arrays are never pickled. The format is described in
-:mod:`sigima.io.npz`.
+kept; arrays are never pickled. The format (version 1) is described in the
+docstring of the ``sigima.io.npz`` module.
 
 .. code-block:: python
 
@@ -110,6 +125,22 @@ kept; arrays are never pickled. The format is described in
 
 .. autofunction:: serialize_object_to_npz
 .. autofunction:: deserialize_object_from_npz
+
+Metadata, ROI and annotation files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The metadata, regions of interest, ROI grid parameters and annotations of signals
+and images may be saved to and loaded from JSON files, independently of the data
+(see :doc:`annotations` for canonical graphical annotations).
+
+.. autofunction:: write_metadata
+.. autofunction:: read_metadata
+.. autofunction:: write_roi
+.. autofunction:: read_roi
+.. autofunction:: write_roi_grid
+.. autofunction:: read_roi_grid
+.. autofunction:: write_annotations
+.. autofunction:: read_annotations
 
 Errors
 ^^^^^^
@@ -127,8 +158,10 @@ Adding new formats
 ^^^^^^^^^^^^^^^^^^
 
 To add new formats, you can create a new class that inherits from
-:py:class:`sigima.io.image.base.ImageFormatBase` or
-:py:class:`sigima.io.signal.base.SignalFormatBase` and implement the required methods.
+:py:class:`sigima.io.image.base.ImageFormatBase` (or from
+:py:class:`sigima.io.image.base.SingleImageFormatBase` for files holding a single
+image) or :py:class:`sigima.io.signal.base.SignalFormatBase` and implement the
+required methods.
 
 .. note::
 
@@ -140,10 +173,12 @@ Example of a new image format plugin:
 
 .. code-block:: python
 
-    from sigima.io.image.base import ImageFormatBase
-    from sigima.io.base import FormatInfo
+    import numpy as np
 
-    class MyImageFormat(ImageFormatBase):
+    from sigima.io.base import FormatInfo
+    from sigima.io.image.base import SingleImageFormatBase
+
+    class MyImageFormat(SingleImageFormatBase):
         \"\"\"Object representing MyImageFormat image file type\"\"\"
 
         FORMAT_INFO = FormatInfo(
@@ -165,6 +200,22 @@ Example of a new image format plugin:
             \"\"\"
             # Implement reading logic here
             pass
+
+Format classes are registered in the registries of image and signal formats when
+they are defined. A format may be unregistered (e.g. when the plugin defining it is
+unloaded) and registered again:
+
+.. code-block:: python
+
+    from sigima.io import ImageIORegistry
+
+    ImageIORegistry.unregister_format(MyImageFormat)
+    ImageIORegistry.register_format(MyImageFormat)
+
+.. autoclass:: ImageIORegistry
+    :members: get_formats, register_format, unregister_format
+.. autoclass:: SignalIORegistry
+    :members: get_formats, register_format, unregister_format
 """
 
 from __future__ import annotations

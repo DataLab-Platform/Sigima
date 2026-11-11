@@ -1,7 +1,7 @@
 Setting up Development Environment
 ==================================
 
-Getting started with DataLab development is easy.
+Getting started with Sigima development is easy.
 
 Here is what you will need:
 
@@ -61,11 +61,11 @@ The following table lists the currently officially used Python distributions:
 
 | Python version | Status       | WinPython version |
 | -------------- | ------------ | ----------------- |
-| 3.9            | OK           | 3.9.10.0          |
 | 3.10           | OK           | 3.10.11.1         |
 | 3.11           | OK           | 3.11.5.0          |
 | 3.12           | OK           | 3.12.3.0          |
 | 3.13           | OK           | 3.13.2.0          |
+| 3.14           | OK           | 3.14.5.0          |
 
 ⚠ We strongly recommend using the `.dot` versions of WinPython which are lightweight
 and can be customized to your needs (using `pip install -r requirements.txt`).

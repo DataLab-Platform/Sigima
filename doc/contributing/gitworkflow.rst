@@ -113,7 +113,7 @@ For example::
 
 Merge commits and annotated release tags are exceptions: keep their explicit Git
 messages, such as ``Merge branch 'feature/feature_name'`` and
-``Release version 1.2.0``. Do not rewrite published history solely to change old
+``Sigima v1.2.0``. Do not rewrite published history solely to change old
 messages.
 
 
@@ -257,7 +257,7 @@ Workflow for Patch Releases
 
 When ready to release a patch version (e.g., 1.0.1, 1.0.2):
 
-1. Ensure the ``release`` branch contains all desired fixes.
+1. Ensure the ``release`` branch contains all desired fixes, as well as the version number and the release notes of the patch release (see ``RELEASING.md``).
 
 2. Merge ``release`` into ``main``:
 
@@ -266,12 +266,13 @@ When ready to release a patch version (e.g., 1.0.1, 1.0.2):
          git checkout main
          git merge --no-ff release
 
-3. Tag the release on ``main``:
+3. Tag the release on ``main`` and push the tag (``-s`` signs the tag, use ``-a`` otherwise):
 
    .. code-block:: sh
 
-         git tag -a v1.0.1 -m "Release version 1.0.1"
-         git push origin main --tags
+         git push origin main
+         git tag -s v1.0.1 -m "Sigima v1.0.1"
+         git push origin v1.0.1
 
 4. Pushing the tag starts the **Release** workflow, which checks the tag, runs the tests and builds the release files, then creates a draft GitHub release. Review the draft release and publish it: this uploads the package to PyPI. Never create a GitHub release by hand (see ``RELEASING.md`` at the root of the repository).
 
@@ -282,19 +283,20 @@ Workflow for Minor/Major Releases
 
 When ready to release a new minor or major version (e.g., 1.1.0, 2.0.0):
 
-1. Merge ``develop`` into ``main``:
+1. Once ``develop`` contains the version number and the release notes of the release (see ``RELEASING.md``), merge ``develop`` into ``main``:
 
    .. code-block:: sh
 
          git checkout main
          git merge --no-ff develop
 
-2. Tag the release on ``main``:
+2. Tag the release on ``main`` and push the tag (``-s`` signs the tag, use ``-a`` otherwise):
 
    .. code-block:: sh
 
-         git tag -a v1.1.0 -m "Release version 1.1.0"
-         git push origin main --tags
+         git push origin main
+         git tag -s v1.1.0 -m "Sigima v1.1.0"
+         git push origin v1.1.0
 
 3. Pushing the tag starts the **Release** workflow, which checks the tag, runs the tests and builds the release files, then creates a draft GitHub release. Review the draft release and publish it: this uploads the package to PyPI. Never create a GitHub release by hand (see ``RELEASING.md`` at the root of the repository).
 

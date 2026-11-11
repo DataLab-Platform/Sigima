@@ -240,7 +240,7 @@ def sampling_rate_period(obj: SignalObj) -> TableResult:
     qualification=ReplayQualification(contract_version=1, comparison=EXACT),
 )
 def contrast(obj: SignalObj) -> TableResult:
-    """Compute contrast with :py:func:`sigima.tools.signal.misc.contrast`"""
+    """Compute contrast with :py:func:`sigima.tools.signal.features.contrast`"""
     table = TableResultBuilder(_("Contrast"))
     table.add(lambda xy: features.contrast(xy[1]), "contrast")
     return table.compute(obj)

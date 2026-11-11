@@ -38,7 +38,7 @@ Key Concepts
    Process only specific areas of your data by defining ROIs. The example shows a circular ROI applied to an image.
 
 **Backend Flexibility**
-   Choose between PlotPy (Qt-based, interactive) or Matplotlib (web-friendly) backends for visualization, making Sigima suitable for both desktop applications and web-based workflows.
+   Choose between PlotPy (Qt-based, interactive), Matplotlib (web-friendly) or Plotly (browser-based, interactive) backends for visualization, making Sigima suitable for both desktop applications and web-based workflows.
 
 Remote Control Example
 ----------------------

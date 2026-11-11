@@ -15,10 +15,10 @@ A release takes two steps, both run by [`.github/workflows/release.yml`](.github
 
 ## Releasing a final version
 
-1. On `develop` (through a pull request as usual):
+1. On `develop` (through a pull request as usual), or on the `release` branch for a patch release (see the [Git workflow](doc/contributing/gitworkflow.rst)):
    * set `__version__ = "X.Y.Z"` in `sigima/_metadata.py`;
    * write the `## Sigima Version X.Y.Z ##` section (and its French translation) of `doc/release_notes/release_X.YY.md`: it becomes the description of the GitHub release, and the release is refused if it is missing.
-2. Merge `develop` into `main`.
+2. Merge `develop` into `main` (or, for a patch release, the `release` branch).
 3. Tag `main` and push the tag (`-s` signs the tag, use `-a` otherwise):
 
    ```console

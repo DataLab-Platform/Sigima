@@ -66,8 +66,8 @@ msgstr "Traitez uniquement des zones spécifiques de vos données en définissan
 msgid "**Backend Flexibility**"
 msgstr "**Flexibilité du backend**"
 
-msgid "Choose between PlotPy (Qt-based, interactive) or Matplotlib (web-friendly) backends for visualization, making Sigima suitable for both desktop applications and web-based workflows."
-msgstr "Choisissez entre les backends PlotPy (basé sur Qt, interactif) ou Matplotlib (adapté au web) pour la visualisation, rendant Sigima adapté à la fois aux applications de bureau et aux flux de travail basés sur le web."
+msgid "Choose between PlotPy (Qt-based, interactive), Matplotlib (web-friendly) or Plotly (browser-based, interactive) backends for visualization, making Sigima suitable for both desktop applications and web-based workflows."
+msgstr "Choisissez entre les backends PlotPy (basé sur Qt, interactif), Matplotlib (adapté au web) ou Plotly (dans le navigateur, interactif) pour la visualisation, rendant Sigima adapté à la fois aux applications de bureau et aux flux de travail basés sur le web."
 
 msgid "Remote Control Example"
 msgstr "Exemple de contrôle à distance"
