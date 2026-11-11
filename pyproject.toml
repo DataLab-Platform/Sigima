@@ -36,7 +36,8 @@ dependencies = [
     "NumPy >= 1.22, < 2.6",
     "SciPy >= 1.10.1, < 1.19",
     "scikit-image >= 0.19.2, < 0.27",
-    # Not built for Pyodide (WebAssembly): tifffile then reads uncompressed TIFF
+    # Excluded on Emscripten: no imagecodecs wheel for Pyodide 0.26 (DataLab-Web),
+    # nor emscripten-forge package; tifffile then reads uncompressed TIFF only
     "imagecodecs >= 2024.12.30; sys_platform != 'emscripten'",
     "pandas >= 1.4, < 3.1",
     "PyWavelets >= 1.2, < 2.0",
