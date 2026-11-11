@@ -81,8 +81,8 @@ Contribute to new features
 Even if you are not a developer, you can contribute to the project by:
 
 - Testing new features
-- Writing and submitting new Plugins
-- Writing and submitting macro-commands
+- Writing and submitting new examples for the gallery
+- Writing and submitting new file formats (I/O plugins, see :mod:`sigima.io`)
 
 Develop new features
 --------------------

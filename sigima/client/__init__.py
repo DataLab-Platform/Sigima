@@ -35,9 +35,9 @@ language using the same methods of proxy server as in the
 Data (signals and images) may also be exchanged between DataLab and the remote
 client application, in both directions.
 
-The remote client application may be run on the same computer as DataLab or on
-different computer. In the latter case, the remote client application must
-know the IP address of the computer running DataLab.
+The remote client application must be run on the same computer as DataLab: the
+XML-RPC server of DataLab and :py:class:`sigima.client.SimpleRemoteProxy` only use
+the local loopback address (``127.0.0.1``).
 
 The remote client application may be run before or after DataLab. In the latter
 case, the remote client application must try to connect to DataLab until it

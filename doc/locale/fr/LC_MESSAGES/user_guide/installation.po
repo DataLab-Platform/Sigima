@@ -36,8 +36,8 @@ msgstr "En tant que :ref:`install_wheel` précompilé, qui peut être installé 
 msgid "As a :ref:`install_source`, which can be installed using ``pip`` or manually."
 msgstr "En tant que :ref:`install_source`, qui peut être installé à l'aide de ``pip`` ou manuellement."
 
-msgid "Impatient to try the next version of Sigima? You can also install the latest development version of Sigima from the master branch of the Git repository. See :ref:`install_development` for more information."
-msgstr "Impatient d'essayer la prochaine version de Sigima ? Vous pouvez également installer la dernière version de développement de Sigima depuis la branche principale du dépôt Git. Voir :ref:`install_development` pour plus d'informations."
+msgid "Impatient to try the next version of Sigima? You can also install the latest development version of Sigima from the ``develop`` branch of the Git repository. See :ref:`install_development` for more information."
+msgstr "Impatient d'essayer la prochaine version de Sigima ? Vous pouvez également installer la dernière version de développement de Sigima depuis la branche ``develop`` du dépôt Git. Voir :ref:`install_development` pour plus d'informations."
 
 msgid "Conda package"
 msgstr "Paquet Conda"
@@ -60,6 +60,21 @@ msgstr "L'installation de Sigima depuis PyPI est aussi simple que d'exécuter ce
 msgid "If you already have a previous version of Sigima installed, you can upgrade it by running the same command with the ``--upgrade`` option:"
 msgstr "Si vous avez déjà une version précédente de Sigima installée, vous pouvez la mettre à niveau en exécutant la même commande avec l'option ``--upgrade`` :"
 
+msgid "Optional features"
+msgstr "Fonctionnalités optionnelles"
+
+msgid "Some features of Sigima rely on optional dependencies, which may be installed with the following extras:"
+msgstr "Certaines fonctionnalités de Sigima reposent sur des dépendances optionnelles, qui peuvent être installées avec les extras suivants :"
+
+msgid "``opencv``: OpenCV (``opencv-python-headless``), required by the OpenCV blob detection (:func:`sigima.proc.image.blob_opencv`)."
+msgstr "``opencv`` : OpenCV (``opencv-python-headless``), nécessaire à la détection de blobs OpenCV (:func:`sigima.proc.image.blob_opencv`)."
+
+msgid "``plotly``: Plotly, for the browser-based Plotly backend of :mod:`sigima.viz`."
+msgstr "``plotly`` : Plotly, pour le backend Plotly de :mod:`sigima.viz`, qui s'affiche dans le navigateur."
+
+msgid "Reading DICOM files requires the ``pydicom`` package, which is not installed by any extra: install it separately (``pip install pydicom``). Without it, the DICOM format is not available."
+msgstr "La lecture des fichiers DICOM nécessite le paquet ``pydicom``, qui n'est installé par aucun extra : installez-le séparément (``pip install pydicom``). Sans lui, le format DICOM n'est pas disponible."
+
 msgid "Wheel package"
 msgstr "Paquet Wheel"
 
@@ -81,8 +96,8 @@ msgstr "Enfin, vous pouvez également créer votre propre paquet Wheel et l'inst
 msgid "Development version"
 msgstr "Version de développement"
 
-msgid "If you want to try the latest development version of Sigima, you can install it directly from the master branch of the Git repository."
-msgstr "Si vous souhaitez essayer la dernière version de développement de Sigima, vous pouvez l'installer directement depuis la branche principale du dépôt Git."
+msgid "If you want to try the latest development version of Sigima, you can install it directly from the ``develop`` branch of the Git repository (the default branch, ``main``, holds the latest release)."
+msgstr "Si vous souhaitez essayer la dernière version de développement de Sigima, vous pouvez l'installer directement depuis la branche ``develop`` du dépôt Git (la branche par défaut, ``main``, contient la dernière version publiée)."
 
 msgid "The first time you install Sigima from the Git repository, enter the following command:"
 msgstr "La première fois que vous installez Sigima depuis le dépôt Git, entrez la commande suivante :"

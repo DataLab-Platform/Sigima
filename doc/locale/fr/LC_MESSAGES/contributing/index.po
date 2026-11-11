@@ -97,11 +97,11 @@ msgstr "Même si vous n'êtes pas développeur, vous pouvez contribuer au projet
 msgid "Testing new features"
 msgstr "Testant de nouvelles fonctionnalités"
 
-msgid "Writing and submitting new Plugins"
-msgstr "Ecrivant et soumettant de nouveaux plugins"
+msgid "Writing and submitting new examples for the gallery"
+msgstr "Écrivant et soumettant de nouveaux exemples pour la galerie"
 
-msgid "Writing and submitting macro-commands"
-msgstr "Ecivant et soumettant des macro-commandes"
+msgid "Writing and submitting new file formats (I/O plugins, see :mod:`sigima.io`)"
+msgstr "Écrivant et soumettant de nouveaux formats de fichiers (plugins d'entrée/sortie, voir :mod:`sigima.io`)"
 
 msgid "Develop new features"
 msgstr "Développer de nouvelles fonctionnalités"

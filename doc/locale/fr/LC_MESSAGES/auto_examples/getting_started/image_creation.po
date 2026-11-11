@@ -81,11 +81,11 @@ msgstr "Les formats pris en charge incluent :"
 msgid "Common formats: BMP, JPEG, PNG, TIFF, JPEG 2000"
 msgstr "Formats courants : BMP, JPEG, PNG, TIFF, JPEG 2000"
 
-msgid "Scientific formats: DICOM, Andor SIF, Spiricon, Dürr NDT"
-msgstr "Formats scientifiques : DICOM, Andor SIF, Spiricon, Dürr NDT"
+msgid "Scientific formats: DICOM (requires the optional ``pydicom`` package), Andor SIF, Princeton Instruments SPE, PCO Camera REC, Spiricon, Dürr NDT, raw binary data"
+msgstr "Formats scientifiques : DICOM (nécessite le paquet optionnel ``pydicom``), Andor SIF, Princeton Instruments SPE, PCO Camera REC, Spiricon, Dürr NDT, données binaires brutes"
 
-msgid "Data formats: NumPy (.npy), MATLAB (.mat), HDF5 (.h5img)"
-msgstr "Formats de données : NumPy (.npy), MATLAB (.mat), HDF5 (.h5img)"
+msgid "Data formats: NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)"
+msgstr "Formats de données : NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)"
 
 msgid "Text formats: CSV, TXT, ASC (with coordinate support)"
 msgstr "Formats texte : CSV, TXT, ASC (avec prise en charge des coordonnées)"

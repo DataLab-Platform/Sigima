@@ -18,7 +18,7 @@ they can also be used independently.
 
 Each computation module defines a set of computation objects, that is, functions
 that implement processing features and classes that implement the corresponding
-parameters (in the form of :py:class:`guidata.dataset.datatypes.Dataset` subclasses).
+parameters (in the form of :py:class:`guidata.dataset.datatypes.DataSet` subclasses).
 The computation functions takes a signal or image object
 (e.g. :py:class:`sigima.objects.SignalObj`)
 and a parameter object (e.g. :py:class:`sigima.params.MovingAverageParam`) as input

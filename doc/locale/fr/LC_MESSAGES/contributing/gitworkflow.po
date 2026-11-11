@@ -147,8 +147,8 @@ msgstr "``chore`` pour les travaux de maintenance non couverts ci-dessus."
 msgid "For example::"
 msgstr "Par exemple::"
 
-msgid "Merge commits and annotated release tags are exceptions: keep their explicit Git messages, such as ``Merge branch 'feature/feature_name'`` and ``Release version 1.2.0``. Do not rewrite published history solely to change old messages."
-msgstr "Les commits de fusion et les tags de version annotés font exception : conserver leurs messages Git explicites, tels que ``Merge branch 'feature/feature_name'`` et ``Release version 1.2.0``. Ne pas réécrire l'historique publié uniquement pour modifier d'anciens messages."
+msgid "Merge commits and annotated release tags are exceptions: keep their explicit Git messages, such as ``Merge branch 'feature/feature_name'`` and ``Sigima v1.2.0``. Do not rewrite published history solely to change old messages."
+msgstr "Les commits de fusion et les tags de version annotés font exception : conserver leurs messages Git explicites, tels que ``Merge branch 'feature/feature_name'`` et ``Sigima v1.2.0``. Ne pas réécrire l'historique publié uniquement pour modifier d'anciens messages."
 
 msgid "Workflow for New Features"
 msgstr "Workflow pour les nouvelles fonctionnalités"
@@ -222,14 +222,14 @@ msgstr "Workflow pour les versions de correctifs"
 msgid "When ready to release a patch version (e.g., 1.0.1, 1.0.2):"
 msgstr "Lorsque vous êtes prêt à publier une version de correctif (par exemple, 1.0.1, 1.0.2) :"
 
-msgid "Ensure the ``release`` branch contains all desired fixes."
-msgstr "S'assurer que la branche ``release`` contient toutes les corrections souhaitées."
+msgid "Ensure the ``release`` branch contains all desired fixes, as well as the version number and the release notes of the patch release (see ``RELEASING.md``)."
+msgstr "S'assurer que la branche ``release`` contient toutes les corrections souhaitées, ainsi que le numéro de version et les notes de version de la version de correctif (voir ``RELEASING.md``)."
 
 msgid "Merge ``release`` into ``main``:"
 msgstr "Fusionner ``release`` dans ``main`` :"
 
-msgid "Tag the release on ``main``:"
-msgstr "Taguer la version sur ``main`` :"
+msgid "Tag the release on ``main`` and push the tag (``-s`` signs the tag, use ``-a`` otherwise):"
+msgstr "Taguer la version sur ``main`` et pousser le tag (``-s`` signe le tag, utiliser ``-a`` sinon) :"
 
 msgid "Pushing the tag starts the **Release** workflow, which checks the tag, runs the tests and builds the release files, then creates a draft GitHub release. Review the draft release and publish it: this uploads the package to PyPI. Never create a GitHub release by hand (see ``RELEASING.md`` at the root of the repository)."
 msgstr "Le push du tag lance le workflow **Release**, qui vérifie le tag, exécute les tests et construit les fichiers de la version, puis crée un brouillon de release GitHub. Relire ce brouillon et le publier : cela envoie le paquet sur PyPI. Ne jamais créer une release GitHub à la main (voir ``RELEASING.md`` à la racine du dépôt)."
@@ -243,8 +243,8 @@ msgstr "Workflow pour les versions mineures/majeures"
 msgid "When ready to release a new minor or major version (e.g., 1.1.0, 2.0.0):"
 msgstr "Lorsque vous êtes prêt à publier une nouvelle version mineure ou majeure (par exemple, 1.1.0, 2.0.0) :"
 
-msgid "Merge ``develop`` into ``main``:"
-msgstr "Fusionner ``develop`` dans ``main`` :"
+msgid "Once ``develop`` contains the version number and the release notes of the release (see ``RELEASING.md``), merge ``develop`` into ``main``:"
+msgstr "Une fois que ``develop`` contient le numéro de version et les notes de version de la version (voir ``RELEASING.md``), fusionner ``develop`` dans ``main`` :"
 
 msgid "Fast-forward ``develop`` to the released ``main`` commit:"
 msgstr "Avancer ``develop`` en fast-forward jusqu'au commit publié de ``main`` :"

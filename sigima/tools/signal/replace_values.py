@@ -1,8 +1,7 @@
 # Copyright (c) DataLab Platform Developers, BSD 3-Clause license, see LICENSE file.
 
 """
-Replace special values in 1D signals
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. Replace special values (see parent package :mod:`sigima.tools.signal`)
 
 Low-level NumPy algorithms for replacing NaN, +Inf and -Inf values in 1D
 arrays.  These functions operate on raw arrays and are called by the

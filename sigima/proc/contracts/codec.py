@@ -2,7 +2,7 @@
 
 """
 Parameter codec of operation contracts
-======================================
+--------------------------------------
 
 Encodes the parameter arguments actually passed to a computation function as
 plain JSON values, and rebuilds them, guided only by the types declared by the

@@ -22,8 +22,8 @@ msgstr "Les règles de codage sont présentées dans la page :ref:`guidelines`."
 msgid "Fork the project"
 msgstr "Forker le projet"
 
-msgid "The first step is to fork the project on GitHub. You can do that by visiting `DataLab GitHub project <https://github.com/DataLab-Platform/DataLab/>`_ and clicking on the \"Fork\" button on the top right corner of the page."
-msgstr "La première étape est de forker le projet sur GitHub. Vous pouvez le faire en visitant le projet DataLab et en cliquant sur le bouton \"Fork\" en haut à droite de la `page GitHub du projet <https://github.com/DataLab-Platform/DataLab/>`_."
+msgid "The first step is to fork the project on GitHub. You can do that by visiting `Sigima GitHub project <https://github.com/DataLab-Platform/Sigima/>`_ and clicking on the \"Fork\" button on the top right corner of the page."
+msgstr "La première étape est de forker le projet sur GitHub. Vous pouvez le faire en visitant le `projet Sigima sur GitHub <https://github.com/DataLab-Platform/Sigima/>`_ et en cliquant sur le bouton \"Fork\" en haut à droite de la page."
 
 msgid "Once you have forked the project, you will have a copy of the project in your own GitHub account. Then you can clone the project on your computer and start working on it."
 msgstr "Une fois que vous avez forké le projet, vous aurez une copie du projet dans votre propre compte GitHub. Ensuite, vous pouvez cloner le projet sur votre ordinateur et commencer à travailler dessus."

@@ -21,7 +21,7 @@ Sigima is available in several forms:
 .. seealso::
 
     Impatient to try the next version of Sigima? You can also install the
-    latest development version of Sigima from the master branch of the
+    latest development version of Sigima from the ``develop`` branch of the
     Git repository. See :ref:`install_development` for more information.
 
 .. _install_conda:
@@ -63,6 +63,27 @@ Installing Sigima from PyPI is as simple as running this command
 
         $ pip install --upgrade sigima
 
+.. _install_optional:
+
+Optional features
+~~~~~~~~~~~~~~~~~
+
+Some features of Sigima rely on optional dependencies, which may be installed
+with the following extras:
+
+-   ``opencv``: OpenCV (``opencv-python-headless``), required by the OpenCV blob
+    detection (:func:`sigima.proc.image.blob_opencv`).
+
+-   ``plotly``: Plotly, for the browser-based Plotly backend of :mod:`sigima.viz`.
+
+.. code-block:: console
+
+    $ pip install "sigima[opencv,plotly]"
+
+Reading DICOM files requires the ``pydicom`` package, which is not installed by
+any extra: install it separately (``pip install pydicom``). Without it, the DICOM
+format is not available.
+
 .. _install_wheel:
 
 Wheel package
@@ -75,7 +96,7 @@ install sigima on an existing Python distribution:
 
 .. code-block:: console
 
-    $ pip install --upgrade Sigima-0.3.0-py2.py3-none-any.whl
+    $ pip install --upgrade sigima-X.Y.Z-py3-none-any.whl
 
 .. _install_source:
 
@@ -88,7 +109,7 @@ Installing Sigima directly from the source package may be done using ``pip``:
 
 .. code-block:: console
 
-    $ pip install --upgrade sigima-0.3.0.tar.gz
+    $ pip install --upgrade sigima-X.Y.Z.tar.gz
 
 Or, if you prefer, you can install it manually by running the following command
 from the root directory of the source package:
@@ -105,7 +126,7 @@ by running the following command from the root directory of the source package
 
     $ pip install build wheel  # Install build and wheel packages (if needed)
     $ python -m build  # Build the wheel package
-    $ pip install --upgrade dist/sigima-0.3.0-py2.py3-none-any.whl  # Install the wheel package
+    $ pip install --upgrade dist/sigima-X.Y.Z-py3-none-any.whl  # Install the wheel package
 
 .. _install_development:
 
@@ -115,14 +136,15 @@ Development version
 :octicon:`info;1em;sd-text-info` :bdg-info-line:`GNU/Linux` :bdg-info-line:`Windows` :bdg-info-line:`macOS`
 
 If you want to try the latest development version of Sigima, you can install
-it directly from the master branch of the Git repository.
+it directly from the ``develop`` branch of the Git repository (the default
+branch, ``main``, holds the latest release).
 
 The first time you install Sigima from the Git repository, enter the following
 command:
 
 .. code-block:: console
 
-    $ pip install git+https://github.com/DataLab-Platform/Sigima.git
+    $ pip install git+https://github.com/DataLab-Platform/Sigima.git@develop
 
 Then, if at some point you want to upgrade to the latest version of Sigima,
 just run the same command with options to force the reinstall of the package
@@ -130,7 +152,7 @@ without handling dependencies (because it would reinstall all dependencies):
 
 .. code-block:: console
 
-    $ pip install --force-reinstall --no-deps git+https://github.com/DataLab-Platform/Sigima.git
+    $ pip install --force-reinstall --no-deps git+https://github.com/DataLab-Platform/Sigima.git@develop
 
 .. note::
 

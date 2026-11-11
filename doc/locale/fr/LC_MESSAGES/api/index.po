@@ -39,6 +39,12 @@ msgstr ":mod:`sigima.params`"
 msgid "Sets of parameters for configuring computation functions (these parameters are instances of :class:`guidata.dataset.DataSet` objects)"
 msgstr "Ensembles de paramètres pour configurer les fonctions de calcul (ces paramètres sont des instances d'objets :class:`guidata.dataset.DataSet`)"
 
+msgid ":mod:`sigima.enums`"
+msgstr ":mod:`sigima.enums`"
+
+msgid "Enumerations used by the parameters of computation functions"
+msgstr "Énumérations utilisées par les paramètres des fonctions de calcul"
+
 msgid ":mod:`sigima.objects`"
 msgstr ":mod:`sigima.objects`"
 
@@ -56,6 +62,12 @@ msgstr ":mod:`sigima.proc`"
 
 msgid "Computation functions, which operate on signal and image objects (:class:`sigima.objects.SignalObj` or :class:`sigima.objects.ImageObj`) and return signal or image objects, or scalar results (:class:`sigima.objects.GeometryResult` or :class:`sigima.objects.TableResult`)."
 msgstr "Fonctions de calcul, qui opèrent sur des objets signal et image (:class:`sigima.objects.SignalObj` ou :class:`sigima.objects.ImageObj`) et retournent des objets signal ou image, ou des résultats scalaires (:class:`sigima.objects.GeometryResult` ou :class:`sigima.objects.TableResult`)."
+
+msgid ":mod:`sigima.proc.contracts`"
+msgstr ":mod:`sigima.proc.contracts`"
+
+msgid "Operation contracts of computation functions (stable identifiers and versions, replay qualification, execution context), used by applications to record and replay computations (see :ref:`contracts`)"
+msgstr "Contrats d'opération des fonctions de calcul (identifiants et versions stables, qualification pour le rejeu, contexte d'exécution), utilisés par les applications pour enregistrer et rejouer les calculs (voir :ref:`contracts`)"
 
 msgid ":mod:`sigima.io`"
 msgstr ":mod:`sigima.io`"
@@ -78,5 +90,5 @@ msgstr "Interface client pour se connecter à l'application DataLab via le proto
 msgid ":mod:`sigima.viz`"
 msgstr ":mod:`sigima.viz`"
 
-msgid "Visualization tools for interactive display of signal and image objects, supporting PlotPy and Matplotlib backends for testing, debugging, and Jupyter notebook analysis."
-msgstr "Outils de visualisation pour l'affichage interactif des objets signal et image, prenant en charge les backends PlotPy et Matplotlib pour les tests, le débogage et l'analyse dans les notebooks Jupyter."
+msgid "Visualization tools for interactive display of signal and image objects, supporting PlotPy, Matplotlib and Plotly backends for testing, debugging, and Jupyter notebook analysis."
+msgstr "Outils de visualisation pour l'affichage interactif des objets signal et image, prenant en charge les backends PlotPy, Matplotlib et Plotly pour les tests, le débogage et l'analyse dans les notebooks Jupyter."

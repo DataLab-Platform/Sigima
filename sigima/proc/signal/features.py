@@ -488,7 +488,7 @@ def stats(obj: SignalObj) -> TableResult:
 )
 def bandwidth_3db(obj: SignalObj) -> GeometryResult | None:
     """Compute bandwidth at -3 dB with
-    :py:func:`sigima.tools.signal.misc.bandwidth`
+    :py:func:`sigima.tools.signal.features.find_bandwidth_coordinates`
 
     .. note::
 

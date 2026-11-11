@@ -54,14 +54,14 @@ msgstr "Certaines règles s'appliquent à toutes les opérations, ou à une fami
 msgid "the selection of image pixels by regions of interest (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), recorded when an input image carries regions of interest or when the operation takes image regions of interest as parameters (ROI extraction, erasing, offset correction);"
 msgstr "la sélection des pixels d'une image par les régions d'intérêt (``sigima.image.roi.pixel_centers``, :data:`sigima.proc.contracts.IMAGE_ROI_CONVENTION`), enregistrée lorsqu'une image d'entrée porte des régions d'intérêt ou lorsque l'opération prend des régions d'intérêt d'image en paramètres (extraction de ROI, effacement, correction d'offset) ;"
 
-msgid "the alignment of signals on a common X grid, for operations combining several signals (``sigima.signal.x_alignment.*`` policies);"
-msgstr "l'alignement des signaux sur une grille X commune, pour les opérations combinant plusieurs signaux (politiques ``sigima.signal.x_alignment.*``) ;"
-
-msgid "the global options read by a computation and the metadata of its inputs it reads."
-msgstr "les options globales lues par un calcul et les métadonnées de ses entrées qu'il lit."
+msgid "the alignment of signals on a common X grid, for operations combining several signals (``sigima.signal.x_alignment.*`` policies)."
+msgstr "l'alignement des signaux sur une grille X commune, pour les opérations combinant plusieurs signaux (politiques ``sigima.signal.x_alignment.*``)."
 
 msgid "When such a rule changes, its version is increased and the contracts keep theirs."
 msgstr "Lorsqu'une telle règle change, sa version est augmentée et les contrats conservent la leur."
+
+msgid "The values of the global options read by a computation and of the metadata of its inputs it reads are also recorded with each call: they are values, not versioned rules."
+msgstr "Les valeurs des options globales lues par un calcul et des métadonnées de ses entrées qu'il lit sont également enregistrées avec chaque appel : ce sont des valeurs, et non des règles versionnées."
 
 msgid "Consequences for replay"
 msgstr "Conséquences pour le rejeu"
@@ -69,8 +69,8 @@ msgstr "Conséquences pour le rejeu"
 msgid "An application replays a recorded call only with a local contract of the same identifier and version, qualified for that version, and with the recorded execution context. A call recorded with another version of the contract, or with a rule of the context that Sigima no longer supports, is refused explicitly (unsupported contract or unsupported context): it is never replayed to give a silently different result. To obtain a record with the current version, compute the result again."
 msgstr "Une application ne rejoue un appel enregistré qu'avec un contrat local de même identifiant et de même version, qualifié pour cette version, et avec le contexte d'exécution enregistré. Un appel enregistré avec une autre version du contrat, ou avec une règle du contexte que Sigima ne prend plus en charge, est refusé explicitement (contrat ou contexte non pris en charge) : il n'est jamais rejoué pour donner silencieusement un résultat différent. Pour obtenir un enregistrement avec la version actuelle, recalculez le résultat."
 
-msgid "The contracts were published with Sigima 1.3.0 and kept version 1 in Sigima 1.4.0 although several results changed, because they had just been published and were not used yet. This one-off exception does not apply to later releases."
-msgstr "Les contrats, publiés avec Sigima 1.3.0, ont conservé la version 1 dans Sigima 1.4.0 bien que plusieurs résultats aient changé, car ils venaient d'être publiés et n'étaient pas encore exploités. Cette exception ponctuelle ne s'applique pas aux versions ultérieures."
+msgid "The contracts were published with Sigima 1.3.0. Sigima 1.4.0 kept version 1 for most of them although several results changed, because they had just been published and were not used yet. This one-off exception does not apply to later changes: 16 contracts of Sigima 1.4.0 are at version 2 (image profiles, product of signals, extraction of image ROIs and image analyses giving geometric results, see the :doc:`release notes </release_notes/release_1.04>`)."
+msgstr "Les contrats ont été publiés avec Sigima 1.3.0. Sigima 1.4.0 a conservé la version 1 pour la plupart d'entre eux bien que plusieurs résultats aient changé, car ils venaient d'être publiés et n'étaient pas encore exploités. Cette exception ponctuelle ne s'applique pas aux modifications ultérieures : 16 contrats de Sigima 1.4.0 sont en version 2 (profils d'image, produit de signaux, extraction de ROI d'image et analyses d'image donnant des résultats géométriques, voir les :doc:`notes de version </release_notes/release_1.04>`)."
 
 msgid "See also the rules followed by contributors (:doc:`/contributing/guidelines`, section \"Operation contracts\") and the API of :mod:`sigima.proc.contracts`."
 msgstr "Voir aussi les règles suivies par les contributeurs (:doc:`/contributing/guidelines`, section « Operation contracts ») et l'API de :mod:`sigima.proc.contracts`."

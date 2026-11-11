@@ -4,7 +4,7 @@ This document provides essential guidance for AI coding agents working on the Si
 
 ## Project Overview
 
-**Sigima** is a **headless Python library** providing scientific computation functions for 1D signals and 2D images. It is **GUI-independent** (no Qt/PlotPyStack) and designed for testability, modularity, and remote execution.
+**Sigima** is a **headless Python library** providing scientific computation functions for 1D signals and 2D images. It is **GUI-independent** (no Qt binding required; it depends on guidata, from PlotPyStack, for its parameter classes) and designed for testability, modularity, and remote execution.
 
 ### Core Architecture: Three-Layer Model
 
@@ -16,16 +16,20 @@ Sigima separates concerns into three distinct layers:
 
 ```python
 # Example: Processing a signal object (high-level)
-from sigima import SignalObj
-import sigima.proc.signal as sips
+import numpy as np
 
-obj = SignalObj.create(x, y)
-result = sips.normalize(obj, sigima.params.NormalizeParam.create(method="minmax"))
+import sigima.params
+import sigima.proc.signal as sips
+from sigima.objects import create_signal
+
+x = np.linspace(0, 10, 100)
+obj = create_signal("My signal", x, np.sin(x))
+result = sips.normalize(obj, sigima.params.NormalizeParam.create(method="maximum"))
 
 # Example: Using low-level tools directly (NumPy arrays)
-from sigima.tools.signal import filtering
+from sigima.tools.signal import peakdetection
 
-filtered_y = filtering.apply_moving_average(y, n=5)
+peak_indices = peakdetection.peak_indices(obj.y, thres=0.5)
 ```
 
 **Key Design Principle**: `sigima.tools` fills gaps in NumPy/SciPy/scikit-image, not a general-purpose replacement. DataLab uses many `tools` functions independently of the object model.
@@ -34,8 +38,8 @@ filtered_y = filtering.apply_moving_average(y, n=5)
 
 - **Python**: 3.10+ (`from __future__ import annotations`)
 - **Core**: NumPy (≥1.22), SciPy (≥1.10.1), scikit-image (≥0.19.2), pandas (≥1.4)
-- **GUI Parameters**: guidata (≥3.17.0) for `DataSet` parameter classes
-- **Optional**: opencv-python-headless (≥4.8.1.78)
+- **GUI Parameters**: guidata (≥3.17.0) for `DataSet` parameter classes (no Qt binding required)
+- **Optional extras**: `opencv` (opencv-python-headless ≥4.8.1.78, for `blob_opencv`), `plotly` (Plotly backend of `sigima.viz`); `pydicom` (in no extra) is required to read DICOM files
 - **Testing**: pytest with `--gui` flag for visual validation
 - **Linting**: Ruff (preferred), Pylint
 - **Docs**: Sphinx with French translations (sphinx-intl)
@@ -58,7 +62,7 @@ Sigima/
 │   │   ├── signal/       # Signal algorithms (peak detection, stability, etc.)
 │   │   └── image/        # Image algorithms (detection, geometry, etc.)
 │   ├── io/               # I/O for signals/images (CSV, formats)
-│   ├── viz/              # Visualization utilities (PlotPy and Matplotlib backends)
+│   ├── viz/              # Visualization utilities (PlotPy, Matplotlib and Plotly backends)
 │   ├── data/             # Bundled test/example data files
 │   ├── params.py         # Centralized parameter import (re-exports from proc/)
 │   ├── client/           # SimpleRemoteProxy for DataLab control
@@ -147,11 +151,16 @@ python scripts/run_with_env.py python -m guidata.utils.translations compile \
 **All `sigima.proc` functions** use this decorator to enable dual calling conventions:
 
 ```python
+from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 import sigima.params
 
 
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.my_processing",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def my_processing(src: SignalObj, p: MyParam) -> SignalObj:
     """Process signal with my algorithm.
 
@@ -217,8 +226,7 @@ identifier and version, otherwise it is refused explicitly.
   now accepted; refactoring, performance or messages without effect on the result; or the change is
   entirely covered by a versioned rule of the execution context (`IMAGE_ROI_CONVENTION`, X-alignment
   policies), whose version is increased instead.
-- Historical one-off exception: Sigima 1.4.0 kept version 1 although results changed since 1.3.0
-  (contracts just published, not used yet). It does **not** apply to later changes.
+- Historical one-off exception: Sigima 1.4.0 kept version 1 for most contracts although results changed since 1.3.0 (contracts just published, not used yet); the 16 contracts changed afterwards in 1.4.0 are at version 2 (see `doc/release_notes/release_1.04.md`). It does **not** apply to later changes.
 - Keep the identifier when renaming or moving a function (use `aliases` if it must change).
 
 Full rules: `doc/contributing/guidelines.rst` (section "Operation contracts"); user documentation:
@@ -263,47 +271,43 @@ class MyParam(gds.DataSet):
     """My processing parameters."""
 
     param1 = gds.IntItem("Parameter 1", default=10, min=1, max=100)
-    param2 = gds.ChoiceItem("Method", ["method1", "method2"], default="method1")
+    param2 = gds.ChoiceItem(
+        "Method", (("method1", "Method 1"), ("method2", "Method 2")), default="method1"
+    )
 
-    @staticmethod
-    def create(param1: int = 10, param2: str = "method1") -> MyParam:
-        """Factory method for easy instantiation."""
-        return MyParam(param1=param1, param2=param2)
+
+# Script-friendly instantiation with the `create()` class method of `DataSet`
+param = MyParam.create(param1=20, param2="method2")
 ```
 
 **Conventions**:
-- Always provide `create()` static method for script-friendly instantiation
+- Use the `create()` class method inherited from `DataSet` for script-friendly instantiation (do not override it)
 - Export in `sigima.params` for centralized import
 - Use descriptive docstrings (shown in DataLab GUI)
 
 ### 4. Title Formatting System
 
-**Computation results need titles**. Sigima provides a configurable system:
+**Computation results need titles**. Computation functions create their result object with `dst_1_to_1()`, `dst_2_to_1()` or `dst_n_to_1()` (from `sigima.proc.base`), which format its title with the default title formatter:
 
 ```python
-from sigima.proc.title_formatting import TitleFormatter, FormatResultTitle
-
-
-class MyParam(gds.DataSet):
-    # ... parameter definitions ...
-
-    def generate_title(self) -> str:
-        """Generate human-readable title for this computation."""
-        return f"my_processing(p1={self.param1}, p2={self.param2})"
+from sigima.proc.base import dst_1_to_1
 
 
 # In computation function
-@computation_function()
+@computation_function(
+    operation_id="sigima.signal.my_processing",
+    contract_version=1,
+    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+)
 def my_processing(src: SignalObj, p: MyParam) -> SignalObj:
-    dst = src.copy()
+    dst = dst_1_to_1(src, "my_processing", f"p1={p.param1}, p2={p.param2}")
     # ... processing ...
-    FormatResultTitle.apply(dst, src, p)  # Automatically formats title
     return dst
 ```
 
-**Title formatting modes**:
-- **Parameter mode**: Default, uses `param.generate_title()` → `"normalize[minmax]"`
-- **Function mode**: Used by DataLab, shows function name → `"Normalize"`
+**Title formatters** (`sigima.proc.title_formatting`), selected with `set_default_title_formatter()`:
+- **`SimpleTitleFormatter`**: Default, human-readable titles → `"Normalize Result (ref=maximum)"`
+- **`PlaceholderTitleFormatter`**: Used by DataLab, with placeholders resolved later to object identifiers → `"normalize({0})|ref=maximum"`
 
 ### 5. ROI (Region of Interest) System
 
@@ -327,11 +331,12 @@ for roi_index, roi in enumerate(obj.roi):
 **ROI creation in detection functions**:
 
 ```python
+from sigima.enums import DetectionROIGeometry
 from sigima.objects import create_image_roi_around_points
 
 # Automatically create ROIs around detected features
-coords = detect_peaks(image.data)  # Returns N×2 array
-rois = create_image_roi_around_points(coords, image, relative_size=1.5)
+coords = np.array([[10.0, 20.0], [30.0, 40.0]])  # Detected points (N×2 array)
+rois = create_image_roi_around_points(coords, DetectionROIGeometry.RECTANGLE)
 result.roi = rois  # Attach to result
 ```
 
@@ -344,6 +349,7 @@ result.roi = rois  # Attach to result
 1. **Implement in `sigima/proc/signal/processing.py` (or appropriate module)**:
 
 ```python
+from sigima.proc.base import dst_1_to_1
 from sigima.proc.contracts import EXACT, ReplayQualification
 from sigima.proc.decorator import computation_function
 import sigima.params
@@ -364,10 +370,9 @@ def my_feature(src: SignalObj, p: MyFeatureParam) -> SignalObj:
     Returns:
         Processed signal
     """
-    dst = src.copy()
+    dst = dst_1_to_1(src, "my_feature", f"thresh={p.threshold}")
     # Processing logic using src.x, src.y
     dst.y = apply_my_algorithm(src.y, p.threshold)
-    FormatResultTitle.apply(dst, src, p)
     return dst
 ```
 
@@ -378,13 +383,6 @@ class MyFeatureParam(gds.DataSet):
     """Parameters for my feature."""
 
     threshold = gds.FloatItem("Threshold", default=0.5, min=0, max=1)
-
-    @staticmethod
-    def create(threshold: float = 0.5) -> MyFeatureParam:
-        return MyFeatureParam(threshold=threshold)
-
-    def generate_title(self) -> str:
-        return f"my_feature(thresh={self.threshold})"
 ```
 
 3. **Export in `sigima/proc/signal/__init__.py`**:
@@ -498,7 +496,7 @@ def my_numpy_function(y: np.ndarray, threshold: float) -> np.ndarray:
 
 ```python
 # This is handled automatically now
-signal = SignalObj.create(x=np.array([1, 2, 3]), y=np.array([10, 20, 30]))  # int arrays
+signal = create_signal("Integer data", x=np.array([1, 2, 3]), y=np.array([10, 20, 30]))  # int arrays
 # Internally converted to float64
 
 # Validation: If you need strict float checks

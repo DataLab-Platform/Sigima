@@ -59,15 +59,17 @@ Module Attributes
 -----------------
 
 .. py:data:: BACKEND_NAME
-   :type: str
+   :type: str | None
 
-  Name of the currently selected backend: ``"plotpy"``, ``"matplotlib"``, or
-  ``"plotly"``.
+   Name of the selected backend: ``"plotpy"``, ``"matplotlib"``, or
+   ``"plotly"``. The backend is selected on first access to a viewing or creation
+   function of the module: until then, this attribute is ``None``.
 
 .. py:data:: BACKEND_SOURCE
-   :type: str
+   :type: str | None
 
-   How the backend was selected: ``"env"``, ``"config"``, or ``"auto"``.
+   How the backend was selected: ``"env"``, ``"config"``, or ``"auto"`` (``None``
+   until the backend is selected).
 
 Quick Start
 -----------
@@ -105,7 +107,7 @@ Canonical annotations
 
 Object viewing functions render canonical graphical annotations by default.
 Pass ``show_annotations=False`` to hide them independently from regions of
-interest.  Both backends support all canonical primitives, styles, attached
+interest.  All three backends support all canonical primitives, styles, attached
 labels, and layer order.  Text may be positioned in data coordinates or in
 normalized axes coordinates.
 
@@ -116,6 +118,8 @@ annotations portable.
 
 Plotly JSON specifications
 --------------------------
+
+.. py:module:: sigima.viz.plotly_spec
 
 The :mod:`sigima.viz.plotly_spec` module builds plain JSON-compatible
 ``dict``/``list`` structures without importing the Plotly Python package.  These
@@ -143,7 +147,11 @@ The autonomous interactive gallery is available from the repository with:
 Low-Level Viewing Functions
 ---------------------------
 
+.. py:currentmodule:: sigima.viz
+
 These functions display plot items (curves, images) rather than Sigima objects.
+They are not supported by the Matplotlib backend, which raises
+:class:`NotImplementedError`.
 
 .. autofunction:: view_curve_items
 
@@ -153,6 +161,8 @@ Creation Functions
 ------------------
 
 These functions create plot items that can be passed to the low-level viewing functions.
+Like the low-level viewing functions, they raise :class:`NotImplementedError` with the
+Matplotlib backend.
 
 Curve and Image Items
 ~~~~~~~~~~~~~~~~~~~~~

@@ -2,7 +2,7 @@
 
 """
 Operation contract descriptors
-==============================
+------------------------------
 
 Plain, immutable descriptors used to declare and describe operation contracts:
 input and output roles, parameter arguments, comparison rules and replay

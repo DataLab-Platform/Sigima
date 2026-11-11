@@ -35,7 +35,8 @@ YLABEL_INTENSITY = "Intensity"
 # Load test signal and initial visualization
 # -----------------------------------------------------------
 # We load a sample paracetamol spectrum included in the Sigima test data.
-# This spectrum contains characteristic absorption peaks that we will
+# This spectrum is an X-ray powder diffraction pattern: its X axis is the 2θ angle
+# (in degrees). It contains characteristic diffraction peaks that we will
 # analyze using various signal processing techniques.
 
 # Load the paracetamol signal from test data
@@ -44,7 +45,7 @@ x_orig, y_orig = sig.xydata
 
 print("✓ Paracetamol spectrum loaded successfully!")
 print(f"Signal contains {len(x_orig)} data points")
-print(f"Energy range: {x_orig.min():.1f} to {x_orig.max():.1f} eV")
+print(f"2θ angle range: {x_orig.min():.1f} to {x_orig.max():.1f}°")
 print(f"Intensity range: {y_orig.min():.1f} to {y_orig.max():.1f}")
 
 # Visualize the original spectrum
@@ -75,11 +76,11 @@ viz.view_curves(
 # we define a region of interest (ROI) around the feature we want to analyze.
 
 # Define ROI around the peak
-roi_bounds = [35.5, 41.3]  # Energy range in eV
+roi_bounds = [35.5, 41.3]  # 2θ angle range in degrees
 sig_filt.roi = sigima.objects.create_signal_roi(roi_bounds)
 
-print(f"\n✓ ROI defined from {roi_bounds[0]} to {roi_bounds[1]} eV")
-print("This focuses analysis on the primary absorption feature")
+print(f"\n✓ ROI defined from {roi_bounds[0]} to {roi_bounds[1]}°")
+print("This focuses analysis on the primary diffraction feature")
 
 # Visualize the signal with ROI
 viz.view_curves(sig_filt, title="Paracetamol Spectrum - Filtered with ROI")
@@ -95,8 +96,8 @@ viz.view_curves(sig_filt, title="Paracetamol Spectrum - Filtered with ROI")
 fit = sigima.proc.signal.gaussian_fit(sig_filt)
 
 print("\n✓ Gaussian fit completed!")
-print("This characterizes the main absorption peak with parameters:")
-print("- Peak position (energy)")
+print("This characterizes the main diffraction peak with parameters:")
+print("- Peak position (2θ angle)")
 print("- Peak amplitude (intensity)")
 print("- Peak width (FWHM)")
 
@@ -172,9 +173,9 @@ print(f"Found {len(peak_indices)} potential peaks in the spectrum")
 # Print detected peak positions
 x_data = sig_filt.x
 for i, peak_idx in enumerate(peak_indices):
-    energy = x_data[peak_idx]
+    angle = x_data[peak_idx]
     intensity = sig_filt.y[peak_idx]
-    print(f"  Peak {i + 1}: Energy = {energy:.2f} eV, Intensity = {intensity:.1f}")
+    print(f"  Peak {i + 1}: 2θ = {angle:.2f}°, Intensity = {intensity:.1f}")
 
 # %%
 # Multi-Gaussian fitting
@@ -227,8 +228,8 @@ for i in range(num_peaks):
     exclusion_end = center + 2 * abs(sigma)
     peaks_roi_bounds[i] = [exclusion_start, exclusion_end]
 
-    print(f"Peak {i + 1}: Center = {center:.2f} eV, Sigma = {sigma:.3f}")
-    print(f"  Exclusion zone: [{exclusion_start:.2f}, {exclusion_end:.2f}] eV")
+    print(f"Peak {i + 1}: Center = {center:.2f}°, Sigma = {sigma:.3f}°")
+    print(f"  Exclusion zone: [{exclusion_start:.2f}, {exclusion_end:.2f}]°")
 
 # Create ROIs including detected peaks
 roi = sigima.objects.create_signal_roi(peaks_roi_bounds)

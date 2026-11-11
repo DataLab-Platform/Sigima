@@ -120,9 +120,11 @@ Follow these rules when you add or change a computation function:
   the applications that check a contract version (e.g. DataLab).
 
 - Historical exception: the contracts were published with Sigima 1.3.0 and
-  kept version 1 in Sigima 1.4.0 although several results changed, because they
-  had just been published and were not used yet. This one-off decision does not
-  apply to later changes.
+  most of them kept version 1 in Sigima 1.4.0 although several results changed,
+  because they had just been published and were not used yet. This one-off
+  decision does not apply to later changes: the 16 contracts changed afterwards
+  in Sigima 1.4.0 are at version 2 (see the :doc:`release notes
+  </release_notes/release_1.04>`).
 
 - Rules that apply to every operation are recorded in the execution context
   rather than in each contract: the selection of image pixels by regions of
@@ -183,8 +185,11 @@ Follow these rules when you add or change a computation function:
   ``node scripts/pyodide_replay/run.mjs`` (see its header) and compare the
   results with ``sigima.tests.replay_probe.compare_replays``.
 
-- Some two-input contracts align the operand on the source grid before the
-  call: declare the policy with ``x_alignment=...`` (see
+- Contracts combining several signals align them on a common X grid before the
+  call: two-input contracts align the operand on the source grid, and the n-to-1
+  contracts (``addition``, ``average``, ``product``, ``standard_deviation``,
+  ``signals_to_image``) align all signals on the grid with the fewest points.
+  Declare the policy with ``x_alignment=...`` (see
   :mod:`sigima.proc.contracts.policies` and
   :mod:`sigima.proc.contracts.alignment`). Applications
   record the policy and its version, and a replay refuses unknown policies.

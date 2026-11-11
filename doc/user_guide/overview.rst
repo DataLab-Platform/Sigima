@@ -15,6 +15,28 @@ Quick Start Example
 
 Here's a simple example demonstrating image processing with Regions of Interest (ROIs) using Sigima. This example uses the matplotlib backend for visualization, making it web-friendly and easy to run in Jupyter notebooks.
 
+.. code-block:: python
+
+    import numpy as np
+
+    import sigima.objects
+    import sigima.proc.image
+    from sigima import viz
+    from sigima.config import options
+
+    # Create a noisy image and define a circular ROI
+    data = np.random.normal(100, 30, (100, 100))
+    image = sigima.objects.create_image("Noisy", data)
+    image.roi = sigima.objects.create_image_roi("circle", [30, 30, 20])
+
+    # Apply a Gaussian filter within the ROI and compute statistics
+    result = sigima.proc.image.gaussian_filter(image, sigma=5.0)
+    stats = sigima.proc.image.stats(image)
+
+    # Display the original and filtered images with Matplotlib
+    options.viz_backend.set("matplotlib")
+    viz.view_images([image, result])
+
 See the complete interactive notebook in the :ref:`getting_started` section.
 
 Why Sigima?
@@ -302,12 +324,12 @@ Specialized Features
     Sigima can directly read and write images from various scientific and common file formats, making it easy to integrate into existing workflows:
 
     * **Common formats**: BMP, JPEG, PNG, TIFF, JPEG 2000
-    * **Scientific formats**: DICOM (medical imaging), Andor SIF (spectroscopy cameras)
-    * **Data exchange**: NumPy (.npy), MATLAB (.mat), HDF5 (.h5img)
+    * **Scientific formats**: DICOM (medical imaging, requires the optional ``pydicom`` package), Andor SIF (spectroscopy cameras), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI
+    * **Data exchange**: NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)
     * **Text-based**: CSV, TXT, ASC (with coordinate metadata support)
-    * **Specialized**: Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima)
+    * **Specialized**: Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima), raw binary data (.raw, with user-defined import parameters)
 
-    Each format preserves relevant metadata when available, such as DICOM medical imaging headers or acquisition parameters from scientific instruments.
+    Each format preserves relevant metadata when available, such as DICOM medical imaging headers or acquisition parameters from scientific instruments. Scientific and specialized formats are read-only.
 
 **ROI Operations**
     Define rectangular, circular, or polygonal regions of interest for localized analysis or processing.

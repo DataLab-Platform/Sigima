@@ -2,7 +2,7 @@
 
 """
 Contract registry
-=================
+-----------------
 
 An operation contract states what a computation function does, independently of
 its Python name: a stable identifier, an integer contract version, the processing

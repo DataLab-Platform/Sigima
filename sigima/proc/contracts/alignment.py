@@ -2,7 +2,7 @@
 
 """
 X alignment of multi-input signal operations
-============================================
+--------------------------------------------
 
 Rule ``sigima.signal.x_alignment.source_grid_linear`` (version 1): the result is
 computed on the grid of the ``source`` signal.

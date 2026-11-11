@@ -44,7 +44,7 @@ Simply run the cells to explore:
 - Works with **object-oriented wrappers** (`SignalObj`, `ImageObj`) extending NumPy arrays
 - Includes common processing tasks: filtering, smoothing, binning, thresholding, labeling, etc.
 - Structured for **testability**, **modularity**, and **headless usage**
-- 100% **independent of GUI frameworks** (no Qt/PlotPyStack dependencies)
+- **Independent of GUI frameworks**: no Qt binding required (Sigima depends on guidata, from PlotPyStack, for its parameter classes and configuration)
 
 ---
 
@@ -73,7 +73,7 @@ The library is organized to separate concerns clearly:
 
 This structure supports a **layered programming model**:
 
-- Developers can use `computation` to process full signal/image objects in an object-oriented manner.
+- Developers can use `proc` to process full signal/image objects in an object-oriented manner.
 - Or they can directly use `tools` to process raw NumPy arrays — for instance, in custom tools or when integrating Sigima into other projects.
 
 > ⚠️ `sigima.tools` is not intended as a general-purpose NumPy extension. Its purpose is to **fill in the gaps** of common scientific libraries (NumPy, SciPy, scikit-image, etc.), offering consistent tools for signal/image processing in the context of Sigima and similar projects.
@@ -86,7 +86,7 @@ Although Sigima is designed primarily for object-based processing, some of its c
 
 For instance, the [DataLab](https://datalab-platform.com) project — an open-source platform for signal/image processing — uses many functions from `sigima.tools` independently of the object model. This demonstrates how `sigima.tools` can serve as a **lightweight utility layer** in scientific and industrial Python applications, even when the object model is not used directly.
 
-To maintain this flexibility and avoid confusion, the distinction between `tools` (array-based) and `computation` (object-based) is intentional and explicit.
+To maintain this flexibility and avoid confusion, the distinction between `tools` (array-based) and `proc` (object-based) is intentional and explicit.
 
 ---
 
@@ -122,11 +122,18 @@ Sigima is organized by data type:
 
 ```text
 sigima/
-├── tools/      # Low-level NumPy-based algorithms supporting some computation functions
-├── proc/       # High-level processing functions operating on SignalObj/ImageObj
-│   ├── base/   # Common processing functions
-│   ├── signal/ # 1D signal processing
-│   └── image/  # 2D image processing
+├── objects/        # Object model (SignalObj, ImageObj, ROIs, scalar results, annotations)
+├── params.py       # Parameter classes of computation functions (re-exported from proc)
+├── proc/           # High-level processing functions operating on SignalObj/ImageObj
+│   ├── base.py     # Common processing functions
+│   ├── signal/     # 1D signal processing
+│   ├── image/      # 2D image processing
+│   └── contracts/  # Operation contracts (identifiers, versions, replay)
+├── tools/          # Low-level NumPy-based algorithms supporting some computation functions
+├── io/             # Input/output of signals and images (file formats)
+├── client/         # Remote control client for DataLab (XML-RPC)
+├── viz/            # Visualization tools (PlotPy, Matplotlib and Plotly backends)
+└── config.py       # Configuration options
 ```
 
 Each domain provides:
@@ -164,7 +171,7 @@ See [LICENSE](./LICENSE) for details.
 ## 🤝 Contributing
 
 Bug reports, feature requests and pull requests are welcome!
-See the [CONTRIBUTING](https://datalab-platform.com/en/contributing) guide to get started.
+See the [Contributing](https://sigima.readthedocs.io/en/latest/contributing/index.html) guide to get started.
 
 ---
 

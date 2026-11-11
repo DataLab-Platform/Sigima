@@ -63,12 +63,14 @@ and version:
   image carries regions of interest or when the operation takes image regions of
   interest as parameters (ROI extraction, erasing, offset correction);
 - the alignment of signals on a common X grid, for operations combining several
-  signals (``sigima.signal.x_alignment.*`` policies);
-- the global options read by a computation and the metadata of its inputs it
-  reads.
+  signals (``sigima.signal.x_alignment.*`` policies).
 
 When such a rule changes, its version is increased and the contracts keep
 theirs.
+
+The values of the global options read by a computation and of the metadata of
+its inputs it reads are also recorded with each call: they are values, not
+versioned rules.
 
 Consequences for replay
 -----------------------
@@ -83,10 +85,13 @@ version, compute the result again.
 
 .. note::
 
-    The contracts were published with Sigima 1.3.0 and kept version 1 in
-    Sigima 1.4.0 although several results changed, because they had just been
-    published and were not used yet. This one-off exception does not apply to
-    later releases.
+    The contracts were published with Sigima 1.3.0. Sigima 1.4.0 kept version 1
+    for most of them although several results changed, because they had just
+    been published and were not used yet. This one-off exception does not apply
+    to later changes: 16 contracts of Sigima 1.4.0 are at version 2 (image
+    profiles, product of signals, extraction of image ROIs and image analyses
+    giving geometric results, see the :doc:`release notes
+    </release_notes/release_1.04>`).
 
 See also the rules followed by contributors
 (:doc:`/contributing/guidelines`, section "Operation contracts") and the API of

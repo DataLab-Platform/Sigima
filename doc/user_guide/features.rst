@@ -8,6 +8,8 @@ Sigima provides a comprehensive suite of signal and image processing computation
 .. note::
    All computation functions are available in the :mod:`sigima.proc` module. The :mod:`sigima.tools` modules provide lower-level utility functions used internally by the proc functions.
 
+   The functions marked as helpers below are not computation functions: they declare no operation contract (see :ref:`contracts`), so applications neither record nor replay them.
+
 Common Operations
 -----------------
 
@@ -332,7 +334,7 @@ Frequency Filtering
    * - :func:`bandstop <sigima.proc.signal.bandstop>`
      - Band-stop filter
    * - :func:`frequency_filter <sigima.proc.signal.frequency_filter>`
-     - Generic frequency filtering
+     - Generic frequency filtering (helper)
 
 Signal Conditioning & Processing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -354,7 +356,7 @@ Signal Conditioning & Processing
    * - :func:`reverse_x <sigima.proc.signal.reverse_x>`
      - Reverse x-axis order
    * - :func:`xy_mode <sigima.proc.signal.xy_mode>`
-     - Handle XY coordinate modes
+     - Oscilloscope X-Y mode: use a first signal as X and a second one as Y
    * - :func:`replace_x_by_other_y <sigima.proc.signal.replace_x_by_other_y>`
      - Replace X axis using another signal's Y values
    * - :func:`zero_padding <sigima.proc.signal.zero_padding>`
@@ -394,7 +396,7 @@ Peak and Feature Detection
    * - :func:`extract_peak_positions <sigima.proc.signal.extract_peak_positions>`
      - Extract peak positions as an XY-markers table (preferred entry point)
    * - :func:`markers_table_to_signal <sigima.proc.signal.markers_table_to_signal>`
-     - Convert an XY-markers table back into a sticks signal
+     - Convert an XY-markers table back into a sticks signal (helper)
    * - :func:`peak_detection <sigima.proc.signal.peak_detection>`
      - **Deprecated** — use ``extract_peak_positions`` (+ ``markers_table_to_signal``
        when a sticks signal is also needed)
@@ -451,7 +453,7 @@ Curve Fitting
    * - :func:`evaluate_fit <sigima.proc.signal.evaluate_fit>`
      - Evaluate fitted function
    * - :func:`extract_fit_params <sigima.proc.signal.extract_fit_params>`
-     - Extract fitting parameters
+     - Extract fitting parameters (helper)
 
 Stability Analysis
 ~~~~~~~~~~~~~~~~~~
@@ -499,9 +501,9 @@ Utility Functions
    * - Function
      - Description
    * - :func:`check_same_sample_rate <sigima.proc.signal.check_same_sample_rate>`
-     - Verify consistent sampling rates
+     - Verify consistent sampling rates (helper)
    * - :func:`get_nyquist_frequency <sigima.proc.signal.get_nyquist_frequency>`
-     - Calculate Nyquist frequency
+     - Calculate Nyquist frequency (helper)
 
 Image Processing
 ----------------
@@ -518,9 +520,9 @@ Geometry and Transformations
    * - :func:`rotate <sigima.proc.image.rotate>`
      - Rotate image by arbitrary angle
    * - :func:`rotate90 <sigima.proc.image.rotate90>`
-     - Rotate image 90° clockwise
+     - Rotate image 90° counter-clockwise (to the left)
    * - :func:`rotate270 <sigima.proc.image.rotate270>`
-     - Rotate image 270° clockwise
+     - Rotate image 270° counter-clockwise, i.e. 90° clockwise (to the right)
    * - :func:`fliph <sigima.proc.image.fliph>`
      - Flip image horizontally
    * - :func:`flipv <sigima.proc.image.flipv>`
@@ -528,7 +530,7 @@ Geometry and Transformations
    * - :func:`translate <sigima.proc.image.translate>`
      - Translate image by specified offset
    * - :func:`resize <sigima.proc.image.resize>`
-     - Resize image to specified dimensions
+     - Resize image by a zoom factor
    * - :func:`resampling <sigima.proc.image.resampling>`
      - Resample image with different methods
    * - :func:`binning <sigima.proc.image.binning>`
@@ -536,7 +538,7 @@ Geometry and Transformations
    * - :func:`set_uniform_coords <sigima.proc.image.set_uniform_coords>`
      - Set uniform coordinate system
    * - :data:`transformer <sigima.proc.image.transformer>`
-     - Apply custom geometric transformations
+     - Apply custom geometric transformations (helper)
 
 Frequency Domain Filtering
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

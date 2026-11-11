@@ -9,9 +9,9 @@ The :mod:`sigima.config` module provides a way to manage configuration options f
 configuration-related tasks.
 
 It allows users to set and retrieve options that affect the behavior of the library,
-such as whether to keep results of computations or not. The options are handled as
-in-memory objects with default values provided, and can be temporarily overridden using
-a context manager.
+such as whether to shift the zero frequency to the center of FFT results or not. The
+options are handled as in-memory objects with default values provided, and can be
+temporarily overridden using a context manager.
 
 Typical usage:
 
@@ -20,7 +20,7 @@ Typical usage:
     from sigima.config import options
 
     # Get an option
-    value = options.fft_shift_enabled.get(default=True)
+    value = options.fft_shift_enabled.get()
 
     # Set an option
     options.fft_shift_enabled.set(False)
