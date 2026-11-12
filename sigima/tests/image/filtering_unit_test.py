@@ -114,19 +114,74 @@ def build_clean_noisy_images(
 
 
 @pytest.mark.validation
-def test_gaussian_freq_filter() -> None:
+@pytest.mark.parametrize("ifft_result_type", ["real", "abs"])
+def test_gaussian_freq_filter(ifft_result_type: str) -> None:
     """Validation test for :py:func:`sigima.tools.image.gaussian_freq_filter`."""
     clean, noisy = build_clean_noisy_images(freq=0.05)
-    param = sigima.proc.image.GaussianFreqFilterParam.create(f0=0.05, sigma=0.05)
+    param = sigima.proc.image.GaussianFreqFilterParam.create(
+        f0=0.05, sigma=0.05, ifft_result_type=ifft_result_type
+    )
     filt = sigima.proc.image.gaussian_freq_filter(noisy, param)
     clean_area = clean.data[10:-10, 10:-10]
+    if ifft_result_type == "abs":
+        clean_area = np.abs(clean_area)
     guiutils.view_images_side_by_side_if_gui(
-        [clean, noisy, filt], titles=["Clean", "Noisy", "Filtered"]
+        [clean, noisy, filt],
+        titles=["Clean", "Noisy", f"Filtered ({ifft_result_type})"],
     )
     mean_noise = float(np.mean(np.abs(clean_area - filt.data[10:-10, 10:-10])))
     check_scalar_result(
-        "gaussian_freq_filter noise reduction", mean_noise, 0.0, atol=0.1
+        f"gaussian_freq_filter noise reduction ({ifft_result_type})",
+        mean_noise,
+        0.0,
+        atol=0.1,
     )
+
+
+def _inverse_fft_of_gaussian_bandpass(
+    data: np.ndarray, f0: float, sigma: float
+) -> np.ndarray:
+    """Return the complex inverse FFT of an image filtered by a Gaussian bandpass,
+    computed on the unshifted frequency grid (independently of Sigima)."""
+    fy = np.fft.fftfreq(data.shape[0])[:, np.newaxis]
+    fx = np.fft.fftfreq(data.shape[1])[np.newaxis, :]
+    gain = np.exp(-0.5 * ((np.hypot(fx, fy) - f0) / sigma) ** 2)
+    return np.fft.ifft2(np.fft.fft2(data) * gain)
+
+
+@pytest.mark.parametrize("is_complex", [False, True], ids=["real_image", "complex"])
+def test_gaussian_freq_filter_ifft_result_type(is_complex: bool) -> None:
+    """Regression test: the "Inverse FFT result" parameter is applied
+    (Sigima issue #123)."""
+    rng = np.random.default_rng(seed=0)
+    data = rng.normal(size=(64, 48))
+    if is_complex:
+        data = data + 1j * rng.normal(size=data.shape)
+    src = create_image("noise", data)
+    zout = _inverse_fft_of_gaussian_bandpass(data, f0=0.1, sigma=0.05)
+    titles = []
+    for ifft_result_type, expected in (("real", zout.real), ("abs", np.abs(zout))):
+        param = sigima.proc.image.GaussianFreqFilterParam.create(
+            f0=0.1, sigma=0.05, ifft_result_type=ifft_result_type
+        )
+        dst = sigima.proc.image.gaussian_freq_filter(src, param)
+        check_array_result(
+            f"gaussian_freq_filter[{ifft_result_type}]",
+            dst.data,
+            expected,
+            rtol=1e-10,
+            atol=1e-12,
+        )
+        titles.append(dst.title)
+    assert "ifft=real" in titles[0] and "ifft=abs" in titles[1], titles
+
+
+def test_gaussian_freq_filter_invalid_ifft_result_type() -> None:
+    """An unknown inverse FFT result type is refused."""
+    with pytest.raises(ValueError, match="ifft_result_type"):
+        sigima.tools.image.gaussian_freq_filter(
+            np.ones((8, 8)), ifft_result_type="imag"
+        )
 
 
 def test_gaussian_freq_filter_constant_image() -> None:
@@ -161,6 +216,10 @@ if __name__ == "__main__":
     test_image_moving_median()
     test_image_wiener()
     test_butterworth()
-    test_gaussian_freq_filter()
+    for result_type in ("real", "abs"):
+        test_gaussian_freq_filter(result_type)
+    test_gaussian_freq_filter_ifft_result_type(False)
+    test_gaussian_freq_filter_ifft_result_type(True)
+    test_gaussian_freq_filter_invalid_ifft_result_type()
     test_gaussian_freq_filter_constant_image()
     test_gaussian_freq_filter_symmetry()
