@@ -236,9 +236,9 @@ class GaussianFreqFilterParam(GaussianParam):
 
 @computation_function(
     operation_id="sigima.image.gaussian_freq_filter",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
@@ -253,6 +253,9 @@ class GaussianFreqFilterParam(GaussianParam):
 def gaussian_freq_filter(src: ImageObj, p: GaussianFreqFilterParam) -> ImageObj:
     """Apply a Gaussian filter in the frequency domain.
 
+    The real part or the modulus of the inverse FFT is returned, depending on
+    ``p.ifft_result_type`` (see :py:func:`sigima.tools.image.gaussian_freq_filter`).
+
     Args:
         src: Source image object.
         p: Parameters.
@@ -263,8 +266,10 @@ def gaussian_freq_filter(src: ImageObj, p: GaussianFreqFilterParam) -> ImageObj:
     dst = dst_1_to_1(
         src,
         "frequency_domain_gaussian_filter",
-        f"sigma={p.sigma:.3f}, f0={p.f0:.3f}",
+        f"sigma={p.sigma:.3f}, f0={p.f0:.3f}, ifft={p.ifft_result_type}",
     )
-    dst.data = sigima.tools.image.gaussian_freq_filter(src.data, p.f0, p.sigma)
+    dst.data = sigima.tools.image.gaussian_freq_filter(
+        src.data, p.f0, p.sigma, p.ifft_result_type
+    )
     restore_data_outside_roi(dst, src)
     return dst

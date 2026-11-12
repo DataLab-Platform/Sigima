@@ -15,6 +15,15 @@ msgstr ""
 msgid "Version 1.4"
 msgstr "Version 1.4"
 
+msgid "Sigima Version 1.4.1"
+msgstr "Sigima Version 1.4.1"
+
+msgid "🛠️ Bug Fixes since version 1.4.0"
+msgstr "🛠️ Corrections de bugs depuis la version 1.4.0"
+
+msgid "**Gaussian bandpass filter (⚠️ results change)**: The **Inverse FFT result** parameter of the frequency-domain Gaussian filter (`gaussian_freq_filter`, `GaussianFreqFilterParam.ifft_result_type`) had no effect: the filter always returned the real part of the inverse FFT, even with **Absolute value**, although the parameter was recorded as if it had been applied. **Absolute value** now returns the modulus of the inverse FFT, and the title of the result shows the chosen option. **Real part**, the default, gives the same result as before. For real images, the modulus is the absolute value of the real part; for complex images, it also takes the imaginary part into account. The operation contract `sigima.image.gaussian_freq_filter` is now at version 2: calls recorded with an earlier version are refused instead of being replayed. This closes [Issue #123](https://github.com/DataLab-Platform/Sigima/issues/123)."
+msgstr "**Filtre passe-bande gaussien (⚠️ les résultats changent)** : le paramètre **Résultat de la FFT inverse** du filtre gaussien dans le domaine fréquentiel (`gaussian_freq_filter`, `GaussianFreqFilterParam.ifft_result_type`) était sans effet : le filtre renvoyait toujours la partie réelle de la FFT inverse, même avec **Valeur absolue**, alors que le paramètre était enregistré comme s'il avait été appliqué. **Valeur absolue** renvoie désormais le module de la FFT inverse, et le titre du résultat indique l'option choisie. **Partie réelle**, l'option par défaut, donne le même résultat qu'auparavant. Pour les images réelles, le module est la valeur absolue de la partie réelle ; pour les images complexes, il tient aussi compte de la partie imaginaire. Le contrat d'opération `sigima.image.gaussian_freq_filter` passe en version 2 : les appels enregistrés avec une version antérieure sont refusés au lieu d'être rejoués. Cela clôt [Issue #123](https://github.com/DataLab-Platform/Sigima/issues/123)."
+
 msgid "Sigima Version 1.4.0"
 msgstr "Sigima Version 1.4.0"
 

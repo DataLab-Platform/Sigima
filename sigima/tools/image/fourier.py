@@ -21,6 +21,7 @@ including filtering, spectral analysis, and deconvolution.
 from __future__ import annotations
 
 import warnings
+from typing import Literal
 
 import numpy as np
 import scipy.signal as sps
@@ -113,7 +114,10 @@ def psd(z: np.ndarray, log_scale: bool = False) -> np.ndarray:
 
 @check_2d_array
 def gaussian_freq_filter(
-    data: np.ndarray, f0: float = 0.1, sigma: float = 0.05
+    data: np.ndarray,
+    f0: float = 0.1,
+    sigma: float = 0.05,
+    ifft_result_type: Literal["real", "abs"] = "real",
 ) -> np.ndarray:
     """
     Apply a 2D Gaussian bandpass filter in the frequency domain to an image.
@@ -127,10 +131,22 @@ def gaussian_freq_filter(
         data: Input image data.
         f0: Center frequency of the Gaussian filter (cycles/pixel).
         sigma: Standard deviation of the Gaussian filter (cycles/pixel).
+        ifft_result_type: Part of the inverse FFT to return: ``"real"`` for the real
+         part, ``"abs"`` for the modulus. As the filter is real and symmetric, the
+         inverse FFT of a real image is real (up to rounding errors): the modulus
+         is then the absolute value of the real part. Both differ for complex
+         images.
 
     Returns:
         The filtered image.
+
+    Raises:
+        ValueError: If `ifft_result_type` is neither ``"real"`` nor ``"abs"``.
     """
+    if ifft_result_type not in ("real", "abs"):
+        raise ValueError(
+            f"Invalid ifft_result_type: {ifft_result_type!r} (must be 'real' or 'abs')"
+        )
     n, m = data.shape
     fx = np.fft.fftshift(np.fft.fftfreq(m, d=1))
     fy = np.fft.fftshift(np.fft.fftfreq(n, d=1))
@@ -144,6 +160,8 @@ def gaussian_freq_filter(
     fft_data = fft2d(data, shift=True)
     filtered_fft = fft_data * gaussian_filter
     zout = ifft2d(filtered_fft, shift=True)
+    if ifft_result_type == "abs":
+        return np.abs(zout)
     return zout.real
 
 

@@ -1,5 +1,11 @@
 # Version 1.4 #
 
+## Sigima Version 1.4.1 ##
+
+### 🛠️ Bug Fixes since version 1.4.0 ###
+
+* **Gaussian bandpass filter (⚠️ results change)**: The **Inverse FFT result** parameter of the frequency-domain Gaussian filter (`gaussian_freq_filter`, `GaussianFreqFilterParam.ifft_result_type`) had no effect: the filter always returned the real part of the inverse FFT, even with **Absolute value**, although the parameter was recorded as if it had been applied. **Absolute value** now returns the modulus of the inverse FFT, and the title of the result shows the chosen option. **Real part**, the default, gives the same result as before. For real images, the modulus is the absolute value of the real part; for complex images, it also takes the imaginary part into account. The operation contract `sigima.image.gaussian_freq_filter` is now at version 2: calls recorded with an earlier version are refused instead of being replayed. This closes [Issue #123](https://github.com/DataLab-Platform/Sigima/issues/123).
+
 ## Sigima Version 1.4.0 ##
 
 ### Requirements ###
