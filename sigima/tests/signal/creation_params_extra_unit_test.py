@@ -6,7 +6,8 @@ in :mod:`sigima.objects.signal.creation`.
 
 Covers ``get_expected_features`` and ``get_crossing_time`` methods of
 ``LorentzParam``, ``VoigtParam``, ``GaussParam``, ``SquarePulseParam`` and
-the shared ``BaseGaussLorentzVoigtParam`` validation paths.
+the shared ``BaseGaussLorentzVoigtParam`` validation paths, and the convention
+of the cardinal sine generator (``SincParam``).
 """
 
 # pylint: disable=invalid-name
@@ -25,6 +26,7 @@ from sigima.objects import (
     LorentzParam,
     NewSignalParam,
     PulseParam,
+    SincParam,
     SquarePulseParam,
     UniformDistribution1DParam,
     VoigtParam,
@@ -312,6 +314,40 @@ def test_signal_creation_preserves_valid_degenerate_cases() -> None:
         )
     )
     assert np.isfinite(square.y).all()
+
+
+def _sinc_signal(**kwargs) -> tuple[np.ndarray, np.ndarray]:
+    """Return the X and Y data of a cardinal sine sampled every 0.005 on [-1, 1]."""
+    signal = create_signal_from_param(
+        SincParam.create(size=401, xmin=-1.0, xmax=1.0, **kwargs)
+    )
+    return signal.x, signal.y
+
+
+def _y_at(x: np.ndarray, y: np.ndarray, value: float) -> float:
+    """Return the Y value of the sample closest to X = value."""
+    return float(y[np.argmin(np.abs(x - value))])
+
+
+def test_sinc_signal_unnormalized_convention() -> None:
+    """The cardinal sine uses sinc(u) = sin(u)/u with u = 2π f x + φ."""
+    x, y = _sinc_signal(freq=1.0, a=1.0, offset=0.0, phase=0.0)
+    assert _y_at(x, y, 0.0) == pytest.approx(1.0)
+    assert _y_at(x, y, 0.5) == pytest.approx(0.0, abs=1e-12)
+    assert _y_at(x, y, -0.5) == pytest.approx(0.0, abs=1e-12)
+    # The first zeros of sin(u)/u are at u = ±π, i.e. x = ±1/(2f)
+    assert np.all(y[np.abs(x) < 0.5] > 0.0)
+    u = 2 * np.pi * x
+    np.testing.assert_allclose(y, np.sinc(u / np.pi), atol=1e-12)
+
+
+def test_sinc_signal_phase_amplitude_and_offset() -> None:
+    """The phase shifts the peak to x = -φ/(2π f); A and y0 scale and offset it."""
+    x, y = _sinc_signal(freq=1.0, a=2.5, offset=-0.5, phase=90.0)
+    assert np.argmax(y) == np.argmin(np.abs(x + 0.25))
+    assert _y_at(x, y, -0.25) == pytest.approx(2.0)
+    assert _y_at(x, y, 0.25) == pytest.approx(-0.5, abs=1e-12)
+    assert _y_at(x, y, -0.75) == pytest.approx(-0.5, abs=1e-12)
 
 
 def test_peak_creation_sigma_is_strictly_positive() -> None:

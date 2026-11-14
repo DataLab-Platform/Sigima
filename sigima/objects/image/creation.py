@@ -860,7 +860,8 @@ class Sinc2DParam(
     DomainImageParam,
     title=_("2D sinc"),
     comment="z = A sinc(√((x - x<sub>0</sub>)<sup>2</sup> + "
-    "(y - y<sub>0</sub>)<sup>2</sup>) / σ) + C",
+    "(y - y<sub>0</sub>)<sup>2</sup>) / σ) + C<br>"
+    "sinc(u) = sin(u)/u, sinc(0) = 1",
 ):
     """2D sinc function parameters."""
 
@@ -907,12 +908,9 @@ class Sinc2DParam(
         # Calculate radial distance from center
         r = np.sqrt((xx - self.x0) ** 2 + (yy - self.y0) ** 2)
 
-        # Calculate sinc function: sinc(x) = sin(x)/x, with special case for x=0
-        # Scale by sigma
+        # Unnormalized cardinal sine, sinc(u) = sin(u)/u with sinc(0) = 1, scaled by
+        # sigma: it first vanishes at r = π σ
         r_scaled = r / self.sigma
-
-        # Use numpy's sinc which is defined as sin(pi*x)/(pi*x)
-        # We want sin(x)/x, so we divide by pi
         data = np.where(r_scaled == 0, 1.0, np.sin(r_scaled) / r_scaled)
 
         # Apply amplitude and offset
