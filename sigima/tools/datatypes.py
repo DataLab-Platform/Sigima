@@ -27,7 +27,7 @@ def datetime64_to_seconds(dt_values: np.ndarray) -> np.ndarray:
         >>> import pandas as pd
         >>> dt_series = pd.to_datetime(['2025-01-01 10:00:00'])
         >>> seconds = datetime64_to_seconds(dt_series.values)
-        >>> seconds[0] > 1.7e9  # Year 2025
+        >>> bool(seconds[0] > 1.7e9)  # Year 2025
         True
     """
     # Normalize all datetime64 resolutions (ns, us, ms, s, m, h, D...) to

@@ -21,6 +21,9 @@ msgstr "Sigima Version 1.4.1"
 msgid "🛠️ Bug Fixes since version 1.4.0"
 msgstr "🛠️ Corrections de bugs depuis la version 1.4.0"
 
+msgid "**Documentation:** The polar-coordinate example now labels the angle and radius axes correctly, example commands use the actual filenames, and French documentation cards display their translated titles (fixes [Issue #134](https://github.com/DataLab-Platform/Sigima/issues/134))."
+msgstr "**Documentation :** L'exemple de coordonnées polaires nomme désormais correctement les axes de l'angle et du rayon, les commandes des exemples utilisent les noms de fichiers réels et les cartes de la documentation française affichent leurs titres traduits (corrige [l'issue #134](https://github.com/DataLab-Platform/Sigima/issues/134))."
+
 msgid "**Periodic signal creation dialogs**: The displayed sawtooth and square formulas now match the generated waveforms at their phase boundaries. Signal data is unchanged (fixes [Issue #132](https://github.com/DataLab-Platform/Sigima/issues/132))."
 msgstr "**Dialogues de création de signaux périodiques** : les formules affichées pour les signaux en dents de scie et carrés correspondent désormais aux formes générées aux limites de phase. Les données des signaux ne changent pas (corrige [Issue #132](https://github.com/DataLab-Platform/Sigima/issues/132))."
 

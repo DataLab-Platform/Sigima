@@ -109,7 +109,7 @@ viz.view_curves(
 # - Specialized: MCA spectrum files (.mca), FT-Lab (.sig)
 
 # Load a real spectrum from a text file
-# This is a paracetamol (acetaminophen) UV-Vis absorption spectrum
+# This is a paracetamol (acetaminophen) X-ray powder diffraction pattern
 filename = helpers.get_test_fnames("paracetamol.txt")[0]
 signal_from_file = sigima.read_signal(filename)
 

@@ -10,7 +10,7 @@ of interest, detect circular contours, and extract intensity profiles for
 quantitative analysis of interference fringes.
 
 Usage:
-    python fabry_perot_example.py
+    python fabry_perot.py
 
 The script demonstrates optical analysis workflows commonly used in
 interferometry, optical metrology, and precision measurements.

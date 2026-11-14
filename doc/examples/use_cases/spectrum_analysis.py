@@ -11,7 +11,7 @@ in Sigima. Each step builds upon the previous one to create a comprehensive
 analysis workflow.
 
 Usage:
-    python paracetamol_example.py
+    python spectrum_analysis.py
 
 The script demonstrates spectroscopy data processing workflows commonly used
 in analytical chemistry and materials science applications.
