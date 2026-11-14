@@ -232,10 +232,10 @@ for i, r in enumerate(r_coords):
 polar_image = create_image(
     title="Polar Coordinate Mapping",
     data=polar_data,
-    units=("mm", "rad", "signal"),
-    labels=("Radius", "Angle", "Amplitude"),
+    units=("rad", "mm", "signal"),
+    labels=("Angle", "Radius", "Amplitude"),
 )
-polar_image.set_coords(xcoords=r_coords, ycoords=theta_coords)
+polar_image.set_coords(xcoords=theta_coords, ycoords=r_coords)
 
 print("\n✓ Polar coordinate example created!")
 print(f"Radial range: {r_coords[0]:.1f} to {r_coords[-1]:.1f} mm")

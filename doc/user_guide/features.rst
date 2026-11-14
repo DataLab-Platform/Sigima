@@ -744,7 +744,7 @@ Measurements and Analysis
     * - :func:`line_profile <sigima.proc.image.line_profile>`
       - Extract profile along a line
     * - :func:`segment_profile <sigima.proc.image.segment_profile>`
-      - Extract profile along a multi-segment line
+      - Extract profile along a line segment
     * - :func:`radial_profile <sigima.proc.image.radial_profile>`
       - Extract radial profile from center
     * - :func:`average_profile <sigima.proc.image.average_profile>`
@@ -754,7 +754,7 @@ Measurements and Analysis
     * - :func:`vertical_projection <sigima.proc.image.vertical_projection>`
       - Project image onto vertical axis
     * - :func:`generate_image_grid_roi <sigima.proc.image.generate_image_grid_roi>`
-      - Generate grid of ROIs
+      - Generate grid of ROIs (helper)
 
 See Also
 --------

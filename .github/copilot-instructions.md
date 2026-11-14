@@ -241,7 +241,7 @@ Full rules: `doc/contributing/guidelines.rst` (section "Operation contracts"); u
 signal.x  # X coordinates (1D NumPy array, float64)
 signal.y  # Y data (1D NumPy array, float64)
 signal.dx, signal.dy  # Optional uncertainties
-signal.xydata  # Property returning (x, y) tuple
+signal.xydata  # NumPy array with two rows (x, y), or four with uncertainties
 signal.set_xydata(x, y, dx=None, dy=None)
 
 # ImageObj

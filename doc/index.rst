@@ -1,6 +1,8 @@
 Sigima
 ======
 
+.. include:: _card_icons.txt
+
 **Sigima** is an advanced Python library for *scientific image and signal processing*.
 It provides a wide range of functionalities for analyzing and processing data, including signal filtering, image enhancement, and feature extraction. Sigima is based on a simple but effective object-oriented design, making it easy to use and extend.
 
@@ -30,25 +32,25 @@ With Sigima, do in 3 lines of code what would normally take dozens of lines:
     .. grid:: 2 2 4 4
         :gutter: 1 2 3 4
 
-        .. grid-item-card:: :octicon:`rocket;1em;sd-text-info`  User Guide
+        .. grid-item-card:: |card-icon-rocket|  User Guide
             :link: user_guide/index
             :link-type: doc
 
             Installation, overview, and features
 
-        .. grid-item-card:: :octicon:`code;1em;sd-text-info`  Examples
+        .. grid-item-card:: |card-icon-code|  Examples
             :link: ../auto_examples/index
             :link-type: doc
 
             Gallery of examples
 
-        .. grid-item-card:: :octicon:`book;1em;sd-text-info`  API
+        .. grid-item-card:: |card-icon-book|  API
             :link: api/index
             :link-type: doc
 
             Reference documentation
 
-        .. grid-item-card:: :octicon:`gear;1em;sd-text-info`  Contributing
+        .. grid-item-card:: |card-icon-gear|  Contributing
             :link: contributing/index
             :link-type: doc
 

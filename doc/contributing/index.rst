@@ -1,6 +1,8 @@
 Contributing
 ============
 
+.. include:: ../_card_icons.txt
+
 .. meta::
    :description: Contribute to Sigima project, the open-source scientific data analysis platform
    :keywords: Sigima, contribute, open-source, scientific, data, analysis, platform, signal processing, image processing
@@ -25,22 +27,22 @@ you would like to share with the community, please let us know.
    .. grid:: 2
        :gutter: 1 2 3 4
 
-       .. grid-item-card:: :octicon:`bug;1em;sd-text-info` Bugs
+       .. grid-item-card:: |card-icon-bug| Bugs
            :link: https://github.com/DataLab-Platform/Sigima/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=
 
            Reporting a bug
 
-       .. grid-item-card:: :octicon:`light-bulb;1em;sd-text-info` Enhancements
+       .. grid-item-card:: |card-icon-light-bulb| Enhancements
            :link: https://github.com/DataLab-Platform/Sigima/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.md&title=
 
            Suggesting an enhancement
 
-       .. grid-item-card:: :octicon:`book;1em;sd-text-info` Documentation
+       .. grid-item-card:: |card-icon-book| Documentation
            :link: https://github.com/DataLab-Platform/Sigima/issues/new?assignees=&labels=documentation&projects=&template=doc_request.md&title=
 
            Suggesting a documentation topic
 
-       .. grid-item-card:: :octicon:`mortar-board;1em;sd-text-info` Tutorial
+       .. grid-item-card:: |card-icon-mortar-board| Tutorial
            :link: https://github.com/DataLab-Platform/Sigima/issues/new?assignees=&labels=documentation&projects=&template=tutorial_request.md&title=
 
            Suggesting a tutorial topic
@@ -99,7 +101,7 @@ bugs or implementing new features.
    .. grid:: 1
        :gutter: 1 2 3 4
 
-       .. grid-item-card:: :octicon:`terminal;1em;sd-text-info` Code
+       .. grid-item-card:: |card-icon-terminal| Code
             :link: contribute_code
             :link-type: doc
 

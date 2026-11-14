@@ -172,7 +172,7 @@ class SimpleRemoteProxy(SimpleBaseProxy):
         >>> proxy[1]
         <sigima.objects.signal.SignalObj at 0x7f7f1c0b4a90>
         >>> proxy[1].data
-        array([1., 2., 3.])
+        array([ 4.,  5., -1.])
     """
 
     def __init__(self, autoconnect: bool = True) -> None:

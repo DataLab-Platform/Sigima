@@ -153,7 +153,7 @@ def apply_detection_rois(
         >>> param = Peak2DDetectionParam()
         >>> param.create_rois = True
         >>> geometry = peak_detection(img, param)
-        >>> apply_detection_rois(img, geometry)  # Creates ROIs on img
+        >>> _ = apply_detection_rois(img, geometry)  # Creates ROIs on img
     """
     if geometry is None:
         return False

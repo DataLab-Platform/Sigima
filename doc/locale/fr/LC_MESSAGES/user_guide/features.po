@@ -1311,8 +1311,8 @@ msgstr "Extraire le profil le long d'une ligne"
 msgid ":func:`segment_profile <sigima.proc.image.segment_profile>`"
 msgstr ""
 
-msgid "Extract profile along a multi-segment line"
-msgstr "Extraire le profil le long d'une ligne multi-segments"
+msgid "Extract profile along a line segment"
+msgstr "Extraire le profil le long d'un segment de droite"
 
 msgid ":func:`radial_profile <sigima.proc.image.radial_profile>`"
 msgstr ""
@@ -1341,8 +1341,8 @@ msgstr "Projeter l'image sur l'axe vertical"
 msgid ":func:`generate_image_grid_roi <sigima.proc.image.generate_image_grid_roi>`"
 msgstr ""
 
-msgid "Generate grid of ROIs"
-msgstr "Générer une grille de ROI"
+msgid "Generate grid of ROIs (helper)"
+msgstr "Générer une grille de ROI (fonction auxiliaire)"
 
 msgid "See Also"
 msgstr "Voir aussi"

@@ -478,7 +478,7 @@ class SignalObj(gds.DataSet, base.BaseObj[SignalROI]):
             >>> signal.is_x_datetime()
             True
             >>> # X data is stored as Unix timestamps (seconds since 1970)
-            >>> signal.x[0] > 1.7e9  # Year 2025
+            >>> bool(signal.x[0] > 1.7e9)  # Year 2025
             True
         """
         if unit not in VALID_TIME_UNITS:
