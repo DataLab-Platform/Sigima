@@ -34,6 +34,8 @@ from sigima.objects import (
 )
 from sigima.objects.signal.creation import (
     CREATION_PARAMS_VERSION,
+    SawtoothParam,
+    SquareParam,
     convert_legacy_peak_creation_params,
     validate_peak_creation_params,
 )
@@ -44,6 +46,24 @@ from sigima.tools.signal.pulse import (
     LorentzianModel,
     VoigtModel,
 )
+
+
+@pytest.mark.parametrize(
+    ("param_class", "function_name", "expected"),
+    [
+        (SawtoothParam, "sawtooth", [-1.0, -0.5, 0.0]),
+        (SquareParam, "square", [1.0, 1.0, -1.0]),
+    ],
+)
+def test_periodic_creation_dialog_describes_waveform(
+    param_class, function_name: str, expected: list[float]
+) -> None:
+    """The displayed waveform describes the generated phase-boundary values."""
+    param = param_class.create(size=3, xmin=0.0, xmax=0.5, freq=1.0, phase=0.0)
+    _, values = param.generate_1d_data()
+    np.testing.assert_allclose(values, expected, atol=1e-14)
+    assert function_name in param.get_comment().lower()
+
 
 # ===========================================================================
 # LorentzParam / VoigtParam.get_expected_features

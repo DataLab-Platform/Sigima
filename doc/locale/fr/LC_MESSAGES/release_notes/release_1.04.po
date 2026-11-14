@@ -21,6 +21,9 @@ msgstr "Sigima Version 1.4.1"
 msgid "🛠️ Bug Fixes since version 1.4.0"
 msgstr "🛠️ Corrections de bugs depuis la version 1.4.0"
 
+msgid "**Periodic signal creation dialogs**: The displayed sawtooth and square formulas now match the generated waveforms at their phase boundaries. Signal data is unchanged (fixes [Issue #132](https://github.com/DataLab-Platform/Sigima/issues/132))."
+msgstr "**Dialogues de création de signaux périodiques** : les formules affichées pour les signaux en dents de scie et carrés correspondent désormais aux formes générées aux limites de phase. Les données des signaux ne changent pas (corrige [Issue #132](https://github.com/DataLab-Platform/Sigima/issues/132))."
+
 msgid "**Scientific processing (⚠️ results change)**: X–Y mode now uses only the common interval of the two signals and refuses non-overlapping domains, instead of extending one signal beyond its data. Quadratic interpolation and resampling now pass through the samples instead of fitting a single quadratic curve; extrapolation remains available. The operation contracts `sigima.signal.xy_mode`, `sigima.signal.interpolate` and `sigima.signal.resampling` are now at version 2."
 msgstr "**Traitements scientifiques (⚠️ les résultats changent)** : le mode X–Y utilise désormais uniquement l'intervalle commun aux deux signaux et refuse les domaines sans recouvrement, au lieu de prolonger l'un des signaux au-delà de ses données. L'interpolation et le rééchantillonnage quadratiques passent désormais par les échantillons au lieu d'ajuster une seule courbe quadratique ; l'extrapolation reste possible. Les contrats d'opération `sigima.signal.xy_mode`, `sigima.signal.interpolate` et `sigima.signal.resampling` passent en version 2."
 
