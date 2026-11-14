@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from sigima.proc.contracts.alignment import (
+        OVERLAP_GRID_LINEAR,
         SMALLEST_GRID_LINEAR_HOLD,
         SOURCE_GRID_LINEAR,
         SOURCE_GRID_LINEAR_HOLD,
@@ -164,6 +165,7 @@ _NAMES = {
         "x_alignment_policies",
     ),
     "alignment": (
+        "OVERLAP_GRID_LINEAR",
         "SMALLEST_GRID_LINEAR_HOLD",
         "SOURCE_GRID_LINEAR",
         "SOURCE_GRID_LINEAR_HOLD",
@@ -180,6 +182,7 @@ __all__ = [
     "EXECUTION_ERROR_CODES",
     "IMAGE_ROI_CONVENTION",
     "OBJECT_KINDS",
+    "OVERLAP_GRID_LINEAR",
     "PARAMETER_CODEC_VERSION",
     "SMALLEST_GRID_LINEAR_HOLD",
     "SOURCE_GRID_LINEAR",

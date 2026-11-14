@@ -137,9 +137,9 @@ class PulseFeaturesParam(gds.DataSet, title=_("Pulse features")):
 
 @computation_function(
     operation_id="sigima.signal.extract_pulse_features",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"

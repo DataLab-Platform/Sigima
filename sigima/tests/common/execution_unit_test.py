@@ -67,6 +67,24 @@ def _same_signal(first: SignalObj, second: SignalObj) -> None:
     assert first.xydata.dtype == second.xydata.dtype
 
 
+@pytest.mark.parametrize(
+    ("operation", "old_version"),
+    [
+        ("sigima.signal.xy_mode", 1),
+        ("sigima.signal.interpolate", 1),
+        ("sigima.signal.resampling", 1),
+        ("sigima.signal.extract_pulse_features", 1),
+        ("sigima.image.enclosing_circle", 2),
+        ("sigima.image.flatfield", 1),
+    ],
+)
+def test_changed_contracts_refuse_old_versions(operation, old_version) -> None:
+    """Previous computations must not be replayed under the new semantics."""
+    registry = contracts.build_contract_registry()
+    with pytest.raises(contracts.IncompatibleContractError):
+        registry.get(operation, old_version)
+
+
 def test_describe_qualified_call() -> None:
     """A qualified call is described with identity, rule, roles and parameters."""
     src = _signal([0, 1, 2], [1.0, 2.0, 4.0])

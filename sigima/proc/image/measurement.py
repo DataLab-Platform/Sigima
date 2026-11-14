@@ -33,6 +33,7 @@ from numpy import ma
 import sigima.tools.image
 from sigima.config import _
 from sigima.objects import (
+    NO_ROI,
     GeometryResult,
     ImageObj,
     KindShape,
@@ -45,6 +46,7 @@ from sigima.proc.base import new_signal_result
 from sigima.proc.contracts import EXACT, ReplayQualification, tolerance
 from sigima.proc.decorator import computation_function
 from sigima.proc.image.base import compute_geometry_from_obj
+from sigima.proc.image.extraction import _check_same_units, _pixel_centers
 
 # NOTE: Only parameter classes DEFINED in this module should be included in __all__.
 # Parameter classes imported from other modules (like sigima.proc.base) should NOT
@@ -105,14 +107,13 @@ def centroid(image: ImageObj) -> GeometryResult | None:
 
 
 def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
-    """Return diameter coords for the circle contour enclosing image
-    values above threshold (FWHM)
+    """Return the minimum circle enclosing pixel centers above the midrange.
 
     Args:
         data: input data
 
     Returns:
-        Diameter coords
+        Circle center and radius in pixel coordinates.
     """
     x, y, r = sigima.tools.image.get_enclosing_circle(data)
     return np.array([[x, y, r]])
@@ -120,32 +121,53 @@ def get_enclosing_circle_coords(data: np.ndarray) -> np.ndarray:
 
 @computation_function(
     operation_id="sigima.image.enclosing_circle",
-    contract_version=2,
+    contract_version=3,
     qualification=ReplayQualification(
-        contract_version=2,
+        contract_version=3,
         comparison=tolerance(
-            (
-                "The fitted circle center is truncated to whole pixels: "
-                "a last-bit difference of the fit may move it by one pixel"
-            ),
-            atol=1.0,
-            rtol=0.0,
+            "Floating-point geometry may differ in the last bits across platforms",
+            atol=1e-12,
+            rtol=1e-12,
             same_environment="exact",
         ),
     ),
 )
 def enclosing_circle(image: ImageObj) -> GeometryResult | None:
-    """Compute minimum enclosing circle
-    with :py:func:`sigima.tools.image.get_enclosing_circle`
+    """Compute the minimum physical circle enclosing pixel centers above midrange.
+
+    The threshold is ``min + 0.5 * (max - min)`` in each selected region.
+    X and Y units must be equal.
 
     Args:
         image: input image
 
     Returns:
-        Diameter coords
+        Circle center and radius for each ROI.
     """
-    return compute_geometry_from_obj(
-        "enclosing_circle", KindShape.CIRCLE, image, get_enclosing_circle_coords
+    _check_same_units(image, "Enclosing circle")
+    xcoords = _pixel_centers(image, "x")
+    ycoords = _pixel_centers(image, "y")
+    circles = []
+    roi_indices = []
+    for index in image.iterate_roi_indices():
+        if index is None:
+            data = image.get_data()
+        else:
+            roi = image.roi.get_single_roi(index)
+            data = ma.masked_array(image.data, mask=roi.to_mask(image))
+        circles.append(
+            sigima.tools.image.get_enclosing_circle(
+                data, xcoords=xcoords, ycoords=ycoords
+            )
+        )
+        roi_indices.append(NO_ROI if index is None else index)
+    if not circles:
+        return None
+    return GeometryResult(
+        "enclosing_circle",
+        KindShape.CIRCLE,
+        np.asarray(circles),
+        np.asarray(roi_indices),
     )
 
 

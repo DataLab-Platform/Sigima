@@ -21,13 +21,15 @@ for scientific and technical image analysis applications.
 
 from __future__ import annotations
 
+import math
 from typing import Literal
 
 import numpy as np
+from numpy import ma
 from skimage import measure
 
 from sigima.tools.checks import check_2d_array
-from sigima.tools.image.preprocessing import fit_circle_model, get_absolute_level
+from sigima.tools.image.preprocessing import get_absolute_level
 
 
 @check_2d_array
@@ -159,35 +161,132 @@ def get_centroid_auto(
     return result + (method,) if return_method else result
 
 
-@check_2d_array(non_constant=True)
+def _diameter_circle(a: np.ndarray, b: np.ndarray) -> tuple[float, float, float]:
+    center = (a + b) / 2
+    return float(center[0]), float(center[1]), float(np.linalg.norm(a - center))
+
+
+def _contains(circle: tuple[float, float, float], point: np.ndarray) -> bool:
+    x, y, radius = circle
+    return math.hypot(point[0] - x, point[1] - y) <= radius + 1e-14
+
+
+def _circle_with_two_boundary_points(
+    points: np.ndarray, a: np.ndarray, b: np.ndarray
+) -> tuple[float, float, float]:
+    """Find the smallest circle containing points with a and b on its boundary."""
+    diameter = _diameter_circle(a, b)
+    left = right = None
+    left_cross, right_cross = -math.inf, math.inf
+    ab = b - a
+    for point in points:
+        if _contains(diameter, point):
+            continue
+        ap = point - a
+        cross = ab[0] * ap[1] - ab[1] * ap[0]
+        if cross == 0:
+            raise ValueError(
+                "Cannot determine an enclosing circle for collinear points"
+            )
+        ab2 = float(np.dot(ab, ab))
+        ap2 = float(np.dot(ap, ap))
+        center = a + np.array(
+            [ap[1] * ab2 - ab[1] * ap2, ab[0] * ap2 - ap[0] * ab2]
+        ) / (2 * cross)
+        candidate = (
+            float(center[0]),
+            float(center[1]),
+            float(np.linalg.norm(center - a)),
+        )
+        center_cross = ab[0] * (center[1] - a[1]) - ab[1] * (center[0] - a[0])
+        if cross > 0 and center_cross > left_cross:
+            left, left_cross = candidate, center_cross
+        elif cross < 0 and center_cross < right_cross:
+            right, right_cross = candidate, center_cross
+    if left is None:
+        return diameter if right is None else right
+    if right is None:
+        return left
+    return min(left, right, key=lambda circle: circle[2])
+
+
+def _minimum_enclosing_circle(points: np.ndarray) -> tuple[float, float, float]:
+    """Compute a deterministic minimum enclosing circle of physical points."""
+    minimum = points.min(axis=0)
+    extent = points.max(axis=0) - minimum
+    scale = float(extent.max())
+    if scale == 0:
+        return float(minimum[0]), float(minimum[1]), 0.0
+    origin = minimum + extent / 2
+    normalized = (points - origin) / scale
+    normalized = normalized[np.random.default_rng(0).permutation(len(normalized))]
+    circle = None
+    for i, point in enumerate(normalized):
+        if circle is not None and _contains(circle, point):
+            continue
+        circle = (float(point[0]), float(point[1]), 0.0)
+        for j, other in enumerate(normalized[:i]):
+            if not _contains(circle, other):
+                circle = _circle_with_two_boundary_points(normalized[:j], point, other)
+    assert circle is not None
+    x, y = origin + scale * np.array(circle[:2])
+    radius = max(
+        scale * circle[2],
+        float(np.max(np.hypot(points[:, 0] - x, points[:, 1] - y))),
+    )
+    return float(x), float(y), radius
+
+
+@check_2d_array
 def get_enclosing_circle(
-    data: np.ndarray, level: float = 0.5
-) -> tuple[int, int, float]:
-    """Return (x, y, radius) for the circle contour enclosing image
-    values above threshold relative level (.5 means FWHM)
+    data: np.ndarray,
+    level: float = 0.5,
+    *,
+    xcoords: np.ndarray | None = None,
+    ycoords: np.ndarray | None = None,
+) -> tuple[float, float, float]:
+    """Return the minimum circle enclosing centers of pixels above the threshold.
 
     Args:
         data: Input data
-        level: Relative level (default: 0.5)
+        level: Relative level within the data range (default: 0.5).
+        xcoords: Physical pixel-center coordinates along columns, or pixel indices.
+        ycoords: Physical pixel-center coordinates along rows, or pixel indices.
 
     Returns:
         A tuple (x, y, radius)
 
     Raises:
-        ValueError: No contour was found
+        ValueError: No pixel is above the threshold, or coordinates are invalid.
     """
-    data_th = data.copy()
-    data_th[data <= get_absolute_level(data, level)] = 0.0
-    contours = measure.find_contours(data_th)
-    result = None
-    max_radius = 1.0
-    for contour in contours:
-        fit_result = fit_circle_model(contour)
-        if fit_result:
-            xc, yc, radius = fit_result
-            if radius > max_radius:
-                result = (int(xc), int(yc), radius)
-                max_radius = radius
-    if result is None:
-        raise ValueError("No contour was found")
-    return result
+    arr = ma.masked_where(np.isnan(data), ma.asarray(data))
+    if arr.count() == 0:
+        raise ValueError("No valid pixel for enclosing circle")
+    if not np.all(np.isfinite(arr.compressed())):
+        raise ValueError("Enclosing circle data contains infinite values")
+    threshold = get_absolute_level(arr, level)
+    selected = ma.filled(arr > threshold, False)
+    if not np.any(selected):
+        raise ValueError("No pixel above the enclosing circle threshold")
+    x = (
+        np.arange(data.shape[1], dtype=float)
+        if xcoords is None
+        else np.asarray(xcoords)
+    )
+    y = (
+        np.arange(data.shape[0], dtype=float)
+        if ycoords is None
+        else np.asarray(ycoords)
+    )
+    if (
+        x.shape != (data.shape[1],)
+        or y.shape != (data.shape[0],)
+        or not np.all(np.isfinite(x))
+        or not np.all(np.isfinite(y))
+    ):
+        raise ValueError("Invalid pixel-center coordinates")
+    rows = np.flatnonzero(np.any(selected, axis=1))
+    xmin = np.min(np.where(selected[rows], x, np.inf), axis=1)
+    xmax = np.max(np.where(selected[rows], x, -np.inf), axis=1)
+    points = np.column_stack((np.concatenate((xmin, xmax)), np.tile(y[rows], 2)))
+    return _minimum_enclosing_circle(points)

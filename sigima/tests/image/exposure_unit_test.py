@@ -324,6 +324,35 @@ def test_flatfield() -> None:
         check_array_result(f"FlatField[threshold={threshold}]", dst.data, exp)
 
 
+def test_flatfield_zero_denominator_only_when_corrected() -> None:
+    """Zero denominators are rejected only for pixels selected for correction."""
+    raw = np.array([[1.0, 1.0]])
+    flat = np.array([[0.0, 2.0]])
+    with pytest.raises(ValueError, match="zero"):
+        image_exposure.flatfield(raw, flat, threshold=0.0)
+    result = image_exposure.flatfield(np.array([[0.0, 1.0]]), flat, threshold=0.0)
+    np.testing.assert_array_equal(result, [[0.0, 0.5]])
+
+
+def test_flatfield_zero_outside_roi() -> None:
+    """A zero outside the ROI does not prevent correction inside it."""
+    raw = sigima.objects.create_image("raw", np.ones((4, 4)))
+    raw.roi = sigima.objects.create_image_roi("rectangle", [1, 1, 2, 2], indices=True)
+    flat = sigima.objects.create_image("flat", np.ones((4, 4)))
+    flat.data[0, 0] = 0.0
+    result = sigima.proc.image.flatfield(
+        raw, flat, sigima.params.FlatFieldParam.create(threshold=0.0)
+    )
+    np.testing.assert_array_equal(result.data[raw.maskdata], raw.data[raw.maskdata])
+    np.testing.assert_allclose(result.data[~raw.maskdata], 15.0 / 16.0)
+    flat.data[1, 1] = 0.0
+    with pytest.raises(ValueError, match="zero"):
+        sigima.proc.image.flatfield(
+            raw, flat, sigima.params.FlatFieldParam.create(threshold=0.0)
+        )
+    np.testing.assert_array_equal(raw.data, np.ones((4, 4)))
+
+
 @pytest.mark.validation
 def test_image_normalize() -> None:
     """Validation test for the image normalization processing."""

@@ -19,10 +19,12 @@ import dataclasses
 from typing import Any, Callable
 
 from sigima.proc.contracts.alignment import (
+    OVERLAP_GRID_LINEAR,
     SMALLEST_GRID_LINEAR_HOLD,
     SOURCE_GRID_LINEAR,
     SOURCE_GRID_LINEAR_HOLD,
     XAlignmentError,
+    _xy_overlap,
     align_operand,
     align_operand_hold,
     align_signals_hold,
@@ -121,6 +123,12 @@ def _source_grid_linear_hold(inputs: list[Any]) -> tuple[list[Any], dict[str, An
     return [source, aligned], record
 
 
+def _overlap_grid_linear(inputs: list[Any]) -> tuple[list[Any], dict[str, Any]]:
+    source, operand = inputs
+    _xy_overlap(source, operand)
+    return list(inputs), {"rule": OVERLAP_GRID_LINEAR, "version": 1}
+
+
 register_x_alignment_policy(
     XAlignmentPolicy(SOURCE_GRID_LINEAR, 1, ("2_to_1",), _source_grid_linear)
 )
@@ -129,4 +137,7 @@ register_x_alignment_policy(
 )
 register_x_alignment_policy(
     XAlignmentPolicy(SMALLEST_GRID_LINEAR_HOLD, 1, ("n_to_1",), align_signals_hold)
+)
+register_x_alignment_policy(
+    XAlignmentPolicy(OVERLAP_GRID_LINEAR, 1, ("2_to_1",), _overlap_grid_linear)
 )

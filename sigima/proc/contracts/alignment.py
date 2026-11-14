@@ -32,6 +32,10 @@ historical behavior of multi-input signal operations in DataLab:
   no grid or unit check is made. Grids are equal only when they have the same
   length and the same values.
 
+Rule ``sigima.signal.x_alignment.overlap_grid_linear`` (version 1) leaves both
+signals on their original grids. The operation interpolates them on a common
+grid within their overlap and refuses domains without an overlapping interval.
+
 The inputs are never modified. Applications record the rule (identifier and
 version) with each execution; a replay accepts only the rules listed in
 :data:`X_ALIGNMENT_RULES`.
@@ -46,6 +50,7 @@ import numpy as np
 from sigima.objects import SignalObj
 
 __all__ = [
+    "OVERLAP_GRID_LINEAR",
     "SMALLEST_GRID_LINEAR_HOLD",
     "SOURCE_GRID_LINEAR",
     "SOURCE_GRID_LINEAR_HOLD",
@@ -57,6 +62,8 @@ __all__ = [
     "check_alignment_record",
 ]
 
+#: Identifier of the original-grid overlap rule for X-Y mode.
+OVERLAP_GRID_LINEAR = "sigima.signal.x_alignment.overlap_grid_linear"
 #: Identifier of the source-grid rule.
 SOURCE_GRID_LINEAR = "sigima.signal.x_alignment.source_grid_linear"
 #: Identifier of the historical source-grid rule (constant extension).
@@ -69,6 +76,7 @@ X_ALIGNMENT_RULES = frozenset(
         (SOURCE_GRID_LINEAR, 1),
         (SOURCE_GRID_LINEAR_HOLD, 1),
         (SMALLEST_GRID_LINEAR_HOLD, 1),
+        (OVERLAP_GRID_LINEAR, 1),
     }
 )
 
@@ -78,7 +86,8 @@ class XAlignmentError(ValueError):
 
     Args:
         code: Reason code (``incompatible_units``, ``invalid_grid``,
-         ``insufficient_coverage``, ``uncertainty``, ``unknown_rule``).
+         ``insufficient_coverage``, ``no_overlap``, ``uncertainty``,
+         ``unknown_rule``).
         message: Human-readable detail.
     """
 
@@ -98,6 +107,17 @@ def _check_grid(role: str, x: np.ndarray) -> None:
         raise XAlignmentError(
             "invalid_grid", f"The {role} grid is not strictly increasing"
         )
+
+
+def _xy_overlap(source: SignalObj, operand: SignalObj) -> tuple[float, float]:
+    """Return the common X interval of two signals or refuse invalid domains."""
+    xs, xo = np.asarray(source.x), np.asarray(operand.x)
+    _check_grid("source", xs)
+    _check_grid("operand", xo)
+    xmin, xmax = max(xs[0], xo[0]), min(xs[-1], xo[-1])
+    if xmin >= xmax:
+        raise XAlignmentError("no_overlap", "X-Y mode: No overlap between signals")
+    return float(xmin), float(xmax)
 
 
 def align_operand(
