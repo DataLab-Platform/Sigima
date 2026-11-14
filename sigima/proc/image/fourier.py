@@ -137,9 +137,9 @@ def ifft(src: ImageObj, p: FFTParam | None = None) -> ImageObj:
 
 @computation_function(
     operation_id="sigima.image.magnitude_spectrum",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "
@@ -189,9 +189,9 @@ def phase_spectrum(src: ImageObj) -> ImageObj:
 
 @computation_function(
     operation_id="sigima.image.psd",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Fourier transforms (NumPy/SciPy pocketfft) differ in the last bits "

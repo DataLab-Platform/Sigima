@@ -26,9 +26,25 @@ from typing import Literal
 import numpy as np
 import scipy.signal as sps
 
+from sigima.tools._spectral import to_decibel
 from sigima.tools.checks import check_2d_array, normalize_kernel
 
 # pylint: disable=invalid-name  # Allows short reference names like x, y, ...
+
+
+def _check_nonzero_spectrum(spectrum: np.ndarray) -> None:
+    """Check that a spectrum can be expressed in decibel.
+
+    Args:
+        spectrum: Non-negative spectral values.
+
+    Raises:
+        ValueError: If the spectrum is identically zero (all-zero image).
+    """
+    if not np.any(spectrum):
+        raise ValueError(
+            "The spectrum of an all-zero image cannot be expressed in decibel"
+        )
 
 
 @check_2d_array
@@ -69,16 +85,24 @@ def ifft2d(z: np.ndarray, shift: bool = True) -> np.ndarray:
 def magnitude_spectrum(z: np.ndarray, log_scale: bool = False) -> np.ndarray:
     """Compute magnitude spectrum of complex array `z`
 
+    In decibel, the spectrum is floored at the machine epsilon of its peak value
+    (about 313 dB below the peak), so that the result does not depend on the unit
+    of the data.
+
     Args:
         z: Input data
         log_scale: Use log scale (default: False)
 
     Returns:
         Magnitude spectrum of input data
+
+    Raises:
+        ValueError: If `log_scale` is True and the input data is all zero.
     """
     z1 = np.abs(fft2d(z))
     if log_scale:
-        z1 = 20 * np.log10(z1.clip(1e-10))
+        _check_nonzero_spectrum(z1)
+        z1 = to_decibel(z1, 20.0)
     return z1
 
 
@@ -99,16 +123,24 @@ def phase_spectrum(z: np.ndarray) -> np.ndarray:
 def psd(z: np.ndarray, log_scale: bool = False) -> np.ndarray:
     """Compute power spectral density of complex array `z`
 
+    In decibel, the density is floored at the machine epsilon of its peak value
+    (about 156.5 dB below the peak), so that the result does not depend on the
+    unit of the data.
+
     Args:
         z: Input data
         log_scale: Use log scale (default: False)
 
     Returns:
         Power spectral density of input data
+
+    Raises:
+        ValueError: If `log_scale` is True and the input data is all zero.
     """
     z1 = np.abs(fft2d(z)) ** 2
     if log_scale:
-        z1 = 10 * np.log10(z1.clip(1e-10))
+        _check_nonzero_spectrum(z1)
+        z1 = to_decibel(z1, 10.0)
     return z1
 
 

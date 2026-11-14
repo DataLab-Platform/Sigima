@@ -14,33 +14,9 @@ from typing import Literal
 import numpy as np
 import scipy.signal  # type: ignore[import]
 
+from sigima.tools._spectral import to_decibel
 from sigima.tools.checks import check_1d_arrays, normalize_kernel
 from sigima.tools.signal.dynamic import sampling_rate
-
-
-def _to_decibel(values: np.ndarray, factor: float) -> np.ndarray:
-    """Convert non-negative spectral values to a decibel scale.
-
-    Spectral values are exactly zero wherever the signal has no content at a given
-    frequency -- a synthetic signal, a zero-padded segment or a notch filter all
-    produce them. Taking the logarithm as-is yields ``-inf`` samples, which propagate
-    to autoscaling, statistics and file export, and emit a divide-by-zero warning.
-    Values are therefore floored at the machine epsilon of the peak value, i.e. about
-    313 dB below the peak for the amplitude convention: far below any physically
-    meaningful level, yet finite.
-
-    Args:
-        values: Non-negative spectral values.
-        factor: 20 for amplitude quantities, 10 for power quantities.
-
-    Returns:
-        Values expressed in decibel.
-    """
-    peak = np.max(values)
-    if peak <= 0.0:
-        # Identically zero spectrum: there is no dynamic range to represent
-        return np.full(values.shape, -np.inf)
-    return factor * np.log10(np.maximum(values, peak * np.finfo(float).eps))
 
 
 @check_1d_arrays(x_evenly_spaced=True)
@@ -164,7 +140,7 @@ def magnitude_spectrum(
     f, spectrum = fft1d(x, y)
     mag_spectrum = np.abs(spectrum)
     if decibel:
-        mag_spectrum = _to_decibel(mag_spectrum, 20.0)
+        mag_spectrum = to_decibel(mag_spectrum, 20.0)
     return f, mag_spectrum
 
 
@@ -205,7 +181,7 @@ def psd(
     """
     f, welch_psd = scipy.signal.welch(y, fs=sampling_rate(x))
     if decibel:
-        welch_psd = _to_decibel(welch_psd, 10.0)
+        welch_psd = to_decibel(welch_psd, 10.0)
     return f, welch_psd
 
 
