@@ -143,15 +143,17 @@ def test_image_ifft() -> None:
 def test_image_magnitude_spectrum() -> None:
     """2D magnitude spectrum validation test."""
     ima1 = sigima.tests.data.create_checkerboard()
-    fft = sigima.proc.image.fft(ima1)
+    exp = np.abs(sigima.proc.image.fft(ima1).data)
+    exp_db = 20 * np.log10(np.maximum(exp, exp.max() * np.finfo(float).eps))
     param = sigima.params.SpectrumParam()
-    for decibel in (True, False):
+    for decibel, expected in ((False, exp), (True, exp_db)):
         param.decibel = decibel
         mag = sigima.proc.image.magnitude_spectrum(ima1, param)
-
-    # Check that the magnitude spectrum is correct
-    exp = np.abs(fft.data)
-    check_array_result("Checkerboard image FFT magnitude spectrum", mag.data, exp)
+        check_array_result(
+            f"Checkerboard image FFT magnitude spectrum (dB={decibel})",
+            mag.data,
+            expected,
+        )
 
 
 @pytest.mark.validation
@@ -170,14 +172,68 @@ def test_image_phase_spectrum() -> None:
 def test_image_psd() -> None:
     """2D Power Spectral Density validation test."""
     ima1 = sigima.tests.data.create_checkerboard()
+    exp = np.abs(sigima.proc.image.fft(ima1).data) ** 2
+    exp_db = 10 * np.log10(np.maximum(exp, exp.max() * np.finfo(float).eps))
     param = sigima.params.SpectrumParam()
-    for decibel in (True, False):
+    for decibel, expected in ((False, exp), (True, exp_db)):
         param.decibel = decibel
         psd = sigima.proc.image.psd(ima1, param)
+        check_array_result(f"Checkerboard image PSD (dB={decibel})", psd.data, expected)
 
-    # Check that the PSD is correct
-    exp = np.abs(sigima.proc.image.fft(ima1).data) ** 2
-    check_array_result("Checkerboard image PSD", psd.data, exp)
+
+SPECTRUM_FUNCS_DB = (
+    # Function, decibel factor
+    (sigima.tools.image.magnitude_spectrum, 20.0),
+    (sigima.tools.image.psd, 10.0),
+)
+
+
+@pytest.mark.parametrize("func", [func for func, _factor in SPECTRUM_FUNCS_DB])
+def test_image_spectrum_db_unit_independence(func) -> None:
+    """Scaling an image only shifts its spectrum in decibel (regression test).
+
+    The decibel floor was absolute (1e-10), so that the dynamic range of the
+    spectrum of a low-amplitude image collapsed onto the floor.
+    """
+    rng = np.random.default_rng(0)
+    data = rng.random((64, 64))
+    ref = func(data, log_scale=True)
+    for scale in (1e3, 1e-12):
+        shifted = func(data * scale, log_scale=True)
+        # Amplitude scales as `scale`, power as `scale**2`: same shift in decibel
+        check_array_result(
+            f"{func.__name__} in dB, image scaled by {scale}",
+            shifted - ref,
+            np.full(ref.shape, 20.0 * np.log10(scale)),
+            rtol=0.0,
+            atol=1e-6,
+        )
+
+
+@pytest.mark.parametrize("func, factor", SPECTRUM_FUNCS_DB)
+def test_image_spectrum_db_zero_lines(func, factor) -> None:
+    """Exactly zero spectral lines are floored relative to the peak, finite."""
+    data = np.full((32, 32), 5.0)  # Constant image: only the DC line is not zero
+    result = func(data, log_scale=True)
+    assert np.all(np.isfinite(result)), "Non-finite values in the spectrum"
+    peak = result.max()
+    floor = np.delete(result.ravel(), result.argmax())
+    check_array_result(
+        f"{func.__name__} in dB, zero lines",
+        floor,
+        np.full(floor.shape, peak + factor * np.log10(np.finfo(float).eps)),
+        rtol=0.0,
+        atol=1e-6,
+    )
+
+
+@pytest.mark.parametrize("func", [func for func, _factor in SPECTRUM_FUNCS_DB])
+def test_image_spectrum_db_zero_image(func) -> None:
+    """The spectrum of an all-zero image cannot be expressed in decibel."""
+    data = np.zeros((16, 16))
+    with pytest.raises(ValueError, match="all-zero image"):
+        func(data, log_scale=True)
+    assert np.all(func(data, log_scale=False) == 0.0)
 
 
 if __name__ == "__main__":
