@@ -834,7 +834,7 @@ register_signal_parameters_class(SignalTypes.COSINE, CosineParam)
 class SawtoothParam(
     BasePeriodicParam,
     title=_("Sawtooth"),
-    comment="y = y<sub>0</sub> + 2 A (f x + φ/(2π) - ⌊f x + φ/(2π) + 1/2⌋)",
+    comment="y = y<sub>0</sub> + A sawtooth(2π f x + φ)",
 ):
     """Parameters for sawtooth function."""
 
@@ -860,7 +860,7 @@ register_signal_parameters_class(SignalTypes.TRIANGLE, TriangleParam)
 class SquareParam(
     BasePeriodicParam,
     title=_("Square"),
-    comment="y = y<sub>0</sub> + A sgn(sin(2π f x + φ))",
+    comment="y = y<sub>0</sub> + A square(2π f x + φ)",
 ):
     """Parameters for square function."""
 
