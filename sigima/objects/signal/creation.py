@@ -790,16 +790,20 @@ class BasePeriodicParam(NewSignalParam):
             Tuple of (x, y) arrays
         """
         x = self.generate_x_data()
+        freq = self.get_frequency_in_hz()
+        arg = 2 * np.pi * freq * x + np.deg2rad(self.phase)
+        if self.STYPE is SignalTypes.SINC:
+            # Unnormalized cardinal sine, sinc(u) = sin(u)/u, as for the 2D sinc:
+            # numpy's sinc is normalized, sinc(u) = sin(πu)/(πu)
+            return x, self.a * np.sinc(arg / np.pi) + self.offset
         func = {
             SignalTypes.SINE: np.sin,
             SignalTypes.COSINE: np.cos,
             SignalTypes.SAWTOOTH: sps.sawtooth,
             SignalTypes.TRIANGLE: triangle_func,
             SignalTypes.SQUARE: sps.square,
-            SignalTypes.SINC: np.sinc,
         }[self.STYPE]
-        freq = self.get_frequency_in_hz()
-        y = self.a * func(2 * np.pi * freq * x + np.deg2rad(self.phase)) + self.offset
+        y = self.a * func(arg) + self.offset
         return x, y
 
 
@@ -869,7 +873,7 @@ register_signal_parameters_class(SignalTypes.SQUARE, SquareParam)
 class SincParam(
     BasePeriodicParam,
     title=_("Cardinal sine"),
-    comment="y = y<sub>0</sub> + A sinc(2π f x + φ)",
+    comment="y = y<sub>0</sub> + A sinc(2π f x + φ)<br>sinc(u) = sin(u)/u, sinc(0) = 1",
 ):
     """Parameters for cardinal sine function."""
 

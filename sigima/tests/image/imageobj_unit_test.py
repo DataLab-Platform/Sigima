@@ -491,6 +491,30 @@ def test_sinusoidal_grating_period_matches_axes() -> None:
     np.testing.assert_allclose(image.data[0], np.sin(2 * np.pi * 0.1 * x), atol=1e-12)
 
 
+def test_sinc_2d_unnormalized_convention() -> None:
+    """The 2D sinc uses sinc(u) = sin(u)/u: it first vanishes at r = π σ."""
+    sigma, a, c = 10.0, 3.0, 0.5
+    param = Sinc2DParam.create(
+        height=1,
+        width=1001,
+        a=a,
+        c=c,
+        sigma=sigma,
+        xmin=-50.0,
+        xmax=50.0,
+        ymin=0.0,
+        ymax=1.0,
+    )
+    image = sigima.objects.create_image_from_param(param)
+    x = np.linspace(-50.0, 50.0, 1001)
+    row = image.data[0]
+    assert row[500] == pytest.approx(a + c)
+    np.testing.assert_allclose(row, a * np.sinc(x / (np.pi * sigma)) + c, atol=1e-12)
+    positive = row[500:] - c
+    first_zero = x[500 + np.flatnonzero(np.diff(np.sign(positive)))[0] + 1]
+    assert first_zero == pytest.approx(np.pi * sigma, abs=0.1)
+
+
 @pytest.mark.parametrize("param_class", DOMAIN_IMAGE_PARAM_CLASSES)
 def test_domain_image_legacy_parameters_keep_pixel_coordinates(
     param_class: type,
