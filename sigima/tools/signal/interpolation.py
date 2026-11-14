@@ -47,9 +47,10 @@ def interpolate(
         knots, coeffs, degree = scipy.interpolate.splrep(x, y, s=0)
         ynew = scipy.interpolate.splev(xnew, (knots, coeffs, degree), der=0)
     elif method == Interpolation1DMethod.QUADRATIC:
-        # Quadratic interpolation using NumPy's polyval function:
-        coeffs = np.polyfit(x, y, 2)
-        ynew = np.polyval(coeffs, xnew)
+        interpolator = scipy.interpolate.interp1d(
+            x, y, kind="quadratic", bounds_error=False, fill_value="extrapolate"
+        )
+        ynew = interpolator(xnew)
     elif method == Interpolation1DMethod.CUBIC:
         # Cubic interpolation using SciPy's Akima1DInterpolator class:
         interpolator_extrap = scipy.interpolate.Akima1DInterpolator(x, y)

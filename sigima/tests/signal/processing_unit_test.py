@@ -588,6 +588,37 @@ def test_signal_interpolate() -> None:
     check_array_result("Interpolate[PCHIP+fill_value]|x", dst.x, x2_extrap)
 
 
+def test_quadratic_interpolation_preserves_samples() -> None:
+    """Quadratic interpolation, including resampling, passes through all samples."""
+    x = np.arange(4.0)
+    y = x**3
+    src = sigima.objects.create_signal("cubic data", x, y)
+    target = sigima.objects.create_signal("target", x, np.zeros_like(x))
+    method = sigima.enums.Interpolation1DMethod.QUADRATIC
+    param = sigima.params.InterpolationParam.create(method=method)
+    result = sigima.proc.signal.interpolate(src, target, param)
+    np.testing.assert_allclose(result.y, y, atol=1e-12)
+    resampling = sigima.params.Resampling1DParam.create(
+        xmin=0.0, xmax=3.0, mode="nbpts", nbpts=4, method=method
+    )
+    result = sigima.proc.signal.resampling(src, resampling)
+    np.testing.assert_allclose(result.y, y, atol=1e-12)
+
+
+def test_quadratic_extrapolates_despite_fill_value() -> None:
+    """Quadratic interpolation retains its existing extrapolation behavior."""
+    x = np.arange(4.0)
+    src = sigima.objects.create_signal("quadratic", x, x**2)
+    target_x = np.array([-1.0, 4.0])
+    target = sigima.objects.create_signal("target", target_x, np.zeros_like(target_x))
+    param = sigima.params.InterpolationParam.create(
+        method=sigima.enums.Interpolation1DMethod.QUADRATIC, fill_value=-999.0
+    )
+    np.testing.assert_allclose(
+        sigima.proc.signal.interpolate(src, target, param).y, [1, 16], atol=1e-12
+    )
+
+
 @pytest.mark.validation
 def test_signal_apply_window() -> None:
     """Validation test for the signal windowing processing."""

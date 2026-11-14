@@ -422,8 +422,8 @@ class FlatFieldParam(gds.DataSet):
 
 @computation_function(
     operation_id="sigima.image.flatfield",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
     """Compute flat field correction with :py:func:`sigima.tools.image.flatfield`
@@ -437,7 +437,9 @@ def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
         Output image object
     """
     dst = dst_2_to_1(src1, src2, "flatfield", f"threshold={p.threshold}")
-    dst.data = sigima.tools.image.flatfield(src1.data, src2.data, p.threshold)
+    dst.data = sigima.tools.image.flatfield(
+        src1.data, src2.data, p.threshold, excluded_mask=src1.maskdata
+    )
     restore_data_outside_roi(dst, src1)
     return dst
 

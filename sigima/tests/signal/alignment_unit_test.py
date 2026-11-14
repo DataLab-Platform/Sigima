@@ -32,6 +32,45 @@ def _difference(source, operand):
     return prepared.run(), prepared.context
 
 
+def test_xy_mode_uses_original_overlap() -> None:
+    """Preparing X-Y must not extend either signal beyond its measured domain."""
+    source = _signal([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])
+    operand = _signal([1, 2, 3], [10, 20, 30])
+    contract = contracts.contract_for_function(sigima.proc.signal.xy_mode)
+    prepared = prepare_execution(contract, [source, operand], param=None)
+    for result in (sigima.proc.signal.xy_mode(source, operand), prepared.run()):
+        np.testing.assert_array_equal(result.x, [1, 2, 3])
+        np.testing.assert_array_equal(result.y, [10, 20, 30])
+    replay = prepare_execution(
+        contract, [source, operand], values={}, context=prepared.context
+    )
+    np.testing.assert_array_equal(replay.run().y, [10, 20, 30])
+    with pytest.raises(XAlignmentError, match="Unsupported"):
+        prepare_execution(
+            contract,
+            [source, operand],
+            values={},
+            context={
+                "x_alignment": {
+                    "rule": "sigima.signal.x_alignment.source_grid_linear_hold",
+                    "version": 1,
+                }
+            },
+        )
+
+
+@pytest.mark.parametrize("operand_x", [[10, 11, 12], [4, 5, 6]])
+def test_xy_mode_refuses_domains_without_interval(operand_x) -> None:
+    """Disjoint domains and a single common endpoint have no usable overlap."""
+    source = _signal([0, 1, 2, 3, 4], [0, 1, 2, 3, 4])
+    operand = _signal(operand_x, [10, 20, 30])
+    contract = contracts.contract_for_function(sigima.proc.signal.xy_mode)
+    with pytest.raises(ValueError, match="overlap"):
+        sigima.proc.signal.xy_mode(source, operand)
+    with pytest.raises(ValueError, match="overlap"):
+        prepare_execution(contract, [source, operand], param=None)
+
+
 def test_equal_grids_are_not_interpolated() -> None:
     """Exactly equal grids keep the operand object itself."""
     source = _signal([0, 1, 2, 3], [1, 4, 9, 16])

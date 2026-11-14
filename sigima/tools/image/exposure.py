@@ -294,7 +294,11 @@ def normalize(
 
 @check_2d_array
 def flatfield(
-    rawdata: np.ndarray, flatdata: np.ndarray, threshold: float | None = None
+    rawdata: np.ndarray,
+    flatdata: np.ndarray,
+    threshold: float | None = None,
+    *,
+    excluded_mask: np.ndarray | None = None,
 ) -> np.ndarray:
     """Compute flat-field correction
 
@@ -302,14 +306,27 @@ def flatfield(
         rawdata: Raw data
         flatdata: Flat-field data
         threshold: Threshold for flat-field correction (default: None)
+        excluded_mask: Pixels excluded from correction, e.g. outside the ROI.
 
     Returns:
         Flat-field corrected data
+
+    Raises:
+        ValueError: If a corrected pixel has a zero flat-field value.
     """
-    dtemp = np.array(rawdata, dtype=float, copy=True) * np.nanmean(flatdata)
-    dunif = np.array(flatdata, dtype=float, copy=True)
-    dunif[dunif == 0] = 1.0
-    dcorr_all = np.array(dtemp / dunif, dtype=rawdata.dtype)
+    flat = np.broadcast_to(flatdata, rawdata.shape)
+    selected = (
+        np.ones(rawdata.shape, dtype=bool) if threshold is None else rawdata > threshold
+    )
+    if excluded_mask is not None:
+        selected &= ~excluded_mask
+    if np.any(selected & (flat == 0)):
+        raise ValueError("Flat-field values must be nonzero for corrected pixels")
     dcorr = np.array(rawdata, copy=True)
-    dcorr[rawdata > threshold] = dcorr_all[rawdata > threshold]
+    corrected = (
+        np.asarray(rawdata[selected], dtype=float)
+        * np.nanmean(flatdata)
+        / flat[selected]
+    )
+    dcorr[selected] = corrected.astype(rawdata.dtype)
     return dcorr

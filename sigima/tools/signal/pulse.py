@@ -1548,8 +1548,9 @@ class PulseFeatures:
     Attributes:
         signal_shape: The shape of the signal (step or square).
         polarity: The polarity of the signal (1 for positive, -1 for negative).
-        amplitude: The amplitude of the signal.
-        offset: The baseline offset of the signal.
+        amplitude: The amplitude of the signal; for a step, the absolute
+         difference between the start and end baseline means.
+        offset: The signed start baseline mean.
         foot_duration: The duration of the foot (flat region before rise) of the signal.
         xstartmin: The minimum x-value of the start baseline region.
         xstartmax: The maximum x-value of the start baseline region.
@@ -1720,7 +1721,7 @@ def extract_pulse_features(
         signal_shape=signal_shape,
         polarity=polarity,
         amplitude=amplitude,
-        offset=get_range_mean_y(x, y * polarity, start_range),
+        offset=get_range_mean_y(x, y, start_range),
         foot_duration=x0 - x[0],
         xstartmin=start_range[0],
         xstartmax=start_range[1],

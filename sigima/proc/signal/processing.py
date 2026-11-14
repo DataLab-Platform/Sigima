@@ -47,10 +47,12 @@ from sigima.proc.base import (
 )
 from sigima.proc.contracts import (
     EXACT,
+    OVERLAP_GRID_LINEAR,
     SOURCE_GRID_LINEAR_HOLD,
     ReplayQualification,
     tolerance,
 )
+from sigima.proc.contracts.alignment import _xy_overlap
 from sigima.proc.decorator import computation_function
 from sigima.tools.signal import fourier, interpolation, scaling, windowing
 from sigima.tools.signal import replace_values as rv
@@ -87,9 +89,9 @@ class InterpolationParam(gds.DataSet, title=_("Interpolation")):
 
 @computation_function(
     operation_id="sigima.signal.interpolate",
-    contract_version=1,
+    contract_version=2,
     qualification=ReplayQualification(
-        contract_version=1,
+        contract_version=2,
         comparison=tolerance(
             (
                 "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"
@@ -173,8 +175,8 @@ class Resampling1DParam(InterpolationParam):
 
 @computation_function(
     operation_id="sigima.signal.resampling",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def resampling(src: SignalObj, p: Resampling1DParam) -> SignalObj:
     """Resample data with :py:func:`sigima.tools.signal.interpolation.interpolate`
@@ -691,14 +693,16 @@ def convolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.xy_mode",
-    contract_version=1,
-    x_alignment=SOURCE_GRID_LINEAR_HOLD,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    x_alignment=OVERLAP_GRID_LINEAR,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Simulate the X-Y mode of an oscilloscope.
 
     Use the first signal as the X-axis and the second signal as the Y-axis.
+    Both are interpolated linearly onto a uniform grid within their shared X
+    interval, with the smaller of the two input point counts.
 
     Args:
         src1: First input signal (X-axis).
@@ -706,12 +710,13 @@ def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
 
     Returns:
         A signal object representing the X-Y mode.
+
+    Raises:
+        XAlignmentError: If a grid is invalid or the domains do not overlap.
     """
     dst = dst_2_to_1(src1, src2, "", "X-Y Mode")
     p = Resampling1DParam()
-    p.xmin = max(src1.x[0], src2.x[0])
-    p.xmax = min(src1.x[-1], src2.x[-1])
-    assert p.xmin < p.xmax, "X-Y mode: No overlap between signals."
+    p.xmin, p.xmax = _xy_overlap(src1, src2)
     p.mode = "nbpts"
     p.nbpts = min(src1.x.size, src2.x.size)
     _, y1 = resampling(src1, p).get_data()

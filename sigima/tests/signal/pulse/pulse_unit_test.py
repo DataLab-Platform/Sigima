@@ -1747,6 +1747,29 @@ def test_gaussian_feature_extraction() -> None:
     _extract_and_validate_gaussian_features(x, y, analysis, expected, signal_params)
 
 
+@pytest.mark.parametrize("direction", [-1, 1])
+def test_pulse_offset_is_actual_baseline(direction: int) -> None:
+    """The offset retains the sign of the physical baseline for both polarities."""
+    x = np.linspace(0.0, 10.0, 101)
+    y = 5.0 + direction * np.interp(x, [0.0, 4.0, 6.0, 10.0], [0, 0, 10, 10])
+    features = pulse.extract_pulse_features(
+        x, y, (0.0, 2.0), (8.0, 10.0), signal_shape=SignalShape.STEP, denoise=False
+    )
+    assert features.offset == pytest.approx(5.0)
+    assert features.amplitude == pytest.approx(10.0)
+
+
+def test_step_amplitude_uses_baseline_means_not_peak_to_peak() -> None:
+    """A spike outside the selected plateau does not set the step amplitude."""
+    x = np.arange(101.0)
+    y = np.where(x < 50.0, 0.0, 10.0)
+    y[60] = 100.0
+    features = pulse.extract_pulse_features(
+        x, y, (0.0, 20.0), (80.0, 100.0), signal_shape=SignalShape.STEP, denoise=False
+    )
+    assert features.amplitude == pytest.approx(10.0)
+
+
 @pytest.mark.validation
 def test_signal_extract_pulse_features() -> None:
     """Validation test for extract_pulse_features computation function.
