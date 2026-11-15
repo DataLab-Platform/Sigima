@@ -691,6 +691,30 @@ def convolution(src1: SignalObj, src2: SignalObj) -> SignalObj:
     return dst
 
 
+def _inside_roi(src: SignalObj, x: np.ndarray) -> np.ndarray | None:
+    """Return which X values lie within the ROI of a signal.
+
+    The ROI segments are taken on the signal's own grid (from its first to its
+    last sample inside each segment), so that values interpolated between two
+    samples of a segment are inside it.
+
+    Args:
+        src: Signal whose ROI is used.
+        x: X values to test.
+
+    Returns:
+        Boolean array (True inside the ROI), or None if the signal has no ROI.
+    """
+    if src.roi is None or src.roi.is_empty():
+        return None
+    inside = ~src.maskdata[0]
+    edges = np.flatnonzero(np.diff(np.concatenate(([0], inside.astype(int), [0]))))
+    result = np.zeros(np.shape(x), dtype=bool)
+    for start, stop in zip(edges[::2], edges[1::2]):
+        result |= (x >= src.x[start]) & (x <= src.x[stop - 1])
+    return result
+
+
 @computation_function(
     operation_id="sigima.signal.xy_mode",
     contract_version=2,
@@ -701,8 +725,12 @@ def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Simulate the X-Y mode of an oscilloscope.
 
     Use the first signal as the X-axis and the second signal as the Y-axis.
-    Both are interpolated linearly onto a uniform grid within their shared X
-    interval, with the smaller of the two input point counts.
+    When the two signals share the same X grid, their samples are paired
+    directly. Otherwise, both are interpolated linearly onto a uniform grid
+    within their shared X interval, with the smaller of the two input point
+    counts. If the first signal has a ROI, only the points within the ROI are
+    kept, and the result has no ROI. The X and Y labels and units of the result
+    are the Y labels and units of the first and second signals.
 
     Args:
         src1: First input signal (X-axis).
@@ -712,25 +740,44 @@ def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
         A signal object representing the X-Y mode.
 
     Raises:
-        XAlignmentError: If a grid is invalid or the domains do not overlap.
+        XAlignmentError: If a grid is invalid, the X units differ or the domains
+         do not overlap.
+        ValueError: If no point of the shared interval is within the ROI of the
+         first signal.
     """
+    xmin, xmax = _xy_overlap(src1, src2)
+    if src1.x.shape == src2.x.shape and np.array_equal(src1.x, src2.x):
+        x, y1, y2 = src1.x, src1.y, src2.y
+    else:
+        p = Resampling1DParam()
+        p.xmin, p.xmax = xmin, xmax
+        p.mode = "nbpts"
+        p.nbpts = min(src1.x.size, src2.x.size)
+        src1_copy, src2_copy = src1.copy(), src2.copy()
+        src1_copy.roi = src2_copy.roi = None
+        x, y1 = resampling(src1_copy, p).get_data()
+        _x2, y2 = resampling(src2_copy, p).get_data()
+    inside = _inside_roi(src1, x)
+    if inside is not None:
+        if not np.any(inside):
+            raise ValueError(
+                "X-Y mode: no point of the common interval is within the ROI "
+                "of the first signal"
+            )
+        y1, y2 = y1[inside], y2[inside]
     dst = dst_2_to_1(src1, src2, "", "X-Y Mode")
-    p = Resampling1DParam()
-    p.xmin, p.xmax = _xy_overlap(src1, src2)
-    p.mode = "nbpts"
-    p.nbpts = min(src1.x.size, src2.x.size)
-    _, y1 = resampling(src1, p).get_data()
-    _, y2 = resampling(src2, p).get_data()
     dst.set_xydata(y1, y2)
+    dst.roi = None
     dst.title = "{1} = f({0})"
-    restore_data_outside_roi(dst, src1)
+    dst.xlabel, dst.xunit = src1.ylabel, src1.yunit
+    dst.ylabel, dst.yunit = src2.ylabel, src2.yunit
     return dst
 
 
 @computation_function(
     operation_id="sigima.signal.replace_x_by_other_y",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Create a new signal using Y from src1 and Y from src2 as X coordinates.
@@ -739,7 +786,8 @@ def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
     data (e.g., wavelengths) in its Y values, and you want to plot another signal's
     Y values against these calibration points.
 
-    The two signals must have the same number of points.
+    The two signals must have the same number of points. If the first signal has
+    a ROI, only its samples within the ROI are kept, and the result has no ROI.
 
     Args:
         src1: First signal (provides Y data for output).
@@ -756,12 +804,16 @@ def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
             f"Signals must have the same number of points: "
             f"{src1.y.size} != {src2.y.size}"
         )
+    xnew, ynew = src2.y, src1.y
+    inside = _inside_roi(src1, src1.x)
+    if inside is not None:
+        xnew, ynew = xnew[inside], ynew[inside]
     dst = dst_2_to_1(src1, src2, "replace_x_by_other_y")
-    dst.set_xydata(src2.y, src1.y)
+    dst.set_xydata(xnew, ynew)
+    dst.roi = None
     dst.xlabel = src2.ylabel if src2.ylabel else "X"
     dst.xunit = src2.yunit if src2.yunit else ""
     # Y label and unit remain from src1
-    restore_data_outside_roi(dst, src1)
     return dst
 
 

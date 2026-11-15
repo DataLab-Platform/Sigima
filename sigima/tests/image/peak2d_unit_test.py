@@ -81,6 +81,20 @@ def test_peak2d_unit():
     )
 
 
+@pytest.mark.parametrize("dtype", [np.int16, np.float64])
+def test_peak2d_signed_integer_range(dtype) -> None:
+    """The local ranges of a signed integer image must not overflow.
+
+    Between -30000 and +30000, ``int16`` local ranges wrap around and spurious
+    peaks appear in flat regions.
+    """
+    data = np.full((200, 200), -30000, dtype=dtype)
+    data[50, 50] = data[150, 150] = 30000
+    data[50, 150] = 0
+    coords = get_2d_peaks_coords(data, size=20)
+    np.testing.assert_array_equal(sorted(coords.tolist()), [[50, 50], [150, 150]])
+
+
 @pytest.mark.validation
 def test_image_peak_detection():
     """2D peak detection unit test"""

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 import sigima.proc.signal
-from sigima.objects import create_signal
+from sigima.objects import create_signal, create_signal_roi
 from sigima.tests.helpers import check_array_result
 
 
@@ -71,6 +71,22 @@ def test_replace_x_by_other_y():
     assert calibrated.xunit == "nm"
     assert calibrated.ylabel == "I"
     assert calibrated.yunit == "counts"
+
+
+def test_replace_x_by_other_y_keeps_only_samples_within_roi():
+    """With a ROI, the calibrated signal only keeps the samples within the ROI.
+
+    Samples outside the ROI must not be restored from the original X axis (time)
+    into the calibrated X axis (wavelength).
+    """
+    t = np.linspace(0, 1, 11)
+    spectrum = create_signal("Spectrum", t, 100 + t, units=("s", "a.u."))
+    spectrum.roi = create_signal_roi([[2, 8]], indices=True)
+    calibration = create_signal("λ", t, 400 + 30 * t, units=("s", "nm"))
+    calibrated = sigima.proc.signal.replace_x_by_other_y(spectrum, calibration)
+    np.testing.assert_allclose(calibrated.x, 400 + 30 * t[2:8])
+    np.testing.assert_allclose(calibrated.y, 100 + t[2:8])
+    assert calibrated.roi is None
 
 
 if __name__ == "__main__":

@@ -149,6 +149,21 @@ def test_enclosing_circle_inverse_roi():
     np.testing.assert_allclose(result.coords[0], [4, 4, 2])
 
 
+@pytest.mark.parametrize("dtype", [np.int16, np.int32, np.float64])
+def test_enclosing_circle_signed_integer_range(dtype):
+    """The threshold of a signed integer image must not overflow.
+
+    The range of an ``int16`` image from -30000 to +30000 exceeds the ``int16``
+    capacity: the midpoint threshold is 0, and the circle encloses the centers of
+    the 6x6 square only.
+    """
+    data = np.zeros((20, 20), dtype=dtype)
+    data[0, 0] = -30000
+    data[7:13, 7:13] = 30000
+    xc, yc, radius = sigima.tools.image.get_enclosing_circle(data)
+    np.testing.assert_allclose([xc, yc, radius], [9.5, 9.5, np.sqrt(12.5)])
+
+
 if __name__ == "__main__":
     test_enclosing_circle_interactive()
     test_image_enclosing_circle()

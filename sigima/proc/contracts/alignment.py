@@ -111,6 +111,11 @@ def _check_grid(role: str, x: np.ndarray) -> None:
 
 def _xy_overlap(source: SignalObj, operand: SignalObj) -> tuple[float, float]:
     """Return the common X interval of two signals or refuse invalid domains."""
+    if source.xunit != operand.xunit:
+        raise XAlignmentError(
+            "incompatible_units",
+            f"X-Y mode: X units differ: {source.xunit!r} and {operand.xunit!r}",
+        )
     xs, xo = np.asarray(source.x), np.asarray(operand.x)
     _check_grid("source", xs)
     _check_grid("operand", xo)

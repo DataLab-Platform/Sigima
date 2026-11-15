@@ -23,8 +23,8 @@ msgstr "Cet exemple présente un traitement avancé du signal pour l'analyse spe
 msgid "Usage:"
 msgstr "Utilisation :"
 
-msgid "python paracetamol_example.py"
-msgstr "python paracetamol_example.py"
+msgid "python spectrum_analysis.py"
+msgstr ""
 
 msgid "The script demonstrates spectroscopy data processing workflows commonly used in analytical chemistry and materials science applications."
 msgstr "Ce script illustre des flux de traitement de données spectroscopiques couramment utilisés en chimie analytique et en science des matériaux."

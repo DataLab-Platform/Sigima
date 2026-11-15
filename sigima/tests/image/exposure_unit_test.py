@@ -314,14 +314,44 @@ def test_flatfield() -> None:
         dst = sigima.proc.image.flatfield(src1, src2, p)
 
         # Compute expected result using the same algorithm as in sigima.tools.image
+        # (an integer raw image gives a floating-point result)
         dtemp = np.array(src1.data, dtype=float, copy=True) * np.nanmean(src2.data)
         dunif = np.array(src2.data, dtype=float, copy=True)
         dunif[dunif == 0] = 1.0
-        dcorr_all = np.array(dtemp / dunif, dtype=src1.data.dtype)
-        exp = np.array(src1.data, copy=True)
+        dcorr_all = dtemp / dunif
+        exp = np.array(src1.data, dtype=float, copy=True)
         exp[src1.data > threshold] = dcorr_all[src1.data > threshold]
 
         check_array_result(f"FlatField[threshold={threshold}]", dst.data, exp)
+
+
+@pytest.mark.parametrize("dtype", [np.uint8, np.uint16, np.int16])
+def test_flatfield_integer_image_is_not_wrapped(dtype) -> None:
+    """Correcting an integer image gives floating-point values, never wrapped.
+
+    A correction exceeding the range of the raw image type (e.g. 60000 / 0.5 for
+    ``uint16``) used to wrap around silently.
+    """
+    vmax = np.iinfo(dtype).max
+    raw = np.array([[vmax, vmax]], dtype=dtype)
+    flat = np.array([[0.5, 1.5]])
+    result = image_exposure.flatfield(raw, flat)
+    assert result.dtype == np.float64
+    np.testing.assert_allclose(result, [[2.0 * vmax, 2.0 * vmax / 3.0]])
+    image = sigima.proc.image.flatfield(
+        sigima.objects.create_image("raw", raw),
+        sigima.objects.create_image("flat", flat),
+        sigima.params.FlatFieldParam.create(threshold=0.0),
+    )
+    np.testing.assert_allclose(image.data, [[2.0 * vmax, 2.0 * vmax / 3.0]])
+
+
+def test_flatfield_float_image_keeps_its_type() -> None:
+    """A floating-point raw image keeps its data type."""
+    raw = np.array([[2.0, 4.0]], dtype=np.float32)
+    result = image_exposure.flatfield(raw, np.array([[1.0, 2.0]]))
+    assert result.dtype == np.float32
+    np.testing.assert_allclose(result, [[3.0, 3.0]])
 
 
 def test_flatfield_zero_denominator_only_when_corrected() -> None:
