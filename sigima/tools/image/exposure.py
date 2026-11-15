@@ -309,7 +309,8 @@ def flatfield(
         excluded_mask: Pixels excluded from correction, e.g. outside the ROI.
 
     Returns:
-        Flat-field corrected data
+        Flat-field corrected data, as floating-point values for an integer raw
+        image (a floating-point raw image keeps its data type)
 
     Raises:
         ValueError: If a corrected pixel has a zero flat-field value.
@@ -322,11 +323,13 @@ def flatfield(
         selected &= ~excluded_mask
     if np.any(selected & (flat == 0)):
         raise ValueError("Flat-field values must be nonzero for corrected pixels")
-    dcorr = np.array(rawdata, copy=True)
-    corrected = (
+    # Integer images give a floating-point result: casting the correction back to
+    # the raw image type would wrap the values exceeding its range
+    dtype = rawdata.dtype if np.issubdtype(rawdata.dtype, np.floating) else float
+    dcorr = np.array(rawdata, dtype=dtype, copy=True)
+    dcorr[selected] = (
         np.asarray(rawdata[selected], dtype=float)
         * np.nanmean(flatdata)
         / flat[selected]
     )
-    dcorr[selected] = corrected.astype(rawdata.dtype)
     return dcorr

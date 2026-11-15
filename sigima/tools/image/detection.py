@@ -60,8 +60,9 @@ def get_2d_peaks_coords(
         size = max(min(data.shape) // 40, 50)
     data_max = spi.maximum_filter(data, size)
     data_min = spi.minimum_filter(data, size)
-    data_diff = data_max - data_min
-    diff = (data_max - data_min) > get_absolute_level(data_diff, level)
+    # Floating-point difference: the range of a signed integer image may overflow
+    data_diff = np.asarray(data_max, dtype=float) - data_min
+    diff = data_diff > get_absolute_level(data_diff, level)
     maxima = data == data_max
     maxima[diff == 0] = 0
     labeled, _num_objects = spi.label(maxima)

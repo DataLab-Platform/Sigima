@@ -540,9 +540,11 @@ def get_amplitude(
 ) -> float:
     """Get curve amplitude.
 
-    This function uses plateau-mean detection which is robust to noise but introduces
-    a systematic error (~2-3%) for smooth pulse shapes (Gaussian, Lorentzian, etc.).
-    This is an acceptable trade-off for robustness across all signal types.
+    This function uses plateau-mean detection which is robust to noise but
+    underestimates the amplitude of smooth pulse shapes (Gaussian, Lorentzian, etc.)
+    by several percent, depending on the baseline level (up to about 9% for a
+    noise-free Gaussian peak). This is an acceptable trade-off for robustness
+    across all signal types.
 
     Args:
         x: 1D array of x values.
@@ -560,7 +562,8 @@ def get_amplitude(
     .. warning::
 
         For noise-free smooth peaks (Gaussian, Lorentzian), this method introduces
-        a systematic offset of approximately +2-3% due to plateau-mean detection.
+        a systematic error of several percent due to plateau-mean detection, which
+        depends on the baseline level.
         For accurate results with known signal shapes, use fitting methods instead
         (e.g., fwhm with method='gauss' for Gaussian signals).
     """
@@ -1473,10 +1476,11 @@ def fwhm(
     .. warning::
 
         The zero-crossing method uses amplitude normalization via
-        :py:func:`get_amplitude`,
-        which introduces a small systematic offset (~2-3%) for smooth peaks
-        (Gaussian, Lorentzian, etc.) but is robust to noise. For accurate results
-        with known signal shapes, use fitting methods (e.g., method='gauss').
+        :py:func:`get_amplitude`, which is robust to noise but overestimates the
+        width of smooth peaks (Gaussian, Lorentzian, etc.) by a few percent, and
+        the error depends on the baseline level (from about 2.5% to 7% for a
+        noise-free Gaussian peak). For accurate results with known signal shapes,
+        use fitting methods (e.g., method='gauss').
     """
     dx, dy, base = np.max(x) - np.min(x), np.max(y) - np.min(y), np.min(y)
     sigma, mu = dx * 0.1, peakdetection.xpeak(x, y)

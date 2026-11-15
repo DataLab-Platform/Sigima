@@ -236,7 +236,9 @@ def get_absolute_level(data: np.ndarray, level: float) -> float:
     """
     if not isinstance(level, (int, float)) or level < 0.0 or level > 1.0:
         raise ValueError("Level must be a number between 0.0 and 1.0")
-    return np.nanmin(data) + level * (np.nanmax(data) - np.nanmin(data))
+    # Floating-point extrema: the range of a signed integer image may overflow
+    vmin, vmax = float(np.nanmin(data)), float(np.nanmax(data))
+    return vmin + level * (vmax - vmin)
 
 
 def distance_matrix(coords: list) -> np.ndarray:

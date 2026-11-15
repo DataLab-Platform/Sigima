@@ -71,6 +71,61 @@ def test_xy_mode_refuses_domains_without_interval(operand_x) -> None:
         prepare_execution(contract, [source, operand], param=None)
 
 
+def test_xy_mode_labels_and_units_follow_y_axes() -> None:
+    """A current/voltage characteristic is labeled by the Y axes of its inputs."""
+    t = np.linspace(0, 1, 11)
+    voltage = sigima.objects.create_signal(
+        "V", t, 10 * t, units=("s", "V"), labels=("Time", "Voltage")
+    )
+    current = sigima.objects.create_signal(
+        "I", t, 0.1 * t, units=("s", "A"), labels=("Time", "Current")
+    )
+    result = sigima.proc.signal.xy_mode(voltage, current)
+    assert (result.xlabel, result.xunit) == ("Voltage", "V")
+    assert (result.ylabel, result.yunit) == ("Current", "A")
+    np.testing.assert_allclose(result.y, result.x / 100)
+
+
+def test_xy_mode_refuses_different_x_units() -> None:
+    """Times in seconds and in milliseconds are not aligned on their numbers."""
+    source = _signal([0, 1, 2], [0, 1, 2], units=("s", "V"))
+    operand = _signal([0, 1000, 2000], [0, 1, 2], units=("ms", "A"))
+    contract = contracts.contract_for_function(sigima.proc.signal.xy_mode)
+    with pytest.raises(XAlignmentError, match="X units differ") as exc:
+        sigima.proc.signal.xy_mode(source, operand)
+    assert exc.value.code == "incompatible_units"
+    with pytest.raises(XAlignmentError, match="X units differ"):
+        prepare_execution(contract, [source, operand], param=None)
+
+
+def test_xy_mode_keeps_identical_grids() -> None:
+    """Identical non-uniform grids are paired without interpolation."""
+    angle = np.array([0.0, 0.1, 0.2, 2.5, 6.0])
+    cosine = _signal(angle, np.cos(angle))
+    sine = _signal(angle, np.sin(angle))
+    result = sigima.proc.signal.xy_mode(cosine, sine)
+    np.testing.assert_array_equal(result.x, np.cos(angle))
+    np.testing.assert_array_equal(result.y, np.sin(angle))
+
+
+@pytest.mark.parametrize("operand_size", [11, 21])
+def test_xy_mode_keeps_only_points_within_roi(operand_size) -> None:
+    """With a ROI, X-Y pairs only come from the ROI of the first signal.
+
+    Data outside the ROI must not be restored from the original coordinates
+    (time) into the X-Y result (voltage and current).
+    """
+    t = np.linspace(0, 1, 11)
+    voltage = _signal(t, 10 * t, units=("s", "V"))
+    voltage.roi = sigima.objects.create_signal_roi([[2, 8]], indices=True)
+    t2 = np.linspace(0, 1, operand_size)
+    current = _signal(t2, 0.1 * t2, units=("s", "A"))
+    result = sigima.proc.signal.xy_mode(voltage, current)
+    np.testing.assert_allclose(result.x, [2, 3, 4, 5, 6, 7])
+    np.testing.assert_allclose(result.y, result.x / 100)
+    assert result.roi is None
+
+
 def test_equal_grids_are_not_interpolated() -> None:
     """Exactly equal grids keep the operand object itself."""
     source = _signal([0, 1, 2, 3], [1, 4, 9, 16])

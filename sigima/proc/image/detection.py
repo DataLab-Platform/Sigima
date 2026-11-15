@@ -341,8 +341,8 @@ class Peak2DDetectionParam(DetectionROIParam, GenericDetectionParam):
 
 @computation_function(
     operation_id="sigima.image.peak_detection",
-    contract_version=2,
-    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
+    contract_version=3,
+    qualification=ReplayQualification(contract_version=3, comparison=EXACT),
 )
 def peak_detection(obj: ImageObj, p: Peak2DDetectionParam) -> GeometryResult | None:
     """Compute 2D peak detection
@@ -389,9 +389,9 @@ class ContourShapeParam(GenericDetectionParam):
 
 @computation_function(
     operation_id="sigima.image.contour_shape",
-    contract_version=2,
+    contract_version=3,
     qualification=ReplayQualification(
-        contract_version=2,
+        contract_version=3,
         comparison=tolerance(
             (
                 "Floating-point reductions and linear algebra (NumPy, SciPy, scikit-"

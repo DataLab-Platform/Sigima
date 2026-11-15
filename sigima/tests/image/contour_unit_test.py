@@ -150,6 +150,23 @@ def test_contour_shape() -> None:
     execenv.print("All contour shape tests passed!")
 
 
+@pytest.mark.parametrize("dtype", [np.int16, np.float64])
+def test_contour_shape_signed_integer_range(dtype) -> None:
+    """The contour level of a signed integer image must not overflow.
+
+    Between -30000 and +30000, the ``int16`` range wraps around: the contour level
+    fell below the data minimum and no contour was found.
+    """
+    data = np.zeros((200, 200), dtype=dtype)
+    data[0, 0] = -30000
+    data[70:130, 70:130] = 30000
+    image = sigima.objects.create_image("Square", data=data)
+    param = sigima.params.ContourShapeParam.create(shape=ContourShape.CIRCLE)
+    result = sigima.proc.image.contour_shape(image, param)
+    assert result is not None
+    np.testing.assert_allclose(result.coords[0][:2], [99.5, 99.5], atol=0.1)
+
+
 def test_contour_roi_polygon() -> None:
     """Test contour detection with polygon shape creates polygon ROIs."""
     data, _coords = get_peak2d_data()

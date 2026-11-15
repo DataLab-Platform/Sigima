@@ -24,8 +24,8 @@ msgstr "Ce tutoriel présente des techniques de traitement d'image pour analyser
 msgid "Usage:"
 msgstr "Utilisation :"
 
-msgid "python fabry_perot_example.py"
-msgstr "python fabry_perot_example.py"
+msgid "python fabry_perot.py"
+msgstr ""
 
 msgid "The script demonstrates optical analysis workflows commonly used in interferometry, optical metrology, and precision measurements."
 msgstr "Ce script illustre des flux d'analyse optique couramment utilisés en interférométrie, en métrologie optique et en mesures de précision."
