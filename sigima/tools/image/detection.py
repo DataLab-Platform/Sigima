@@ -23,16 +23,47 @@ from __future__ import annotations
 import numpy as np
 import scipy.ndimage as spi
 from numpy import ma
+from scipy.spatial import cKDTree
 from skimage import exposure, feature, measure, transform
 
 from sigima.enums import ContourShape
 from sigima.tools.checks import check_2d_array, warn_if_masked
 from sigima.tools.image.preprocessing import (
-    distance_matrix,
     fit_circle_model,
     fit_ellipse_model,
     get_absolute_level,
 )
+
+
+def _suppress_non_maxima(
+    coords: np.ndarray, values: np.ndarray, distance: float
+) -> np.ndarray:
+    """Return the indices of the points kept by non-maximum suppression.
+
+    Points are visited by decreasing value, equal values in index order. A point
+    closer than ``distance`` to a point already kept is discarded.
+
+    Args:
+        coords: Point coordinates, shape (n, 2)
+        values: Point values, shape (n,)
+        distance: Minimum distance between kept points
+
+    Returns:
+        Indices of the kept points, in increasing order
+    """
+    count = len(coords)
+    # Decreasing values, equal values in index order (no negation: unsigned-safe)
+    order = np.lexsort((-np.arange(count), values))[::-1]
+    neighbors = cKDTree(coords).query_ball_point(coords, r=distance)
+    discarded = np.zeros(count, dtype=bool)
+    for index in order:
+        if discarded[index]:
+            continue
+        close = np.array(neighbors[index], dtype=int)
+        close = close[close != index]
+        gaps = np.hypot(*(coords[close] - coords[index]).T)
+        discarded[close[gaps < distance]] = True
+    return np.flatnonzero(~discarded)
 
 
 @warn_if_masked
@@ -47,6 +78,10 @@ def get_2d_peaks_coords(
 
     Detection threshold level is relative to difference
     between data maximum and minimum values.
+
+    Local maxima closer than ``size`` pixels to a stronger retained peak are
+    discarded: peaks are retained by decreasing value, equal values in the order
+    of the image rows. Retained peaks are returned in the order of the image rows.
 
     Args:
         data: Input data
@@ -66,18 +101,18 @@ def get_2d_peaks_coords(
     maxima = data == data_max
     maxima[diff == 0] = 0
     labeled, _num_objects = spi.label(maxima)
-    slices = spi.find_objects(labeled)
-    coords = []
-    for dy, dx in slices:
+    values_data = np.asarray(data)
+    coords, values = [], []
+    for label, (dy, dx) in enumerate(spi.find_objects(labeled), start=1):
         x_center = int(0.5 * (dx.start + dx.stop - 1))
         y_center = int(0.5 * (dy.start + dy.stop - 1))
         coords.append((x_center, y_center))
+        # A candidate region is a plateau: all its pixels share the same value
+        values.append(values_data[dy, dx][labeled[dy, dx] == label][0])
+    coords = np.array(coords)
     if len(coords) > 1:
-        # Eventually removing duplicates
-        dist = distance_matrix(coords)
-        for index in reversed(np.unique(np.where((dist < size) & (dist > 0))[1])):
-            coords.pop(index)
-    return np.array(coords)
+        coords = coords[_suppress_non_maxima(coords, np.array(values), size)]
+    return coords
 
 
 def get_contour_shapes(
