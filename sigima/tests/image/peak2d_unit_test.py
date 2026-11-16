@@ -148,6 +148,50 @@ def test_peak2d_signed_integer_range(dtype) -> None:
     np.testing.assert_array_equal(sorted(coords.tolist()), [[50, 50], [150, 150]])
 
 
+def _point_image(points: dict[tuple[int, int], float], dtype=np.float64) -> np.ndarray:
+    """Return a zero image with the given (x, y): value points."""
+    data = np.zeros((50, 50), dtype=dtype)
+    for (x, y), value in points.items():
+        data[y, x] = value
+    return data
+
+
+@pytest.mark.parametrize(
+    "points, expected",
+    [
+        # Chain: B is close to A and C, A and C are far apart
+        ({(10, 10): 10, (16, 10): 9, (22, 10): 8}, [[10, 10], [22, 10]]),
+        # The strongest peak of a chain wins over both neighbors
+        ({(10, 10): 8, (16, 10): 10, (22, 10): 9}, [[16, 10]]),
+        # A weaker peak earlier in the image does not hide a stronger one
+        ({(10, 10): 6, (17, 10): 10}, [[17, 10]]),
+        # Equal peaks: the first one in the order of the image rows is kept
+        ({(17, 10): 10, (10, 12): 10}, [[17, 10]]),
+        # Peaks exactly ``size`` apart are both kept, in the order of the rows
+        ({(16, 18): 9, (10, 10): 10}, [[10, 10], [16, 18]]),
+    ],
+)
+def test_peak2d_duplicate_suppression(points, expected) -> None:
+    """Close peaks are suppressed by stronger retained peaks only (issue #141)."""
+    coords = get_2d_peaks_coords(_point_image(points), size=10)
+    assert coords.tolist() == expected
+
+
+def test_peak2d_duplicate_suppression_unsigned() -> None:
+    """Peak priority does not depend on the sign handling of unsigned images."""
+    data = _point_image({(10, 10): 8, (16, 10): 10, (22, 10): 9}, dtype=np.uint16)
+    assert get_2d_peaks_coords(data, size=10).tolist() == [[16, 10]]
+
+
+def test_peak2d_identical_centers_are_merged() -> None:
+    """Concentric plateaus sharing the same center give a single peak."""
+    data = np.zeros((50, 50))
+    for start, stop in ((10, 31), (16, 25)):
+        data[start, start:stop] = data[stop - 1, start:stop] = 10
+        data[start:stop, start] = data[start:stop, stop - 1] = 10
+    assert get_2d_peaks_coords(data, size=10).tolist() == [[20, 20]]
+
+
 @pytest.mark.validation
 def test_image_peak_detection():
     """2D peak detection unit test"""

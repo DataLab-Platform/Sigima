@@ -341,8 +341,8 @@ class Peak2DDetectionParam(DetectionROIParam, GenericDetectionParam):
 
 @computation_function(
     operation_id="sigima.image.peak_detection",
-    contract_version=3,
-    qualification=ReplayQualification(contract_version=3, comparison=EXACT),
+    contract_version=4,
+    qualification=ReplayQualification(contract_version=4, comparison=EXACT),
 )
 def peak_detection(obj: ImageObj, p: Peak2DDetectionParam) -> GeometryResult | None:
     """Compute 2D peak detection
