@@ -696,7 +696,8 @@ def _inside_roi(src: SignalObj, x: np.ndarray) -> np.ndarray | None:
 
     The ROI segments are taken on the signal's own grid (from its first to its
     last sample inside each segment), so that values interpolated between two
-    samples of a segment are inside it.
+    samples of a segment are inside it. This assumes that the X values of the
+    signal are strictly increasing, as checked by X-Y mode.
 
     Args:
         src: Signal whose ROI is used.
@@ -776,8 +777,8 @@ def xy_mode(src1: SignalObj, src2: SignalObj) -> SignalObj:
 
 @computation_function(
     operation_id="sigima.signal.replace_x_by_other_y",
-    contract_version=2,
-    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
+    contract_version=3,
+    qualification=ReplayQualification(contract_version=3, comparison=EXACT),
 )
 def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
     """Create a new signal using Y from src1 and Y from src2 as X coordinates.
@@ -787,7 +788,8 @@ def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
     Y values against these calibration points.
 
     The two signals must have the same number of points. If the first signal has
-    a ROI, only its samples within the ROI are kept, and the result has no ROI.
+    a ROI, only its samples within the ROI are kept, whatever the order of its X
+    values, and the result has no ROI.
 
     Args:
         src1: First signal (provides Y data for output).
@@ -797,7 +799,8 @@ def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
         A new signal with X from src2.y and Y from src1.y.
 
     Raises:
-        ValueError: If signals don't have the same number of points.
+        ValueError: If signals don't have the same number of points, or if no
+         sample of the first signal is within its ROI.
     """
     if src1.y.size != src2.y.size:
         raise ValueError(
@@ -805,8 +808,12 @@ def replace_x_by_other_y(src1: SignalObj, src2: SignalObj) -> SignalObj:
             f"{src1.y.size} != {src2.y.size}"
         )
     xnew, ynew = src2.y, src1.y
-    inside = _inside_roi(src1, src1.x)
-    if inside is not None:
+    if src1.roi is not None and not src1.roi.is_empty():
+        inside = ~src1.maskdata[0]
+        if not np.any(inside):
+            raise ValueError(
+                "No sample of the first signal is within its region of interest"
+            )
         xnew, ynew = xnew[inside], ynew[inside]
     dst = dst_2_to_1(src1, src2, "replace_x_by_other_y")
     dst.set_xydata(xnew, ynew)
