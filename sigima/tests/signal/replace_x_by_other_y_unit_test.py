@@ -89,6 +89,35 @@ def test_replace_x_by_other_y_keeps_only_samples_within_roi():
     assert calibrated.roi is None
 
 
+@pytest.mark.parametrize(
+    "x",
+    (
+        np.linspace(1, 0, 11),
+        np.array([0.0, 0.5, 0.1, 0.6, 0.2, 0.7, 0.3, 0.8, 0.4, 0.9, 1.0]),
+    ),
+    ids=("decreasing", "non-monotonic"),
+)
+def test_replace_x_by_other_y_roi_on_non_increasing_x(x: np.ndarray):
+    """The samples within the ROI are kept whatever the order of the X values."""
+    spectrum = create_signal("Spectrum", x, 100 + np.arange(11.0))
+    spectrum.roi = create_signal_roi([[2, 5], [7, 9]], indices=True)
+    calibration = create_signal("λ", x, 400 + np.arange(11.0))
+    calibrated = sigima.proc.signal.replace_x_by_other_y(spectrum, calibration)
+    kept = np.r_[2:5, 7:9]
+    np.testing.assert_array_equal(calibrated.x, 400 + kept)
+    np.testing.assert_array_equal(calibrated.y, 100 + kept)
+
+
+def test_replace_x_by_other_y_roi_without_sample():
+    """A ROI containing no sample is refused instead of giving an empty signal."""
+    t = np.linspace(0, 1, 11)
+    spectrum = create_signal("Spectrum", t, 100 + t)
+    spectrum.roi = create_signal_roi([2.0, 3.0])
+    calibration = create_signal("λ", t, 400 + 30 * t)
+    with pytest.raises(ValueError, match="region of interest"):
+        sigima.proc.signal.replace_x_by_other_y(spectrum, calibration)
+
+
 if __name__ == "__main__":
     test_replace_x_by_other_y_size_mismatch()
     test_replace_x_by_other_y()
