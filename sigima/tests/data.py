@@ -335,24 +335,46 @@ class PeakDataParam(gds.DataSet, title=_("Image with peaks")):
 
 
 def get_peak2d_data(
-    p: PeakDataParam | None = None, seed: int | None = None, multi: bool = False
+    p: PeakDataParam | None = None,
+    seed: int | None = None,
+    multi: bool = False,
+    min_distance: float | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return a list of NumPy arrays containing images which are relevant for
-    testing 2D peak detection or similar image processing features
+    """Generate an image for testing 2D peak detection.
 
     Args:
         p: Peak data test image parameters. Defaults to None.
         seed: Seed for random number generator. Defaults to None.
         multi: If True, multiple peaks are generated. Defaults to False.
+        min_distance: Minimum distance in pixels between generated primary
+         coordinates, or None for unconstrained positions. Secondary peaks and
+         any offsets applied to the generated coordinates are excluded.
 
     Returns:
         A tuple containing the image data and coordinates of the peaks.
+
+    Raises:
+        ValueError: If the distance is invalid or no suitable positions can be
+         generated within the sampling limit.
     """
     if p is None:
         p = PeakDataParam()
+    if min_distance is not None and (not np.isfinite(min_distance) or min_distance < 0):
+        raise ValueError("Minimum peak separation must be finite and non-negative")
     delta = 0.1
     rng = np.random.default_rng(seed)
-    coords_phys = (rng.random((p.num_peaks, 2)) - 0.5) * 10 * (1 - delta)
+    for _attempt in range(1000):
+        coords_phys = (rng.random((p.num_peaks, 2)) - 0.5) * 10 * (1 - delta)
+        if min_distance is None or min_distance == 0 or p.num_peaks < 2:
+            break
+        distances = np.linalg.norm(
+            coords_phys[:, np.newaxis] - coords_phys[np.newaxis, :], axis=2
+        )
+        distances *= p.size / 20
+        if np.all(distances[np.triu_indices(p.num_peaks, 1)] >= min_distance):
+            break
+    else:
+        raise ValueError("Unable to generate peaks with the requested separation")
     data = rng.normal(p.mu_noise, p.sigma_noise, size=(p.size, p.size))
     multi_nb = 2 if multi else 1
     for x0, y0 in coords_phys:
@@ -721,14 +743,23 @@ def create_ring_image(p: RingParam | None = None) -> ImageObj:
     return obj
 
 
-def create_peak_image(p: NewImageParam | None = None) -> ImageObj:
-    """Creating image with bright peaks
+def create_peak_image(
+    p: NewImageParam | None = None, seed: int | None = None
+) -> ImageObj:
+    """Create an image with four bright, randomly positioned peaks.
+
+    The generated peak coordinates are at least 10% of the image width apart.
+    Detection of all peaks is not guaranteed for every image size.
 
     Args:
         p: Image parameters. Defaults to None
+        seed: Seed for random number generation. Defaults to None.
 
     Returns:
         Image object
+
+    Raises:
+        ValueError: If well-separated peak positions cannot be generated.
     """
     p = __set_default_size_dtype(p)
     p.title = "Test image (2D peaks)" if p.title is None else p.title
@@ -736,7 +767,7 @@ def create_peak_image(p: NewImageParam | None = None) -> ImageObj:
     param = PeakDataParam()
     if p.height is not None and p.width is not None:
         param.size = max(p.height, p.width)
-    obj.data, coords = get_peak2d_data(param)
+    obj.data, coords = get_peak2d_data(param, seed=seed, min_distance=param.size * 0.1)
     obj.metadata["peak_coords"] = coords
     return obj
 

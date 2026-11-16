@@ -19,7 +19,7 @@ import sigima.objects
 import sigima.params
 import sigima.proc.image
 from sigima.tests import guiutils
-from sigima.tests.data import get_peak2d_data
+from sigima.tests.data import PeakDataParam, create_peak_image, get_peak2d_data
 from sigima.tests.env import execenv
 from sigima.tests.helpers import check_array_result, validate_detection_rois
 from sigima.tools.image import get_2d_peaks_coords
@@ -79,6 +79,59 @@ def test_peak2d_unit():
         atol=2,
         sort=True,
     )
+
+
+def test_peak_image_is_reproducible_and_peaks_are_separated() -> None:
+    """A fixed seed produces the same image with well-separated primary peaks."""
+    param = sigima.objects.NewImageParam.create(height=256, width=256)
+    image = create_peak_image(param, seed=3)
+    repeated = create_peak_image(param, seed=3)
+    other = create_peak_image(param, seed=6)
+
+    coords = image.metadata["peak_coords"]
+    assert coords.shape == (4, 2)
+    distances = np.linalg.norm(coords[:, None, :] - coords[None, :, :], axis=2)
+    assert np.min(distances[np.triu_indices(4, 1)]) >= 25.6
+    np.testing.assert_array_equal(coords, repeated.metadata["peak_coords"])
+    np.testing.assert_array_equal(image.data, repeated.data)
+    assert not np.array_equal(coords, other.metadata["peak_coords"])
+
+    unseeded = create_peak_image(param)
+    another_unseeded = create_peak_image(param)
+    assert not np.array_equal(
+        unseeded.metadata["peak_coords"], another_unseeded.metadata["peak_coords"]
+    )
+
+
+def test_peak_data_minimum_distance_is_opt_in() -> None:
+    """The first valid layout keeps the original seeded and multi-peak output."""
+    first = PeakDataParam.create(size=256)
+    second = PeakDataParam.create(size=256)
+    original, coords = get_peak2d_data(first, seed=1, multi=True)
+    separated, separated_coords = get_peak2d_data(
+        second, seed=1, multi=True, min_distance=25.6
+    )
+    np.testing.assert_array_equal(original, separated)
+    np.testing.assert_array_equal(coords, separated_coords)
+
+    single = PeakDataParam.create(size=256, num_peaks=1)
+    _, single_coords = get_peak2d_data(single, seed=1, min_distance=25.6)
+    assert single_coords.shape == (1, 2)
+
+
+def test_peak_data_refuses_impossible_minimum_distance() -> None:
+    """Impossible spacing cannot silently produce overlapping peaks."""
+    param = PeakDataParam.create(size=256, num_peaks=2)
+    with pytest.raises(ValueError, match="separat"):
+        get_peak2d_data(param, seed=1, min_distance=512)
+
+
+@pytest.mark.parametrize("min_distance", [-1.0, np.inf, np.nan])
+def test_peak_data_refuses_invalid_minimum_distance(min_distance: float) -> None:
+    """Invalid distances must not be interpreted as a valid constraint."""
+    param = PeakDataParam.create(size=256)
+    with pytest.raises(ValueError, match="separation"):
+        get_peak2d_data(param, seed=1, min_distance=min_distance)
 
 
 @pytest.mark.parametrize("dtype", [np.int16, np.float64])
