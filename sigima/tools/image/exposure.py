@@ -23,7 +23,6 @@ import numpy as np
 
 from sigima.enums import NormalizationMethod
 from sigima.tools.checks import check_2d_array
-from sigima.tools.image.preprocessing import scale_data_to_min_max
 
 __all__ = [
     "adjust_brightness_contrast",
@@ -271,18 +270,28 @@ def normalize(
 ) -> np.ndarray:
     """Normalize input array to a given parameter.
 
+    The result is a new float64 array. NaN values are ignored when computing
+    normalization factors.
+
     Args:
         data: Input data
         parameter: Normalization parameter (default: MAXIMUM)
 
     Returns:
         Normalized array
+
+    Raises:
+        ValueError: If maximum normalization has a zero maximum.
     """
+    fdata = np.array(data, dtype=np.float64)
     if parameter == NormalizationMethod.MAXIMUM:
-        return scale_data_to_min_max(data, np.nanmin(data) / np.nanmax(data), 1.0)
+        maximum = np.nanmax(fdata)
+        if maximum == 0:
+            raise ValueError("Cannot normalize image: maximum is zero.")
+        return fdata / maximum
     if parameter == NormalizationMethod.AMPLITUDE:
-        return scale_data_to_min_max(data, 0.0, 1.0)
-    fdata = np.array(data, dtype=float)
+        minimum = np.nanmin(fdata)
+        return (fdata - minimum) / (np.nanmax(fdata) - minimum)
     if parameter == NormalizationMethod.AREA:
         return fdata / np.nansum(fdata)
     if parameter == NormalizationMethod.ENERGY:

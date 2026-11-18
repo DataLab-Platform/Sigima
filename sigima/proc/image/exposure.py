@@ -451,8 +451,8 @@ def flatfield(src1: ImageObj, src2: ImageObj, p: FlatFieldParam) -> ImageObj:
 
 @computation_function(
     operation_id="sigima.image.normalize",
-    contract_version=1,
-    qualification=ReplayQualification(contract_version=1, comparison=EXACT),
+    contract_version=2,
+    qualification=ReplayQualification(contract_version=2, comparison=EXACT),
 )
 def normalize(src: ImageObj, p: NormalizeParam) -> ImageObj:
     """

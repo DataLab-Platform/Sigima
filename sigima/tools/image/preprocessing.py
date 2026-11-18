@@ -303,7 +303,9 @@ def binning(
 def scale_data_to_min_max(
     data: np.ndarray, zmin: float | int, zmax: float | int
 ) -> np.ndarray:
-    """Scale array `data` to fit [zmin, zmax] dynamic range
+    """Scale array `data` to fit [zmin, zmax] dynamic range.
+
+    The result retains the input data type.
 
     Args:
         data: Input data
