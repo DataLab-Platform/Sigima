@@ -383,6 +383,108 @@ def test_flatfield_zero_outside_roi() -> None:
     np.testing.assert_array_equal(raw.data, np.ones((4, 4)))
 
 
+@pytest.mark.parametrize(
+    "dtype", [np.uint8, np.uint16, np.int16, np.float32, np.float64]
+)
+@pytest.mark.parametrize(
+    ("method", "expected"),
+    [
+        (sigima.enums.NormalizationMethod.MAXIMUM, [0, 0.25, 0.5, 1]),
+        (sigima.enums.NormalizationMethod.AMPLITUDE, [0, 0.25, 0.5, 1]),
+        (sigima.enums.NormalizationMethod.AREA, [0, 1 / 7, 2 / 7, 4 / 7]),
+        (
+            sigima.enums.NormalizationMethod.ENERGY,
+            [0, 1 / np.sqrt(21), 2 / np.sqrt(21), 4 / np.sqrt(21)],
+        ),
+        (
+            sigima.enums.NormalizationMethod.RMS,
+            [0, 2 / np.sqrt(21), 4 / np.sqrt(21), 8 / np.sqrt(21)],
+        ),
+    ],
+)
+def test_image_normalize_preserves_intermediate_values(dtype, method, expected) -> None:
+    """Each method preserves fractional values and returns floating-point data."""
+    data = np.array([[0, 1], [2, 4]], dtype=dtype)
+    src = sigima.objects.create_image("image", data)
+    dst = sigima.proc.image.normalize(
+        src, sigima.params.NormalizeParam.create(method=method)
+    )
+    assert dst.data.dtype == np.float64
+    np.testing.assert_allclose(dst.data, np.array(expected).reshape(2, 2))
+    np.testing.assert_array_equal(src.data, data)
+    assert not np.shares_memory(dst.data, src.data)
+
+
+@pytest.mark.parametrize(
+    ("method", "expected"),
+    [
+        (sigima.enums.NormalizationMethod.MAXIMUM, [-1, -1 / 3, 0, 1]),
+        (sigima.enums.NormalizationMethod.AMPLITUDE, [0, 1 / 3, 0.5, 1]),
+    ],
+)
+def test_image_normalize_signed_integer_range(method, expected) -> None:
+    """Signed integer ranges retain their sign without integer overflow."""
+    data = np.array([[-30000, -10000], [0, 30000]], dtype=np.int16)
+    result = image_exposure.normalize(data, method)
+    assert result.dtype == np.float64
+    np.testing.assert_allclose(result, np.array(expected).reshape(2, 2))
+
+
+@pytest.mark.parametrize("method", list(sigima.enums.NormalizationMethod))
+def test_image_normalize_ignores_nan(method) -> None:
+    """NaNs stay in place and do not enter normalization factors."""
+    data = np.array([[np.nan, 1.0], [2.0, 4.0]])
+    result = image_exposure.normalize(data, method)
+    assert np.isnan(result[0, 0])
+    expected = image_exposure.normalize(np.array([[1.0, 2.0, 4.0]]), method)
+    np.testing.assert_allclose(result[~np.isnan(data)], expected.ravel())
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        sigima.enums.NormalizationMethod.MAXIMUM,
+        sigima.enums.NormalizationMethod.AMPLITUDE,
+    ],
+)
+def test_image_normalize_already_normalized_is_independent(method) -> None:
+    """A normalized image must not share data with its result."""
+    src = sigima.objects.create_image("image", np.array([[0.0, 0.5], [0.25, 1.0]]))
+    dst = sigima.proc.image.normalize(
+        src, sigima.params.NormalizeParam.create(method=method)
+    )
+    dst.data[0, 0] = 42.0
+    assert src.data[0, 0] == 0.0
+
+
+def test_image_normalize_zero_maximum_is_rejected() -> None:
+    """A nonconstant image with a zero maximum cannot be normalized by it."""
+    data = np.array([[-2.0, -1.0], [-0.5, 0.0]])
+    with np.errstate(all="raise"), pytest.raises(ValueError, match="maximum.*zero"):
+        image_exposure.normalize(data, sigima.enums.NormalizationMethod.MAXIMUM)
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        sigima.enums.NormalizationMethod.MAXIMUM,
+        sigima.enums.NormalizationMethod.AMPLITUDE,
+    ],
+)
+def test_image_normalize_preserves_data_outside_roi(method) -> None:
+    """Outside the ROI, source data are restored in the floating-point result."""
+    data = np.arange(16, dtype=np.uint16).reshape(4, 4)
+    src = sigima.objects.create_image("image", data)
+    src.roi = sigima.objects.create_image_roi("rectangle", [1, 1, 2, 2], indices=True)
+    dst = sigima.proc.image.normalize(
+        src, sigima.params.NormalizeParam.create(method=method)
+    )
+    assert dst.data.dtype == np.float64
+    np.testing.assert_array_equal(dst.data[src.maskdata], data[src.maskdata])
+    np.testing.assert_allclose(dst.data[~src.maskdata], data[~src.maskdata] / 15)
+    np.testing.assert_array_equal(src.data, data)
+
+
 @pytest.mark.validation
 def test_image_normalize() -> None:
     """Validation test for the image normalization processing."""
