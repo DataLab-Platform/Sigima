@@ -77,6 +77,7 @@ def _same_signal(first: SignalObj, second: SignalObj) -> None:
         ("sigima.image.enclosing_circle", 2),
         ("sigima.image.flatfield", 1),
         ("sigima.image.normalize", 1),
+        ("sigima.image.normalize", 2),
     ],
 )
 def test_changed_contracts_refuse_old_versions(operation, old_version) -> None:
