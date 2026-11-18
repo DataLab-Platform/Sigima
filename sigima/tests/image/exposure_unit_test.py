@@ -465,6 +465,38 @@ def test_image_normalize_zero_maximum_is_rejected() -> None:
 
 
 @pytest.mark.parametrize(
+    "data",
+    [
+        np.array([[1, -1], [2, -2]], dtype=np.int16),
+        np.array([[np.nan, 1.0], [0.0, -1.0]]),
+    ],
+)
+def test_image_normalize_zero_area_is_rejected(data) -> None:
+    """Zero sums, including those ignoring NaNs, cannot normalize an image."""
+    src = sigima.objects.create_image("zero sum", data.copy())
+    with np.errstate(all="raise"), pytest.raises(ValueError, match="sum.*zero"):
+        sigima.proc.image.normalize(
+            src, sigima.params.NormalizeParam.create(method="area")
+        )
+    np.testing.assert_array_equal(src.data, data)
+
+
+def test_image_normalize_zero_image_is_rejected() -> None:
+    """A constant zero image is already refused by the input check."""
+    with pytest.raises(ValueError, match="no dynamic range"):
+        image_exposure.normalize(
+            np.zeros((2, 2)), sigima.enums.NormalizationMethod.AREA
+        )
+
+
+def test_image_normalize_small_nonzero_area() -> None:
+    """A nonzero sum is accepted without an arbitrary tolerance."""
+    data = np.array([[1.0, -1.0], [1e-12, 0.0]])
+    result = image_exposure.normalize(data, sigima.enums.NormalizationMethod.AREA)
+    np.testing.assert_array_equal(result, data / 1e-12)
+
+
+@pytest.mark.parametrize(
     "method",
     [
         sigima.enums.NormalizationMethod.MAXIMUM,

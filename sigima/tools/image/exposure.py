@@ -281,7 +281,8 @@ def normalize(
         Normalized array
 
     Raises:
-        ValueError: If maximum normalization has a zero maximum.
+        ValueError: If maximum normalization has a zero maximum or area
+         normalization has a zero sum.
     """
     fdata = np.array(data, dtype=np.float64)
     if parameter == NormalizationMethod.MAXIMUM:
@@ -293,7 +294,10 @@ def normalize(
         minimum = np.nanmin(fdata)
         return (fdata - minimum) / (np.nanmax(fdata) - minimum)
     if parameter == NormalizationMethod.AREA:
-        return fdata / np.nansum(fdata)
+        area = np.nansum(fdata)
+        if area == 0:
+            raise ValueError("Cannot normalize image: sum is zero.")
+        return fdata / area
     if parameter == NormalizationMethod.ENERGY:
         return fdata / np.sqrt(np.nansum(fdata * fdata.conjugate()))
     if parameter == NormalizationMethod.RMS:
