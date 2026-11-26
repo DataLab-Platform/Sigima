@@ -276,8 +276,8 @@ msgstr "Sigima peut lire et écrire directement des images depuis divers formats
 msgid "**Common formats**: BMP, JPEG, PNG, TIFF, JPEG 2000"
 msgstr "**Formats courants** : BMP, JPEG, PNG, TIFF, JPEG 2000"
 
-msgid "**Scientific formats**: DICOM (medical imaging, requires the optional ``pydicom`` package), Andor SIF (spectroscopy cameras), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI"
-msgstr "**Formats scientifiques** : DICOM (imagerie médicale, nécessite le paquet optionnel ``pydicom``), Andor SIF (caméras de spectroscopie), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI"
+msgid "**Scientific formats**: DICOM (medical imaging, requires the optional ``pydicom`` package), NIfTI (neuroimaging, 2D images and slices of 3D volumes, requires the optional ``nibabel`` package), Andor SIF (spectroscopy cameras), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI"
+msgstr "**Formats scientifiques** : DICOM (imagerie médicale, nécessite le paquet optionnel ``pydicom``), NIfTI (neuro-imagerie, images 2D et coupes de volumes 3D, nécessite le paquet optionnel ``nibabel``), Andor SIF (caméras de spectroscopie), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI"
 
 msgid "**Data exchange**: NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)"
 msgstr "**Échange de données** : NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)"

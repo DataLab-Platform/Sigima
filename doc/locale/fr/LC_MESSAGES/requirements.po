@@ -261,6 +261,15 @@ msgstr ">= 4.8.1.78"
 msgid "Wrapper package for OpenCV python bindings."
 msgstr "Bibliothèque d'interfaces Python pour OpenCV."
 
+msgid "nibabel"
+msgstr ""
+
+msgid ">= 5.3"
+msgstr ""
+
+msgid "Access a multitude of neuroimaging data formats"
+msgstr "Accès à de nombreux formats de données de neuro-imagerie"
+
 msgid "Optional modules for running test suite:"
 msgstr "Modules facultatifs pour exécuter la suite de tests :"
 

@@ -69,6 +69,9 @@ msgstr "Certaines fonctionnalités de Sigima reposent sur des dépendances optio
 msgid "``opencv``: OpenCV (``opencv-python-headless``), required by the OpenCV blob detection (:func:`sigima.proc.image.blob_opencv`)."
 msgstr "``opencv`` : OpenCV (``opencv-python-headless``), nécessaire à la détection de blobs OpenCV (:func:`sigima.proc.image.blob_opencv`)."
 
+msgid "``nifti``: NiBabel, required to read NIfTI images (``*.nii`` and ``*.nii.gz``). Without it, the NIfTI format is not available."
+msgstr "``nifti`` : NiBabel, nécessaire à la lecture des images NIfTI (``*.nii`` et ``*.nii.gz``). Sans lui, le format NIfTI n'est pas disponible."
+
 msgid "``plotly``: Plotly, for the browser-based Plotly backend of :mod:`sigima.viz`."
 msgstr "``plotly`` : Plotly, pour le backend Plotly de :mod:`sigima.viz`, qui s'affiche dans le navigateur."
 
@@ -359,6 +362,15 @@ msgstr ">= 4.8.1.78"
 
 msgid "Wrapper package for OpenCV python bindings."
 msgstr "Bibliothèque d'interfaces Python pour OpenCV."
+
+msgid "nibabel"
+msgstr ""
+
+msgid ">= 5.3"
+msgstr ""
+
+msgid "Access a multitude of neuroimaging data formats"
+msgstr "Accès à de nombreux formats de données de neuro-imagerie"
 
 msgid "Optional modules for running test suite:"
 msgstr "Modules optionnels pour l'exécution de la suite de tests :"

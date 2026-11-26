@@ -57,6 +57,62 @@ applications can invert the display. Writing RAW files is not supported.
 
 .. autodataset:: sigima.io.RawImageImportParam
 
+NIfTI image import
+^^^^^^^^^^^^^^^^^^
+
+Single-file NIfTI-1 and NIfTI-2 images (``*.nii`` and ``*.nii.gz``) holding real
+scalar values are read when NiBabel is installed (``pip install sigima[nifti]``).
+A 2D image (or a volume of a single slice) is read directly. For a 3D volume, a
+:py:class:`NiftiImageImportParam` instance selects the slices to read along the third
+axis of the file: bounds are included and indexed from zero, and one image is
+returned per slice, by increasing index. :py:func:`get_nifti_image_info` returns
+the dimensions, data types and spatial unit of a file without reading its voxels,
+e.g. to ask for the slice range. Files with four dimensions or more, complex, RGB or
+RGBA images and separate ``.hdr``/``.img`` files are refused. Writing NIfTI files
+is not supported.
+
+.. code-block:: python
+
+    from sigima.io import NiftiImageImportParam, read_images
+
+    selection = NiftiImageImportParam.create(first_slice=12, last_slice=16)
+    images = read_images("volume.nii.gz", param=selection)
+    assert len(images) == 5
+
+Slices follow the native axes of the file: they are not necessarily axial, and their
+display is not an anatomical orientation. Pixel ``data[j, i]`` of the image of slice
+``k`` is voxel ``(i, j, k)`` of the file. Values are those computed by NiBabel,
+including the ``scl_slope`` and ``scl_inter`` scaling. They keep their data type
+when images support it; otherwise they are converted to a supported type only if no
+value changes (e.g. ``int8`` to ``int16``), and the file is refused otherwise.
+Non-finite values are kept, and no windowing or clipping is applied.
+
+Each image has local coordinates, with its origin at the center of pixel ``(0, 0)``.
+Pixel sizes are the norms of the first two columns of the affine transform of the
+file (sform, then qform, as chosen by NiBabel), in the unit declared by the file,
+when these columns are orthogonal. Without sform nor qform, the voxel sizes of the
+header are used. Otherwise (sheared slice plane, invalid sform, unknown unit), the
+image is in pixels and the reason is given in the metadata. The import provenance is
+stored in the ``nifti`` metadata of each image: version, shape of the file, slice
+index ``slice_index``, stored data type, sform and qform codes, origin of the affine
+transform (``affine_source``), affine transform ``affine`` when it is valid,
+calibration mode and the reason of a calibration in pixels. The position of voxel
+``(i, j, k)`` is ``affine @ [i, j, k, 1]``, in the RAS+ frame and in the declared unit
+when the affine transform comes from the sform or qform. The fallback transform
+(``affine_source`` is ``"fallback"``) is a convention: it does not give a known
+anatomical orientation. These metadata describe the import: they are not updated by
+later processing (e.g. cropping or rotation).
+
+.. note::
+
+    Importing a file is not a de-identification procedure: the file name, the source
+    path stored in the metadata and the pixels themselves may hold personal data.
+
+.. autodataset:: sigima.io.NiftiImageImportParam
+.. autofunction:: get_nifti_image_info
+.. autoclass:: NiftiImageInfo
+    :members: width, height, slice_count, is_volume, slice_nbytes
+
 Format-aware image export
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -250,10 +306,13 @@ from sigima.io.image import (
     ImageExportOptionSpec,
     ImageExportParam,
     ImageIORegistry,
+    NiftiImageImportParam,
+    NiftiImageInfo,
     RawImageImportParam,
     encode_image_export_data,
     get_image_export_capabilities,
     get_image_export_writer_kwargs,
+    get_nifti_image_info,
     get_supported_export_dtypes,
     prepare_image_export_preview,
     prepare_image_for_export,
@@ -273,6 +332,8 @@ __all__ = [
     "ImageExportOptionSpec",
     "ImageExportParam",
     "ImageIORegistry",
+    "NiftiImageImportParam",
+    "NiftiImageInfo",
     "RawImageImportParam",
     "SignalIORegistry",
     "UnsupportedFormatOperationError",
@@ -280,6 +341,7 @@ __all__ = [
     "encode_image_export_data",
     "get_image_export_capabilities",
     "get_image_export_writer_kwargs",
+    "get_nifti_image_info",
     "get_supported_export_dtypes",
     "prepare_image_export_preview",
     "prepare_image_for_export",

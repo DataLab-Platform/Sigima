@@ -300,15 +300,31 @@ class BaseIORegistry(Generic[TypeObj], type):
 
         Returns:
             Format handler
+
+        .. note::
+
+            The longest extension matching the end of the file name wins (e.g.
+            ``nii.gz`` over ``gz``), regardless of case; formats registered first
+            win in case of a tie.
         """
+        basename = osp.basename(filename).lower()
+        best_format, best_length = None, 0
         for fmt in cls.get_formats():
             fmt: FormatBase
-            if osp.splitext(filename)[1][1:].lower() in fmt.extlist:
-                if not fmt.info.readable and action == IOAction.LOAD:
-                    continue
-                if not fmt.info.writeable and action == IOAction.SAVE:
-                    continue
-                return fmt
+            if not fmt.info.readable and action == IOAction.LOAD:
+                continue
+            if not fmt.info.writeable and action == IOAction.SAVE:
+                continue
+            for extension in fmt.extlist:
+                suffix = "." + extension
+                if (
+                    len(extension) > best_length
+                    and len(basename) > len(suffix)
+                    and basename.endswith(suffix)
+                ):
+                    best_format, best_length = fmt, len(extension)
+        if best_format is not None:
+            return best_format
         raise NotImplementedError(
             f"{filename} is not supported for {action.name.lower()}"
         )
@@ -351,12 +367,16 @@ class BaseIORegistry(Generic[TypeObj], type):
 def get_file_extensions(string: str) -> list[str]:
     """Return a sorted list of unique file extensions contained in `string`.
 
+    Extensions are read from the ``*.ext`` patterns of `string` (e.g. a format
+    extension list or Qt file filters). Compound extensions are kept: ``*.nii.gz``
+    gives ``nii.gz``.
+
     Args:
         string: String containing file extensions.
 
     Returns:
         List of file extensions.
     """
-    pattern = r"\S+\.[\w-]+"
+    pattern = r"\*\.([\w-]+(?:\.[\w-]+)*)"
     matches = re.findall(pattern, string)
-    return sorted({match.split(".")[-1].lower() for match in matches})
+    return sorted({match.lower() for match in matches})

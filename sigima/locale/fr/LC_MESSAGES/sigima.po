@@ -314,6 +314,15 @@ msgstr "Fichiers MAT"
 msgid "RAW image import"
 msgstr "Importation d'image RAW"
 
+msgid "NIfTI image import"
+msgstr "Importation d'image NIfTI"
+
+msgid "First slice"
+msgstr "Première coupe"
+
+msgid "Last slice"
+msgstr "Dernière coupe"
+
 msgid "Image data type"
 msgstr "Type de données de l'image"
 

@@ -127,7 +127,9 @@ def read_images(
     Args:
         filename: File name.
         param: Optional format-specific read parameters. Formats without
-         parameter support reject non-None values.
+         parameter support reject non-None values. For example, a
+         :py:class:`sigima.io.NiftiImageImportParam` selects a range of slices of a
+         NIfTI volume: one image is returned per slice.
 
     Returns:
         List of images.
@@ -137,6 +139,10 @@ def read_images(
 
 def read_image(filename: str, *, param: gds.DataSet | None = None) -> ImageObj:
     """Read an image from a file.
+
+    When the file holds several images (or when ``param`` selects several of them,
+    e.g. a range of slices of a NIfTI volume), only the first one is returned: use
+    :py:func:`read_images` to get all of them.
 
     Args:
         filename: File name.

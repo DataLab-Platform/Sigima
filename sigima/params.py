@@ -111,6 +111,8 @@ I/O parameters
     :no-index:
 .. autodataset:: sigima.params.RawImageImportParam
     :no-index:
+.. autodataset:: sigima.params.NiftiImageImportParam
+    :no-index:
 .. autodataset:: sigima.io.convenience.SaveToDirectoryParam
     :no-index:
 
@@ -376,6 +378,7 @@ __all__ = [
     "MorphologyParam",
     "MovingAverageParam",
     "MovingMedianParam",
+    "NiftiImageImportParam",
     "NormalizeParam",
     "OrdinateParam",
     "Peak2DDetectionParam",
@@ -410,6 +413,7 @@ __all__ = [
 
 from sigima.io.convenience import SaveToDirectoryParam
 from sigima.io.image.export import ImageExportParam
+from sigima.io.image.nifti import NiftiImageImportParam
 from sigima.io.image.raw import RawImageImportParam
 from sigima.proc.base import (
     AngleUnitParam,
