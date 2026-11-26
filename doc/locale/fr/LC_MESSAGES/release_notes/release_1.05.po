@@ -1,0 +1,37 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2026, DataLab Platform Developers
+# This file is distributed under the same license as the Sigima package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Version 1.5"
+msgstr "Version 1.5"
+
+msgid "Sigima Version 1.5.0"
+msgstr "Sigima Version 1.5.0"
+
+msgid "Requirements"
+msgstr "Prérequis"
+
+msgid "**Third-party**:"
+msgstr "**Bibliothèques tierces** :"
+
+msgid "NiBabel 5.3 or later is an optional dependency, installed with the new `nifti` extra (`pip install sigima[nifti]`): it is required to read NIfTI images."
+msgstr "NiBabel 5.3 ou ultérieur est une dépendance optionnelle, installée avec le nouvel extra `nifti` (`pip install sigima[nifti]`) : elle est nécessaire à la lecture des images NIfTI."
+
+msgid "✨ New features since version 1.4.2"
+msgstr "✨ Nouveautés depuis la version 1.4.2"
+
+msgid "**NIfTI image import**: Single-file NIfTI-1 and NIfTI-2 images (`*.nii` and `*.nii.gz`) can now be read when NiBabel is installed. A 2D image is read directly. For a 3D volume, `NiftiImageImportParam` selects a slice or a range of slices along the third axis of the file, and one image is returned per slice, reading only the selected slices. `get_nifti_image_info` gives the dimensions, data types and spatial unit of a file without reading its voxels. Values are those of the file, scaling factors included, without windowing; pixel sizes and units come from the spatial transform of the file when its slice plane is not sheared, and the import provenance (version, slice index, affine transform, calibration) is stored in the `nifti` metadata of each image. Volumes with four dimensions or more, complex and color images, separate `.hdr`/`.img` files and NIfTI writing are not supported (closes [Issue #152](https://github.com/DataLab-Platform/Sigima/issues/152))."
+msgstr "**Import d'images NIfTI** : Les images NIfTI-1 et NIfTI-2 en fichier unique (`*.nii` et `*.nii.gz`) peuvent désormais être lues lorsque NiBabel est installé. Une image 2D est lue directement. Pour un volume 3D, `NiftiImageImportParam` sélectionne une coupe ou une plage de coupes selon le troisième axe du fichier, et une image est renvoyée par coupe, en ne lisant que les coupes sélectionnées. `get_nifti_image_info` donne les dimensions, les types de données et l'unité spatiale d'un fichier sans lire ses voxels. Les valeurs sont celles du fichier, facteurs d'échelle compris, sans fenêtrage ; la taille des pixels et les unités proviennent de la transformation spatiale du fichier lorsque le plan de coupe n'est pas cisaillé, et la provenance de l'import (version, indice de coupe, transformation affine, calibration) est enregistrée dans la métadonnée `nifti` de chaque image. Les volumes à quatre dimensions ou plus, les images complexes et couleur, les fichiers `.hdr`/`.img` séparés et l'écriture au format NIfTI ne sont pas pris en charge (ferme [l'issue #152](https://github.com/DataLab-Platform/Sigima/issues/152))."
+
+msgid "**Compound file extensions**: File formats may now declare compound extensions such as `*.nii.gz`. The longest matching extension selects the format, whatever the case of the file name, so that a `*.nii.gz` file is not taken for another format declaring `*.gz`."
+msgstr "**Extensions de fichier composées** : Les formats de fichier peuvent désormais déclarer des extensions composées comme `*.nii.gz`. L'extension la plus longue qui correspond au nom du fichier, quelle que soit sa casse, détermine le format : un fichier `*.nii.gz` n'est pas pris pour un autre format déclarant `*.gz`."

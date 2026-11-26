@@ -74,11 +74,14 @@ with the following extras:
 -   ``opencv``: OpenCV (``opencv-python-headless``), required by the OpenCV blob
     detection (:func:`sigima.proc.image.blob_opencv`).
 
+-   ``nifti``: NiBabel, required to read NIfTI images (``*.nii`` and
+    ``*.nii.gz``). Without it, the NIfTI format is not available.
+
 -   ``plotly``: Plotly, for the browser-based Plotly backend of :mod:`sigima.viz`.
 
 .. code-block:: console
 
-    $ pip install "sigima[opencv,plotly]"
+    $ pip install "sigima[opencv,nifti,plotly]"
 
 Reading DICOM files requires the ``pydicom`` package, which is not installed by
 any extra: install it separately (``pip install pydicom``). Without it, the DICOM

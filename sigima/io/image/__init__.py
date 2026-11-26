@@ -25,6 +25,11 @@ from sigima.io.image.export import (
     validate_image_export_options,
     write_image_export_data,
 )
+from sigima.io.image.nifti import (
+    NiftiImageImportParam,
+    NiftiImageInfo,
+    get_nifti_image_info,
+)
 from sigima.io.image.raw import RawImageImportParam
 
 __all__ = [
@@ -34,10 +39,13 @@ __all__ = [
     "ImageExportOptionSpec",
     "ImageExportParam",
     "ImageIORegistry",
+    "NiftiImageImportParam",
+    "NiftiImageInfo",
     "RawImageImportParam",
     "encode_image_export_data",
     "get_image_export_capabilities",
     "get_image_export_writer_kwargs",
+    "get_nifti_image_info",
     "get_supported_export_dtypes",
     "prepare_image_export_preview",
     "prepare_image_for_export",

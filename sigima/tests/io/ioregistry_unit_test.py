@@ -6,6 +6,10 @@ I/O registry unit test
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
+
 from sigima.config import _
 from sigima.io import ImageIORegistry, SignalIORegistry
 from sigima.io.base import FormatInfo, IOAction, get_file_extensions
@@ -26,6 +30,50 @@ def test_get_file_extensions() -> None:
         "tif",
         "tiff",
     ], "get_file_extensions did not return expected list of extensions"
+    assert get_file_extensions("*.NII *.nii.gz *.nii *.scor-data") == [
+        "nii",
+        "nii.gz",
+        "scor-data",
+    ]
+    assert get_file_extensions("NIfTI (*.nii *.nii.gz)\nHDF5 (*.h5ima)") == [
+        "h5ima",
+        "nii",
+        "nii.gz",
+    ]
+
+
+def test_image_io_registry_without_nibabel() -> None:
+    """Without NiBabel, the NIfTI format is absent and other formats still work."""
+    code = """
+import sys
+sys.modules["nibabel"] = None
+from sigima.io import ImageIORegistry, NiftiImageImportParam, get_nifti_image_info
+from sigima.io.base import IOAction
+assert "nii" not in ImageIORegistry.get_read_filters()
+assert ImageIORegistry.get_format("image.tif", IOAction.LOAD).info.readable
+try:
+    ImageIORegistry.get_format("volume.nii.gz", IOAction.LOAD)
+except NotImplementedError:
+    pass
+else:
+    raise AssertionError("NIfTI format registered without NiBabel")
+NiftiImageImportParam.create(first_slice=1)
+try:
+    get_nifti_image_info("volume.nii")
+except ImportError as exc:
+    assert "sigima[nifti]" in str(exc)
+else:
+    raise AssertionError("ImportError not raised")
+"""
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join(p for p in sys.path if p)}
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 def __test_io_registry(

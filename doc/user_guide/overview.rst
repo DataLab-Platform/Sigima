@@ -324,7 +324,7 @@ Specialized Features
     Sigima can directly read and write images from various scientific and common file formats, making it easy to integrate into existing workflows:
 
     * **Common formats**: BMP, JPEG, PNG, TIFF, JPEG 2000
-    * **Scientific formats**: DICOM (medical imaging, requires the optional ``pydicom`` package), Andor SIF (spectroscopy cameras), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI
+    * **Scientific formats**: DICOM (medical imaging, requires the optional ``pydicom`` package), NIfTI (neuroimaging, 2D images and slices of 3D volumes, requires the optional ``nibabel`` package), Andor SIF (spectroscopy cameras), Princeton Instruments SPE, PCO Camera REC, Opticks GEL, Hamamatsu Slide Scanner NDPI
     * **Data exchange**: NumPy (.npy), MATLAB (.mat), HDF5 (.h5ima)
     * **Text-based**: CSV, TXT, ASC (with coordinate metadata support)
     * **Specialized**: Spiricon (.scor-data), Dürr NDT (.xyz), FT-Lab (.ima), raw binary data (.raw, with user-defined import parameters)

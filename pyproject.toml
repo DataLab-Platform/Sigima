@@ -57,6 +57,7 @@ Documentation = "https://sigima.readthedocs.io/"
 
 [project.optional-dependencies]
 opencv = ["opencv-python-headless >= 4.8.1.78"]
+nifti = ["nibabel >= 5.3"]
 dev = ["build", "babel","ruff", "pylint", "Coverage", "pre-commit", "setuptools", "wheel"]
 doc = [
     "sphinx",
@@ -72,6 +73,7 @@ doc = [
     "plotpy",
     "matplotlib",
     "opencv-python-headless >= 4.8.1.78",
+    "nibabel >= 5.3",
 ]
 test = ["pytest", "pytest-xvfb", "jsonschema >= 4"]
 qt = ["qtpy", "PyQt5", "plotpy"]

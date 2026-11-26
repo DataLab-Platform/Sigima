@@ -142,6 +142,9 @@ Optional modules for building the documentation:
     * - opencv-python-headless
       - >= 4.8.1.78
       - Wrapper package for OpenCV python bindings.
+    * - nibabel
+      - >= 5.3
+      - Access a multitude of neuroimaging data formats
 
 Optional modules for running test suite:
 
